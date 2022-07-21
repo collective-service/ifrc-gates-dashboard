@@ -120,12 +120,6 @@ const barChartData = [
         pv: 3800,
         amt: 2200,
     },
-    {
-        name: 'Rus',
-        range: '210M',
-        pv: 4300,
-        amt: 2100,
-    },
 ];
 
 function Overview(props: OverviewProps) {

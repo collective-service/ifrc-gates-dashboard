@@ -7,5 +7,12 @@
 
     .progress-bar-container {
         flex-basis: 25%;
+        flex-direction: column;
+
+        .progressRate {
+            background-color: var(--color-background);
+            padding: var(--dui-spacing-large);
+        }
+
     }
 }
