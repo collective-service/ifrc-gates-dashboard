@@ -14,4 +14,8 @@
         color: var(--dui-color-label);
         font-size: var(--dui-font-size-medium);
     }
+
+    .filter-options {
+        position: relative;
+    }
 }

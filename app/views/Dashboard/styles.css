@@ -1,6 +1,7 @@
 .dashboard-navigation {
     display: flex;
     flex-direction: column;
+    flex-grow: 1;
     background-color: var(--color-foreground);
     padding: 0 var(--dui-spacing-ultra-large);
     gap: var(--dui-spacing-medium);
