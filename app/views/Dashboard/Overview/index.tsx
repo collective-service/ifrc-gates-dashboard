@@ -1,5 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
+    Tabs,
+    TabList,
+    Tab,
+    TabPanel,
     ContainerCard,
     CompactInformationCard,
 } from '@the-deep/deep-ui';
@@ -20,6 +24,7 @@ import {
     IoBookmark,
 } from 'react-icons/io5';
 
+import MapView from './MapView';
 import styles from './styles.css';
 
 interface OverviewProps {
@@ -128,13 +133,15 @@ function Overview(props: OverviewProps) {
         className,
     } = props;
 
+    const [currentTab, setCurrentTab] = useState<string | undefined>('mapMode');
+
     return (
         <div className={_cs(className, styles.overviewMain)}>
             <div className={styles.cardCollection}>
                 <ContainerCard
                     className={_cs(styles.globalSurgeCard, styles.cardInfo)}
                     heading="Total number of cases"
-                    headingClassName={styles.cardsHeader}
+                    headingSize="extraSmall"
                     headerDescription={(
                         <p>
                             All Outbreak numbers:
@@ -152,7 +159,7 @@ function Overview(props: OverviewProps) {
                 <ContainerCard
                     className={_cs(styles.trendsCard, styles.cardInfo)}
                     heading="Outbreak over last 12 months"
-                    headingClassName={styles.cardsHeader}
+                    headingSize="extraSmall"
                     contentClassName={styles.responsiveContent}
                     headerDescription="Average indicator value weighted by country's populations"
                 >
@@ -165,8 +172,8 @@ function Overview(props: OverviewProps) {
                                 right: 20,
                             }}
                         >
-                            <XAxis dataKey="name" />
-                            <YAxis />
+                            <XAxis dataKey="name" tickLine={false} />
+                            <YAxis tickLine={false} />
                             <Tooltip
                                 allowEscapeViewBox={{
                                     x: true,
@@ -202,7 +209,7 @@ function Overview(props: OverviewProps) {
                     className={_cs(styles.regionsCard, styles.cardInfo)}
                     contentClassName={styles.responsiveContent}
                     heading="Regional Breakdown"
-                    headingClassName={styles.cardsHeader}
+                    headingSize="extraSmall"
                     headerDescription="Average indicator value weighted by country's populations (Apr 2022)"
                 >
                     <ResponsiveContainer className={styles.responsiveContainer}>
@@ -215,7 +222,7 @@ function Overview(props: OverviewProps) {
                                     y: true,
                                 }}
                             />
-                            <XAxis dataKey="name">
+                            <XAxis dataKey="name" tickLine={false}>
                                 <LabelList dataKey="name" position="bottom" />
                             </XAxis>
                             <Bar dataKey="amt" fill="#38c073">
@@ -226,12 +233,43 @@ function Overview(props: OverviewProps) {
                 </ContainerCard>
             </div>
             <div className={styles.mapContainer}>
-                <ContainerCard
-                    heading="Map Overview"
-                    headingClassName={styles.cardsHeader}
+                <Tabs
+                    value={currentTab}
+                    onChange={(tabName: string | undefined) => setCurrentTab(tabName)}
                 >
-                    MAP ---COMPONENT---HERE
-                </ContainerCard>
+                    <ContainerCard
+                        heading={currentTab === 'mapMode' ? 'Overview map' : 'Tabular data'}
+                        headingSize="extraSmall"
+                        headerDescription={currentTab === 'mapMode'
+                            ? 'Overview of the average indicator value weighted by  populations'
+                            : 'Interpretation of the data in table'}
+                        headerActions={(
+                            <TabList>
+                                <Tab
+                                    name="mapMode"
+                                >
+                                    Map overview
+                                </Tab>
+                                <Tab
+                                    name="tableMode"
+                                >
+                                    Table
+                                </Tab>
+                            </TabList>
+                        )}
+                    >
+                        <TabPanel
+                            name="mapMode"
+                        >
+                            <MapView />
+                        </TabPanel>
+                        <TabPanel
+                            name="tableMode"
+                        >
+                            Tabular component here---------------
+                        </TabPanel>
+                    </ContainerCard>
+                </Tabs>
             </div>
         </div>
     );

@@ -40,10 +40,6 @@
         }
     }
 
-    .cards-header {
-        font-size: small;
-    }
-
     .map-container {
         flex-grow: 1;
         border: var(--width-separator-thin) solid var(--color-separator-light);

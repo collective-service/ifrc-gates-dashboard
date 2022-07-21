@@ -1,0 +1,11 @@
+.map-view-wrapper {
+    display: flex;
+
+    .map-container {
+        flex-basis: 75%;
+    }
+
+    .progress-bar-container {
+        flex-basis: 25%;
+    }
+}
