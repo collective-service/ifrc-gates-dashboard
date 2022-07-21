@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import {
     Tabs,
     TabList,
@@ -13,13 +13,15 @@ import {
 
 import Overview from './Overview';
 import Country from './Country';
+import AdvancedFilterPane from './AdvancedFilterPane';
 import styles from './styles.css';
 
 function Dashboard() {
-    const handleAdvancedFilters = () => {
-        // eslint-disable-next-line no-console
-        console.log('Handled main filter::>>');
-    };
+    const [filterView, setFilterView] = useState(false);
+
+    const handleAdvancedFilterButtonClick = useCallback(() => {
+        setFilterView((old) => !old);
+    }, []);
 
     const handleExport = () => {
         // eslint-disable-next-line no-console
@@ -40,11 +42,10 @@ function Dashboard() {
                             icons={<IoFilterSharp />}
                             name={undefined}
                             variant="tertiary"
-                            onClick={handleAdvancedFilters}
+                            onClick={handleAdvancedFilterButtonClick}
                         >
                             Filter
                         </Button>
-
                         <Button
                             className={styles.button}
                             icons={<IoCloudDownloadOutline />}
@@ -70,16 +71,21 @@ function Dashboard() {
                         </Tab>
                     </TabList>
                 </div>
-                <TabPanel
-                    name="overview"
-                >
-                    <Overview />
-                </TabPanel>
-                <TabPanel
-                    name="country"
-                >
-                    <Country />
-                </TabPanel>
+                <div className={styles.content}>
+                    {filterView && (
+                        <AdvancedFilterPane />
+                    )}
+                    <TabPanel
+                        name="overview"
+                    >
+                        <Overview />
+                    </TabPanel>
+                    <TabPanel
+                        name="country"
+                    >
+                        <Country />
+                    </TabPanel>
+                </div>
             </Tabs>
         </div>
     );

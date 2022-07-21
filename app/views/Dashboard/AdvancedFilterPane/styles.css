@@ -1,0 +1,17 @@
+.filter-pane {
+    display: flex;
+    position: absolute;
+    flex-direction: column;
+    justify-content: center;
+    z-index: 1;
+    border: var(--dui-width-separator-thin) solid var(--dui-color-separator);
+    background-color: var(--dui-color-foreground);
+    width: 100%;
+    max-width: 400px;
+    height: 100%;
+
+    .heading-description {
+        color: var(--dui-color-label);
+        font-size: var(--dui-font-size-medium);
+    }
+}
