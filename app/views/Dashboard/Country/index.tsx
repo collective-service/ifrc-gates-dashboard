@@ -12,6 +12,7 @@ import {
 import {
     ContainerCard,
     CompactInformationCard,
+    TextOutput,
 } from '@the-deep/deep-ui';
 /* import Map, {
     MapContainer,
@@ -21,7 +22,6 @@ import {
 } from '@togglecorp/re-map'; */
 import {
     IoChevronForward,
-    IoFlag,
 } from 'react-icons/io5';
 
 import styles from './styles.css';
@@ -184,14 +184,136 @@ function Country(props: CountryProps) {
                 </div>
                 <ContainerCard
                     className={styles.countryInfo}
-                    footerContent="Country-details"
-                    headerDescription="Country MAP"
-                    headerIcons={<IoFlag />}
+                    headingSectionClassName={styles.countryHeader}
+                    headerIconsContainerClassName={styles.countryAvatar}
+                    headerIcons={(
+                        // FIX ME: COUNTRY AVATAR
+                        <img src="https://picsum.photos/50" alt="country-avatar" />
+                    )}
+                    headingSize="small"
                     heading="<Country-Name>"
                 >
-                    Country Details here
+                    <div className={styles.countryDetails}>
+                        <div className={styles.countryMap}>
+                            {/* FIX ME: COUNTRY MAP */}
+                            <img
+                                src="https://picsum.photos/350/200"
+                                alt="Country-logo"
+                            />
+                        </div>
+                        <TextOutput
+                            className={styles.countryTextOutput}
+                            valueContainerClassName={styles.valueText}
+                            label="Population"
+                            value="38,928,346"
+                        />
+                        <TextOutput
+                            className={styles.countryTextOutput}
+                            valueContainerClassName={styles.valueText}
+                            label="Internet access"
+                            value={(
+                                <>
+                                    11.4%
+                                    <div className={styles.regionalText}>
+                                        [regional- 30%]
+                                    </div>
+                                </>
+                            )}
+                        />
+                        <TextOutput
+                            className={styles.countryTextOutput}
+                            valueContainerClassName={styles.valueText}
+                            label="Literacy rate"
+                            value={(
+                                <>
+                                    90%
+                                    <div className={styles.regionalText}>
+                                        [regional- 30%]
+                                    </div>
+                                </>
+                            )}
+                        />
+                        <TextOutput
+                            className={styles.countryTextOutput}
+                            valueContainerClassName={styles.valueText}
+                            hideLabelColon
+                            label={(
+                                <p>
+                                    Access to basic
+                                    <br />
+                                    washing facilities:
+                                </p>
+                            )}
+                            value={(
+                                <>
+                                    35%
+                                    <div className={styles.regionalText}>
+                                        [regional- 30%]
+                                    </div>
+                                </>
+                            )}
+                        />
+                        <TextOutput
+                            className={styles.countryTextOutput}
+                            valueContainerClassName={styles.valueText}
+                            hideLabelColon
+                            label={(
+                                <p>
+                                    Doctors and nurses
+                                    <br />
+                                    per 1000 people:
+                                </p>
+                            )}
+                            value={(
+                                <>
+                                    6.2
+                                    <div className={styles.regionalText}>
+                                        [regional- 30%]
+                                    </div>
+                                </>
+                            )}
+                        />
+                        <TextOutput
+                            className={styles.countryTextOutput}
+                            valueContainerClassName={styles.valueText}
+                            label="Stringency"
+                            value={(
+                                <>
+                                    11.8%
+                                    <div className={styles.regionalText}>
+                                        [regional- 30%]
+                                    </div>
+                                </>
+                            )}
+                        />
+                        <TextOutput
+                            className={styles.countryTextOutput}
+                            valueContainerClassName={styles.valueText}
+                            label="Regional cases %"
+                            value={(
+                                <>
+                                    34%
+                                    <div className={styles.regionalText}>
+                                        [regional- 30%]
+                                    </div>
+                                </>
+                            )}
+                        />
+                        <TextOutput
+                            className={styles.countryTextOutput}
+                            valueContainerClassName={styles.valueText}
+                            label="Economic support index"
+                            value={(
+                                <>
+                                    37.5%
+                                    <div className={styles.regionalText}>
+                                        [regional- 30%]
+                                    </div>
+                                </>
+                            )}
+                        />
+                    </div>
                 </ContainerCard>
-
             </div>
             <ContainerCard
                 className={styles.perceptionWrapper}

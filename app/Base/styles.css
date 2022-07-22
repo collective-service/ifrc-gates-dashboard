@@ -101,6 +101,7 @@
     --color-background-dark: #193256;
     --color-text-on-dark: #ffffff;
     --color-text: #333333;
+    --color-text-regional : #2F9C67;
 
     --color-navbar: rgb(51, 64, 83);
     --color-text-on-navbar: rgba(255, 255, 255, .9);
@@ -138,6 +139,7 @@
     --dui-border-radius-modal: 0.5rem;
     --dui-border-radius-tag: 1.5rem;
     --dui-border-radius-progress-bar: 1rem;
+    --dui-border-radius-avatar: 50%;
 
     /*
      * TIMING
