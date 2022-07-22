@@ -1,18 +1,29 @@
-.progress-wrapper {
+.progress-info {
     display: flex;
-    border-radius: 10px;
-    background-color: var(--tui-color-background-input-section-light);
-    height: 16px;
+    align-items: center;
+    gap: var(--dui-spacing-medium);
 
-    .data {
-        &:first-of-type {
-            border-top-left-radius: 4px;
-            border-bottom-left-radius: 4px;
-        }
+    .progress-bar-wrapper {
+        display: flex;
+        flex-grow: 1;
+        border-radius: 10px;
+        background-color: var(--dui-color-background-progress-bar-light);
+        height: 8px;
 
-        &:last-of-type {
-            border-top-right-radius: 4px;
-            border-bottom-right-radius: 4px;
+        .data {
+            &:first-of-type {
+                border-top-left-radius: 4px;
+                border-bottom-left-radius: 4px;
+            }
+
+            &:last-of-type {
+                border-top-right-radius: 4px;
+                border-bottom-right-radius: 4px;
+            }
         }
+    }
+
+    .progress-label {
+        flex-shrink: 0;
     }
 }

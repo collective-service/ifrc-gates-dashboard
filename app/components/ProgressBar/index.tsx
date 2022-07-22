@@ -12,8 +12,9 @@ export interface ProgressBarProps {
     barHeight: number;
     data: {
         title: string | undefined | null,
-        color: string | undefined | null,
+        color?: string | undefined | null,
         value: number | undefined | null,
+        totalValue: number | undefined | null,
     }[];
 }
 
@@ -27,18 +28,25 @@ function ProgressBar(props: ProgressBarProps) {
     const totalSum = useMemo(
         () => (
             sum(data.map((item) => item.value).filter(isDefined))
-        ), [data],
+        ),
+        [
+            data,
+        ],
     );
 
     const avgResult = useMemo(
         () => (
-            data.map(({ value, ...other }) => ({
+            data.map(({ value, totalValue, ...other }) => ({
                 ...other,
-                percentage: isDefined(value) && totalSum > 0
-                    ? ((value / totalSum) * 100).toFixed(2)
+                percentage: isDefined(value) && isDefined(totalValue) && totalValue > 0
+                    ? ((value / totalValue) * 100).toFixed(1)
                     : undefined,
             }))
-        ), [data, totalSum],
+        ),
+        [
+            data,
+            totalSum,
+        ],
     );
 
     const tooltip = useMemo(
@@ -48,24 +56,40 @@ function ProgressBar(props: ProgressBarProps) {
     );
 
     return (
-        <div
-            className={_cs(styles.progressWrapper, className)}
-            style={{ height: `${barHeight}px` }}
-            title={tooltip}
-        >
-            {avgResult.map((item) => {
-                if (isNotDefined(item.percentage)) {
-                    return null;
-                }
-                return (
-                    <div
-                        key={item.title}
-                        className={styles.data}
-                        style={{ width: `${item.percentage}%`, backgroundColor: `${item.color}` }}
-                    />
-                );
-            })}
-        </div>
+        <>
+            <div className={styles.progressInfo}>
+                <div
+                    className={_cs(styles.progressBarWrapper, className)}
+                    style={{ height: `${barHeight}px` }}
+                    title={tooltip}
+                >
+                    {avgResult.map((item) => {
+                        if (isNotDefined(item.percentage)) {
+                            return null;
+                        }
+                        return (
+                            <div
+                                key={item.title}
+                                className={styles.data}
+                                style={{
+                                    width: `${item.percentage}%`,
+                                    backgroundColor: item.color ?? 'blue',
+                                }}
+                            />
+                        );
+                    })}
+                </div>
+                <div className={styles.progressLabel} title={tooltip}>
+                    {avgResult.map((item) => {
+                        if (isNotDefined(item.percentage)) {
+                            return null;
+                        }
+                        return (item.percentage);
+                    })}
+                    M
+                </div>
+            </div>
+        </>
     );
 }
 export default ProgressBar;

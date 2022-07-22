@@ -9,10 +9,24 @@
         flex-basis: 25%;
         flex-direction: column;
 
-        .progressRate {
+        .low-progress-rate {
+            border: var(--dui-card-border-color) solid 4px;
+            border-bottom: none;
+            border-radius: 8px;
+            border-bottom-left-radius: 0px;
+            border-bottom-right-radius: 0px;
             background-color: var(--color-background);
             padding: var(--dui-spacing-large);
         }
 
+        .high-progress-rate {
+            border: var(--dui-card-border-color) solid 4px;
+            border-top: none;
+            border-radius: 8px;
+            border-top-left-radius: 0px;
+            border-top-right-radius: 0px;
+            background-color: var(--color-background);
+            padding: var(--dui-spacing-large);
+        }
     }
 }

@@ -11,51 +11,121 @@ interface MapViewProps {
     className?: string;
 }
 
-const barHeight = 10;
+const barHeight = 6;
 
 const progressDataOne = [
     {
-        title: 'Signed Off',
-        color: 'var(--color-success)',
-        value: 20,
+        countryName: 'Cameroon',
+        progressData: [
+            {
+                title: 'Signed Off',
+                color: 'var(--color-success)',
+                value: 130,
+                totalValue: 200,
+            },
+        ],
     },
     {
-        title: 'Review Completed',
-        color: 'var(--color-success)',
-        value: 50,
+        countryName: 'Algeria',
+        progressData: [
+            {
+                title: 'Signed Off',
+                color: 'var(--color-success)',
+                value: 50,
+                totalValue: 200,
+            },
+        ],
     },
     {
-        title: 'Under Review',
-        color: 'var(--color-success)',
-        value: 30,
+        countryName: 'Bulgaria',
+        progressData: [
+            {
+                title: 'Signed Off',
+                color: 'var(--color-success)',
+                value: 99.5,
+                totalValue: 200,
+            },
+        ],
     },
     {
-        title: 'To be Reviewed',
-        color: 'var(--color-success)',
-        value: 10,
+        countryName: 'Democratic Republic of Congo',
+        progressData: [
+            {
+                title: 'Signed Off',
+                color: 'var(--color-success)',
+                value: 105,
+                totalValue: 200,
+            },
+        ],
+    },
+    {
+        countryName: 'Belarus',
+        progressData: [
+            {
+                title: 'Signed Off',
+                color: 'var(--color-success)',
+                value: 125,
+                totalValue: 200,
+            },
+        ],
     },
 ];
 
 const progressDataTwo = [
     {
-        title: 'Signed Off',
-        color: 'var(--color-success)',
-        value: 99.1,
+        countryName: 'Oman',
+        progressData: [
+            {
+                title: 'Signed Off',
+                color: 'var(--color-success)',
+                value: 180,
+                totalValue: 200,
+            },
+        ],
     },
     {
-        title: 'Review Completed',
-        color: 'var(--color-success',
-        value: 98,
+        countryName: 'Malaysia',
+        progressData: [
+            {
+                title: 'Signed Off',
+                color: 'var(--color-success)',
+                value: 190,
+                totalValue: 200,
+            },
+        ],
     },
     {
-        title: 'Under Review',
-        color: 'var(--color-success)',
-        value: 97.5,
+        countryName: 'Viet Nam',
+        progressData: [
+            {
+                title: 'Signed Off',
+                color: 'var(--color-success)',
+                value: 195,
+                totalValue: 200,
+            },
+        ],
     },
     {
-        title: 'To be Reviewed',
-        color: 'var(--color-success',
-        value: 96,
+        countryName: 'Bangladesh',
+        progressData: [
+            {
+                title: 'Signed Off',
+                color: 'var(--color-success)',
+                value: 175,
+                totalValue: 200,
+            },
+        ],
+    },
+    {
+        countryName: 'Lao PDR',
+        progressData: [
+            {
+                title: 'Signed Off',
+                color: 'var(--color-success)',
+                value: 156,
+                totalValue: 200,
+            },
+        ],
     },
 ];
 
@@ -79,29 +149,47 @@ function MapView(props: MapViewProps) {
                 ---------------------------------
                 ---------------------------------
                 ---------------------------------
+                ---------------------------------
+                ---------------------------------
+                ---------------------------------
+                ---------------------------------
+                ---------------------------------
+                ---------------------------------
+                ---------------------------------
+                ---------------------------------
+                ---------------------------------
+                ---------------------------------
             </ContainerCard>
             <div className={styles.progressBarContainer}>
                 <ContainerCard
-                    className={styles.progressRate}
-                    heading="Lowest rates"
+                    className={styles.lowProgressRate}
+                    heading="Lowest cases"
                     headingSize="extraSmall"
                 >
-                    country-name
-                    <ProgressBar
-                        barHeight={barHeight}
-                        data={progressDataOne}
-                    />
+                    {progressDataOne.map((item) => (
+                        <>
+                            {item.countryName}
+                            <ProgressBar
+                                barHeight={barHeight}
+                                data={item.progressData}
+                            />
+                        </>
+                    ))}
                 </ContainerCard>
                 <ContainerCard
-                    className={styles.progressRate}
-                    heading="Highest rates"
+                    className={styles.highProgressRate}
+                    heading="Highest cases"
                     headingSize="extraSmall"
                 >
-                    country-name
-                    <ProgressBar
-                        barHeight={barHeight}
-                        data={progressDataTwo}
-                    />
+                    {progressDataTwo.map((item) => (
+                        <>
+                            {item.countryName}
+                            <ProgressBar
+                                barHeight={barHeight}
+                                data={item.progressData}
+                            />
+                        </>
+                    ))}
                 </ContainerCard>
             </div>
         </div>
