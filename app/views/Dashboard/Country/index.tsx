@@ -3,6 +3,9 @@ import { _cs } from '@togglecorp/fujs';
 import {
     LineChart,
     Line,
+    PieChart,
+    Pie,
+    Cell,
     XAxis,
     YAxis,
     Tooltip,
@@ -103,6 +106,7 @@ const outbreakData = [
 
 ];
 
+<<<<<<< HEAD
 const statusData: statusCardProps[] = [
     {
         statusId: 1,
@@ -133,6 +137,53 @@ const statusData: statusCardProps[] = [
 interface CountryProps {
     className?: string;
 }
+=======
+const genderDisaggregationData = [
+    {
+        id: 1,
+        gender: 'Male',
+        percentage: 40,
+    },
+    {
+        id: 2,
+        gender: 'Female',
+        percentage: 40,
+    },
+    {
+        id: 3,
+        gender: 'other',
+        percentage: 20,
+    },
+];
+
+const COLORS = ['#D7DF23', '#616161', '#00ACC1'];
+
+const RADIAN = Math.PI / 180;
+const renderCustomizedLabel = ({
+    cx,
+    cy,
+    midAngle,
+    innerRadius,
+    outerRadius,
+    percent,
+}: any) => {
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+    return (
+        <text
+            x={x}
+            y={y}
+            fill="white"
+            textAnchor={x > cx ? 'start' : 'end'}
+            dominantBaseline="central"
+        >
+            {`${(percent * 100).toFixed(0)}%`}
+        </text>
+    );
+};
+>>>>>>> indicator component setup
 
 function Country(props: CountryProps) {
     const {
@@ -170,7 +221,7 @@ function Country(props: CountryProps) {
                         headingSize="extraSmall"
                         contentClassName={styles.responsiveContent}
                     >
-                        <ResponsiveContainer>
+                        <ResponsiveContainer className={styles.responsiveContainer}>
                             <LineChart
                                 data={outbreakData}
                             >
@@ -209,6 +260,86 @@ function Country(props: CountryProps) {
                             </LineChart>
                         </ResponsiveContainer>
                     </ContainerCard>
+                    <div className={styles.indicatorWrapper}>
+                        <ContainerCard
+                            className={_cs(styles.indicatorsCard, styles.percentageCard)}
+                        >
+                            Percentage Card
+                        </ContainerCard>
+                        <ContainerCard
+                            className={_cs(styles.indicatorsCard, styles.indicatorsChart)}
+                        >
+                            Indicator Chart
+                        </ContainerCard>
+                        <ContainerCard
+                            className={_cs(styles.indicatorsCard, styles.genderDisaggregation)}
+                            contentClassName={styles.responsiveContent}
+                            heading="Percentage of unvaccinated individuals who have tried to get vaccinated"
+                            headerDescription="Lorem ipsum explaining the topic"
+                            headingSize="extraSmall"
+                        >
+                            <ResponsiveContainer className={styles.responsiveContainer}>
+                                <PieChart>
+                                    <Pie
+                                        data={genderDisaggregationData}
+                                        dataKey="percentage"
+                                        labelLine={false}
+                                        label={renderCustomizedLabel}
+                                        cx={100}
+                                        cy={100}
+                                        outerRadius={70}
+                                    >
+                                        {genderDisaggregationData.map((entry) => (
+                                            <Cell
+                                                key={`Cell -${entry.id}`}
+                                                fill={COLORS[entry.id % COLORS.length]}
+                                            />
+                                        ))}
+                                    </Pie>
+                                    <Legend
+                                        name="gender"
+                                        verticalAlign="middle"
+                                        align="right"
+                                        layout="vertical"
+                                    />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </ContainerCard>
+                        <ContainerCard
+                            className={_cs(styles.indicatorsCard, styles.ageDisaggregation)}
+                            contentClassName={styles.responsiveContent}
+                            heading="Age disaggregation"
+                            headerDescription="Lorem ipsum explaining the topic"
+                            headingSize="extraSmall"
+                        >
+                            <ResponsiveContainer className={styles.responsiveContainer}>
+                                <PieChart>
+                                    <Pie
+                                        data={genderDisaggregationData}
+                                        dataKey="percentage"
+                                        labelLine={false}
+                                        label={renderCustomizedLabel}
+                                        cx={100}
+                                        cy={100}
+                                        outerRadius={70}
+                                    >
+                                        {genderDisaggregationData.map((entry) => (
+                                            <Cell
+                                                key={`Cell -${entry.id}`}
+                                                fill={COLORS[entry.id % COLORS.length]}
+                                            />
+                                        ))}
+                                    </Pie>
+                                    <Legend
+                                        name="gender"
+                                        verticalAlign="middle"
+                                        align="right"
+                                        layout="vertical"
+                                    />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </ContainerCard>
+                    </div>
                 </div>
                 <ContainerCard
                     className={styles.countryInfo}

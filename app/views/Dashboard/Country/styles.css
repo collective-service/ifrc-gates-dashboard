@@ -32,8 +32,49 @@
                 border-radius: var(--dui-border-radius-card);
 
                 .responsive-content {
-                    min-height: 32rem;
+                    min-height: 20rem;
+
+                    .responsive-container {
+                        overflow: hidden;
+                    }
                 }
+            }
+
+            .indicator-wrapper {
+                display: flex;
+                flex-wrap: wrap;
+                gap: var(--dui-spacing-small);
+
+                .indicators-card {
+                    border: var(--width-separator-thin) solid var(--color-separator-light);
+                    border-radius: var(--dui-border-radius-card);
+                }
+
+                .percentage-card {
+                    flex-basis: 40%;
+                    flex-grow: 1;
+                }
+
+                .indicators-chart {
+                    flex-basis: calc(60% - var(--dui-spacing-small));
+                }
+
+                .gender-disaggregation {
+                    flex-basis: 40%
+                }
+
+                .age-disaggregation {
+                    flex-basis: calc(60% - var(--dui-spacing-small));
+                }
+
+                .responsive-content {
+                    min-height: 15rem;
+
+                    .responsive-container {
+                        overflow: hidden;
+                    }
+                }
+
             }
         }
 
@@ -43,15 +84,15 @@
             background-color: var(--dui-color-foreground);
             min-width: var(--line-chart-reponsive-width);
 
-            .country-header {
-                align-items: center;
-            }
-
             .country-avatar {
                 img {
                     border: var(--width-separator-thin) solid var(--color-separator-light);
                     border-radius: var(--dui-border-radius-avatar);
                 }
+            }
+
+            .country-header {
+                align-items: center;
             }
 
             .country-map {
@@ -88,6 +129,7 @@
             }
         }
     }
+
 
     .perception-wrapper {
         display: flex;
