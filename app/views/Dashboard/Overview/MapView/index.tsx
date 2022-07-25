@@ -3,6 +3,12 @@ import { _cs } from '@togglecorp/fujs';
 import {
     ContainerCard,
 } from '@the-deep/deep-ui';
+import Map, {
+    MapContainer,
+    MapBounds,
+    MapSource,
+    MapLayer,
+} from '@togglecorp/re-map';
 import ProgressBar from '#components/ProgressBar';
 
 import styles from './styles.css';
@@ -10,6 +16,17 @@ import styles from './styles.css';
 interface MapViewProps {
     className?: string;
 }
+
+const lightStyle = 'mapbox://styles/priyesh777/cl60kjfzg000i14nu1xwl8783';
+const countryFillPaint: mapboxgl.FillPaint = {
+    'fill-color': '#63ba34', // empty color
+    'fill-opacity': 0.2,
+};
+
+const countryLinePaint: mapboxgl.LinePaint = {
+    'line-color': '#f8f8f8',
+    'line-width': 1,
+};
 
 const barHeight = 6;
 
@@ -137,28 +154,42 @@ function MapView(props: MapViewProps) {
     return (
         <div className={_cs(className, styles.mapViewWrapper)}>
             <ContainerCard className={styles.mapContainer}>
-                ---------------------------------
-                ----The actual map will stay here----
-                ---------------------------------
-                ---------------------------------
-                ---------------------------------
-                ---------------------------------
-                ---------------------------------
-                ---------------------------------
-                ---------------------------------
-                ---------------------------------
-                ---------------------------------
-                ---------------------------------
-                ---------------------------------
-                ---------------------------------
-                ---------------------------------
-                ---------------------------------
-                ---------------------------------
-                ---------------------------------
-                ---------------------------------
-                ---------------------------------
-                ---------------------------------
-                ---------------------------------
+                <Map
+                    mapStyle={lightStyle}
+                    mapOptions={{
+                        logoPosition: 'bottom-left',
+                    }}
+                    scaleControlShown
+                    navControlShown
+                >
+                    <MapContainer className={styles.mapContainer} />
+                    <MapBounds
+                        bounds={[50, 40, 90, 80]}
+                        padding={50}
+                    />
+                    <MapSource
+                        sourceKey="country"
+                        sourceOptions={{
+                            type: 'geojson',
+                        }}
+                        geoJson="mapbox://mapbox.3o7ubwm8"
+                    >
+                        <MapLayer
+                            layerKey="country-fill"
+                            layerOptions={{
+                                type: 'fill',
+                                paint: countryFillPaint,
+                            }}
+                        />
+                        <MapLayer
+                            layerKey="country-line"
+                            layerOptions={{
+                                type: 'line',
+                                paint: countryLinePaint,
+                            }}
+                        />
+                    </MapSource>
+                </Map>
             </ContainerCard>
             <div className={styles.progressBarContainer}>
                 <ContainerCard

@@ -25,7 +25,9 @@ import Dashboard from '#views/Dashboard';
 
 import styles from './styles.css';
 
-setMapboxToken(mapboxToken);
+if (mapboxToken) {
+    setMapboxToken(mapboxToken);
+}
 
 if (sentryConfig) {
     init(sentryConfig);
