@@ -5,7 +5,6 @@ import {
     Tab,
     TabPanel,
     ContainerCard,
-    CompactInformationCard,
 } from '@the-deep/deep-ui';
 import { _cs } from '@togglecorp/fujs';
 import {
@@ -23,6 +22,8 @@ import {
 import {
     IoBookmark,
 } from 'react-icons/io5';
+
+import PercentageStats from '#components/PercentageStats';
 
 import MapView from './MapView';
 import TableView from './TableView';
@@ -140,8 +141,8 @@ function Overview(props: OverviewProps) {
     return (
         <div className={_cs(className, styles.overviewMain)}>
             <div className={styles.cardCollection}>
-                <ContainerCard
-                    className={_cs(styles.globalSurgeCard, styles.cardInfo)}
+                <PercentageStats
+                    className={styles.globalStatCard}
                     heading="Total number of cases"
                     headingSize="extraSmall"
                     headerDescription={(
@@ -149,15 +150,11 @@ function Overview(props: OverviewProps) {
                             All Outbreak numbers:
                         </p>
                     )}
-                >
-                    <CompactInformationCard
-                        className={styles.statCard}
-                        icon={<IoBookmark />}
-                        label="Approx."
-                        spacing="loose"
-                        value={140}
-                    />
-                </ContainerCard>
+                    StatValue={160}
+                    StatValueSpacing="loose"
+                    StatValueDescription="Approx.value"
+                    StatValueIcon={<IoBookmark />}
+                />
                 <ContainerCard
                     className={_cs(styles.trendsCard, styles.cardInfo)}
                     heading="Outbreak over last 12 months"

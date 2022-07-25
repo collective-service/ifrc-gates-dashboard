@@ -16,7 +16,7 @@
             border-radius: var(--dui-border-radius-card);
         }
 
-        .global-surge-card {
+        .global-stat-card {
             flex-basis: 20%;
         }
 
@@ -26,10 +26,6 @@
 
         .regions-card {
             flex-basis: calc(35% - var(--dui-spacing-small));
-        }
-
-        .stat-card {
-            color: green;
         }
     }
 

@@ -45,7 +45,6 @@ function ProgressBar(props: ProgressBarProps) {
         ),
         [
             data,
-            totalSum,
         ],
     );
 
