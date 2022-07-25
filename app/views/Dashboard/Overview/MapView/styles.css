@@ -16,7 +16,6 @@
             border-bottom-left-radius: 0px;
             border-bottom-right-radius: 0px;
             background-color: var(--color-background);
-            padding: var(--dui-spacing-large);
         }
 
         .high-progress-rate {
@@ -26,7 +25,11 @@
             border-top-left-radius: 0px;
             border-top-right-radius: 0px;
             background-color: var(--color-background);
-            padding: var(--dui-spacing-large);
+        }
+
+        .progress-rate-box {
+            padding: 0 var(--dui-spacing-extra-large);
+            font-size: var(--dui-font-size-medium);
         }
     }
 }
