@@ -1,3 +1,5 @@
+--line-chart-reponsive-width: 20rem;
+
 .country-wrapper {
     display: flex;
     flex-direction: column;
@@ -5,7 +7,7 @@
 
     .country-main {
         display: flex;
-        gap: var(--dui-spacing-extra-large);
+        gap: var(--dui-spacing-small);
 
         .country-detail-wrapper {
             display: flex;
@@ -30,20 +32,61 @@
                 border-radius: var(--dui-border-radius-card);
 
                 .responsive-content {
-                    min-height: 20rem;
+                    min-height: 32rem;
                 }
             }
         }
 
         .country-info {
-            flex-basis: 25%;
-            flex-shrink: 0;
             border: var(--width-separator-thin) solid var(--color-separator-light);
             border-radius: var(--dui-border-radius-card);
             background-color: var(--dui-color-foreground);
+            min-width: var(--line-chart-reponsive-width);
+
+            .country-header {
+                align-items: center;
+            }
+
+            .country-avatar {
+                img {
+                    border: var(--width-separator-thin) solid var(--color-separator-light);
+                    border-radius: var(--dui-border-radius-avatar);
+                }
+            }
+
+            .country-map {
+                display: flex;
+                justify-content: center;
+
+                img {
+                    width: 100%;
+                    object-fit: cover;
+                }
+            }
+
+            .country-details {
+                display: flex;
+                flex-direction: column;
+                gap: var(--dui-spacing-medium);
+
+                .country-text-output {
+                    justify-content: space-between;
+                    font-size: var(--dui-font-size-medium);
+
+                    .value-text {
+                        display: flex;
+                        align-items: flex-end;
+                        flex-direction: column;
+                        font-weight: var(--dui-font-weight-light);
+
+                        .regional-text {
+                            color: var(--color-text-regional);
+                            font-size: var(--dui-font-size-small);
+                        }
+                    }
+                }
+            }
         }
-
-
     }
 
     .perception-wrapper {
