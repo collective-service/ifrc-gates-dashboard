@@ -25,6 +25,8 @@ import {
 } from '@togglecorp/re-map'; */
 import StatusCard, { statusCardProps } from '#base/components/StatusCard';
 
+import IndicatorChart from '#base/components/IndicatorChart';
+
 import styles from './styles.css';
 
 /* const lightStyle = 'mapbox://styles/togglecorp/cl50rwy0a002d14mo6w9zprio';
@@ -41,6 +43,78 @@ const countryLinePaint: mapboxgl.LinePaint = {
 */
 
 const keySelector = (d: statusCardProps) => d.statusId;
+
+interface CustomizedLabel {
+    cx: number;
+    cy: number;
+    midAngle: number;
+    innerRadius: number;
+    outerRadius: number;
+    percent: number;
+}
+
+const indicatorData = [
+    {
+        id: 1,
+        month: 'Jan',
+        percentage: 10,
+    },
+    {
+        id: 2,
+        month: 'Feb',
+        percentage: 15,
+    },
+    {
+        id: 3,
+        month: 'Mar',
+        percentage: 20,
+    },
+    {
+        id: 4,
+        month: 'Apr',
+        percentage: 25,
+    },
+    {
+        id: 5,
+        month: 'May',
+        percentage: 35,
+    },
+    {
+        id: 6,
+        month: 'Jun',
+        percentage: 15,
+    },
+    {
+        id: 7,
+        month: 'Jul',
+        percentage: 25,
+    },
+    {
+        id: 8,
+        month: 'Aug',
+        percentage: 55,
+    },
+    {
+        id: 9,
+        month: 'Sept',
+        percentage: 50,
+    },
+    {
+        id: 10,
+        month: 'Oct',
+        percentage: 45,
+    },
+    {
+        id: 11,
+        month: 'Nov',
+        percentage: 65,
+    },
+    {
+        id: 12,
+        month: 'Dec',
+        percentage: 5,
+    },
+];
 
 const outbreakData = [
     {
@@ -106,7 +180,6 @@ const outbreakData = [
 
 ];
 
-<<<<<<< HEAD
 const statusData: statusCardProps[] = [
     {
         statusId: 1,
@@ -137,7 +210,6 @@ const statusData: statusCardProps[] = [
 interface CountryProps {
     className?: string;
 }
-=======
 const genderDisaggregationData = [
     {
         id: 1,
@@ -166,7 +238,7 @@ const renderCustomizedLabel = ({
     innerRadius,
     outerRadius,
     percent,
-}: any) => {
+}: CustomizedLabel) => {
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
@@ -183,7 +255,6 @@ const renderCustomizedLabel = ({
         </text>
     );
 };
->>>>>>> indicator component setup
 
 function Country(props: CountryProps) {
     const {
@@ -266,11 +337,12 @@ function Country(props: CountryProps) {
                         >
                             Percentage Card
                         </ContainerCard>
-                        <ContainerCard
+                        <IndicatorChart
                             className={_cs(styles.indicatorsCard, styles.indicatorsChart)}
-                        >
-                            Indicator Chart
-                        </ContainerCard>
+                            heading="Indicator overview over the last 12 months"
+                            headerDescription="Lorem ipsum"
+                            chartData={indicatorData}
+                        />
                         <ContainerCard
                             className={_cs(styles.indicatorsCard, styles.genderDisaggregation)}
                             contentClassName={styles.responsiveContent}
@@ -301,6 +373,7 @@ function Country(props: CountryProps) {
                                         verticalAlign="middle"
                                         align="right"
                                         layout="vertical"
+                                        iconType="circle"
                                     />
                                 </PieChart>
                             </ResponsiveContainer>
