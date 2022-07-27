@@ -1,94 +1,75 @@
 import React, { useMemo } from 'react';
-import {
-    _cs,
-    sum,
-    isDefined,
-    isNotDefined,
-} from '@togglecorp/fujs';
+import { _cs } from '@togglecorp/fujs';
+
 import styles from './styles.css';
 
 export interface ProgressBarProps {
-    className?: string | null | undefined;
+    className?: string | undefined;
     barHeight: number;
-    data: {
-        title: string | undefined | null,
-        color?: string | undefined | null,
-        value: number | undefined | null,
-        totalValue: number | undefined | null,
-    }[];
+    progressData: {
+        countryName: string | undefined,
+        id: string,
+        title: string | undefined,
+        color?: string | undefined,
+        value: number | undefined,
+        totalValue: number | undefined,
+    };
 }
 
 function ProgressBar(props: ProgressBarProps) {
     const {
         className,
         barHeight,
-        data,
+        progressData,
     } = props;
 
-    const totalSum = useMemo(
-        () => (
-            sum(data.map((item) => item.value).filter(isDefined))
-        ),
-        [
-            data,
-        ],
-    );
-
     const avgResult = useMemo(
-        () => (
-            data.map(({ value, totalValue, ...other }) => ({
-                ...other,
-                percentage: isDefined(value) && isDefined(totalValue) && totalValue > 0
-                    ? ((value / totalValue) * 100).toFixed(1)
-                    : undefined,
-            }))
-        ),
-        [
-            data,
-        ],
+        () => ({
+            percentage: progressData?.value && progressData?.totalValue
+                && (((progressData.value / progressData.totalValue) * 100).toFixed(1)
+                    ?? undefined),
+        }),
+        [progressData],
     );
 
     const tooltip = useMemo(
-        () => (
-            data.map((datum) => `${datum.title}: ${datum.value ?? 0}`).join('\n')
-        ), [data],
+        () => ((progressData?.value && progressData?.totalValue)
+            && ((`${progressData.title}: ${progressData.value ?? '0'}`) ?? undefined)
+        ),
+        [
+            progressData,
+        ],
     );
 
     return (
-        <>
-            <div className={styles.progressInfo}>
+        <div className={styles.progressInfo}>
+            <div className={styles.labelStyle}>
+                {progressData.countryName}
+            </div>
+            <div className={styles.progressValueWrapper}>
                 <div
                     className={_cs(styles.progressBarWrapper, className)}
                     style={{ height: `${barHeight}px` }}
-                    title={tooltip}
+                    title={tooltip as string}
                 >
-                    {avgResult.map((item) => {
-                        if (isNotDefined(item.percentage)) {
-                            return null;
-                        }
-                        return (
-                            <div
-                                key={item.title}
-                                className={styles.data}
-                                style={{
-                                    width: `${item.percentage}%`,
-                                    backgroundColor: item.color ?? 'blue',
-                                }}
-                            />
-                        );
-                    })}
+                    <div
+                        className={styles.progressBarStyle}
+                        key={progressData.id}
+                        style={{
+                            width: `${avgResult.percentage}%`,
+                            backgroundColor: progressData.color ?? 'blue',
+                        }}
+                    />
                 </div>
-                <div className={styles.progressLabel} title={tooltip}>
-                    {avgResult.map((item) => {
-                        if (isNotDefined(item.percentage)) {
-                            return null;
-                        }
-                        return (item.percentage);
-                    })}
+                <div
+                    className={styles.progressValue}
+                    title={tooltip as string}
+                >
+                    {avgResult?.percentage}
                     M
                 </div>
             </div>
-        </>
+        </div>
     );
 }
 export default ProgressBar;

@@ -2,34 +2,25 @@
     display: flex;
 
     .map-container {
-        flex-basis: 75%;
+        flex-grow: 1;
     }
 
     .progress-bar-container {
         flex-basis: 25%;
         flex-direction: column;
-
-        .low-progress-rate {
-            border: var(--dui-card-border-color) solid 4px;
-            border-bottom: none;
-            border-radius: 8px;
-            border-bottom-left-radius: 0px;
-            border-bottom-right-radius: 0px;
-            background-color: var(--color-background);
-        }
-
-        .high-progress-rate {
-            border: var(--dui-card-border-color) solid 4px;
-            border-top: none;
-            border-radius: 8px;
-            border-top-left-radius: 0px;
-            border-top-right-radius: 0px;
-            background-color: var(--color-background);
-        }
+        flex-shrink: 0;
+        border: var(--dui-card-border-color) solid 4px;
+        border-radius: 8px;
+        background-color: var(--color-background);
 
         .progress-rate-box {
-            padding: 0 var(--dui-spacing-extra-large);
-            font-size: var(--dui-font-size-medium);
+            background-color: var(--color-background);
+            padding: var(--dui-spacing-small);
+
+            .progress-list {
+                padding: 0 var(--dui-spacing-large);
+                font-size: small;
+            }
         }
     }
 }
