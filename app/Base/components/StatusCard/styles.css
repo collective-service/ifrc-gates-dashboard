@@ -1,0 +1,25 @@
+.status-card {
+    display: flex;
+    flex-direction: column;
+
+    .title-and-value {
+        display: flex;
+        flex-direction: column;
+        gap: var(--dui-spacing-medium);
+
+        .title {
+            font-size: var(--dui-font-size-medium);
+        }
+
+        .value {
+            color: var(--color-text-regional);
+            font-size: var(--dui-font-size-heading-large);
+            font-weight: var(--dui-font-weight-bold);
+        }
+    }
+
+    .label {
+        font-size: var(--dui-font-size-small);
+    }
+
+}
