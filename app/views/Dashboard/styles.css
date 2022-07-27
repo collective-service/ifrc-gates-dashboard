@@ -14,13 +14,8 @@
         gap: var(--dui-spacing-medium);
     }
 
-    .filter-and-export {
-        display: flex;
-        gap: var(--dui-spacing-small);
-
-        .button {
-            border-radius: var(--dui-border-radius-button);
-        }
+    .button {
+        border-radius: var(--dui-border-radius-button);
     }
 
     .dashboard-tablist {

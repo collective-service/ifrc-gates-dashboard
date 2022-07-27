@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import {
     Tabs,
     TabList,
@@ -7,21 +7,18 @@ import {
     Button,
 } from '@the-deep/deep-ui';
 import {
-    IoFilterSharp,
     IoCloudDownloadOutline,
 } from 'react-icons/io5';
 
 import Overview from './Overview';
 import Country from './Country';
-import AdvancedFilterPane from './AdvancedFilterPane';
+import Filters from './Filters';
 import styles from './styles.css';
 
-function Dashboard() {
-    const [filterView, setFilterView] = useState(false);
+export type TabTypes = 'country' | 'overview' | 'combinedIndicators';
 
-    const handleAdvancedFilterButtonClick = useCallback(() => {
-        setFilterView((old) => !old);
-    }, []);
+function Dashboard() {
+    const [activeTab, setActiveTab] = useState<TabTypes | undefined>('country');
 
     const handleExport = () => {
         // eslint-disable-next-line no-console
@@ -31,31 +28,20 @@ function Dashboard() {
     return (
         <div className={styles.dashboardNavigation}>
             <Tabs
-                useHash
-                defaultHash="overview"
+                value={activeTab}
+                onChange={setActiveTab}
                 variant="secondary"
             >
                 <div className={styles.dashboardButtons}>
-                    <div className={styles.filterAndExport}>
-                        <Button
-                            className={styles.button}
-                            icons={<IoFilterSharp />}
-                            name={undefined}
-                            variant="tertiary"
-                            onClick={handleAdvancedFilterButtonClick}
-                        >
-                            Filter
-                        </Button>
-                        <Button
-                            className={styles.button}
-                            icons={<IoCloudDownloadOutline />}
-                            name={undefined}
-                            variant="tertiary"
-                            onClick={handleExport}
-                        >
-                            Export
-                        </Button>
-                    </div>
+                    <Button
+                        className={styles.button}
+                        icons={<IoCloudDownloadOutline />}
+                        name={undefined}
+                        variant="tertiary"
+                        onClick={handleExport}
+                    >
+                        Export
+                    </Button>
                     <TabList className={styles.dashboardTablist}>
                         <Tab
                             className={styles.tabName}
@@ -69,12 +55,20 @@ function Dashboard() {
                         >
                             Country
                         </Tab>
+                        <Tab
+                            className={styles.tabName}
+                            name="combinedIndicators"
+                        >
+                            Combined Indicators
+                        </Tab>
                     </TabList>
                 </div>
+                <div>
+                    <Filters
+                        activeTab={activeTab}
+                    />
+                </div>
                 <div className={styles.content}>
-                    {filterView && (
-                        <AdvancedFilterPane />
-                    )}
                     <TabPanel
                         name="overview"
                     >
@@ -82,6 +76,11 @@ function Dashboard() {
                     </TabPanel>
                     <TabPanel
                         name="country"
+                    >
+                        <Country />
+                    </TabPanel>
+                    <TabPanel
+                        name="combinedIndicators"
                     >
                         <Country />
                     </TabPanel>
