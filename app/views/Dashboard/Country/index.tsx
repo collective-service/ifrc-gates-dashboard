@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { _cs } from '@togglecorp/fujs';
 import {
     LineChart,
@@ -11,8 +11,8 @@ import {
 } from 'recharts';
 import {
     ContainerCard,
-    CompactInformationCard,
     TextOutput,
+    ListView,
 } from '@the-deep/deep-ui';
 /* import Map, {
     MapContainer,
@@ -20,9 +20,7 @@ import {
     MapSource,
     MapLayer,
 } from '@togglecorp/re-map'; */
-import {
-    IoChevronForward,
-} from 'react-icons/io5';
+import StatusCard, { statusCardProps } from '#base/components/StatusCard';
 
 import styles from './styles.css';
 
@@ -38,9 +36,8 @@ const countryLinePaint: mapboxgl.LinePaint = {
     'line-width': 1,
 };
 */
-interface CountryProps {
-    className?: string;
-}
+
+const keySelector = (d: statusCardProps) => d.statusId;
 
 const outbreakData = [
     {
@@ -106,10 +103,48 @@ const outbreakData = [
 
 ];
 
+const statusData: statusCardProps[] = [
+    {
+        statusId: 1,
+        title: 'Total number of deaths',
+        value: 189050,
+        regionalValue: 1,
+    },
+    {
+        statusId: 2,
+        title: 'Total outbreaks for country',
+        value: 2,
+        regionalValue: 167.3,
+    },
+    {
+        statusId: 3,
+        title: 'Total number of cases',
+        value: 2,
+        regionalValue: 65,
+    },
+    {
+        statusId: 4,
+        title: 'New cases per million',
+        value: 56.8,
+        regionalValue: 167.3,
+    },
+];
+
+interface CountryProps {
+    className?: string;
+}
+
 function Country(props: CountryProps) {
     const {
         className,
     } = props;
+
+    const rendererParams = useCallback((_, data: statusCardProps) => ({
+        statusId: data.statusId,
+        title: data.title,
+        value: data.value,
+        regionalValue: data.regionalValue,
+    }), []);
 
     return (
         <div className={_cs(className, styles.countryWrapper)}>
@@ -118,23 +153,16 @@ function Country(props: CountryProps) {
                     <ContainerCard
                         className={styles.statusContainer}
                     >
-                        <div className={styles.infoCards}>
-                            <CompactInformationCard
-                                icon={<IoChevronForward />}
-                                label="Cases"
-                                value={130}
-                            />
-                            <CompactInformationCard
-                                icon={<IoChevronForward />}
-                                label="Vaccination"
-                                value={645}
-                            />
-                            <CompactInformationCard
-                                icon={<IoChevronForward />}
-                                label="Deaths"
-                                value={100}
-                            />
-                        </div>
+                        <ListView
+                            className={styles.infoCards}
+                            renderer={StatusCard}
+                            rendererParams={rendererParams}
+                            data={statusData}
+                            keySelector={keySelector}
+                            errored={false}
+                            filtered={false}
+                            pending={false}
+                        />
                     </ContainerCard>
                     <ContainerCard
                         className={styles.countryTrend}
