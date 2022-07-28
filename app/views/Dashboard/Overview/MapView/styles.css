@@ -1,0 +1,32 @@
+.map-view-wrapper {
+    display: flex;
+
+    .map-container {
+        flex-grow: 1;
+        padding-left: 0px;
+        min-height: 40rem;
+    }
+
+    .progress-bar-container {
+        flex-basis: 25%;
+        flex-direction: column;
+        flex-shrink: 0;
+        border: var(--dui-card-border-color) solid 4px;
+        border-radius: 8px;
+        background-color: var(--color-background);
+
+        .progress-rate-box {
+            background-color: var(--color-background);
+            padding: var(--dui-spacing-small);
+
+            .progress-list {
+                padding: 0 var(--dui-spacing-large);
+                font-size: small;
+            }
+
+            .progress-list-header {
+                padding-bottom: var(--dui-spacing-small);
+            }
+        }
+    }
+}

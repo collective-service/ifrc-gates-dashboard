@@ -92,12 +92,14 @@
     --dui-color-label: rgb(100, 99, 99);
     --dui-color-description: rgb(100, 99, 99);
     --dui-color-watermark: rgb(100, 99, 99);
+    --dui-card-border-color: #f1f1f1;
 
-    --dui-color-background: #eff4fa;
+    --dui-color-background: #fbfbfb;
     --dui-color-background-information: var(--dui-color-background);
+    --dui-color-background-progress-bar-light: #d6d6d6;
 
     --color-foreground: #ffffff;
-    --color-background: #eff4fa;
+    --color-background: #fafafa;
     --color-background-dark: #193256;
     --color-text-on-dark: #ffffff;
     --color-text: #333333;

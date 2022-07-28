@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import {
+    Tabs,
+    TabList,
+    Tab,
+    TabPanel,
     ContainerCard,
-    CompactInformationCard,
 } from '@the-deep/deep-ui';
 import { _cs } from '@togglecorp/fujs';
 import {
@@ -20,6 +23,10 @@ import {
     IoBookmark,
 } from 'react-icons/io5';
 
+import PercentageStats from '#components/PercentageStats';
+
+import MapView from './MapView';
+import TableView from './TableView';
 import styles from './styles.css';
 
 interface OverviewProps {
@@ -29,52 +36,52 @@ interface OverviewProps {
 const lineChartData = [
     {
         name: 'Mar',
-        uv: 4000,
-        pv: 2400,
-        amt: 2400,
-        range: 3500,
+        Covid: 80,
+        MonkeyPox: 24,
+        SpanishFlu: 24,
+        Ebola: 35,
     },
     {
         name: 'Apr',
-        uv: 3000,
-        pv: 1398,
-        amt: 2210,
-        range: 1004,
+        Covid: 30,
+        MonkeyPox: 13,
+        SpanishFlu: 22,
+        Ebola: 10,
     },
     {
         name: 'May',
-        uv: 2000,
-        pv: 9800,
-        amt: 2290,
-        range: 1580,
+        Covid: 90,
+        MonkeyPox: 98,
+        SpanishFlu: 22,
+        Ebola: 58,
     },
     {
         name: 'June',
-        uv: 2780,
-        pv: 3908,
-        amt: 2000,
-        range: 3000,
+        Covid: 78,
+        MonkeyPox: 90,
+        SpanishFlu: 20,
+        Ebola: 30,
     },
     {
         name: 'July',
-        uv: 1890,
-        pv: 4800,
-        amt: 2181,
-        range: 2600,
+        Covid: 89,
+        MonkeyPox: 48,
+        SpanishFlu: 28,
+        Ebola: 26,
     },
     {
         name: 'Aug',
-        uv: 2390,
-        pv: 3800,
-        amt: 2500,
-        range: 3900,
+        Covid: 90,
+        MonkeyPox: 80,
+        SpanishFlu: 50,
+        Ebola: 39,
     },
     {
         name: 'Sept',
-        uv: 3490,
-        pv: 4300,
-        amt: 2100,
-        range: 2900,
+        Covid: 90,
+        MonkeyPox: 43,
+        SpanishFlu: 21,
+        Ebola: 29,
     },
 ];
 
@@ -115,12 +122,6 @@ const barChartData = [
         pv: 3800,
         amt: 2200,
     },
-    {
-        name: 'Rus',
-        range: '210M',
-        pv: 4300,
-        amt: 2100,
-    },
 ];
 
 function Overview(props: OverviewProps) {
@@ -128,31 +129,36 @@ function Overview(props: OverviewProps) {
         className,
     } = props;
 
+    const [currentTab, setCurrentTab] = useState<string | undefined>('mapMode');
+
+    const handleMapView = useCallback(
+        (tabName: string | undefined) => {
+            setCurrentTab(tabName);
+        },
+        [],
+    );
+
     return (
         <div className={_cs(className, styles.overviewMain)}>
             <div className={styles.cardCollection}>
-                <ContainerCard
-                    className={_cs(styles.globalSurgeCard, styles.cardInfo)}
+                <PercentageStats
+                    className={styles.globalStatCard}
                     heading="Total number of cases"
-                    headingClassName={styles.cardsHeader}
+                    headingSize="extraSmall"
                     headerDescription={(
                         <p>
                             All Outbreak numbers:
                         </p>
                     )}
-                >
-                    <CompactInformationCard
-                        className={styles.statCard}
-                        icon={<IoBookmark />}
-                        label="Approx."
-                        spacing="loose"
-                        value={140}
-                    />
-                </ContainerCard>
+                    StatValue={160}
+                    StatValueSpacing="loose"
+                    StatValueDescription="Approx.value"
+                    StatValueIcon={<IoBookmark />}
+                />
                 <ContainerCard
                     className={_cs(styles.trendsCard, styles.cardInfo)}
                     heading="Outbreak over last 12 months"
-                    headingClassName={styles.cardsHeader}
+                    headingSize="extraSmall"
                     contentClassName={styles.responsiveContent}
                     headerDescription="Average indicator value weighted by country's populations"
                 >
@@ -165,35 +171,53 @@ function Overview(props: OverviewProps) {
                                 right: 20,
                             }}
                         >
-                            <XAxis dataKey="name" />
-                            <YAxis />
+                            <XAxis
+                                dataKey="name"
+                                axisLine={false}
+                                tickLine={false}
+                            />
+                            <YAxis
+                                axisLine={false}
+                                tickLine={false}
+                                padding={{ top: 30 }}
+                            />
                             <Tooltip
                                 allowEscapeViewBox={{
                                     x: true,
                                     y: true,
                                 }}
                             />
-                            <Legend iconType="square" />
+                            <Legend
+                                iconType="square"
+                                align="right"
+                            />
                             <Line
                                 type="monotone"
-                                dataKey="pv"
+                                dataKey="MonkeyPox"
                                 stroke="#4bda8a"
-                                activeDot={{ r: 8 }}
+                                strokeWidth={2}
+                                dot={false}
                             />
                             <Line
                                 type="monotone"
-                                dataKey="uv"
+                                dataKey="Covid"
                                 stroke="#2169bb"
+                                strokeWidth={2}
+                                dot={false}
                             />
                             <Line
                                 type="monotone"
-                                dataKey="amt"
+                                dataKey="SpanishFlu"
                                 stroke="#d2e82d"
+                                strokeWidth={2}
+                                dot={false}
                             />
                             <Line
                                 type="monotone"
-                                dataKey="range"
+                                dataKey="Ebola"
                                 stroke="#ba2123"
+                                strokeWidth={2}
+                                dot={false}
                             />
                         </LineChart>
                     </ResponsiveContainer>
@@ -202,7 +226,7 @@ function Overview(props: OverviewProps) {
                     className={_cs(styles.regionsCard, styles.cardInfo)}
                     contentClassName={styles.responsiveContent}
                     heading="Regional Breakdown"
-                    headingClassName={styles.cardsHeader}
+                    headingSize="extraSmall"
                     headerDescription="Average indicator value weighted by country's populations (Apr 2022)"
                 >
                     <ResponsiveContainer className={styles.responsiveContainer}>
@@ -215,7 +239,7 @@ function Overview(props: OverviewProps) {
                                     y: true,
                                 }}
                             />
-                            <XAxis dataKey="name">
+                            <XAxis dataKey="name" tickLine={false}>
                                 <LabelList dataKey="name" position="bottom" />
                             </XAxis>
                             <Bar dataKey="amt" fill="#38c073">
@@ -226,12 +250,43 @@ function Overview(props: OverviewProps) {
                 </ContainerCard>
             </div>
             <div className={styles.mapContainer}>
-                <ContainerCard
-                    heading="Map Overview"
-                    headingClassName={styles.cardsHeader}
+                <Tabs
+                    value={currentTab}
+                    onChange={handleMapView}
                 >
-                    MAP ---COMPONENT---HERE
-                </ContainerCard>
+                    <ContainerCard
+                        heading={currentTab === 'mapMode' ? 'Overview map' : 'Tabular data'}
+                        headingSize="extraSmall"
+                        headerDescription={currentTab === 'mapMode'
+                            ? 'Overview of the average indicator value weighted by  populations'
+                            : 'Interpretation of the data in table'}
+                        headerActions={(
+                            <TabList>
+                                <Tab
+                                    name="mapMode"
+                                >
+                                    Map overview
+                                </Tab>
+                                <Tab
+                                    name="tableMode"
+                                >
+                                    Table
+                                </Tab>
+                            </TabList>
+                        )}
+                    >
+                        <TabPanel
+                            name="mapMode"
+                        >
+                            <MapView />
+                        </TabPanel>
+                        <TabPanel
+                            name="tableMode"
+                        >
+                            <TableView />
+                        </TabPanel>
+                    </ContainerCard>
+                </Tabs>
             </div>
         </div>
     );
