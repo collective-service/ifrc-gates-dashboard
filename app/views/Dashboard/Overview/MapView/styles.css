@@ -21,6 +21,10 @@
                 padding: 0 var(--dui-spacing-large);
                 font-size: small;
             }
+
+            .progress-list-header {
+                padding-bottom: var(--dui-spacing-small);
+            }
         }
     }
 }

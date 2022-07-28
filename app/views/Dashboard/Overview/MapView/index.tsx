@@ -182,7 +182,7 @@ function MapView(props: MapViewProps) {
             </ContainerCard>
             <ContainerCard className={styles.progressBarContainer}>
                 <div className={styles.progressRateBox}>
-                    <Heading size="extraSmall">
+                    <Heading size="extraSmall" className={styles.progressListHeader}>
                         Lowest cases
                     </Heading>
                     <div className={styles.progressList}>
@@ -195,7 +195,7 @@ function MapView(props: MapViewProps) {
                     </div>
                 </div>
                 <div className={styles.progressRateBox}>
-                    <Heading size="extraSmall">
+                    <Heading size="extraSmall" className={styles.progressListHeader}>
                         Highest cases
                     </Heading>
                     <div className={styles.progressList}>

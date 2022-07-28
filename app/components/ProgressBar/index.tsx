@@ -43,7 +43,7 @@ function ProgressBar(props: ProgressBarProps) {
 
     return (
         <div className={styles.progressInfo}>
-            <div className={styles.labelStyle}>
+            <div>
                 {progressData.countryName}
             </div>
             <div className={styles.progressValueWrapper}>

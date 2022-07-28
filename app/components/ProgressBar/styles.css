@@ -2,14 +2,10 @@
     display: flex;
     flex-direction: column;
 
-    .label-style {
-        /*FIX ME: Need a way to implement a negative margin*/
-        margin-bottom: -6px;
-    }
-
     .progress-value-wrapper {
         display: flex;
         align-items: center;
+        line-height: 1;
         gap: var(--dui-spacing-medium);
 
         .progress-bar-wrapper {
