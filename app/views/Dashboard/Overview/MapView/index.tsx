@@ -12,6 +12,7 @@ import Map, {
     MapLayer,
 } from '@togglecorp/re-map';
 import ProgressBar from '#components/ProgressBar';
+import geoJson from '#utils/geoJson';
 
 import styles from './styles.css';
 
@@ -29,7 +30,7 @@ interface MapViewProps {
     className?: string;
 }
 
-const lightStyle = 'mapbox://styles/priyesh777/cl60kjfzg000i14nu1xwl8783';
+const lightStyle = 'mapbox://styles/mapbox/light-v10';
 const countryFillPaint: mapboxgl.FillPaint = {
     'fill-color': '#63ba34', // empty color
     'fill-opacity': 0.2,
@@ -153,7 +154,7 @@ function MapView(props: MapViewProps) {
                 >
                     <MapContainer className={styles.mapContainer} />
                     <MapBounds
-                        bounds={[50, 40, 90, 80]}
+                        bounds={[80.088425, 26.397898, 88.174804, 30.422717]}
                         padding={50}
                     />
                     <MapSource
@@ -161,7 +162,7 @@ function MapView(props: MapViewProps) {
                         sourceOptions={{
                             type: 'geojson',
                         }}
-                        geoJson="mapbox://mapbox.3o7ubwm8"
+                        geoJson={geoJson}
                     >
                         <MapLayer
                             layerKey="country-fill"
