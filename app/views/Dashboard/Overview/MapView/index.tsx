@@ -13,6 +13,11 @@ import Map, {
 } from '@togglecorp/re-map';
 import ProgressBar from '#components/ProgressBar';
 import geoJson from '#utils/geoJson';
+import {
+    progressDataOne,
+    progressDataTwo,
+    boundsData,
+} from '#utils/dummyData';
 
 import styles from './styles.css';
 
@@ -43,92 +48,6 @@ const countryLinePaint: mapboxgl.LinePaint = {
 
 const barHeight = 5;
 
-const progressDataOne = [
-    {
-        countryName: 'Cameroon',
-        id: '1',
-        title: 'Vulnerable cases',
-        color: 'var(--color-success)',
-        value: 130,
-        totalValue: 200,
-    },
-    {
-        countryName: 'Algeria',
-        id: '2',
-        title: 'Vulnerable cases',
-        color: 'var(--color-success)',
-        value: 50,
-        totalValue: 200,
-    },
-    {
-        countryName: 'Bulgaria',
-        id: '3',
-        title: 'Vulnerable cases',
-        color: 'var(--color-success)',
-        value: 99.5,
-        totalValue: 200,
-    },
-    {
-        countryName: 'Democratic Republic of Congo',
-        id: '4',
-        title: 'Vulnerable cases',
-        color: 'var(--color-success)',
-        value: 105,
-        totalValue: 200,
-    },
-    {
-        countryName: 'Belarus',
-        id: '5',
-        title: 'Vulnerable cases',
-        color: 'var(--color-success)',
-        value: 125,
-        totalValue: 200,
-    },
-];
-
-const progressDataTwo = [
-    {
-        countryName: 'Oman',
-        id: '13',
-        title: 'Vulnerable cases',
-        color: 'var(--color-success)',
-        value: 180,
-        totalValue: 200,
-    },
-    {
-        countryName: 'Malaysia',
-        id: '29',
-        title: 'Vulnerable cases',
-        color: 'var(--color-success)',
-        value: 190,
-        totalValue: 200,
-    },
-    {
-        countryName: 'Viet Nam',
-        id: '23',
-        title: 'Vulnerable cases',
-        color: 'var(--color-success)',
-        value: 195,
-        totalValue: 200,
-    },
-    {
-        countryName: 'Bangladesh',
-        id: '34',
-        title: 'Vulnerable cases',
-        color: 'var(--color-success)',
-        value: 175,
-        totalValue: 200,
-    },
-    {
-        countryName: 'Lao PDR',
-        id: '26',
-        title: 'Vulnerable cases',
-        color: 'var(--color-success)',
-        value: 156,
-        totalValue: 200,
-    },
-];
-
 function MapView(props: MapViewProps) {
     const {
         className,
@@ -154,7 +73,7 @@ function MapView(props: MapViewProps) {
                 >
                     <MapContainer className={styles.mapContainer} />
                     <MapBounds
-                        bounds={[80.088425, 26.397898, 88.174804, 30.422717]}
+                        bounds={boundsData}
                         padding={50}
                     />
                     <MapSource
