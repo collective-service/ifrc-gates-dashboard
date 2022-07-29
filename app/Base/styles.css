@@ -21,9 +21,9 @@
     --dui-font-size-heading-small: var(--dui-font-size-extra-large);
     --dui-font-size-heading-extra-small: var(--dui-font-size-large);
 
-    --dui-font-weight-light: 400;
+    --dui-font-weight-light: 200;
     --dui-font-weight-regular: 400;
-    --dui-font-weight-medium: 400;
+    --dui-font-weight-medium: 500;
     --dui-font-weight-bold: 700;
     --dui-font-weight-heading: 900;
 

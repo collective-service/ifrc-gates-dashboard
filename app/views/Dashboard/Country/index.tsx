@@ -23,9 +23,10 @@ import {
     MapSource,
     MapLayer,
 } from '@togglecorp/re-map'; */
-import StatusCard, { statusCardProps } from '#base/components/StatusCard';
+import StatusCard, { StatusCardProps } from '#components/StatusCard';
 
-import IndicatorChart from '#base/components/IndicatorChart';
+import IndicatorChart from '#components/IndicatorChart';
+import PercentageStats from '#components/PercentageStats';
 
 import styles from './styles.css';
 
@@ -42,7 +43,7 @@ const countryLinePaint: mapboxgl.LinePaint = {
 };
 */
 
-const keySelector = (d: statusCardProps) => d.statusId;
+const keySelector = (d: StatusCardProps) => d.statusId;
 
 interface CustomizedLabel {
     cx: number;
@@ -180,7 +181,7 @@ const outbreakData = [
 
 ];
 
-const statusData: statusCardProps[] = [
+const statusData: StatusCardProps[] = [
     {
         statusId: 1,
         title: 'Total number of deaths',
@@ -261,7 +262,7 @@ function Country(props: CountryProps) {
         className,
     } = props;
 
-    const rendererParams = useCallback((_, data: statusCardProps) => ({
+    const rendererParams = useCallback((_, data: StatusCardProps) => ({
         statusId: data.statusId,
         title: data.title,
         value: data.value,
@@ -332,11 +333,16 @@ function Country(props: CountryProps) {
                         </ResponsiveContainer>
                     </ContainerCard>
                     <div className={styles.indicatorWrapper}>
-                        <ContainerCard
-                            className={_cs(styles.indicatorsCard, styles.percentageCard)}
-                        >
-                            Percentage Card
-                        </ContainerCard>
+                        <PercentageStats
+                            className={styles.percentageCard}
+                            heading="Percentage of unvaccinated individuals who have tried to get vaccinated"
+                            headerDescription="Lorem ipsum explaining the topic"
+                            headingSize="extraSmall"
+                            statValue={56}
+                            subValue={78}
+                            suffix="percentage"
+                            icon={null}
+                        />
                         <IndicatorChart
                             className={_cs(styles.indicatorsCard, styles.indicatorsChart)}
                             heading="Indicator overview over the last 12 months"

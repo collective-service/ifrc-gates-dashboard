@@ -3,14 +3,14 @@ import { NumberOutput } from '@the-deep/deep-ui';
 
 import styles from './styles.css';
 
-export interface statusCardProps {
+export interface StatusCardProps {
     statusId: number;
     title: string;
     value: number;
     regionalValue: number;
 }
 
-function StatusCard(props: statusCardProps) {
+function StatusCard(props: StatusCardProps) {
     const {
         statusId,
         title,

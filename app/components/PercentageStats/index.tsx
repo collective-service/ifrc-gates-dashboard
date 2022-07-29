@@ -1,35 +1,32 @@
 import React from 'react';
 import {
-    ContainerCard,
-    CompactInformationCard,
+    ContainerCard, NumberOutput,
 } from '@the-deep/deep-ui';
 import { _cs } from '@togglecorp/fujs';
 
 import styles from './styles.css';
 
-export declare type SpacingTypes = 'none' | 'compact' | 'comfortable' | 'loose';
-
 interface PercentageStatsProps {
     className?: string;
+    icon: React.ReactNode;
     heading?: React.ReactNode;
     headerDescription?: React.ReactNode;
     headingSize?: 'large' | 'small' | 'extraSmall' | 'medium' | 'extraLarge' | undefined;
-    StatValue: number;
-    StatValueSpacing?: SpacingTypes | undefined;
-    StatValueDescription: string | undefined;
-    StatValueIcon?: React.ReactNode;
+    suffix?: string;
+    statValue: number;
+    subValue?: number;
 }
 
 function PercentageStats(props: PercentageStatsProps) {
     const {
         className,
+        icon,
         heading,
         headingSize = 'large',
         headerDescription,
-        StatValue,
-        StatValueSpacing,
-        StatValueDescription,
-        StatValueIcon,
+        statValue,
+        subValue,
+        suffix,
     } = props;
 
     return (
@@ -39,13 +36,25 @@ function PercentageStats(props: PercentageStatsProps) {
             headingSize={headingSize}
             headerDescription={headerDescription}
         >
-            <CompactInformationCard
-                className={styles.statCard}
-                icon={StatValueIcon}
-                label={StatValueDescription}
-                spacing={StatValueSpacing}
-                value={StatValue}
-            />
+            <div className={styles.valueDescription}>
+                <div className={styles.iconContainer}>
+                    {icon}
+                </div>
+                <div className={styles.valueAndSubValue}>
+                    <NumberOutput
+                        className={styles.valueText}
+                        value={statValue}
+                        suffix={suffix === 'percentage' ? '%' : ''}
+                    />
+                    {subValue && (
+                        <NumberOutput
+                            className={styles.subValueText}
+                            value={subValue}
+                            suffix={suffix === 'percentage' ? '%' : ''}
+                        />
+                    )}
+                </div>
+            </div>
         </ContainerCard>
     );
 }

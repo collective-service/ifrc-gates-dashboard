@@ -51,6 +51,7 @@
                 .percentage-card {
                     flex-basis: 40%;
                     flex-grow: 1;
+                    gap: var(--dui-spacing-mega-large);
                 }
 
                 .indicators-chart {

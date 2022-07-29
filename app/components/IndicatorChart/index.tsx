@@ -32,8 +32,7 @@ function IndicatorChart(props: IndicatorChartProps) {
         heading,
         headerDescription,
         headingSize = 'extraSmall',
-        chartData
-        ,
+        chartData,
     } = props;
     return (
         <ContainerCard
