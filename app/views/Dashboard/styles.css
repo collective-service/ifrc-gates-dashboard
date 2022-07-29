@@ -1,6 +1,7 @@
 .dashboard-navigation {
     display: flex;
     flex-direction: column;
+    flex-grow: 1;
     background-color: var(--color-foreground);
     padding: 0 var(--dui-spacing-ultra-large);
     gap: var(--dui-spacing-medium);
@@ -13,13 +14,8 @@
         gap: var(--dui-spacing-medium);
     }
 
-    .filter-and-export {
-        display: flex;
-        gap: var(--dui-spacing-small);
-
-        .button {
-            border-radius: var(--dui-border-radius-button);
-        }
+    .button {
+        border-radius: var(--dui-border-radius-button);
     }
 
     .dashboard-tablist {
@@ -32,5 +28,9 @@
 
     .tab-name {
         padding: var(--dui-spacing-small) var(--dui-spacing-large);
+    }
+
+    .content {
+        position: relative;
     }
 }

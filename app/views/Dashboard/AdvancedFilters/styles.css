@@ -1,0 +1,8 @@
+.advanced-filters {
+    display: flex;
+    align-items: flex-end;
+    border: var(--width-separator-thin) solid var(--color-separator-light);
+    border-radius: var(--border-radius-button);
+    padding: var(--dui-spacing-medium);
+    gap: var(--dui-spacing-large);
+}

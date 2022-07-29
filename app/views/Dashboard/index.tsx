@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Tabs,
     TabList,
@@ -7,19 +7,18 @@ import {
     Button,
 } from '@the-deep/deep-ui';
 import {
-    IoFilterSharp,
     IoCloudDownloadOutline,
 } from 'react-icons/io5';
 
 import Overview from './Overview';
 import Country from './Country';
+import Filters from './Filters';
 import styles from './styles.css';
 
+export type TabTypes = 'country' | 'overview' | 'combinedIndicators';
+
 function Dashboard() {
-    const handleAdvancedFilters = () => {
-        // eslint-disable-next-line no-console
-        console.log('Handled main filter::>>');
-    };
+    const [activeTab, setActiveTab] = useState<TabTypes | undefined>('country');
 
     const handleExport = () => {
         // eslint-disable-next-line no-console
@@ -29,32 +28,20 @@ function Dashboard() {
     return (
         <div className={styles.dashboardNavigation}>
             <Tabs
-                useHash
-                defaultHash="overview"
+                value={activeTab}
+                onChange={setActiveTab}
                 variant="secondary"
             >
                 <div className={styles.dashboardButtons}>
-                    <div className={styles.filterAndExport}>
-                        <Button
-                            className={styles.button}
-                            icons={<IoFilterSharp />}
-                            name={undefined}
-                            variant="tertiary"
-                            onClick={handleAdvancedFilters}
-                        >
-                            Filter
-                        </Button>
-
-                        <Button
-                            className={styles.button}
-                            icons={<IoCloudDownloadOutline />}
-                            name={undefined}
-                            variant="tertiary"
-                            onClick={handleExport}
-                        >
-                            Export
-                        </Button>
-                    </div>
+                    <Button
+                        className={styles.button}
+                        icons={<IoCloudDownloadOutline />}
+                        name={undefined}
+                        variant="tertiary"
+                        onClick={handleExport}
+                    >
+                        Export
+                    </Button>
                     <TabList className={styles.dashboardTablist}>
                         <Tab
                             className={styles.tabName}
@@ -68,18 +55,36 @@ function Dashboard() {
                         >
                             Country
                         </Tab>
+                        <Tab
+                            className={styles.tabName}
+                            name="combinedIndicators"
+                        >
+                            Combined Indicators
+                        </Tab>
                     </TabList>
                 </div>
-                <TabPanel
-                    name="overview"
-                >
-                    <Overview />
-                </TabPanel>
-                <TabPanel
-                    name="country"
-                >
-                    <Country />
-                </TabPanel>
+                <div>
+                    <Filters
+                        activeTab={activeTab}
+                    />
+                </div>
+                <div className={styles.content}>
+                    <TabPanel
+                        name="overview"
+                    >
+                        <Overview />
+                    </TabPanel>
+                    <TabPanel
+                        name="country"
+                    >
+                        <Country />
+                    </TabPanel>
+                    <TabPanel
+                        name="combinedIndicators"
+                    >
+                        <Country />
+                    </TabPanel>
+                </div>
             </Tabs>
         </div>
     );
