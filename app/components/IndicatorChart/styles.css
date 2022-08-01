@@ -6,6 +6,7 @@
 
     .responsive-container {
         min-height: 15rem;
+
         .responsive-content {
             overflow: hidden;
         }

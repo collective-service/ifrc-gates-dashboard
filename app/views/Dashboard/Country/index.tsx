@@ -23,10 +23,11 @@ import {
     MapSource,
     MapLayer,
 } from '@togglecorp/re-map'; */
-import StatusCard, { StatusCardProps } from '#components/StatusCard';
+import StatusCard, { Props as StatusCardProps } from '#components/StatusCard';
 
 import IndicatorChart from '#components/IndicatorChart';
 import PercentageStats from '#components/PercentageStats';
+import CustomLabel from '#components/CustomLabel';
 
 import styles from './styles.css';
 
@@ -44,15 +45,6 @@ const countryLinePaint: mapboxgl.LinePaint = {
 */
 
 const keySelector = (d: StatusCardProps) => d.statusId;
-
-interface CustomizedLabel {
-    cx: number;
-    cy: number;
-    midAngle: number;
-    innerRadius: number;
-    outerRadius: number;
-    percent: number;
-}
 
 const indicatorData = [
     {
@@ -231,32 +223,6 @@ const genderDisaggregationData = [
 
 const COLORS = ['#D7DF23', '#616161', '#00ACC1'];
 
-const RADIAN = Math.PI / 180;
-const renderCustomizedLabel = ({
-    cx,
-    cy,
-    midAngle,
-    innerRadius,
-    outerRadius,
-    percent,
-}: CustomizedLabel) => {
-    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
-    return (
-        <text
-            x={x}
-            y={y}
-            fill="white"
-            textAnchor={x > cx ? 'start' : 'end'}
-            dominantBaseline="central"
-        >
-            {`${(percent * 100).toFixed(0)}%`}
-        </text>
-    );
-};
-
 function Country(props: CountryProps) {
     const {
         className,
@@ -340,7 +306,7 @@ function Country(props: CountryProps) {
                             headingSize="extraSmall"
                             statValue={56}
                             subValue={78}
-                            suffix="percentage"
+                            suffix="%"
                             icon={null}
                         />
                         <IndicatorChart
@@ -362,7 +328,7 @@ function Country(props: CountryProps) {
                                         data={genderDisaggregationData}
                                         dataKey="percentage"
                                         labelLine={false}
-                                        label={renderCustomizedLabel}
+                                        label={CustomLabel}
                                         cx={100}
                                         cy={100}
                                         outerRadius={70}
@@ -397,7 +363,7 @@ function Country(props: CountryProps) {
                                         data={genderDisaggregationData}
                                         dataKey="percentage"
                                         labelLine={false}
-                                        label={renderCustomizedLabel}
+                                        label={CustomLabel}
                                         cx={100}
                                         cy={100}
                                         outerRadius={70}

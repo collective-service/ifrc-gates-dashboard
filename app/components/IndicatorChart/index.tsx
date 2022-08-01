@@ -1,5 +1,8 @@
 import React from 'react';
-import { ContainerCard } from '@the-deep/deep-ui';
+import {
+    ContainerCard,
+    ContainerCardProps,
+} from '@the-deep/deep-ui';
 import { _cs } from '@togglecorp/fujs';
 import {
     Line,
@@ -13,17 +16,18 @@ import {
 
 import styles from './styles.css';
 
-type indicatorOverviewType = ({
+type IndicatorOverviewType = {
     id: number;
     month: string;
     percentage: number;
-})[]
+};
+type headingSizeType = ContainerCardProps['headingSize']
 interface IndicatorChartProps {
     className?: string;
     heading?: React.ReactNode;
     headerDescription?: React.ReactNode;
-    headingSize?: 'large' | 'small' | 'extraSmall' | 'medium' | 'extraLarge' | undefined;
-    chartData: indicatorOverviewType;
+    headingSize?: headingSizeType;
+    chartData: IndicatorOverviewType[];
 }
 
 function IndicatorChart(props: IndicatorChartProps) {
