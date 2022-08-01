@@ -1,5 +1,3 @@
---line-chart-reponsive-width: 20rem;
-
 .country-wrapper {
     display: flex;
     flex-direction: column;
@@ -32,8 +30,51 @@
                 border-radius: var(--dui-border-radius-card);
 
                 .responsive-content {
-                    min-height: 32rem;
+                    min-height: 20rem;
+
+                    .responsive-container {
+                        overflow: hidden;
+                    }
                 }
+            }
+
+            .indicator-wrapper {
+                display: flex;
+                flex-wrap: wrap;
+                gap: var(--dui-spacing-small);
+
+                .indicators-card {
+                    border: var(--width-separator-thin) solid var(--color-separator-light);
+                    border-radius: var(--dui-border-radius-card);
+                }
+
+                .percentage-card {
+                    flex-basis: 40%;
+                    flex-grow: 1;
+                    gap: var(--dui-spacing-mega-large);
+                }
+
+                .indicators-chart {
+                    flex-basis: calc(60% - var(--dui-spacing-small));
+                }
+
+                .gender-disaggregation {
+                    flex-basis: 40%;
+                    flex-grow: 1;
+                }
+
+                .age-disaggregation {
+                    flex-basis: calc(60% - var(--dui-spacing-small));
+                }
+
+                .responsive-content {
+                    min-height: 15rem;
+
+                    .responsive-container {
+                        overflow: hidden;
+                    }
+                }
+
             }
         }
 
@@ -41,17 +82,17 @@
             border: var(--width-separator-thin) solid var(--color-separator-light);
             border-radius: var(--dui-border-radius-card);
             background-color: var(--dui-color-foreground);
-            min-width: var(--line-chart-reponsive-width);
-
-            .country-header {
-                align-items: center;
-            }
+            min-width: var(--dui-width-min-modal);
 
             .country-avatar {
                 img {
                     border: var(--width-separator-thin) solid var(--color-separator-light);
                     border-radius: var(--dui-border-radius-avatar);
                 }
+            }
+
+            .country-header {
+                align-items: center;
             }
 
             .country-map {
@@ -88,6 +129,7 @@
             }
         }
     }
+
 
     .perception-wrapper {
         display: flex;

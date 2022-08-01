@@ -4,7 +4,34 @@
     border: var(--width-separator-thin) solid var(--color-separator-light);
     border-radius: var(--dui-border-radius-card);
 
-    .stat-card {
-        color: green;
+    .value-description {
+        gap: var(--spacing);
+        display: flex;
+        align-items: center;
+
+        .icon-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-text-regional);
+            font-size: var(--dui-font-size-super-large);
+        }
+
+        .value-and-sub-value {
+            display: flex;
+            flex-direction: column;
+
+            .value-text {
+                color: var(--color-text-regional);
+                font-size: var(--dui-font-size-mega-large);
+                font-weight: var(--dui-font-weight-bold);
+            }
+
+            .sub-value-text {
+                padding: var(--dui-spacing-extra-small);
+                font-size: var(--dui-font-size-medium);
+                font-weight: var(--dui-font-weight-medium);
+            }
+        }
     }
 }

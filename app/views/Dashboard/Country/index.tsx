@@ -3,6 +3,9 @@ import { _cs } from '@togglecorp/fujs';
 import {
     LineChart,
     Line,
+    PieChart,
+    Pie,
+    Cell,
     XAxis,
     YAxis,
     Tooltip,
@@ -20,7 +23,11 @@ import {
     MapSource,
     MapLayer,
 } from '@togglecorp/re-map'; */
-import StatusCard, { statusCardProps } from '#base/components/StatusCard';
+import StatusCard, { Props as StatusCardProps } from '#components/StatusCard';
+
+import IndicatorChart from '#components/IndicatorChart';
+import PercentageStats from '#components/PercentageStats';
+import CustomLabel from '#components/CustomLabel';
 
 import styles from './styles.css';
 
@@ -37,7 +44,70 @@ const countryLinePaint: mapboxgl.LinePaint = {
 };
 */
 
-const keySelector = (d: statusCardProps) => d.statusId;
+const keySelector = (d: StatusCardProps) => d.statusId;
+
+const indicatorData = [
+    {
+        id: 1,
+        month: 'Jan',
+        percentage: 10,
+    },
+    {
+        id: 2,
+        month: 'Feb',
+        percentage: 15,
+    },
+    {
+        id: 3,
+        month: 'Mar',
+        percentage: 20,
+    },
+    {
+        id: 4,
+        month: 'Apr',
+        percentage: 25,
+    },
+    {
+        id: 5,
+        month: 'May',
+        percentage: 35,
+    },
+    {
+        id: 6,
+        month: 'Jun',
+        percentage: 15,
+    },
+    {
+        id: 7,
+        month: 'Jul',
+        percentage: 25,
+    },
+    {
+        id: 8,
+        month: 'Aug',
+        percentage: 55,
+    },
+    {
+        id: 9,
+        month: 'Sept',
+        percentage: 50,
+    },
+    {
+        id: 10,
+        month: 'Oct',
+        percentage: 45,
+    },
+    {
+        id: 11,
+        month: 'Nov',
+        percentage: 65,
+    },
+    {
+        id: 12,
+        month: 'Dec',
+        percentage: 5,
+    },
+];
 
 const outbreakData = [
     {
@@ -103,7 +173,7 @@ const outbreakData = [
 
 ];
 
-const statusData: statusCardProps[] = [
+const statusData: StatusCardProps[] = [
     {
         statusId: 1,
         title: 'Total number of deaths',
@@ -133,13 +203,32 @@ const statusData: statusCardProps[] = [
 interface CountryProps {
     className?: string;
 }
+const genderDisaggregationData = [
+    {
+        id: 1,
+        gender: 'Male',
+        percentage: 40,
+    },
+    {
+        id: 2,
+        gender: 'Female',
+        percentage: 40,
+    },
+    {
+        id: 3,
+        gender: 'other',
+        percentage: 20,
+    },
+];
+
+const COLORS = ['#D7DF23', '#616161', '#00ACC1'];
 
 function Country(props: CountryProps) {
     const {
         className,
     } = props;
 
-    const rendererParams = useCallback((_, data: statusCardProps) => ({
+    const rendererParams = useCallback((_, data: StatusCardProps) => ({
         statusId: data.statusId,
         title: data.title,
         value: data.value,
@@ -170,7 +259,7 @@ function Country(props: CountryProps) {
                         headingSize="extraSmall"
                         contentClassName={styles.responsiveContent}
                     >
-                        <ResponsiveContainer>
+                        <ResponsiveContainer className={styles.responsiveContainer}>
                             <LineChart
                                 data={outbreakData}
                             >
@@ -209,6 +298,93 @@ function Country(props: CountryProps) {
                             </LineChart>
                         </ResponsiveContainer>
                     </ContainerCard>
+                    <div className={styles.indicatorWrapper}>
+                        <PercentageStats
+                            className={styles.percentageCard}
+                            heading="Percentage of unvaccinated individuals who have tried to get vaccinated"
+                            headerDescription="Lorem ipsum explaining the topic"
+                            headingSize="extraSmall"
+                            statValue={56}
+                            subValue={78}
+                            suffix="%"
+                            icon={null}
+                        />
+                        <IndicatorChart
+                            className={_cs(styles.indicatorsCard, styles.indicatorsChart)}
+                            heading="Indicator overview over the last 12 months"
+                            headerDescription="Lorem ipsum"
+                            chartData={indicatorData}
+                        />
+                        <ContainerCard
+                            className={_cs(styles.indicatorsCard, styles.genderDisaggregation)}
+                            contentClassName={styles.responsiveContent}
+                            heading="Percentage of unvaccinated individuals who have tried to get vaccinated"
+                            headerDescription="Lorem ipsum explaining the topic"
+                            headingSize="extraSmall"
+                        >
+                            <ResponsiveContainer className={styles.responsiveContainer}>
+                                <PieChart>
+                                    <Pie
+                                        data={genderDisaggregationData}
+                                        dataKey="percentage"
+                                        labelLine={false}
+                                        label={CustomLabel}
+                                        cx={100}
+                                        cy={100}
+                                        outerRadius={70}
+                                    >
+                                        {genderDisaggregationData.map((entry) => (
+                                            <Cell
+                                                key={`Cell -${entry.id}`}
+                                                fill={COLORS[entry.id % COLORS.length]}
+                                            />
+                                        ))}
+                                    </Pie>
+                                    <Legend
+                                        name="gender"
+                                        verticalAlign="middle"
+                                        align="right"
+                                        layout="vertical"
+                                        iconType="circle"
+                                    />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </ContainerCard>
+                        <ContainerCard
+                            className={_cs(styles.indicatorsCard, styles.ageDisaggregation)}
+                            contentClassName={styles.responsiveContent}
+                            heading="Age disaggregation"
+                            headerDescription="Lorem ipsum explaining the topic"
+                            headingSize="extraSmall"
+                        >
+                            <ResponsiveContainer className={styles.responsiveContainer}>
+                                <PieChart>
+                                    <Pie
+                                        data={genderDisaggregationData}
+                                        dataKey="percentage"
+                                        labelLine={false}
+                                        label={CustomLabel}
+                                        cx={100}
+                                        cy={100}
+                                        outerRadius={70}
+                                    >
+                                        {genderDisaggregationData.map((entry) => (
+                                            <Cell
+                                                key={`Cell -${entry.id}`}
+                                                fill={COLORS[entry.id % COLORS.length]}
+                                            />
+                                        ))}
+                                    </Pie>
+                                    <Legend
+                                        name="gender"
+                                        verticalAlign="middle"
+                                        align="right"
+                                        layout="vertical"
+                                    />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </ContainerCard>
+                    </div>
                 </div>
                 <ContainerCard
                     className={styles.countryInfo}

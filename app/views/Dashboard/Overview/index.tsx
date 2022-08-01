@@ -145,15 +145,9 @@ function Overview(props: OverviewProps) {
                     className={styles.globalStatCard}
                     heading="Total number of cases"
                     headingSize="extraSmall"
-                    headerDescription={(
-                        <p>
-                            All Outbreak numbers:
-                        </p>
-                    )}
-                    StatValue={160}
-                    StatValueSpacing="loose"
-                    StatValueDescription="Approx.value"
-                    StatValueIcon={<IoBookmark />}
+                    headerDescription="All Outbreak numbers:"
+                    statValue={160}
+                    icon={<IoBookmark />}
                 />
                 <ContainerCard
                     className={_cs(styles.trendsCard, styles.cardInfo)}
