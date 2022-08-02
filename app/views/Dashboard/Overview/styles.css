@@ -1,45 +1,12 @@
 .overview-main {
     display: flex;
     flex-direction: column;
-    gap: var(--dui-spacing-small);
+    gap: var(--dui-spacing-large);
     padding-bottom: var(--dui-spacing-medium);
-
-    .card-collection {
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--dui-spacing-small);
-
-        .card-info {
-            display: flex;
-            flex-shrink: 0;
-            border: var(--width-separator-thin) solid var(--color-separator-light);
-            border-radius: var(--dui-border-radius-card);
-        }
-
-        .global-stat-card {
-            flex-basis: 20%;
-        }
-
-        .trends-card {
-            flex-basis: calc(45% - var(--dui-spacing-small));
-        }
-
-        .regions-card {
-            flex-basis: calc(35% - var(--dui-spacing-small));
-        }
-    }
-
-    .responsive-content {
-        min-height: 12rem;
-
-        .responsive-container {
-            overflow: hidden;
-        }
-    }
 
     .map-container {
         flex-grow: 1;
-        border: var(--width-separator-thin) solid var(--color-separator-light);
+        border: var(--width-separator-medium) solid var(--color-separator-light);
         border-radius: var(--dui-border-radius-card);
         padding: var(--dui-spacing-ultra-small);
     }

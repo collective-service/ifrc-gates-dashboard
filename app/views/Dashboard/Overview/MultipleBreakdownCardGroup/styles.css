@@ -1,0 +1,26 @@
+.card-info {
+    display: flex;
+    gap: var(--dui-spacing-mega-large);
+
+    .global-stat-card {
+        flex-grow: 1;
+        border: var(--width-separator-medium) solid var(--color-separator-light);
+        border-radius: var(--dui-border-radius-card);
+    }
+
+
+    .regions-pie-chart {
+        flex-basis: 55%;
+        flex-shrink: 0;
+        border: var(--width-separator-medium) solid var(--color-separator-light);
+        border-radius: var(--dui-border-radius-card);
+    }
+
+    .responsive-content {
+        min-height: 12rem;
+
+        .responsive-container {
+            overflow: hidden;
+        }
+    }
+}
