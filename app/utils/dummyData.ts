@@ -1,4 +1,5 @@
 import { Props as StatusCardProps } from '#components/StatusCard';
+import { ProgressBarRendererProps } from '#views/Dashboard/CombinedIndicators';
 
 type Bounds = [number, number, number, number];
 
@@ -262,77 +263,68 @@ export const genderDisaggregationData = [
     },
 ];
 
-export const sourcesProgressBarData = [
+export const sourcesProgressBarData: ProgressBarRendererProps[] = [
     {
         source: 'Demand all',
         id: '1',
-        title: 'communication',
-        color: 'var(--color-text-regional)',
-        value: 56,
         totalValue: 100,
+        country: 76,
+        regional: 16,
     },
     {
-        source: 'officials',
+        source: 'Officials',
         id: '2',
-        title: 'communication',
-        color: 'var(--color-text-regional)',
-        value: 56,
         totalValue: 100,
+        country: 56,
+        regional: 76,
     },
     {
         source: 'WHO',
         id: '3',
-        title: 'communication',
-        color: 'var(--color-text-regional)',
-        value: 56,
         totalValue: 100,
+        country: 56,
+        regional: 26,
     },
     {
         source: 'Demand Evolution',
         id: '4',
-        title: 'communication',
-        color: 'var(--color-text-regional)',
-        value: 56,
         totalValue: 100,
+        country: 56,
+        regional: 26,
     },
     {
         source: 'Newspapers',
         id: '5',
-        title: 'communication',
-        color: 'var(--color-text-regional)',
-        value: 56,
         totalValue: 100,
+        country: 56,
+        regional: 26,
     },
     {
-        source: 'officials',
+        source: 'Officials',
         id: '6',
-        title: 'communication',
-        color: 'var(--color-text-regional)',
-        value: 56,
         totalValue: 100,
+        country: 56,
+        regional: 26,
     },
     {
         source: 'Demand prevention',
         id: '7',
-        title: 'communication',
-        color: 'var(--color-text-regional)',
-        value: 56,
         totalValue: 100,
+        country: 56,
+        regional: 26,
     },
     {
         source: 'Radio',
         id: '8',
-        title: 'communication',
-        color: 'var(--color-text-regional)',
-        value: 56,
         totalValue: 100,
+        country: 56,
+        regional: 26,
     },
     {
         source: 'Social media',
         id: '9',
-        title: 'communication',
-        color: 'var(--color-text-regional)',
-        value: 56,
         totalValue: 100,
+        country: 56,
+        regional: 26,
     },
 ];
