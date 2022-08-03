@@ -4,12 +4,12 @@ import { NumberOutput } from '@the-deep/deep-ui';
 
 import styles from './styles.css';
 
-export interface ProgressBarProps {
+export interface Props {
     className?: string | undefined;
     barHeight: number;
     suffix?: string;
     progressInfoData: {
-        source: string;
+        title: string;
         id: string;
         country: number;
         regional: number;
@@ -17,7 +17,7 @@ export interface ProgressBarProps {
     };
 }
 
-function MultiDataProgressBar(props: ProgressBarProps) {
+function MultiDataProgressBar(props: Props) {
     const {
         className,
         barHeight,
@@ -25,54 +25,49 @@ function MultiDataProgressBar(props: ProgressBarProps) {
         suffix,
     } = props;
 
-    const avgResult = useMemo(
+    const countryPercentage = useMemo(
         () => (
-            {
-                countryPercentage: (
-                    (progressInfoData.country / progressInfoData.totalValue) * 100).toFixed(0),
-                regionalPercentage: (
-                    (progressInfoData.regional / progressInfoData.totalValue) * 100).toFixed(0),
-            }
+            ((progressInfoData.country / progressInfoData.totalValue) * 100).toFixed(0)
         ), [progressInfoData],
     );
 
-    const tooltip = useMemo(
-        () => ((progressInfoData?.country
-            && progressInfoData?.regional
-            && progressInfoData?.totalValue
-        )
-            && ((`Country: ${progressInfoData.country ?? '0'},Regional: ${progressInfoData.regional ?? '0'}
-            `) ?? undefined)
-        ),
-        [
-            progressInfoData,
-        ],
+    const regionalPercentage = useMemo(
+        () => (
+            ((progressInfoData.regional / progressInfoData.totalValue) * 100).toFixed(0)
+        ), [progressInfoData],
     );
+
+    const barTooltip = (progressInfoData?.country
+        && progressInfoData?.regional
+        && progressInfoData?.totalValue)
+        ? (`Country: ${progressInfoData.country ?? '0'}, Regional: ${progressInfoData.regional ?? '0'}`
+        ) : '';
+
     return (
         <div className={_cs(className, styles.progressInfo)}>
             <div className={styles.progressTitle}>
-                {progressInfoData.source}
+                {progressInfoData.title}
                 <div className={styles.progressValue}>
                     <NumberOutput
-                        value={Number(avgResult?.countryPercentage)}
+                        value={Number(countryPercentage)}
                         suffix={suffix}
                     />
                     <div className={styles.regionalText}>
-                        {`[regional- ${avgResult.regionalPercentage}${suffix}]`}
+                        {`[regional- ${regionalPercentage}${suffix}]`}
                     </div>
                 </div>
             </div>
             <div
                 className={_cs(styles.progressBarWrapper, className)}
                 style={{ height: `${barHeight}px` }}
-                title={tooltip as string}
+                title={barTooltip}
             >
                 <div className={styles.progressBarValue}>
                     <div
                         className={styles.progressBarStyle}
                         key={progressInfoData.id}
                         style={{
-                            width: `${avgResult.countryPercentage}%`,
+                            width: `${countryPercentage}%`,
                             backgroundColor: 'var(--color-progress-bar)',
                         }}
                     />
@@ -82,7 +77,7 @@ function MultiDataProgressBar(props: ProgressBarProps) {
                         className={styles.progressBarStyle}
                         key={progressInfoData.id}
                         style={{
-                            width: `${avgResult.regionalPercentage}%`,
+                            width: `${regionalPercentage}%`,
                             backgroundColor: 'var(--color-text-regional)',
                         }}
                     />

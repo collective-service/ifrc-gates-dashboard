@@ -1,6 +1,9 @@
 import { _cs } from '@togglecorp/fujs';
 import React, { useCallback } from 'react';
-import { ContainerCard, List } from '@the-deep/deep-ui';
+import {
+    ContainerCard,
+    List,
+} from '@the-deep/deep-ui';
 import MultiDataProgressBar from '#components/MultiDataProgressBar';
 import { sourcesProgressBarData } from '#utils/dummyData';
 
@@ -10,17 +13,17 @@ const progressBarKeySelector = (d: ProgressBarRendererProps) => d.id;
 
 const barHeight = 15;
 export interface ProgressBarRendererProps {
-    source: string;
+    title: string;
     id: string;
     country: number;
     regional: number;
     totalValue: number;
 }
-interface CombinedIndicatorsProps {
+interface Props {
     className?: string;
 }
 
-function CombinedIndicators(props: CombinedIndicatorsProps) {
+function CombinedIndicators(props: Props) {
     const { className } = props;
 
     const progressBarRendererParams = useCallback(

@@ -26,14 +26,14 @@
         gap: var(--dui-spacing-super-small);
 
         .progress-bar-value {
-            border-radius: 20px;
+            border-radius: var(--dui-border-radius-progress-bar);
             background-color: var(--dui-color-background-progress-bar-light);
             width: 100%;
             height: 50%;
 
             .progress-bar-style {
                 align-items: center;
-                border-radius: 20px;
+                border-radius: var(--dui-border-radius-progress-bar);
                 height: 100%;
             }
         }

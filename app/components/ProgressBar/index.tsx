@@ -3,7 +3,7 @@ import { _cs } from '@togglecorp/fujs';
 
 import styles from './styles.css';
 
-export interface ProgressBarProps {
+export interface Props {
     className?: string | undefined;
     barHeight: number;
     progressData: {
@@ -16,7 +16,7 @@ export interface ProgressBarProps {
     };
 }
 
-function ProgressBar(props: ProgressBarProps) {
+function ProgressBar(props: Props) {
     const {
         className,
         barHeight,
