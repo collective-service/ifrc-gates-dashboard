@@ -1,15 +1,35 @@
 import { _cs } from '@togglecorp/fujs';
-import React from 'react';
-import { ContainerCard } from '@the-deep/deep-ui';
+import React, { useCallback } from 'react';
+import { ContainerCard, List } from '@the-deep/deep-ui';
+import MultiDataProgressBar from '#components/MultiDataProgressBar';
+import { sourcesProgressBarData } from '#utils/dummyData';
 
 import styles from './styles.css';
 
+const progressBarKeySelector = (d: ProgressBarRendererProps) => d.id;
+
+const barHeight = 15;
+export interface ProgressBarRendererProps {
+    source: string;
+    id: string;
+    country: number;
+    regional: number;
+    totalValue: number;
+}
 interface CombinedIndicatorsProps {
     className?: string;
 }
 
 function CombinedIndicators(props: CombinedIndicatorsProps) {
     const { className } = props;
+
+    const progressBarRendererParams = useCallback(
+        (_: string, data: ProgressBarRendererProps) => ({
+            barHeight,
+            suffix: '%',
+            progressInfoData: data,
+        }), [],
+    );
 
     return (
         <div className={_cs(className, styles.combinedIndicatorWrapper)}>
@@ -25,24 +45,42 @@ function CombinedIndicators(props: CombinedIndicatorsProps) {
                     heading="Information Sources"
                     headingSize="extraSmall"
                     headerDescription="Lorem ipsum explaining the topic"
+                    contentClassName={styles.progressBar}
                 >
-                    Information Sources
+                    <List
+                        data={sourcesProgressBarData}
+                        keySelector={progressBarKeySelector}
+                        rendererParams={progressBarRendererParams}
+                        renderer={MultiDataProgressBar}
+                    />
                 </ContainerCard>
                 <ContainerCard
                     className={styles.progressBarCard}
                     heading="Trusted Channel"
                     headingSize="extraSmall"
                     headerDescription="Lorem ipsum explaining the topic"
+                    contentClassName={styles.progressBar}
                 >
-                    CombinedIndicators
+                    <List
+                        data={sourcesProgressBarData}
+                        keySelector={progressBarKeySelector}
+                        rendererParams={progressBarRendererParams}
+                        renderer={MultiDataProgressBar}
+                    />
                 </ContainerCard>
                 <ContainerCard
                     className={styles.progressBarCard}
                     heading="Demands"
                     headingSize="extraSmall"
                     headerDescription="Lorem ipsum explaining the topic"
+                    contentClassName={styles.progressBar}
                 >
-                    CombinedIndicators
+                    <List
+                        data={sourcesProgressBarData}
+                        keySelector={progressBarKeySelector}
+                        rendererParams={progressBarRendererParams}
+                        renderer={MultiDataProgressBar}
+                    />
                 </ContainerCard>
             </ContainerCard>
             <ContainerCard
