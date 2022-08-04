@@ -1,6 +1,7 @@
 .card-info {
     display: flex;
     gap: var(--dui-spacing-mega-large);
+    overflow: auto;
 
     .global-stat-card {
         flex-grow: 1;
@@ -14,12 +15,18 @@
         flex-shrink: 0;
         border: var(--width-separator-medium) solid var(--color-separator-light);
         border-radius: var(--dui-border-radius-card);
+
+        .pie-chart-collection {
+            display: flex;
+            flex-wrap: wrap;
+        }
     }
 
     .responsive-content {
-        min-height: 12rem;
+        overflow: auto;
 
         .responsive-container {
+            min-height: 10rem !important;
             overflow: hidden;
         }
     }

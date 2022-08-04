@@ -349,52 +349,207 @@ export const barChartData = [
 
 export const totalCasesBarChart = [
     {
+        id: 1,
         name: 'COVID-19',
         range: '500M',
-        pv: 2400,
+        pv: 2100,
         amt: 2010,
+        color: 'red',
     },
     {
+        id: 23,
         name: 'Ebola',
         range: '300M',
         pv: 1398,
         amt: 1200,
+        color: 'blue',
     },
     {
+        id: 34,
         name: 'MonkeyPox',
         range: '400M',
         pv: 9800,
         amt: 1900,
+        color: 'green',
     },
     {
+        id: 56,
         name: 'Cholera',
         range: '200M',
         pv: 3908,
         amt: 1100,
+        color: 'purple',
     },
     {
+        id: 78,
         name: 'Spanish Flu',
         range: '300M',
         pv: 4800,
         amt: 1181,
+        color: 'yellow',
     },
 ];
 
 export const regionalBreakdownPieData = [
     {
-        id: 1,
-        gender: 'USA',
-        percentage: 40,
+        id: '1',
+        country: 'USA',
+        color: 'var(--color-success)',
+        regionalData: [
+            {
+                id: 21,
+                status: 'Severe',
+                percentage: 40,
+            },
+            {
+                id: 24,
+                status: 'Normal',
+                percentage: 30,
+            },
+            {
+                id: 34,
+                status: 'Average',
+                percentage: 20,
+            },
+            {
+                id: 45,
+                status: 'Good',
+                percentage: 30,
+            },
+            {
+                id: 12,
+                status: 'severe',
+                percentage: 20,
+            },
+        ],
     },
     {
-        id: 2,
-        gender: 'EUR',
-        percentage: 40,
+        id: '2',
+        country: 'EUR',
+        color: 'var(--color-accent)',
+        regionalData: [
+            {
+                id: 21,
+                status: 'Severe',
+                percentage: 40,
+            },
+            {
+                id: 24,
+                status: 'Normal',
+                percentage: 30,
+            },
+            {
+                id: 34,
+                status: 'Average',
+                percentage: 20,
+            },
+            {
+                id: 45,
+                status: 'Good',
+                percentage: 30,
+            },
+            {
+                id: 12,
+                status: 'severe',
+                percentage: 20,
+            },
+        ],
     },
     {
-        id: 3,
-        gender: 'other',
-        percentage: 20,
+        id: '3',
+        country: 'ASIA',
+        color: 'var(--color-warning)',
+        regionalData: [
+            {
+                id: 21,
+                status: 'Severe',
+                percentage: 40,
+            },
+            {
+                id: 24,
+                status: 'Normal',
+                percentage: 30,
+            },
+            {
+                id: 34,
+                status: 'Average',
+                percentage: 20,
+            },
+            {
+                id: 45,
+                status: 'Good',
+                percentage: 30,
+            },
+            {
+                id: 12,
+                status: 'severe',
+                percentage: 20,
+            },
+        ],
+    },
+    {
+        id: '4',
+        country: 'IRE',
+        color: 'var(--color-danger)',
+        regionalData: [
+            {
+                id: 21,
+                status: 'Severe',
+                percentage: 40,
+            },
+            {
+                id: 24,
+                status: 'Normal',
+                percentage: 30,
+            },
+            {
+                id: 34,
+                status: 'Average',
+                percentage: 20,
+            },
+            {
+                id: 45,
+                status: 'Good',
+                percentage: 30,
+            },
+            {
+                id: 12,
+                status: 'severe',
+                percentage: 20,
+            },
+        ],
+    },
+    {
+        id: '5',
+        country: 'POL',
+        color: 'var(--color-success)',
+        regionalData: [
+            {
+                id: 21,
+                status: 'Severe',
+                percentage: 40,
+            },
+            {
+                id: 24,
+                status: 'Normal',
+                percentage: 30,
+            },
+            {
+                id: 34,
+                status: 'Average',
+                percentage: 20,
+            },
+            {
+                id: 45,
+                status: 'Good',
+                percentage: 30,
+            },
+            {
+                id: 12,
+                status: 'severe',
+                percentage: 20,
+            },
+        ],
     },
 ];
 

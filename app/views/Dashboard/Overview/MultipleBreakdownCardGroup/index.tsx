@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
     BarChart,
     Bar,
@@ -12,6 +12,7 @@ import {
 } from 'recharts';
 import {
     ContainerCard,
+    List,
 } from '@the-deep/deep-ui';
 import { _cs } from '@togglecorp/fujs';
 
@@ -20,17 +21,45 @@ import {
     regionalBreakdownPieData,
 } from '#utils/dummyData';
 
+import PieChartInfo, { RegionalDataType } from './PieChartInfo';
 import styles from './styles.css';
 
-const COLORS = ['#4D6F8B', '#AED8F1', '#7FAEDA', '#D0EFF2', '#B5CFD1'];
-interface PercentageCardGroupProps {
+const COLORS = ['#4D6F8B', '#AED8F1', '#B5CFD1', '#7FAEDA', '#D0EFF2'];
+const pieChartInfoKeySelector = (d: PieChartInfoRendererProps) => d.id;
+export interface PieChartInfoRendererProps {
+    id: string;
+    country?: string;
+    color?: string;
+    regionalData?: RegionalDataType[];
+}
+interface BreakdownCardGroupProps {
     className?: string;
 }
 
-function MultipleBreakdownCardGroup(props: PercentageCardGroupProps) {
+function RegionalBreakdownLabel() {
+    return (
+        <div className={styles.breakdownLabelWrapper}>
+            <div className={styles.labelColor}>
+                ColorHere
+            </div>
+            <div className={styles.labelName}>
+                Label-Name-Here
+            </div>
+        </div>
+    );
+}
+
+function MultipleBreakdownCardGroup(props: BreakdownCardGroupProps) {
     const {
         className,
     } = props;
+
+    const pieChartInfoRendererParams = useCallback(
+        (_: string, data: PieChartInfoRendererProps) => ({
+            id: data.id,
+            regionalData: data?.regionalData,
+        }), [],
+    );
 
     return (
         <div className={_cs(className, styles.cardInfo)}>
@@ -47,15 +76,25 @@ function MultipleBreakdownCardGroup(props: PercentageCardGroupProps) {
                         barSize={45}
                     >
                         <Tooltip
+                            isAnimationActive={false}
                             allowEscapeViewBox={{
-                                x: true,
-                                y: true,
+                                x: false,
+                                y: false,
                             }}
                         />
                         <XAxis dataKey="name" tickLine={false} axisLine={false}>
-                            <LabelList dataKey="name" position="bottom" />
+                            <LabelList dataKey="name" position="bottom" fontSize="10" />
                         </XAxis>
-                        <Bar dataKey="amt" fill="#7FAEDA">
+                        <Bar
+                            dataKey="amt"
+                            isAnimationActive={false}
+                        >
+                            {totalCasesBarChart?.map((entry) => (
+                                <Cell
+                                    key={`Cell -${entry.id}`}
+                                    fill={COLORS[entry.id % COLORS.length]}
+                                />
+                            ))}
                             <LabelList dataKey="range" position="top" />
                         </Bar>
                     </BarChart>
@@ -68,25 +107,22 @@ function MultipleBreakdownCardGroup(props: PercentageCardGroupProps) {
                 headingSize="extraSmall"
                 headerDescription="Loreum Ipsum epsum sandiego"
             >
-                <ResponsiveContainer className={styles.responsiveContainer}>
-                    <PieChart>
-                        <Pie
-                            data={regionalBreakdownPieData}
-                            dataKey="percentage"
-                            labelLine={false}
-                            cx={100}
-                            cy={100}
-                            outerRadius={50}
-                        >
-                            {regionalBreakdownPieData.map((entry) => (
-                                <Cell
-                                    key={`Cell -${entry.id}`}
-                                    fill={COLORS[entry.id % COLORS.length]}
-                                />
-                            ))}
-                        </Pie>
-                    </PieChart>
-                </ResponsiveContainer>
+                <div className={styles.pieChartCollection}>
+                    <List
+                        keySelector={pieChartInfoKeySelector}
+                        data={regionalBreakdownPieData}
+                        renderer={PieChartInfo}
+                        rendererParams={pieChartInfoRendererParams}
+                    />
+                </div>
+                {/* <div className={styles.breakDownLabel}>
+                    <List
+                        keySelector={pieChartInfoKeySelector}
+                        data={null}
+                        renderer={RegionalBreakdownLabel}
+                        rendererParams={null}
+                    />
+                </div> */}
             </ContainerCard>
         </div>
     );
