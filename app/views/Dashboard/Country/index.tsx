@@ -17,209 +17,25 @@ import {
     TextOutput,
     ListView,
 } from '@the-deep/deep-ui';
-/* import Map, {
-    MapContainer,
-    MapBounds,
-    MapSource,
-    MapLayer,
-} from '@togglecorp/re-map'; */
 import StatusCard, { Props as StatusCardProps } from '#components/StatusCard';
 
 import IndicatorChart from '#components/IndicatorChart';
 import PercentageStats from '#components/PercentageStats';
 import CustomLabel from '#components/CustomLabel';
+import {
+    indicatorData,
+    outbreakData,
+    statusData,
+    genderDisaggregationData,
+} from '#utils/dummyData';
 
 import styles from './styles.css';
 
-/* const lightStyle = 'mapbox://styles/togglecorp/cl50rwy0a002d14mo6w9zprio';
-
-const countryFillPaint: mapboxgl.FillPaint = {
-    'fill-color': '#354052', // empty color
-    'fill-opacity': 0.2,
-};
-
-const countryLinePaint: mapboxgl.LinePaint = {
-    'line-color': '#ffffff',
-    'line-width': 1,
-};
-*/
-
 const keySelector = (d: StatusCardProps) => d.statusId;
-
-const indicatorData = [
-    {
-        id: 1,
-        month: 'Jan',
-        percentage: 10,
-    },
-    {
-        id: 2,
-        month: 'Feb',
-        percentage: 15,
-    },
-    {
-        id: 3,
-        month: 'Mar',
-        percentage: 20,
-    },
-    {
-        id: 4,
-        month: 'Apr',
-        percentage: 25,
-    },
-    {
-        id: 5,
-        month: 'May',
-        percentage: 35,
-    },
-    {
-        id: 6,
-        month: 'Jun',
-        percentage: 15,
-    },
-    {
-        id: 7,
-        month: 'Jul',
-        percentage: 25,
-    },
-    {
-        id: 8,
-        month: 'Aug',
-        percentage: 55,
-    },
-    {
-        id: 9,
-        month: 'Sept',
-        percentage: 50,
-    },
-    {
-        id: 10,
-        month: 'Oct',
-        percentage: 45,
-    },
-    {
-        id: 11,
-        month: 'Nov',
-        percentage: 65,
-    },
-    {
-        id: 12,
-        month: 'Dec',
-        percentage: 5,
-    },
-];
-
-const outbreakData = [
-    {
-        month: 'Jan',
-        covid: 20,
-        monkeyPox: 5,
-    },
-    {
-        month: 'Feb',
-        covid: 30,
-        monkeyPox: 15,
-    },
-    {
-        month: 'Mar',
-        covid: 35,
-        monkeyPox: 20,
-    },
-    {
-        month: 'Apr',
-        covid: 25,
-        monkeyPox: 25,
-    },
-    {
-        month: 'May',
-        covid: 40,
-        monkeyPox: 35,
-    },
-    {
-        month: 'Jun',
-        covid: 45,
-        monkeyPox: 15,
-    },
-    {
-        month: 'Jul',
-        covid: 55,
-        monkeyPox: 25,
-    },
-    {
-        month: 'Aug',
-        covid: 65,
-        monkeyPox: 55,
-    },
-    {
-        month: 'Sept',
-        covid: 70,
-        monkeyPox: 50,
-    },
-    {
-        month: 'Oct',
-        covid: 65,
-        monkeyPox: 45,
-    },
-    {
-        month: 'Nov',
-        covid: 80,
-        monkeyPox: 65,
-    },
-    {
-        month: 'Dec',
-        covid: 60,
-        monkeyPox: 5,
-    },
-
-];
-
-const statusData: StatusCardProps[] = [
-    {
-        statusId: 1,
-        title: 'Total number of deaths',
-        value: 189050,
-        regionalValue: 1,
-    },
-    {
-        statusId: 2,
-        title: 'Total outbreaks for country',
-        value: 2,
-        regionalValue: 167.3,
-    },
-    {
-        statusId: 3,
-        title: 'Total number of cases',
-        value: 2,
-        regionalValue: 65,
-    },
-    {
-        statusId: 4,
-        title: 'New cases per million',
-        value: 56.8,
-        regionalValue: 167.3,
-    },
-];
 
 interface CountryProps {
     className?: string;
 }
-const genderDisaggregationData = [
-    {
-        id: 1,
-        gender: 'Male',
-        percentage: 40,
-    },
-    {
-        id: 2,
-        gender: 'Female',
-        percentage: 40,
-    },
-    {
-        id: 3,
-        gender: 'other',
-        percentage: 20,
-    },
-];
 
 const COLORS = ['#D7DF23', '#616161', '#00ACC1'];
 

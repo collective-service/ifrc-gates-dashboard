@@ -104,6 +104,7 @@
     --color-text-on-dark: #ffffff;
     --color-text: #333333;
     --color-text-regional : #2F9C67;
+    --color-progress-bar: #FF800B;
 
     --color-navbar: rgb(51, 64, 83);
     --color-text-on-navbar: rgba(255, 255, 255, .9);

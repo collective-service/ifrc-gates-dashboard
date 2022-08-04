@@ -12,6 +12,7 @@ import {
 
 import Overview from './Overview';
 import Country from './Country';
+import CombinedIndicators from './CombinedIndicators';
 import Filters from './Filters';
 import styles from './styles.css';
 
@@ -82,7 +83,7 @@ function Dashboard() {
                     <TabPanel
                         name="combinedIndicators"
                     >
-                        <Country />
+                        <CombinedIndicators />
                     </TabPanel>
                 </div>
             </Tabs>

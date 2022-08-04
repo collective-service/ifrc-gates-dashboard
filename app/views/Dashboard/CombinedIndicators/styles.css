@@ -1,0 +1,41 @@
+.combined-indicator-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--dui-spacing-super-large);
+
+    .combined-indicator-main {
+        display: flex;
+
+        .progress-bar-container {
+            display: flex;
+            flex-direction: column;
+            gap: var(--dui-spacing-small);
+
+            .progress-bar-card {
+                border: var(--width-separator-thin) solid var(--color-separator-light);
+                border-radius: var(--dui-border-radius-card);
+
+                .progress-bar {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: var(--dui-spacing-super-large);
+                }
+            }
+        }
+    }
+
+    .perception-wrapper {
+        display: flex;
+        flex-direction: column;
+        padding: var(--dui-spacing-medium);
+
+        .perception-card {
+            width: 20rem;
+
+            p {
+                padding-left: var(--dui-spacing-small);
+            }
+        }
+    }
+}
