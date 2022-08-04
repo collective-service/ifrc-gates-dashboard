@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import {
     RadioInput,
     SelectInput,
+    TextInput,
 } from '@the-deep/deep-ui';
 
 import styles from './styles.css';
@@ -154,6 +155,12 @@ function AdvancedFilters() {
                 labelSelector={topicLabelSelector}
                 value={selectedTopic}
                 onChange={setSelectedTopic}
+            />
+            {/* FIX ME: MAKE MULTI SELECT INPUTS */}
+            <TextInput
+                name="keywords"
+                placeholder="Keywords"
+                value=""
             />
         </div>
     );
