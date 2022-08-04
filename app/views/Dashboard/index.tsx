@@ -43,7 +43,7 @@ function Dashboard() {
                     >
                         Export
                     </Button>
-                    <TabList className={styles.dashboardTablist}>
+                    <TabList className={styles.dashboardTabList}>
                         <Tab
                             className={styles.tabName}
                             name="overview"
@@ -64,20 +64,12 @@ function Dashboard() {
                         </Tab>
                     </TabList>
                 </div>
-                <div>
-                    <Filters
-                        activeTab={activeTab}
-                    />
-                </div>
+                <Filters activeTab={activeTab} />
                 <div className={styles.content}>
-                    <TabPanel
-                        name="overview"
-                    >
+                    <TabPanel name="overview">
                         <Overview />
                     </TabPanel>
-                    <TabPanel
-                        name="country"
-                    >
+                    <TabPanel name="country">
                         <Country />
                     </TabPanel>
                     <TabPanel
