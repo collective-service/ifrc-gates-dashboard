@@ -392,9 +392,10 @@ export const totalCasesBarChart = [
 
 export const regionalBreakdownPieData = [
     {
-        id: '1',
+        regionId: '1',
         country: 'USA',
-        color: 'var(--color-success)',
+        outbreak: 'COVID-19',
+        color: '#4D6F8B',
         regionalData: [
             {
                 id: 21,
@@ -424,8 +425,9 @@ export const regionalBreakdownPieData = [
         ],
     },
     {
-        id: '2',
+        regionId: '2',
         country: 'EUR',
+        outbreak: 'Monkey-pox',
         color: 'var(--color-accent)',
         regionalData: [
             {
@@ -456,9 +458,10 @@ export const regionalBreakdownPieData = [
         ],
     },
     {
-        id: '3',
+        regionId: '3',
         country: 'ASIA',
-        color: 'var(--color-warning)',
+        outbreak: 'Cholera',
+        color: '#AED8F1',
         regionalData: [
             {
                 id: 21,
@@ -488,9 +491,10 @@ export const regionalBreakdownPieData = [
         ],
     },
     {
-        id: '4',
+        regionId: '4',
         country: 'IRE',
-        color: 'var(--color-danger)',
+        outbreak: 'Spanish Flu',
+        color: '#D0EFF2',
         regionalData: [
             {
                 id: 21,
@@ -520,9 +524,41 @@ export const regionalBreakdownPieData = [
         ],
     },
     {
-        id: '5',
+        regionId: '5',
         country: 'POL',
-        color: 'var(--color-success)',
+        outbreak: 'Ebola',
+        color: '#7FAEDA',
+        regionalData: [
+            {
+                id: 21,
+                status: 'Severe',
+                percentage: 40,
+            },
+            {
+                id: 24,
+                status: 'Normal',
+                percentage: 30,
+            },
+            {
+                id: 34,
+                status: 'Average',
+                percentage: 20,
+            },
+            {
+                id: 45,
+                status: 'Good',
+                percentage: 30,
+            },
+            {
+                id: 12,
+                status: 'severe',
+                percentage: 20,
+            },
+        ],
+    },
+    {
+        regionId: '6',
+        country: 'WCAR',
         regionalData: [
             {
                 id: 21,

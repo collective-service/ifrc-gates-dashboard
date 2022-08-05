@@ -10,61 +10,63 @@ import {
 } from 'recharts';
 import {
     ContainerCard,
-    List,
+    ListView,
 } from '@the-deep/deep-ui';
 import { _cs } from '@togglecorp/fujs';
 
 import {
     totalCasesBarChart,
     regionalBreakdownPieData,
+
 } from '#utils/dummyData';
 
 import PieChartInfo, { RegionalDataType } from './PieChartInfo';
 import styles from './styles.css';
 
 const COLORS = ['#4D6F8B', '#AED8F1', '#B5CFD1', '#7FAEDA', '#D0EFF2'];
-const pieChartInfoKeySelector = (d: PieChartInfoRendererProps) => d.id;
-const breakdownLabelKeySelector = (d: RegionalBreakdownLabelProps) => d.id;
-
+const pieChartInfoKeySelector = (d: PieChartInfoRendererProps) => d.regionId;
+const breakdownLabelKeySelector = (d: RegionalBreakdownLabelProps) => d.regionId;
 export interface PieChartInfoRendererProps {
-    id: string;
+    regionId: string;
     country?: string;
     color?: string;
     regionalData?: RegionalDataType[];
 }
-interface RegionalBreakdownCardProps {
-    className?: string;
-}
 export interface RegionalBreakdownLabelProps {
-    id: string;
-    country: string;
+    regionId: string;
+    outbreak?: string;
     color?: string;
 }
 
 function RegionalBreakdownLabel(props: RegionalBreakdownLabelProps) {
     const {
-        id,
-        country,
+        regionId,
+        outbreak,
         color,
     } = props;
 
     return (
         <div
             className={styles.breakdownLabelWrapper}
-            key={id}
+            key={regionId}
         >
             <div
                 style={{
                     backgroundColor: color,
                     width: 10,
                     height: 10,
+                    borderRadius: 50,
                 }}
             />
             <div className={styles.labelName}>
-                {country}
+                {outbreak}
             </div>
         </div>
     );
+}
+
+interface RegionalBreakdownCardProps {
+    className?: string;
 }
 
 function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
@@ -74,7 +76,6 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
 
     const pieChartInfoRendererParams = useCallback(
         (_: string, data: PieChartInfoRendererProps) => ({
-            id: data.id,
             country: data.country,
             regionalData: data?.regionalData,
         }), [],
@@ -82,9 +83,9 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
 
     const regionalBreakdownLabelParams = useCallback(
         (_: string, data: RegionalBreakdownLabelProps) => ({
-            id: data.id,
+            regionId: data.regionId,
             color: data.color,
-            country: data.country,
+            outbreak: data.outbreak,
         }), [],
     );
 
@@ -142,22 +143,26 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
                 headingSize="extraSmall"
                 headerDescription="Loreum Ipsum epsum san-diego"
             >
-                <div className={styles.pieChartCollection}>
-                    <List
-                        keySelector={pieChartInfoKeySelector}
-                        data={regionalBreakdownPieData}
-                        renderer={PieChartInfo}
-                        rendererParams={pieChartInfoRendererParams}
-                    />
-                </div>
-                <div className={styles.breakdownLabel}>
-                    <List
-                        keySelector={breakdownLabelKeySelector}
-                        data={regionalBreakdownPieData}
-                        renderer={RegionalBreakdownLabel}
-                        rendererParams={regionalBreakdownLabelParams}
-                    />
-                </div>
+                <ListView
+                    className={styles.pieChartCollection}
+                    keySelector={pieChartInfoKeySelector}
+                    data={regionalBreakdownPieData}
+                    renderer={PieChartInfo}
+                    rendererParams={pieChartInfoRendererParams}
+                    filtered={false}
+                    errored={false}
+                    pending={false}
+                />
+                <ListView
+                    className={styles.breakdownLabel}
+                    keySelector={breakdownLabelKeySelector}
+                    data={regionalBreakdownPieData}
+                    renderer={RegionalBreakdownLabel}
+                    rendererParams={regionalBreakdownLabelParams}
+                    filtered={false}
+                    errored={false}
+                    pending={false}
+                />
             </ContainerCard>
         </div>
     );

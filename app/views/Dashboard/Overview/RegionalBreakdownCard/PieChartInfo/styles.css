@@ -13,7 +13,7 @@
     }
 
     .responsive-container {
-        min-height: 10rem !important;
+        min-height: 10rem;
         overflow: hidden;
     }
 }

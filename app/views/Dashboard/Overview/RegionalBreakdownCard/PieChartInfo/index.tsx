@@ -19,7 +19,6 @@ export type RegionalDataType = {
 
 interface PieChartInfoProps {
     className?: string;
-    id: string;
     country?: string;
     regionalData?: RegionalDataType[];
 }
@@ -27,16 +26,12 @@ interface PieChartInfoProps {
 function PieChartInfo(props: PieChartInfoProps) {
     const {
         className,
-        id,
         country,
         regionalData,
     } = props;
 
     return (
-        <div
-            key={id}
-            className={_cs(className, styles.pieChartWrapper)}
-        >
+        <div className={_cs(className, styles.pieChartWrapper)}>
             <div className={styles.pieChartHeader}>
                 {country}
             </div>
@@ -52,9 +47,9 @@ function PieChartInfo(props: PieChartInfoProps) {
                             data={regionalData}
                             dataKey="percentage"
                             labelLine={false}
-                            cx={60}
-                            cy={60}
-                            outerRadius={50}
+                            cx={65}
+                            cy={50}
+                            outerRadius={40}
                         >
                             {regionalData?.map((entry) => (
                                 <Cell
