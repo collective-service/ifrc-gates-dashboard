@@ -21,7 +21,6 @@ interface PieChartInfoProps {
     className?: string;
     id: string;
     country?: string;
-    color?: string;
     regionalData?: RegionalDataType[];
 }
 
@@ -30,14 +29,16 @@ function PieChartInfo(props: PieChartInfoProps) {
         className,
         id,
         country,
-        color,
         regionalData,
     } = props;
 
     return (
-        <div className={_cs(className, styles.pieChartWrapper)}>
+        <div
+            key={id}
+            className={_cs(className, styles.pieChartWrapper)}
+        >
             <div className={styles.pieChartHeader}>
-                chart header
+                {country}
             </div>
             <div className={styles.pieChartHolder}>
                 <ResponsiveContainer

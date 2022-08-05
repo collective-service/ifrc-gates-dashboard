@@ -6,8 +6,6 @@ import {
     Tooltip,
     ResponsiveContainer,
     LabelList,
-    Pie,
-    PieChart,
     Cell,
 } from 'recharts';
 import {
@@ -26,30 +24,50 @@ import styles from './styles.css';
 
 const COLORS = ['#4D6F8B', '#AED8F1', '#B5CFD1', '#7FAEDA', '#D0EFF2'];
 const pieChartInfoKeySelector = (d: PieChartInfoRendererProps) => d.id;
+const breakdownLabelKeySelector = (d: RegionalBreakdownLabelProps) => d.id;
+
 export interface PieChartInfoRendererProps {
     id: string;
     country?: string;
     color?: string;
     regionalData?: RegionalDataType[];
 }
-interface BreakdownCardGroupProps {
+interface RegionalBreakdownCardProps {
     className?: string;
 }
+export interface RegionalBreakdownLabelProps {
+    id: string;
+    country: string;
+    color?: string;
+}
 
-function RegionalBreakdownLabel() {
+function RegionalBreakdownLabel(props: RegionalBreakdownLabelProps) {
+    const {
+        id,
+        country,
+        color,
+    } = props;
+
     return (
-        <div className={styles.breakdownLabelWrapper}>
-            <div className={styles.labelColor}>
-                ColorHere
-            </div>
+        <div
+            className={styles.breakdownLabelWrapper}
+            key={id}
+        >
+            <div
+                style={{
+                    backgroundColor: color,
+                    width: 10,
+                    height: 10,
+                }}
+            />
             <div className={styles.labelName}>
-                Label-Name-Here
+                {country}
             </div>
         </div>
     );
 }
 
-function MultipleBreakdownCardGroup(props: BreakdownCardGroupProps) {
+function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
     const {
         className,
     } = props;
@@ -57,7 +75,16 @@ function MultipleBreakdownCardGroup(props: BreakdownCardGroupProps) {
     const pieChartInfoRendererParams = useCallback(
         (_: string, data: PieChartInfoRendererProps) => ({
             id: data.id,
+            country: data.country,
             regionalData: data?.regionalData,
+        }), [],
+    );
+
+    const regionalBreakdownLabelParams = useCallback(
+        (_: string, data: RegionalBreakdownLabelProps) => ({
+            id: data.id,
+            color: data.color,
+            country: data.country,
         }), [],
     );
 
@@ -82,8 +109,16 @@ function MultipleBreakdownCardGroup(props: BreakdownCardGroupProps) {
                                 y: false,
                             }}
                         />
-                        <XAxis dataKey="name" tickLine={false} axisLine={false}>
-                            <LabelList dataKey="name" position="bottom" fontSize="10" />
+                        <XAxis
+                            dataKey="name"
+                            tickLine={false}
+                            axisLine={false}
+                        >
+                            <LabelList
+                                dataKey="name"
+                                position="bottom"
+                                fontSize="10"
+                            />
                         </XAxis>
                         <Bar
                             dataKey="amt"
@@ -105,7 +140,7 @@ function MultipleBreakdownCardGroup(props: BreakdownCardGroupProps) {
                 contentClassName={styles.responsiveContent}
                 heading="Regional Breakdown"
                 headingSize="extraSmall"
-                headerDescription="Loreum Ipsum epsum sandiego"
+                headerDescription="Loreum Ipsum epsum san-diego"
             >
                 <div className={styles.pieChartCollection}>
                     <List
@@ -115,16 +150,16 @@ function MultipleBreakdownCardGroup(props: BreakdownCardGroupProps) {
                         rendererParams={pieChartInfoRendererParams}
                     />
                 </div>
-                {/* <div className={styles.breakDownLabel}>
+                <div className={styles.breakdownLabel}>
                     <List
-                        keySelector={pieChartInfoKeySelector}
-                        data={null}
+                        keySelector={breakdownLabelKeySelector}
+                        data={regionalBreakdownPieData}
                         renderer={RegionalBreakdownLabel}
-                        rendererParams={null}
+                        rendererParams={regionalBreakdownLabelParams}
                     />
-                </div> */}
+                </div>
             </ContainerCard>
         </div>
     );
 }
-export default MultipleBreakdownCardGroup;
+export default RegionalBreakdownCard;

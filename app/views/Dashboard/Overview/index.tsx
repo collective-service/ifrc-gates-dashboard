@@ -8,7 +8,7 @@ import {
 } from '@the-deep/deep-ui';
 import { _cs } from '@togglecorp/fujs';
 
-import MultipleBreakdownCardGroup from './MultipleBreakdownCardGroup';
+import RegionalBreakdownCard from './RegionalBreakdownCard';
 import PercentageCardGroup from './PercentageCardGroup';
 import MapView from './MapView';
 import TableView from './TableView';
@@ -35,7 +35,7 @@ function Overview(props: OverviewProps) {
     return (
         <div className={_cs(className, styles.overviewMain)}>
             <PercentageCardGroup />
-            <MultipleBreakdownCardGroup />
+            <RegionalBreakdownCard />
             <div className={styles.mapContainer}>
                 <Tabs
                     value={currentTab}

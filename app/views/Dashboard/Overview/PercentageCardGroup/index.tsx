@@ -56,8 +56,6 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
             >
                 <ResponsiveContainer className={styles.responsiveContainer}>
                     <LineChart
-                        // width={500}
-                        // height={100}
                         data={lineChartData}
                         margin={{
                             right: 20,
@@ -125,11 +123,24 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                                 y: true,
                             }}
                         />
-                        <XAxis dataKey="name" tickLine={false} axisLine={false}>
-                            <LabelList dataKey="name" position="bottom" />
+                        <XAxis
+                            dataKey="name"
+                            tickLine={false}
+                            axisLine={false}
+                        >
+                            <LabelList
+                                dataKey="name"
+                                position="bottom"
+                            />
                         </XAxis>
-                        <Bar dataKey="amt" fill="#2F9C67">
-                            <LabelList dataKey="range" position="top" />
+                        <Bar
+                            dataKey="amt"
+                            fill="#2F9C67"
+                        >
+                            <LabelList
+                                dataKey="range"
+                                position="top"
+                            />
                         </Bar>
                     </BarChart>
                 </ResponsiveContainer>

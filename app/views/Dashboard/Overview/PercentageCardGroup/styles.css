@@ -21,7 +21,7 @@
     }
 
     .responsive-content {
-        min-height: 8rem;
+        min-height: 10rem;
 
         .responsive-container {
             overflow: hidden;

@@ -31,3 +31,19 @@
         }
     }
 }
+
+.breakdown-label {
+    display: flex;
+    justify-content: space-around;
+
+    .breakdown-label-wrapper {
+        display: flex;
+        gap: var(--dui-spacing-small);
+        align-items: center;
+
+        .label-name {
+            font-size: var(--dui-font-size-medium);
+        }
+    }
+
+}
