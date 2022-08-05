@@ -33,7 +33,7 @@ services:
     restart: always
     image: ifrc-gates-server/server
     build:
-      context: ./server
+      context: ./server/
     tty: true
     environment:
       DEBUG: ${DEBUG:-True}
@@ -47,7 +47,7 @@ services:
       - .env
     command: bash -c "/code/scripts/run_develop.sh"
     volumes:
-      - ./:/code
+      - ./server/:/code
       - media:/media
     ports:
       - '7020:7020'
