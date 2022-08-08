@@ -12,21 +12,25 @@
         flex-basis: 25%;
         flex-direction: column;
         flex-shrink: 0;
-        border: var(--dui-card-border-color) solid 4px;
-        border-radius: 8px;
-        background-color: var(--color-background);
 
-        .progress-rate-box {
-            background-color: var(--color-background);
-            padding: var(--dui-spacing-small);
+        .low-progress-box {
+            padding-top: var(--dui-spacing-large);
 
-            .progress-list {
-                padding: 0 var(--dui-spacing-large);
-                font-size: small;
-            }
+        }
 
-            .progress-list-header {
-                padding-bottom: var(--dui-spacing-small);
+        .high-progress-box {
+            padding-top: var(--dui-spacing-super-large);
+        }
+
+        .progress-list-header {
+            padding-bottom: var(--dui-spacing-medium);
+        }
+
+        .progress-list {
+            font-size: small;
+
+            .progressItemBorder {
+                margin-top: var(--dui-spacing-medium);
             }
         }
     }
