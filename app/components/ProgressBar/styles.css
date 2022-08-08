@@ -1,6 +1,7 @@
 .progress-info {
     display: flex;
     flex-direction: column;
+    padding-top: var(--dui-spacing-small);
 
     .progress-value-wrapper {
         display: flex;

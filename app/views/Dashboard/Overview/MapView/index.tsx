@@ -46,7 +46,7 @@ const countryLinePaint: mapboxgl.LinePaint = {
     'line-width': 1,
 };
 
-const barHeight = 5;
+const barHeight = 10;
 
 function MapView(props: MapViewProps) {
     const {
@@ -100,38 +100,44 @@ function MapView(props: MapViewProps) {
                     </MapSource>
                 </Map>
             </ContainerCard>
-            <ContainerCard className={styles.progressBarContainer}>
-                <div className={styles.progressRateBox}>
+            <ContainerCard
+                className={styles.progressBarContainer}
+            >
+                <div className={styles.lowProgressBox}>
                     <Heading size="extraSmall" className={styles.progressListHeader}>
                         Lowest cases
                     </Heading>
-                    <div className={styles.progressList}>
-                        <ListView
-                            keySelector={progressBarKeySelector}
-                            data={progressDataOne}
-                            renderer={ProgressBar}
-                            rendererParams={progressBarRendererParams}
-                            filtered={false}
-                            errored={false}
-                            pending={false}
-                        />
-                    </div>
+                    <ListView
+                        className={styles.progressList}
+                        keySelector={progressBarKeySelector}
+                        data={progressDataOne}
+                        renderer={ProgressBar}
+                        rendererParams={progressBarRendererParams}
+                        filtered={false}
+                        errored={false}
+                        pending={false}
+                        borderBetweenItem
+                        borderBetweenItemWidth="medium"
+                        borderBetweenItemClassName={styles.progressItemBorder}
+                    />
                 </div>
-                <div className={styles.progressRateBox}>
+                <div className={styles.highProgressBox}>
                     <Heading size="extraSmall" className={styles.progressListHeader}>
                         Highest cases
                     </Heading>
-                    <div className={styles.progressList}>
-                        <ListView
-                            keySelector={progressBarKeySelector}
-                            data={progressDataTwo}
-                            renderer={ProgressBar}
-                            rendererParams={progressBarRendererParams}
-                            filtered={false}
-                            errored={false}
-                            pending={false}
-                        />
-                    </div>
+                    <ListView
+                        className={styles.progressList}
+                        keySelector={progressBarKeySelector}
+                        data={progressDataTwo}
+                        renderer={ProgressBar}
+                        rendererParams={progressBarRendererParams}
+                        filtered={false}
+                        errored={false}
+                        pending={false}
+                        borderBetweenItem
+                        borderBetweenItemWidth="medium"
+                        borderBetweenItemClassName={styles.progressItemBorder}
+                    />
                 </div>
             </ContainerCard>
         </div>
