@@ -3,7 +3,7 @@ import { _cs } from '@togglecorp/fujs';
 import {
     Heading,
     ContainerCard,
-    List,
+    ListView,
 } from '@the-deep/deep-ui';
 import Map, {
     MapContainer,
@@ -106,11 +106,14 @@ function MapView(props: MapViewProps) {
                         Lowest cases
                     </Heading>
                     <div className={styles.progressList}>
-                        <List
+                        <ListView
                             keySelector={progressBarKeySelector}
                             data={progressDataOne}
                             renderer={ProgressBar}
                             rendererParams={progressBarRendererParams}
+                            filtered={false}
+                            errored={false}
+                            pending={false}
                         />
                     </div>
                 </div>
@@ -119,11 +122,14 @@ function MapView(props: MapViewProps) {
                         Highest cases
                     </Heading>
                     <div className={styles.progressList}>
-                        <List
+                        <ListView
                             keySelector={progressBarKeySelector}
                             data={progressDataTwo}
                             renderer={ProgressBar}
                             rendererParams={progressBarRendererParams}
+                            filtered={false}
+                            errored={false}
+                            pending={false}
                         />
                     </div>
                 </div>

@@ -1,0 +1,48 @@
+.card-info {
+    display: flex;
+    gap: var(--dui-spacing-large);
+    overflow: auto;
+
+    .global-stat-card {
+        flex-basis: 34%;
+        flex-shrink: 0;
+        border: var(--width-separator-medium) solid var(--color-separator-light);
+        border-radius: var(--dui-border-radius-card);
+    }
+
+
+    .regions-pie-chart {
+        flex-grow: 1;
+        border: var(--width-separator-medium) solid var(--color-separator-light);
+        border-radius: var(--dui-border-radius-card);
+
+        .pie-chart-collection {
+            display: flex;
+        }
+    }
+
+    .responsive-content {
+        overflow: auto;
+
+        .responsive-container {
+            min-height: 10rem !important;
+            overflow: hidden;
+        }
+    }
+}
+
+.breakdown-label {
+    display: flex;
+    justify-content: space-around;
+
+    .breakdown-label-wrapper {
+        display: flex;
+        gap: var(--dui-spacing-small);
+        align-items: center;
+
+        .label-name {
+            font-size: var(--dui-font-size-medium);
+        }
+    }
+
+}

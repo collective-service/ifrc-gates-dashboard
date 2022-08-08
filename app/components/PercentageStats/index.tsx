@@ -11,7 +11,7 @@ import styles from './styles.css';
 type headingSizeType = ContainerCardProps['headingSize']
 interface PercentageStatsProps {
     className?: string;
-    icon: React.ReactNode;
+    icon?: React.ReactNode;
     heading?: React.ReactNode;
     headerDescription?: React.ReactNode;
     headingSize?: headingSizeType;

@@ -1,0 +1,30 @@
+.card-info {
+    display: flex;
+    gap: var(--dui-spacing-large);
+
+    .global-stat-card {
+        flex-basis: 20%;
+        border: var(--width-separator-medium) solid var(--color-separator-light);
+        border-radius: var(--dui-border-radius-card);
+    }
+
+    .trends-card {
+        flex-basis: calc(45% - var(--dui-spacing-small));
+        border: var(--width-separator-medium) solid var(--color-separator-light);
+        border-radius: var(--dui-border-radius-card);
+    }
+
+    .regions-card {
+        flex-basis: calc(35% - var(--dui-spacing-small));
+        border: var(--width-separator-medium) solid var(--color-separator-light);
+        border-radius: var(--dui-border-radius-card);
+    }
+
+    .responsive-content {
+        min-height: 10rem;
+
+        .responsive-container {
+            overflow: hidden;
+        }
+    }
+}

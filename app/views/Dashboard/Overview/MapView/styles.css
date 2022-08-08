@@ -1,5 +1,6 @@
 .map-view-wrapper {
     display: flex;
+    align-items: flex-start;
 
     .map-container {
         flex-grow: 1;
