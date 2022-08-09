@@ -95,14 +95,8 @@
                 align-items: center;
             }
 
-            .country-map {
-                display: flex;
-                justify-content: center;
-
-                img {
-                    width: 100%;
-                    object-fit: cover;
-                }
+            .country-heading {
+                align-items: end;
             }
 
             .country-details {
@@ -111,8 +105,15 @@
                 gap: var(--dui-spacing-medium);
 
                 .country-text-output {
+                    align-items: center;
                     justify-content: space-between;
+                    border-bottom: var(--dui-width-separator-thin) solid var(--dui-color-line-separator);
+                    height: 4rem;
                     font-size: var(--dui-font-size-medium);
+
+                    .labelText {
+                        width: 10rem;
+                    }
 
                     .value-text {
                         display: flex;

@@ -206,6 +206,7 @@ function Country(props: CountryProps) {
                     className={styles.countryInfo}
                     headingSectionClassName={styles.countryHeader}
                     headerIconsContainerClassName={styles.countryAvatar}
+                    headingClassName={styles.countryHeading}
                     headerIcons={(
                         // FIX ME: COUNTRY AVATAR
                         <img src="https://picsum.photos/50" alt="country-avatar" />
@@ -214,28 +215,25 @@ function Country(props: CountryProps) {
                     heading="<Country-Name>"
                 >
                     <div className={styles.countryDetails}>
-                        <div className={styles.countryMap}>
-                            {/* FIX ME: COUNTRY MAP */}
-                            <img
-                                src="https://picsum.photos/350/200"
-                                alt="Country-logo"
-                            />
-                        </div>
                         <TextOutput
                             className={styles.countryTextOutput}
                             valueContainerClassName={styles.valueText}
+                            labelContainerClassName={styles.labelText}
+                            hideLabelColon
                             label="Population"
                             value="38,928,346"
                         />
                         <TextOutput
                             className={styles.countryTextOutput}
                             valueContainerClassName={styles.valueText}
+                            labelContainerClassName={styles.labelText}
+                            hideLabelColon
                             label="Internet access"
                             value={(
                                 <>
                                     11.4%
                                     <div className={styles.regionalText}>
-                                        [regional- 30%]
+                                        Regional 30%
                                     </div>
                                 </>
                             )}
@@ -243,12 +241,14 @@ function Country(props: CountryProps) {
                         <TextOutput
                             className={styles.countryTextOutput}
                             valueContainerClassName={styles.valueText}
+                            labelContainerClassName={styles.labelText}
+                            hideLabelColon
                             label="Literacy rate"
                             value={(
                                 <>
                                     90%
                                     <div className={styles.regionalText}>
-                                        [regional- 30%]
+                                        Regional 30%
                                     </div>
                                 </>
                             )}
@@ -256,19 +256,14 @@ function Country(props: CountryProps) {
                         <TextOutput
                             className={styles.countryTextOutput}
                             valueContainerClassName={styles.valueText}
+                            labelContainerClassName={styles.labelText}
                             hideLabelColon
-                            label={(
-                                <p>
-                                    Access to basic
-                                    <br />
-                                    washing facilities:
-                                </p>
-                            )}
+                            label="Access to basic washing facilities"
                             value={(
                                 <>
                                     35%
                                     <div className={styles.regionalText}>
-                                        [regional- 30%]
+                                        Regional 30%
                                     </div>
                                 </>
                             )}
@@ -276,19 +271,14 @@ function Country(props: CountryProps) {
                         <TextOutput
                             className={styles.countryTextOutput}
                             valueContainerClassName={styles.valueText}
+                            labelContainerClassName={styles.labelText}
                             hideLabelColon
-                            label={(
-                                <p>
-                                    Doctors and nurses
-                                    <br />
-                                    per 1000 people:
-                                </p>
-                            )}
+                            label="Doctors and nurses per 1000 people"
                             value={(
                                 <>
                                     6.2
                                     <div className={styles.regionalText}>
-                                        [regional- 30%]
+                                        Regional 30%
                                     </div>
                                 </>
                             )}
@@ -296,12 +286,14 @@ function Country(props: CountryProps) {
                         <TextOutput
                             className={styles.countryTextOutput}
                             valueContainerClassName={styles.valueText}
+                            labelContainerClassName={styles.labelText}
+                            hideLabelColon
                             label="Stringency"
                             value={(
                                 <>
                                     11.8%
                                     <div className={styles.regionalText}>
-                                        [regional- 30%]
+                                        Regional 30%
                                     </div>
                                 </>
                             )}
@@ -309,12 +301,14 @@ function Country(props: CountryProps) {
                         <TextOutput
                             className={styles.countryTextOutput}
                             valueContainerClassName={styles.valueText}
+                            labelContainerClassName={styles.labelText}
+                            hideLabelColon
                             label="Regional cases %"
                             value={(
                                 <>
                                     34%
                                     <div className={styles.regionalText}>
-                                        [regional- 30%]
+                                        Regional 30%
                                     </div>
                                 </>
                             )}
@@ -322,12 +316,14 @@ function Country(props: CountryProps) {
                         <TextOutput
                             className={styles.countryTextOutput}
                             valueContainerClassName={styles.valueText}
+                            labelContainerClassName={styles.labelText}
+                            hideLabelColon
                             label="Economic support index"
                             value={(
                                 <>
                                     37.5%
                                     <div className={styles.regionalText}>
-                                        [regional- 30%]
+                                        Regional 30%
                                     </div>
                                 </>
                             )}
