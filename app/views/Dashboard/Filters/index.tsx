@@ -154,25 +154,29 @@ function Filters(props: Props) {
                     value={selectedOutbreak}
                     onChange={setSelectedOutbreak}
                 />
-                <SelectInput
-                    name="regions"
-                    options={regions}
-                    placeholder="Regions"
-                    keySelector={regionsKeySelector}
-                    labelSelector={regionsLabelSelector}
-                    value={selectedRegion}
-                    onChange={setSelectedRegion}
-                />
-                <SelectInput
-                    name="indicators"
-                    options={indicators}
-                    placeholder="Indicators"
-                    keySelector={indicatorKeySelector}
-                    labelSelector={indicatorLabelSelector}
-                    value={selectedIndicator}
-                    onChange={setSelectedIndicator}
-                />
-                {activeTab === 'country' && (
+                {(activeTab !== 'country') && (
+                    <SelectInput
+                        name="regions"
+                        options={regions}
+                        placeholder="Regions"
+                        keySelector={regionsKeySelector}
+                        labelSelector={regionsLabelSelector}
+                        value={selectedRegion}
+                        onChange={setSelectedRegion}
+                    />
+                )}
+                {(activeTab !== 'combinedIndicators') && (
+                    <SelectInput
+                        name="indicators"
+                        options={indicators}
+                        placeholder="Indicators"
+                        keySelector={indicatorKeySelector}
+                        labelSelector={indicatorLabelSelector}
+                        value={selectedIndicator}
+                        onChange={setSelectedIndicator}
+                    />
+                )}
+                {(activeTab !== 'overview') && (
                     <SelectInput
                         name="countries"
                         options={countries}

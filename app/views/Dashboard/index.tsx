@@ -19,7 +19,7 @@ import styles from './styles.css';
 export type TabTypes = 'country' | 'overview' | 'combinedIndicators';
 
 function Dashboard() {
-    const [activeTab, setActiveTab] = useState<TabTypes | undefined>('country');
+    const [activeTab, setActiveTab] = useState<TabTypes | undefined>('overview');
 
     const handleExport = () => {
         // eslint-disable-next-line no-console
