@@ -105,7 +105,8 @@
     --color-background-dark: #193256;
     --color-text-on-dark: #ffffff;
     --color-text: #333333;
-    --color-text-regional : #2F9C67;
+    --color-text-regional : #8DD2B1;
+    --color-background-readiness: #E8F9F1;
     --color-progress-bar: #FF800B;
 
     --color-navbar: rgb(51, 64, 83);

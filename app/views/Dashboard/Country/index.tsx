@@ -17,21 +17,25 @@ import {
     TextOutput,
     ListView,
 } from '@the-deep/deep-ui';
-import StatusCard, { Props as StatusCardProps } from '#components/StatusCard';
 
 import IndicatorChart from '#components/IndicatorChart';
 import PercentageStats from '#components/PercentageStats';
 import CustomLabel from '#components/CustomLabel';
+import ReadinessCard from '#components/ReadinessCard';
 import {
     indicatorData,
     outbreakData,
     statusData,
     genderDisaggregationData,
+    readinessData,
+    PercentageStatsProps,
+    ReadinessCardProps
 } from '#utils/dummyData';
 
 import styles from './styles.css';
 
-const keySelector = (d: StatusCardProps) => d.statusId;
+const percentageKeySelector = (d: PercentageStatsProps) => d.id;
+const readinessKeySelector = (d: ReadinessCardProps) => d.id;
 
 interface CountryProps {
     className?: string;
@@ -44,11 +48,15 @@ function Country(props: CountryProps) {
         className,
     } = props;
 
-    const rendererParams = useCallback((_, data: StatusCardProps) => ({
-        statusId: data.statusId,
+    const rendererParams = useCallback((_, data: PercentageStatsProps) => ({
+        heading: data.heading,
+        statValue: data.statValue,
+        suffix: data.suffix,
+    }), []);
+
+    const readinessRendererParams = useCallback((_, data: ReadinessCardProps) => ({
         title: data.title,
         value: data.value,
-        regionalValue: data.regionalValue,
     }), []);
 
     return (
@@ -56,18 +64,33 @@ function Country(props: CountryProps) {
             <div className={styles.countryMain}>
                 <div className={styles.countryDetailWrapper}>
                     <ContainerCard
-                        className={styles.statusContainer}
+                        className={styles.statusCardContainer}
+                        contentClassName={styles.statusContainer}
                     >
-                        <ListView
-                            className={styles.infoCards}
-                            renderer={StatusCard}
-                            rendererParams={rendererParams}
-                            data={statusData}
-                            keySelector={keySelector}
-                            errored={false}
-                            filtered={false}
-                            pending={false}
-                        />
+                        <div className={styles.statusCard}>
+                            <ListView
+                                className={styles.infoCards}
+                                renderer={PercentageStats}
+                                rendererParams={rendererParams}
+                                data={statusData}
+                                keySelector={percentageKeySelector}
+                                errored={false}
+                                filtered={false}
+                                pending={false}
+                            />
+                        </div>
+                        <div className={styles.readinessCard}>
+                            <ListView
+                                className={styles.readinessListCard}
+                                renderer={ReadinessCard}
+                                rendererParams={readinessRendererParams}
+                                data={readinessData}
+                                keySelector={readinessKeySelector}
+                                errored={false}
+                                filtered={false}
+                                pending={false}
+                            />
+                        </div>
                     </ContainerCard>
                     <ContainerCard
                         className={styles.countryTrend}
@@ -81,7 +104,6 @@ function Country(props: CountryProps) {
                             >
                                 <XAxis
                                     dataKey="month"
-                                    axisLine={false}
                                     tickLine={false}
                                 />
                                 <YAxis
@@ -118,10 +140,8 @@ function Country(props: CountryProps) {
                         <PercentageStats
                             className={styles.percentageCard}
                             heading="Percentage of unvaccinated individuals who have tried to get vaccinated"
-                            headerDescription="Lorem ipsum explaining the topic"
                             headingSize="extraSmall"
                             statValue={56}
-                            subValue={78}
                             suffix="%"
                             icon={null}
                         />
