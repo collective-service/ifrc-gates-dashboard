@@ -1,7 +1,20 @@
-import { Props as StatusCardProps } from '#components/StatusCard';
+//import { Props as PercentageStatsProps } from '#components/PercentageStats';
 import { ProgressBarRendererProps } from '#views/Dashboard/CombinedIndicators';
+//import { Props as ReadinessCardProps } from '#components/ReadinessCard';
 
 type Bounds = [number, number, number, number];
+
+export interface PercentageStatsProps {
+    id: number;
+    heading: string;
+    statValue: number;
+    suffix: string;
+}
+export interface ReadinessCardProps {
+    id: number;
+    title: string;
+    value: number;
+}
 
 export const progressDataOne = [
     {
@@ -210,30 +223,41 @@ export const outbreakData = [
 
 ];
 
-export const statusData: StatusCardProps[] = [
+export const statusData: PercentageStatsProps[] = [
     {
-        statusId: 1,
-        title: 'Total number of deaths',
-        value: 189050,
-        regionalValue: 1,
+        id: 1,
+        heading: 'Total number of COVID-19 cases',
+        statValue: 65,
+        suffix: '%',
     },
     {
-        statusId: 2,
-        title: 'Total outbreaks for country',
-        value: 2,
-        regionalValue: 167.3,
+        id: 2,
+        heading: 'Total number of Monkey pox cases',
+        statValue: 1,
+        suffix: 'M',
+    },
+];
+
+export const readinessData: ReadinessCardProps[] = [
+    {
+        id: 1,
+        title: 'Readiness',
+        value: 10,
     },
     {
-        statusId: 3,
-        title: 'Total number of cases',
-        value: 2,
-        regionalValue: 65,
+        id: 2,
+        title: 'Vulnerability',
+        value: 28,
     },
     {
-        statusId: 4,
-        title: 'New cases per million',
-        value: 56.8,
-        regionalValue: 167.3,
+        id: 3,
+        title: 'Risk',
+        value: 50,
+    },
+    {
+        id: 4,
+        title: 'Response',
+        value: 24.5,
     },
 ];
 
