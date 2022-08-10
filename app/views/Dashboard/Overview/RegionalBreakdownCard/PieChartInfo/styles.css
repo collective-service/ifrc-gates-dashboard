@@ -5,15 +5,17 @@
 
     .pie-chart-header {
         align-self: center;
+        padding-top: var(--dui-spacing-small);
         font-size: small;
     }
 
     .pie-chart-holder {
+        border-bottom: 1px solid var(--dui-color-progress-alt);
         background-color: #ffffff;
     }
 
     .responsive-container {
-        min-height: 10rem;
+        min-height: 7rem;
         overflow: hidden;
     }
 }

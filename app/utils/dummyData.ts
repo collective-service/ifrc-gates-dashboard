@@ -387,7 +387,7 @@ export const regionalBreakdownPieData = [
         regionId: '1',
         country: 'USA',
         outbreak: 'COVID-19',
-        color: '#4D6F8B',
+        color: '#C09A57',
         regionalData: [
             {
                 id: 21,
@@ -420,7 +420,7 @@ export const regionalBreakdownPieData = [
         regionId: '2',
         country: 'EUR',
         outbreak: 'Monkey-pox',
-        color: 'var(--color-accent)',
+        color: '#FFDD98',
         regionalData: [
             {
                 id: 21,
@@ -453,7 +453,7 @@ export const regionalBreakdownPieData = [
         regionId: '3',
         country: 'ASIA',
         outbreak: 'Cholera',
-        color: '#AED8F1',
+        color: '#C7BCA9',
         regionalData: [
             {
                 id: 21,
@@ -486,7 +486,7 @@ export const regionalBreakdownPieData = [
         regionId: '4',
         country: 'IRE',
         outbreak: 'Spanish Flu',
-        color: '#D0EFF2',
+        color: '#ACA28E',
         regionalData: [
             {
                 id: 21,
@@ -519,7 +519,7 @@ export const regionalBreakdownPieData = [
         regionId: '5',
         country: 'POL',
         outbreak: 'Ebola',
-        color: '#7FAEDA',
+        color: '#CCB387',
         regionalData: [
             {
                 id: 21,

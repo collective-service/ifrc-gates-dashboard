@@ -3,6 +3,7 @@ import {
     BarChart,
     Bar,
     XAxis,
+    YAxis,
     Tooltip,
     ResponsiveContainer,
     LabelList,
@@ -23,7 +24,7 @@ import {
 import PieChartInfo, { RegionalDataType } from './PieChartInfo';
 import styles from './styles.css';
 
-const COLORS = ['#4D6F8B', '#AED8F1', '#B5CFD1', '#7FAEDA', '#D0EFF2'];
+const COLORS = ['#C09A57', '#FFDD98', '#C7BCA9', '#ACA28E', '#CCB387'];
 const pieChartInfoKeySelector = (d: PieChartInfoRendererProps) => d.regionId;
 const breakdownLabelKeySelector = (d: RegionalBreakdownLabelProps) => d.regionId;
 export interface PieChartInfoRendererProps {
@@ -101,7 +102,7 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
                 <ResponsiveContainer className={styles.responsiveContainer}>
                     <BarChart
                         data={totalCasesBarChart}
-                        barSize={45}
+                        barSize={18}
                     >
                         <Tooltip
                             isAnimationActive={false}
@@ -113,7 +114,6 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
                         <XAxis
                             dataKey="name"
                             tickLine={false}
-                            axisLine={false}
                         >
                             <LabelList
                                 dataKey="name"
@@ -121,9 +121,14 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
                                 fontSize="10"
                             />
                         </XAxis>
+                        <YAxis
+                            padding={{ bottom: 10 }}
+                            hide
+                        />
                         <Bar
                             dataKey="amt"
                             isAnimationActive={false}
+                            radius={[10, 10, 0, 0]}
                         >
                             {totalCasesBarChart?.map((entry) => (
                                 <Cell
@@ -131,7 +136,12 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
                                     fill={COLORS[entry.id % COLORS.length]}
                                 />
                             ))}
-                            <LabelList dataKey="range" position="top" />
+                            <LabelList
+                                dataKey="range"
+                                position="left"
+                                angle={270}
+                                offset={10}
+                            />
                         </Bar>
                     </BarChart>
                 </ResponsiveContainer>
@@ -144,21 +154,21 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
                 headerDescription="Loreum Ipsum epsum san-diego"
             >
                 <ListView
-                    className={styles.pieChartCollection}
-                    keySelector={pieChartInfoKeySelector}
-                    data={regionalBreakdownPieData}
-                    renderer={PieChartInfo}
-                    rendererParams={pieChartInfoRendererParams}
-                    filtered={false}
-                    errored={false}
-                    pending={false}
-                />
-                <ListView
                     className={styles.breakdownLabel}
                     keySelector={breakdownLabelKeySelector}
                     data={regionalBreakdownPieData}
                     renderer={RegionalBreakdownLabel}
                     rendererParams={regionalBreakdownLabelParams}
+                    filtered={false}
+                    errored={false}
+                    pending={false}
+                />
+                <ListView
+                    className={styles.pieChartCollection}
+                    keySelector={pieChartInfoKeySelector}
+                    data={regionalBreakdownPieData}
+                    renderer={PieChartInfo}
+                    rendererParams={pieChartInfoRendererParams}
                     filtered={false}
                     errored={false}
                     pending={false}
