@@ -9,7 +9,7 @@ import { _cs } from '@togglecorp/fujs';
 import styles from './styles.css';
 
 type headingSizeType = ContainerCardProps['headingSize']
-interface PercentageStatsProps {
+export interface Props {
     className?: string;
     icon?: React.ReactNode;
     heading?: React.ReactNode;
@@ -20,12 +20,12 @@ interface PercentageStatsProps {
     subValue?: number;
 }
 
-function PercentageStats(props: PercentageStatsProps) {
+function PercentageStats(props: Props) {
     const {
         className,
         icon,
         heading,
-        headingSize = 'large',
+        headingSize = 'extraSmall',
         headerDescription,
         statValue,
         subValue,
@@ -35,15 +35,15 @@ function PercentageStats(props: PercentageStatsProps) {
     return (
         <ContainerCard
             className={_cs(className, styles.percentageStatsCard)}
+            headingClassName={styles.percentageHeading}
             heading={heading}
             headingSize={headingSize}
             headerDescription={headerDescription}
-        >
-            <div className={styles.valueDescription}>
-                <div className={styles.iconContainer}>
-                    {icon}
-                </div>
-                <div className={styles.valueAndSubValue}>
+            headerIconsContainerClassName={styles.iconContainer}
+            headerIcons={icon}
+            footerContentClassName={styles.valueAndSubValue}
+            footerContent={(
+                <>
                     <NumberOutput
                         className={styles.valueText}
                         value={statValue}
@@ -56,9 +56,9 @@ function PercentageStats(props: PercentageStatsProps) {
                             suffix={suffix}
                         />
                     )}
-                </div>
-            </div>
-        </ContainerCard>
+                </>
+            )}
+        />
     );
 }
 export default PercentageStats;
