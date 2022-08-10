@@ -1,6 +1,4 @@
-//import { Props as PercentageStatsProps } from '#components/PercentageStats';
 import { ProgressBarRendererProps } from '#views/Dashboard/CombinedIndicators';
-//import { Props as ReadinessCardProps } from '#components/ReadinessCard';
 
 type Bounds = [number, number, number, number];
 

@@ -20,7 +20,6 @@ import {
 
 import IndicatorChart from '#components/IndicatorChart';
 import PercentageStats from '#components/PercentageStats';
-import CustomLabel from '#components/CustomLabel';
 import ReadinessCard from '#components/ReadinessCard';
 import {
     indicatorData,
@@ -29,7 +28,7 @@ import {
     genderDisaggregationData,
     readinessData,
     PercentageStatsProps,
-    ReadinessCardProps
+    ReadinessCardProps,
 } from '#utils/dummyData';
 
 import styles from './styles.css';
@@ -41,7 +40,7 @@ interface CountryProps {
     className?: string;
 }
 
-const COLORS = ['#D7DF23', '#616161', '#00ACC1'];
+const COLORS = ['#567968', '#52625A', '#AFFAD5'];
 
 function Country(props: CountryProps) {
     const {
@@ -115,12 +114,12 @@ function Country(props: CountryProps) {
                                 <Legend
                                     iconType="rect"
                                     align="right"
-                                    verticalAlign="top"
+                                    verticalAlign="bottom"
                                 />
                                 <Line
                                     dataKey="covid"
                                     type="monotone"
-                                    stroke="#FFF84C"
+                                    stroke="#ACA28E"
                                     name="COVID 19"
                                     strokeWidth={3}
                                     dot={false}
@@ -128,7 +127,7 @@ function Country(props: CountryProps) {
                                 <Line
                                     dataKey="monkeyPox"
                                     type="monotone"
-                                    stroke="#2F339C"
+                                    stroke="#FFDD98"
                                     name="Monkey Pox"
                                     strokeWidth={3}
                                     dot={false}
@@ -164,7 +163,6 @@ function Country(props: CountryProps) {
                                         data={genderDisaggregationData}
                                         dataKey="percentage"
                                         labelLine={false}
-                                        label={CustomLabel}
                                         cx={100}
                                         cy={100}
                                         outerRadius={70}
@@ -181,7 +179,6 @@ function Country(props: CountryProps) {
                                         verticalAlign="middle"
                                         align="right"
                                         layout="vertical"
-                                        iconType="circle"
                                     />
                                 </PieChart>
                             </ResponsiveContainer>
@@ -199,7 +196,6 @@ function Country(props: CountryProps) {
                                         data={genderDisaggregationData}
                                         dataKey="percentage"
                                         labelLine={false}
-                                        label={CustomLabel}
                                         cx={100}
                                         cy={100}
                                         outerRadius={70}

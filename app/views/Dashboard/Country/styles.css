@@ -165,8 +165,6 @@
         padding: var(--dui-spacing-medium);
 
         .perception-card {
-            border: var(--width-separator-thin) solid var(--color-separator-light);
-            border-radius: var(--dui-border-radius-card);
             width: 20rem;
 
             p {

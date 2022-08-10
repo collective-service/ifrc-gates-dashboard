@@ -8,14 +8,15 @@
     background-color: white;
     padding: var(--dui-spacing-medium);
     width: 10rem;
-    color: var(--color-text-regional);
 
     .readiness-title {
+        color: var(--color-readiness-title);
         font-size: var(--dui-font-size-heading-extra-small);
         font-weight: var(--dui-font-weight-regular);
     }
 
     .readiness-value {
+        color: var(--color-text-regional);
         font-size: var(--dui-font-size-mega-large);
         font-weight: var(--dui-font-weight-bold);
     }
