@@ -21,36 +21,22 @@
                     display: flex;
                     gap: var(--dui-spacing-medium);
 
-                    .status-card {
+                    .info-cards {
                         display: flex;
-                        flex-direction: column;
                         gap: var(--dui-spacing-small);
-
-                        .info-cards {
-                            display: flex;
-                            gap: var(--dui-spacing-small);
-                            padding: var(--dui-spacing-medium) 0;
-                        }
                     }
 
-                    .readiness-card {
+                    .readinessListCard {
                         display: flex;
                         flex-basis: 62%;
-                        flex-direction: column;
-                        justify-content: center;
-
-                        .readinessListCard {
-                            display: flex;
-                            justify-content: space-evenly;
-                            border: var(--width-separator-thin);
-                            border-radius: var(--dui-border-radius-card);
-                            background-color: var(--color-background-readiness);
-                            padding: var(--dui-spacing-medium);
-                        }
+                        justify-content: space-between;
+                        border: var(--width-separator-thin);
+                        border-radius: var(--dui-border-radius-card);
+                        background-color: var(--color-background-alt);
+                        padding: var(--dui-spacing-medium);
                     }
                 }
             }
-
 
             .country-trend {
                 border: var(--width-separator-thin) solid var(--color-separator-light);
@@ -149,7 +135,7 @@
                         font-weight: var(--dui-font-weight-light);
 
                         .regional-text {
-                            color: var(--color-text-regional);
+                            color: var(--color-text-secondary);
                             font-size: var(--dui-font-size-small);
                         }
                     }

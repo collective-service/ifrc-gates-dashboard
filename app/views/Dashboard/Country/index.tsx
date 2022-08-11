@@ -47,7 +47,7 @@ function Country(props: CountryProps) {
         className,
     } = props;
 
-    const rendererParams = useCallback((_, data: PercentageStatsProps) => ({
+    const statusRendererParams = useCallback((_, data: PercentageStatsProps) => ({
         heading: data.heading,
         statValue: data.statValue,
         suffix: data.suffix,
@@ -66,30 +66,26 @@ function Country(props: CountryProps) {
                         className={styles.statusCardContainer}
                         contentClassName={styles.statusContainer}
                     >
-                        <div className={styles.statusCard}>
-                            <ListView
-                                className={styles.infoCards}
-                                renderer={PercentageStats}
-                                rendererParams={rendererParams}
-                                data={statusData}
-                                keySelector={percentageKeySelector}
-                                errored={false}
-                                filtered={false}
-                                pending={false}
-                            />
-                        </div>
-                        <div className={styles.readinessCard}>
-                            <ListView
-                                className={styles.readinessListCard}
-                                renderer={ReadinessCard}
-                                rendererParams={readinessRendererParams}
-                                data={readinessData}
-                                keySelector={readinessKeySelector}
-                                errored={false}
-                                filtered={false}
-                                pending={false}
-                            />
-                        </div>
+                        <ListView
+                            className={styles.infoCards}
+                            renderer={PercentageStats}
+                            rendererParams={statusRendererParams}
+                            data={statusData}
+                            keySelector={percentageKeySelector}
+                            errored={false}
+                            filtered={false}
+                            pending={false}
+                        />
+                        <ListView
+                            className={styles.readinessListCard}
+                            renderer={ReadinessCard}
+                            rendererParams={readinessRendererParams}
+                            data={readinessData}
+                            keySelector={readinessKeySelector}
+                            errored={false}
+                            filtered={false}
+                            pending={false}
+                        />
                     </ContainerCard>
                     <ContainerCard
                         className={styles.countryTrend}

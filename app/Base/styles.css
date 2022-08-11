@@ -103,11 +103,11 @@
     --color-foreground: #ffffff;
     --color-background: #fafafa;
     --color-background-dark: #193256;
+    --color-background-alt: #E8F9F1;
     --color-text-on-dark: #ffffff;
     --color-text: #333333;
-    --color-text-regional : #8DD2B1;
-    --color-background-readiness: #E8F9F1;
-    --color-readiness-title: #2F9C67;
+    --color-text-secondary : #8DD2B1;
+    --color-text-title: #2F9C67;
     --color-progress-bar: #FF800B;
 
     --color-navbar: rgb(51, 64, 83);
