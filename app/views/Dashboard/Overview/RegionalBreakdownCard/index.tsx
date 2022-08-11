@@ -140,7 +140,7 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
                                 dataKey="range"
                                 position="left"
                                 angle={270}
-                                offset={10}
+                                offset={13}
                             />
                         </Bar>
                     </BarChart>

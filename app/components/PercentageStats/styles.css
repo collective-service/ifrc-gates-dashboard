@@ -23,14 +23,12 @@
 
             .value-text {
                 color: var(--color-text-regional);
-                font-size: var(--dui-font-size-mega-large);
+                font-size: var(--dui-font-size-ultra-large);
                 font-weight: var(--dui-font-weight-bold);
             }
 
             .sub-value-text {
                 padding: var(--dui-spacing-extra-small);
-                font-size: var(--dui-font-size-medium);
-                font-weight: var(--dui-font-weight-medium);
             }
         }
     }

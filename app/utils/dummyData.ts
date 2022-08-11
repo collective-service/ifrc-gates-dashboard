@@ -302,13 +302,13 @@ export const lineChartData = [
 
 export const barChartData = [
     {
-        name: 'USA',
+        name: 'Americas',
         range: '400M',
         pv: 2400,
         amt: 2010,
     },
     {
-        name: 'Asia',
+        name: 'Asia/Paci',
         range: '300M',
         pv: 1398,
         amt: 1710,
@@ -320,16 +320,16 @@ export const barChartData = [
         amt: 1500,
     },
     {
-        name: 'Eur',
+        name: 'Europe',
         range: '270M',
         pv: 3908,
-        amt: 1800,
+        amt: 2000,
     },
     {
         name: 'MENA',
         range: '170M',
         pv: 4800,
-        amt: 1181,
+        amt: 1601,
     },
     {
         name: 'WCAR',
@@ -352,15 +352,15 @@ export const totalCasesBarChart = [
         id: 23,
         name: 'Ebola',
         range: '300M',
-        pv: 1398,
-        amt: 1200,
+        pv: 3098,
+        amt: 1450,
         color: 'blue',
     },
     {
         id: 34,
         name: 'MonkeyPox',
         range: '400M',
-        pv: 9800,
+        pv: 5800,
         amt: 1900,
         color: 'green',
     },
@@ -369,7 +369,7 @@ export const totalCasesBarChart = [
         name: 'Cholera',
         range: '200M',
         pv: 3908,
-        amt: 1100,
+        amt: 1500,
         color: 'purple',
     },
     {
@@ -377,7 +377,7 @@ export const totalCasesBarChart = [
         name: 'Spanish Flu',
         range: '300M',
         pv: 4800,
-        amt: 1181,
+        amt: 1881,
         color: 'yellow',
     },
 ];
