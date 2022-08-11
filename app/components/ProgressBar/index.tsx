@@ -6,8 +6,9 @@ import styles from './styles.css';
 export interface Props {
     className?: string | undefined;
     barHeight: number;
+    suffix?: string;
     progressData: {
-        countryName: string | undefined,
+        barName: string | undefined,
         id: string,
         title: string | undefined,
         color?: string | undefined,
@@ -21,6 +22,7 @@ function ProgressBar(props: Props) {
         className,
         barHeight,
         progressData,
+        suffix,
     } = props;
 
     const avgResult = useMemo(
@@ -42,13 +44,13 @@ function ProgressBar(props: Props) {
     );
 
     return (
-        <div className={styles.progressInfo}>
+        <div className={_cs(className, styles.progressInfo)}>
             <div>
-                {progressData.countryName}
+                {progressData.barName}
             </div>
             <div className={styles.progressValueWrapper}>
                 <div
-                    className={_cs(styles.progressBarWrapper, className)}
+                    className={styles.progressBarWrapper}
                     style={{ height: `${barHeight}px` }}
                     title={tooltip as string}
                 >
@@ -66,7 +68,7 @@ function ProgressBar(props: Props) {
                     title={tooltip as string}
                 >
                     {avgResult?.percentage}
-                    M
+                    {suffix}
                 </div>
             </div>
         </div>

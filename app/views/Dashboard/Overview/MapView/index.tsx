@@ -23,7 +23,7 @@ import styles from './styles.css';
 
 const progressBarKeySelector = (d: ProgressBarRendererProps) => d.id;
 export interface ProgressBarRendererProps {
-    countryName: string;
+    barName: string;
     id: string;
     title: string;
     color: string;
@@ -56,6 +56,7 @@ function MapView(props: MapViewProps) {
     const progressBarRendererParams = useCallback(
         (_: string, data: ProgressBarRendererProps) => ({
             barHeight,
+            suffix: 'M',
             progressData: data,
         }), [],
     );
