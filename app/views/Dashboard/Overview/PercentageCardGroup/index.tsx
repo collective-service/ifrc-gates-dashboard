@@ -115,7 +115,7 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                 <ResponsiveContainer className={styles.responsiveContainer}>
                     <BarChart
                         data={barChartData}
-                        barSize={45}
+                        barSize={18}
                     >
                         <Tooltip
                             allowEscapeViewBox={{
@@ -126,20 +126,29 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                         <XAxis
                             dataKey="name"
                             tickLine={false}
-                            axisLine={false}
+                            fontSize="14"
                         >
                             <LabelList
                                 dataKey="name"
                                 position="bottom"
                             />
                         </XAxis>
+                        <YAxis
+                            padding={{ bottom: 10 }}
+                            hide
+                        />
                         <Bar
                             dataKey="amt"
-                            fill="#2F9C67"
+                            fill="#8DD2B1"
+                            radius={[10, 10, 0, 0]}
                         >
                             <LabelList
                                 dataKey="range"
-                                position="top"
+                                position="insideBottomLeft"
+                                fill="#8DD2B1"
+                                angle={-90}
+                                offset={0}
+                                fontSize={25}
                             />
                         </Bar>
                     </BarChart>

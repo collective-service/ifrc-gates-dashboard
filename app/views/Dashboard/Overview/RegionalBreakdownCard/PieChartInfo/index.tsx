@@ -9,7 +9,7 @@ import {
 
 import styles from './styles.css';
 
-const COLORS = ['#4D6F8B', '#AED8F1', '#7FAEDA', '#D0EFF2', '#B5CFD1'];
+const COLORS = ['#C09A57', '#FFDD98', '#C7BCA9', '#ACA28E', '#CCB387'];
 
 export type RegionalDataType = {
     id: number;
@@ -32,22 +32,19 @@ function PieChartInfo(props: PieChartInfoProps) {
 
     return (
         <div className={_cs(className, styles.pieChartWrapper)}>
-            <div className={styles.pieChartHeader}>
-                {country}
-            </div>
             <div className={styles.pieChartHolder}>
                 <ResponsiveContainer
                     className={styles.responsiveContainer}
                 >
                     <PieChart
                         width={20}
-                        height={50}
+                        height={5}
                     >
                         <Pie
                             data={regionalData}
                             dataKey="percentage"
                             labelLine={false}
-                            cx={65}
+                            cx={60}
                             cy={50}
                             outerRadius={40}
                         >
@@ -60,6 +57,9 @@ function PieChartInfo(props: PieChartInfoProps) {
                         </Pie>
                     </PieChart>
                 </ResponsiveContainer>
+            </div>
+            <div className={styles.pieChartHeader}>
+                {country}
             </div>
         </div>
     );
