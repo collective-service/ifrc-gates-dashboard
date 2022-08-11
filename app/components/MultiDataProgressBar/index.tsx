@@ -78,7 +78,7 @@ function MultiDataProgressBar(props: Props) {
                         key={progressInfoData.id}
                         style={{
                             width: `${regionalPercentage}%`,
-                            backgroundColor: 'var(--color-text-regional)',
+                            backgroundColor: 'var(--color-text-secondary)',
                         }}
                     />
                 </div>

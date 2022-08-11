@@ -56,7 +56,6 @@ function IndicatorChart(props: IndicatorChartProps) {
                 >
                     <XAxis
                         dataKey="month"
-                        axisLine={false}
                         tickLine={false}
                     />
                     <YAxis

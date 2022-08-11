@@ -14,14 +14,27 @@
             flex-wrap: wrap;
             gap: var(--dui-spacing-small);
 
-            .status-container {
-                border: var(--width-separator-thin) solid var(--color-separator-light);
-                border-radius: var(--dui-border-radius-card);
+            .status-card-container {
+                padding: 0;
 
-                .info-cards {
+                .status-container {
                     display: flex;
-                    justify-content: space-between;
-                    padding: var(--dui-spacing-medium);
+                    gap: var(--dui-spacing-medium);
+
+                    .info-cards {
+                        display: flex;
+                        gap: var(--dui-spacing-small);
+                    }
+
+                    .readinessListCard {
+                        display: flex;
+                        flex-basis: 62%;
+                        justify-content: space-between;
+                        border: var(--width-separator-thin);
+                        border-radius: var(--dui-border-radius-card);
+                        background-color: var(--color-background-alt);
+                        padding: var(--dui-spacing-medium);
+                    }
                 }
             }
 
@@ -95,14 +108,8 @@
                 align-items: center;
             }
 
-            .country-map {
-                display: flex;
-                justify-content: center;
-
-                img {
-                    width: 100%;
-                    object-fit: cover;
-                }
+            .country-heading {
+                align-items: end;
             }
 
             .country-details {
@@ -111,8 +118,15 @@
                 gap: var(--dui-spacing-medium);
 
                 .country-text-output {
+                    align-items: center;
                     justify-content: space-between;
+                    border-bottom: var(--dui-width-separator-thin) solid var(--dui-color-line-separator);
+                    height: 4rem;
                     font-size: var(--dui-font-size-medium);
+
+                    .labelText {
+                        width: 10rem;
+                    }
 
                     .value-text {
                         display: flex;
@@ -121,7 +135,7 @@
                         font-weight: var(--dui-font-weight-light);
 
                         .regional-text {
-                            color: var(--color-text-regional);
+                            color: var(--color-text-secondary);
                             font-size: var(--dui-font-size-small);
                         }
                     }
@@ -137,8 +151,6 @@
         padding: var(--dui-spacing-medium);
 
         .perception-card {
-            border: var(--width-separator-thin) solid var(--color-separator-light);
-            border-radius: var(--dui-border-radius-card);
             width: 20rem;
 
             p {

@@ -14,7 +14,7 @@
         }
 
         .regional-text {
-            color: var(--color-text-regional);
+            color: var(--color-text-secondary);
             font-size: var(--dui-font-size-small);
         }
     }

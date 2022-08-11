@@ -1,0 +1,22 @@
+.readiness-container {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    border: var(--width-separator-thin) solid transparent;
+    border-radius: var(--dui-border-radius-card);
+    background-color: white;
+    padding: var(--dui-spacing-medium);
+    width: 10rem;
+
+    .readiness-title {
+        color: var(--color-text-title-secondary);
+        font-size: var(--dui-font-size-heading-extra-small);
+        font-weight: var(--dui-font-weight-regular);
+    }
+
+    .readiness-value {
+        color: var(--color-text-secondary);
+        font-size: var(--dui-font-size-mega-large);
+        font-weight: var(--dui-font-weight-bold);
+    }
+}
