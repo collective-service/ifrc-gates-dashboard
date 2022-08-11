@@ -308,7 +308,7 @@ export const barChartData = [
         amt: 2010,
     },
     {
-        name: 'Asia/Paci',
+        name: 'Asia/Pacific',
         range: '300M',
         pv: 1398,
         amt: 1710,

@@ -138,9 +138,10 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
                             ))}
                             <LabelList
                                 dataKey="range"
-                                position="left"
+                                position="insideBottomLeft"
                                 angle={270}
-                                offset={13}
+                                offset={0}
+                                fontSize={25}
                             />
                         </Bar>
                     </BarChart>

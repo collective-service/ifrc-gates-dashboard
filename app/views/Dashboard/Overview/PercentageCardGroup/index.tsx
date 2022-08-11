@@ -144,10 +144,11 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                         >
                             <LabelList
                                 dataKey="range"
-                                position="left"
-                                angle={270}
-                                offset={13}
+                                position="insideBottomLeft"
                                 fill="#8DD2B1"
+                                angle={-90}
+                                offset={0}
+                                fontSize={25}
                             />
                         </Bar>
                     </BarChart>
