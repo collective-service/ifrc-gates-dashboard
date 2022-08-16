@@ -1,19 +1,20 @@
 import React, { useState } from 'react';
 import {
+    IoCloudDownloadOutline,
+} from 'react-icons/io5';
+import {
     Tabs,
     TabList,
     Tab,
     TabPanel,
     Button,
 } from '@the-deep/deep-ui';
-import {
-    IoCloudDownloadOutline,
-} from 'react-icons/io5';
 
 import Overview from './Overview';
 import Country from './Country';
 import CombinedIndicators from './CombinedIndicators';
-import Filters from './Filters';
+import Filters, { FilterType } from './Filters';
+import { AdvancedOptionType } from './AdvancedFilters';
 import styles from './styles.css';
 
 export type TabTypes = 'country' | 'overview' | 'combinedIndicators';
@@ -25,6 +26,10 @@ function Dashboard() {
         // eslint-disable-next-line no-console
         console.log('Handled the export::>>');
     };
+
+    const [filterValues, setFilterValues] = useState<FilterType | undefined>();
+
+    const [advancedOptions, setAdvancedOptions] = useState<AdvancedOptionType | undefined>();
 
     return (
         <div className={styles.dashboardNavigation}>
@@ -64,7 +69,13 @@ function Dashboard() {
                         </Tab>
                     </TabList>
                 </div>
-                <Filters activeTab={activeTab} />
+                <Filters
+                    activeTab={activeTab}
+                    value={filterValues}
+                    onChange={setFilterValues}
+                    advancedOptions={advancedOptions}
+                    setAdvancedOptions={setAdvancedOptions}
+                />
                 <div className={styles.content}>
                     <TabPanel name="overview">
                         <Overview />

@@ -1,5 +1,5 @@
-import { _cs } from '@togglecorp/fujs';
 import React, { useCallback } from 'react';
+import { _cs } from '@togglecorp/fujs';
 import {
     ContainerCard,
     List,
@@ -12,6 +12,7 @@ import styles from './styles.css';
 const progressBarKeySelector = (d: ProgressBarRendererProps) => d.id;
 
 const barHeight = 8;
+
 export interface ProgressBarRendererProps {
     className?: string,
     barHeight?: number,
@@ -24,6 +25,7 @@ export interface ProgressBarRendererProps {
     totalValue: number;
     color: string;
 }
+
 interface Props {
     className?: string;
 }
