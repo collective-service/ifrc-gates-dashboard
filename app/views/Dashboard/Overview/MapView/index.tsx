@@ -117,6 +117,9 @@ function MapView(props: MapViewProps) {
                         filtered={false}
                         errored={false}
                         pending={false}
+                        borderBetweenItem
+                        borderBetweenItemWidth="medium"
+                        borderBetweenItemClassName={styles.progressItemBorder}
                     />
                 </div>
                 <div className={styles.highProgressBox}>
@@ -132,6 +135,9 @@ function MapView(props: MapViewProps) {
                         filtered={false}
                         errored={false}
                         pending={false}
+                        borderBetweenItem
+                        borderBetweenItemWidth="medium"
+                        borderBetweenItemClassName={styles.progressItemBorder}
                     />
                 </div>
             </ContainerCard>

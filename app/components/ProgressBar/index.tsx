@@ -77,12 +77,11 @@ function ProgressBar(props: Props) {
                     {suffix}
                 </div>
             </div>
-            {avgResult.regionalPercentage
-                && (
-                    <div className={styles.regionalValue}>
-                        {`Regional ${avgResult.regionalPercentage}${suffix}`}
-                    </div>
-                )}
+            {avgResult.regionalPercentage && (
+                <div className={styles.regionalValue}>
+                    {`Regional ${avgResult.regionalPercentage}${suffix}`}
+                </div>
+            )}
         </div>
     );
 }

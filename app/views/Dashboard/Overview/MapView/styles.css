@@ -28,6 +28,10 @@
 
         .progress-list {
             font-size: small;
+
+            .progressItemBorder {
+                margin-top: var(--dui-spacing-medium);
+            }
         }
     }
 }

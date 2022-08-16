@@ -1,7 +1,6 @@
 .progress-info {
     display: flex;
     flex-direction: column;
-    border-bottom: var(--dui-width-separator-thin) solid var(--dui-color-line-separator);
     padding: var(--dui-spacing-small) 0;
 
     .progress-title {

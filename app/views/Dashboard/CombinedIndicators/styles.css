@@ -23,6 +23,7 @@
 
                     .progress-bar-item {
                         flex-basis: 30%;
+                        border-bottom: var(--dui-width-separator-thin) solid var(--dui-color-line-separator);
                     }
                 }
             }
