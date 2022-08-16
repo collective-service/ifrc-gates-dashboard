@@ -19,13 +19,12 @@
                 .progress-bar {
                     display: flex;
                     flex-wrap: wrap;
-                    gap: var(--dui-spacing-medium);
+                    gap: var(--dui-spacing-large);
 
                     .progress-bar-item {
                         flex-basis: 30%;
                     }
                 }
-
             }
         }
     }

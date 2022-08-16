@@ -11,7 +11,7 @@ import styles from './styles.css';
 
 const progressBarKeySelector = (d: ProgressBarRendererProps) => d.id;
 
-const barHeight = 10;
+const barHeight = 8;
 export interface ProgressBarRendererProps {
     barName: string;
     title: string;
@@ -19,6 +19,7 @@ export interface ProgressBarRendererProps {
     value: number;
     regional: number;
     totalValue: number;
+    color: string;
 }
 interface Props {
     className?: string;

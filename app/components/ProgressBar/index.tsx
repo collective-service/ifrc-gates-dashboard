@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { _cs } from '@togglecorp/fujs';
+import { IoInformationCircleOutline } from 'react-icons/io5';
 
 import styles from './styles.css';
 
@@ -13,6 +14,7 @@ export interface Props {
         title: string | undefined,
         color?: string | undefined,
         value: number | undefined,
+        regional?: number | undefined,
         totalValue: number | undefined,
     };
 }
@@ -30,6 +32,9 @@ function ProgressBar(props: Props) {
             percentage: progressData?.value && progressData?.totalValue
                 && (((progressData.value / progressData.totalValue) * 100).toFixed(1)
                     ?? undefined),
+            regionalPercentage: progressData.regional && progressData?.totalValue
+                && (((progressData.regional / progressData.totalValue) * 100).toFixed(1)
+                    ?? undefined),
         }),
         [progressData],
     );
@@ -45,8 +50,9 @@ function ProgressBar(props: Props) {
 
     return (
         <div className={_cs(className, styles.progressInfo)}>
-            <div>
+            <div className={styles.progressTitle}>
                 {progressData.barName}
+                <IoInformationCircleOutline />
             </div>
             <div className={styles.progressValueWrapper}>
                 <div
@@ -71,6 +77,12 @@ function ProgressBar(props: Props) {
                     {suffix}
                 </div>
             </div>
+            {avgResult.regionalPercentage
+                && (
+                    <div className={styles.regionalValue}>
+                        {`Regional ${avgResult.regionalPercentage}${suffix}`}
+                    </div>
+                )}
         </div>
     );
 }

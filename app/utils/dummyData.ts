@@ -610,7 +610,8 @@ export const sourcesProgressBarData: ProgressBarRendererProps[] = [
         id: '1',
         totalValue: 100,
         value: 76,
-        regional: 16,
+        color: '#8DD2B1',
+        regional: 30,
     },
     {
         title: 'communication',
@@ -618,6 +619,7 @@ export const sourcesProgressBarData: ProgressBarRendererProps[] = [
         id: '2',
         totalValue: 100,
         value: 56,
+        color: '#8DD2B1',
         regional: 76,
     },
     {
@@ -626,6 +628,7 @@ export const sourcesProgressBarData: ProgressBarRendererProps[] = [
         id: '3',
         totalValue: 100,
         value: 56,
+        color: '#8DD2B1',
         regional: 26,
     },
     {
@@ -634,6 +637,7 @@ export const sourcesProgressBarData: ProgressBarRendererProps[] = [
         id: '4',
         totalValue: 100,
         value: 56,
+        color: '#8DD2B1',
         regional: 26,
     },
     {
@@ -642,6 +646,7 @@ export const sourcesProgressBarData: ProgressBarRendererProps[] = [
         id: '5',
         totalValue: 100,
         value: 56,
+        color: '#8DD2B1',
         regional: 26,
     },
     {
@@ -650,6 +655,7 @@ export const sourcesProgressBarData: ProgressBarRendererProps[] = [
         id: '6',
         totalValue: 100,
         value: 56,
+        color: '#8DD2B1',
         regional: 26,
     },
     {
@@ -658,6 +664,7 @@ export const sourcesProgressBarData: ProgressBarRendererProps[] = [
         id: '7',
         totalValue: 100,
         value: 56,
+        color: '#8DD2B1',
         regional: 26,
     },
     {
@@ -666,6 +673,7 @@ export const sourcesProgressBarData: ProgressBarRendererProps[] = [
         id: '8',
         totalValue: 100,
         value: 56,
+        color: '#8DD2B1',
         regional: 26,
     },
     {
@@ -674,6 +682,7 @@ export const sourcesProgressBarData: ProgressBarRendererProps[] = [
         id: '9',
         totalValue: 100,
         value: 56,
+        color: '#8DD2B1',
         regional: 26,
     },
 ];

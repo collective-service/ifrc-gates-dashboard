@@ -1,7 +1,14 @@
 .progress-info {
     display: flex;
     flex-direction: column;
-    padding-top: var(--dui-spacing-small);
+    border-bottom: var(--dui-width-separator-thin) solid var(--dui-color-line-separator);
+    padding: var(--dui-spacing-small) 0;
+
+    .progress-title {
+        display: flex;
+        align-items: center;
+        gap: var(--dui-spacing-small);
+    }
 
     .progress-value-wrapper {
         display: flex;
@@ -14,8 +21,6 @@
             flex-grow: 1;
             border-radius: 20px;
             background-color: var(--dui-color-background-progress-bar-light);
-            height: 5px;
-
 
             .progress-bar-style {
                 &:first-of-type {
@@ -31,9 +36,14 @@
         }
 
         .progress-value {
-            flex-basis: 10%;
-            flex-shrink: 0;
+            font-size: var(--dui-font-size-small);
         }
+    }
+
+    .regional-value {
+        align-self: end;
+        color: var(--color-text-title);
+        font-size: var(--dui-font-size-extra-small);
     }
 
 }
