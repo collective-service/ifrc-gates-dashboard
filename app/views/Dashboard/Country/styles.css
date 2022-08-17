@@ -15,10 +15,12 @@
             gap: var(--dui-spacing-small);
 
             .status-card-container {
+                background-color: var(--color-background);
                 padding: 0;
 
                 .status-container {
                     display: flex;
+                    flex-wrap: wrap-reverse;
                     gap: var(--dui-spacing-medium);
 
                     .info-cards {
@@ -28,19 +30,17 @@
 
                     .readinessListCard {
                         display: flex;
-                        flex-basis: 62%;
-                        justify-content: space-between;
+                        flex-grow: 1;
                         border: var(--width-separator-thin);
                         border-radius: var(--dui-border-radius-card);
                         background-color: var(--color-background-alt);
                         padding: var(--dui-spacing-medium);
+                        gap: var(--dui-spacing-medium);
                     }
                 }
             }
 
             .country-trend {
-                border: var(--width-separator-thin) solid var(--color-separator-light);
-                border-radius: var(--dui-border-radius-card);
 
                 .responsive-content {
                     min-height: 20rem;
@@ -56,10 +56,10 @@
                 flex-wrap: wrap;
                 gap: var(--dui-spacing-small);
 
-                .indicators-card {
+                /* .indicators-card {
                     border: var(--width-separator-thin) solid var(--color-separator-light);
                     border-radius: var(--dui-border-radius-card);
-                }
+                } */
 
                 .percentage-card {
                     flex-basis: 40%;
@@ -92,8 +92,6 @@
         }
 
         .country-info {
-            border: var(--width-separator-thin) solid var(--color-separator-light);
-            border-radius: var(--dui-border-radius-card);
             background-color: var(--dui-color-foreground);
             min-width: var(--dui-width-min-modal);
 

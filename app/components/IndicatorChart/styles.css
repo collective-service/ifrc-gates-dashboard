@@ -1,8 +1,6 @@
 .indicator-chart-card {
     display: flex;
     flex-shrink: 0;
-    border: var(--width-separator-thin) solid var(--color-separator-light);
-    border-radius: var(--dui-border-radius-card);
 
     .responsive-container {
         min-height: 15rem;
