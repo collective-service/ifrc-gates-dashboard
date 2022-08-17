@@ -234,6 +234,12 @@ export const statusData: PercentageStatsProps[] = [
         statValue: 1,
         suffix: 'M',
     },
+    {
+        id: 3,
+        heading: 'Total number of Monkey pox cases',
+        statValue: 1,
+        suffix: 'M',
+    },
 ];
 
 export const readinessData: ReadinessCardProps[] = [

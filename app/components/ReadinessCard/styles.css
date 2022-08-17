@@ -1,12 +1,13 @@
 .readiness-container {
     display: flex;
     align-items: center;
+    flex-basis: 25%;
     flex-direction: column;
     border: var(--width-separator-thin) solid transparent;
     border-radius: var(--dui-border-radius-card);
     background-color: white;
     padding: var(--dui-spacing-medium);
-    width: 10rem;
+
 
     .readiness-title {
         color: var(--color-text-title-secondary);
