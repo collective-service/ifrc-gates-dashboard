@@ -17,6 +17,7 @@ import {
     TextOutput,
     ListView,
 } from '@the-deep/deep-ui';
+import { useQuery, gql } from '@apollo/client';
 
 import IndicatorChart from '#components/IndicatorChart';
 import PercentageStats from '#components/PercentageStats';
@@ -30,6 +31,7 @@ import {
     PercentageStatsProps,
     ReadinessCardProps,
 } from '#utils/dummyData';
+import { CountryQuery } from '#generated/types';
 
 import styles from './styles.css';
 
@@ -42,7 +44,35 @@ interface CountryProps {
 
 const COLORS = ['#567968', '#52625A', '#AFFAD5'];
 
+const COUNTRY_PROFILE = gql`
+    query Country($iso3: String) {
+        countryProfile(iso3: $iso3) {
+            iso3
+            countryName
+            populationSize
+            literacyRate
+            washAccessNational
+            medicalStaff
+            stringency
+            economicSupportIndex
+            readiness
+            vulnerability
+            risk
+            response
+        }
+    }
+`;
+
 function Country(props: CountryProps) {
+    const {
+        data: CountryResponse,
+    } = useQuery<CountryQuery>(
+        COUNTRY_PROFILE,
+        { variables: { iso3: 'NPL' } },
+    );
+
+    console.log(CountryResponse);
+
     const {
         className,
     } = props;
