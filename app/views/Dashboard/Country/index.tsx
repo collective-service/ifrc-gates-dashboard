@@ -50,6 +50,7 @@ const COUNTRY_PROFILE = gql`
             iso3
             countryName
             populationSize
+            internetAccess
             literacyRate
             washAccessNational
             medicalStaff
@@ -70,8 +71,6 @@ function Country(props: CountryProps) {
         COUNTRY_PROFILE,
         { variables: { iso3: 'NPL' } },
     );
-
-    console.log(CountryResponse);
 
     const {
         className,
@@ -171,13 +170,13 @@ function Country(props: CountryProps) {
                             icon={null}
                         />
                         <IndicatorChart
-                            className={_cs(styles.indicatorsCard, styles.indicatorsChart)}
+                            className={styles.indicatorsChart}
                             heading="Indicator overview over the last 12 months"
                             headerDescription="Lorem ipsum"
                             chartData={indicatorData}
                         />
                         <ContainerCard
-                            className={_cs(styles.indicatorsCard, styles.genderDisaggregation)}
+                            className={styles.genderDisaggregation}
                             contentClassName={styles.responsiveContent}
                             heading="Percentage of unvaccinated individuals who have tried to get vaccinated"
                             headerDescription="Lorem ipsum explaining the topic"
@@ -210,7 +209,7 @@ function Country(props: CountryProps) {
                             </ResponsiveContainer>
                         </ContainerCard>
                         <ContainerCard
-                            className={_cs(styles.indicatorsCard, styles.ageDisaggregation)}
+                            className={styles.ageDisaggregation}
                             contentClassName={styles.responsiveContent}
                             heading="Age disaggregation"
                             headerDescription="Lorem ipsum explaining the topic"
@@ -254,7 +253,7 @@ function Country(props: CountryProps) {
                         <img src="https://picsum.photos/50" alt="country-avatar" />
                     )}
                     headingSize="small"
-                    heading="<Country-Name>"
+                    heading={CountryResponse?.countryProfile.countryName}
                 >
                     <div className={styles.countryDetails}>
                         <TextOutput
@@ -263,7 +262,7 @@ function Country(props: CountryProps) {
                             labelContainerClassName={styles.labelText}
                             hideLabelColon
                             label="Population"
-                            value="38,928,346"
+                            value={CountryResponse?.countryProfile.populationSize}
                         />
                         <TextOutput
                             className={styles.countryTextOutput}
@@ -273,7 +272,7 @@ function Country(props: CountryProps) {
                             label="Internet access"
                             value={(
                                 <>
-                                    11.4%
+                                    {CountryResponse?.countryProfile.internetAccess}
                                     <div className={styles.regionalText}>
                                         Regional 30%
                                     </div>
@@ -288,7 +287,7 @@ function Country(props: CountryProps) {
                             label="Literacy rate"
                             value={(
                                 <>
-                                    90%
+                                    {CountryResponse?.countryProfile.literacyRate}
                                     <div className={styles.regionalText}>
                                         Regional 30%
                                     </div>
@@ -303,7 +302,7 @@ function Country(props: CountryProps) {
                             label="Access to basic washing facilities"
                             value={(
                                 <>
-                                    35%
+                                    {CountryResponse?.countryProfile.washAccessNational}
                                     <div className={styles.regionalText}>
                                         Regional 30%
                                     </div>
@@ -318,7 +317,7 @@ function Country(props: CountryProps) {
                             label="Doctors and nurses per 1000 people"
                             value={(
                                 <>
-                                    6.2
+                                    {CountryResponse?.countryProfile.medicalStaff}
                                     <div className={styles.regionalText}>
                                         Regional 30%
                                     </div>
@@ -333,7 +332,7 @@ function Country(props: CountryProps) {
                             label="Stringency"
                             value={(
                                 <>
-                                    11.8%
+                                    {CountryResponse?.countryProfile.stringency}
                                     <div className={styles.regionalText}>
                                         Regional 30%
                                     </div>
@@ -363,7 +362,7 @@ function Country(props: CountryProps) {
                             label="Economic support index"
                             value={(
                                 <>
-                                    37.5%
+                                    {CountryResponse?.countryProfile.economicSupportIndex}
                                     <div className={styles.regionalText}>
                                         Regional 30%
                                     </div>

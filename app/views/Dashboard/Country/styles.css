@@ -56,11 +56,6 @@
                 flex-wrap: wrap;
                 gap: var(--dui-spacing-small);
 
-                /* .indicators-card {
-                    border: var(--width-separator-thin) solid var(--color-separator-light);
-                    border-radius: var(--dui-border-radius-card);
-                } */
-
                 .percentage-card {
                     flex-basis: 40%;
                     flex-grow: 1;
