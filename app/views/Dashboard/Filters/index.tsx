@@ -1,65 +1,43 @@
 import React from 'react';
-
+import { listToGroupList } from '@togglecorp/fujs';
+import { gql, useQuery } from '@apollo/client';
 import {
     SelectInput,
 } from '@the-deep/deep-ui';
+
+import {
+    CountryListQuery,
+    CountryListQueryVariables,
+} from '#generated/types';
 
 import { TabTypes } from '..';
 import AdvancedFilters, { AdvancedOptionType } from '../AdvancedFilters';
 import styles from './styles.css';
 
 interface Outbreak {
-    key: string;
-    name: string;
+    key: 'Monkeypox' | 'COVID-19';
+    label: string;
 }
+
+// FIXME: Data to be fetched from graphql
 const outbreaks: Outbreak[] = [
     {
-        key: '1',
-        name: 'Monkey Pox',
+        key: 'Monkeypox',
+        label: 'Monkeypox',
     },
     {
-        key: '2',
-        name: 'Ebola',
-    },
-    {
-        key: '3',
-        name: 'Covid',
+        key: 'COVID-19',
+        label: 'COVID-19',
     },
 ];
 
 const outbreakKeySelector = (d: Outbreak) => d.key;
-const outbreakLabelSelector = (d: Outbreak) => d.name;
+const outbreakLabelSelector = (d: Outbreak) => d.label;
 
 interface Region {
     key: string;
     title: string;
 }
-const regions: Region[] = [
-    {
-        key: '1',
-        title: 'Americas',
-    },
-    {
-        key: '2',
-        title: 'Asia/Pacific',
-    },
-    {
-        key: '3',
-        title: 'ESAR',
-    },
-    {
-        key: '4',
-        title: 'Europe',
-    },
-    {
-        key: '5',
-        title: 'MENA',
-    },
-    {
-        key: '6',
-        title: 'WCAR',
-    },
-];
 
 const regionsKeySelector = (d: Region) => d.key;
 const regionsLabelSelector = (d: Region) => d.title;
@@ -86,32 +64,19 @@ const indicators: Indicator[] = [
 const indicatorKeySelector = (d: Indicator) => d.key;
 const indicatorLabelSelector = (d: Indicator) => d.name;
 
-interface Country {
-    key: string;
-    name: string;
-}
+const COUNTRY_LIST_WITH_REGION = gql`
+    query CountryListWithRegion {
+        countryProfiles {
+            iso3
+            countryName
+            region
+        }
+    }
+`;
 
-const countries: Country[] = [
-    {
-        key: 'AFG',
-        name: 'Afghanistan',
-    },
-    {
-        key: 'IND',
-        name: 'India',
-    },
-    {
-        key: 'NPL',
-        name: 'Nepal',
-    },
-    {
-        key: 'CHI',
-        name: 'China',
-    },
-];
-
-const countriesKeySelector = (d: Country) => d.key;
-const countriesLabelSelector = (d: Country) => d.name;
+type Country = NonNullable<CountryListQuery['countryProfiles']>[number];
+const countriesKeySelector = (d: Country) => d.iso3;
+const countriesLabelSelector = (d: Country) => d.countryName ?? '';
 
 export interface FilterType {
     outbreak?: string;
@@ -124,8 +89,8 @@ interface Props {
     value: FilterType | undefined;
     onChange: React.Dispatch<React.SetStateAction<FilterType| undefined>>;
     activeTab?: TabTypes;
-    advancedOptions: AdvancedOptionType | undefined;
-    setAdvancedOptions: React.Dispatch<React.SetStateAction<AdvancedOptionType | undefined>>;
+    advancedFilterValues: AdvancedOptionType | undefined;
+    setAdvancedFilterValues: React.Dispatch<React.SetStateAction<AdvancedOptionType | undefined>>;
 }
 
 function Filters(props: Props) {
@@ -133,8 +98,8 @@ function Filters(props: Props) {
         activeTab,
         onChange,
         value,
-        advancedOptions,
-        setAdvancedOptions,
+        advancedFilterValues,
+        setAdvancedFilterValues,
     } = props;
 
     const handleInputChange = React.useCallback(
@@ -149,6 +114,25 @@ function Filters(props: Props) {
         [onChange],
     );
 
+    const {
+        data: countryList,
+        loading: countryListLoading,
+    } = useQuery<CountryListQuery, CountryListQueryVariables>(
+        COUNTRY_LIST_WITH_REGION,
+    );
+
+    // const countryMap = countryList?.countryProfiles.map((c) => c.region);
+    const regionGroupedCountryList = listToGroupList(
+        countryList?.countryProfiles,
+        (country) => country.region ?? '__null',
+    );
+
+    const regionListUnsafe = regionGroupedCountryList ? Object.keys(regionGroupedCountryList) : [];
+
+    const regionList = regionListUnsafe
+        .filter((r) => r !== '__null')
+        .map((r) => ({ key: r, title: r }));
+
     return (
         <div className={styles.filtersWrapper}>
             <div className={styles.filters}>
@@ -160,45 +144,50 @@ function Filters(props: Props) {
                     labelSelector={outbreakLabelSelector}
                     value={value?.outbreak}
                     onChange={handleInputChange}
+                    variant="general"
                 />
                 {(activeTab !== 'country') && (
                     <SelectInput
                         name="region"
-                        options={regions}
-                        placeholder="Regions"
+                        options={regionList}
+                        placeholder="Region"
                         keySelector={regionsKeySelector}
                         labelSelector={regionsLabelSelector}
                         value={value?.region}
                         onChange={handleInputChange}
+                        variant="general"
                     />
                 )}
                 {(activeTab !== 'combinedIndicators') && (
                     <SelectInput
                         name="indicator"
                         options={indicators}
-                        placeholder="Indicators"
+                        placeholder="Indicator"
                         keySelector={indicatorKeySelector}
                         labelSelector={indicatorLabelSelector}
                         value={value?.indicator}
                         onChange={handleInputChange}
+                        variant="general"
                     />
                 )}
                 {(activeTab !== 'overview') && (
                     <SelectInput
                         name="country"
-                        options={countries}
-                        placeholder="Countries"
+                        options={countryList?.countryProfiles ?? []}
+                        placeholder="Country"
                         keySelector={countriesKeySelector}
                         labelSelector={countriesLabelSelector}
                         value={value?.country}
                         onChange={handleInputChange}
+                        disabled={countryListLoading}
+                        variant="general"
                     />
                 )}
             </div>
             {activeTab === 'combinedIndicators' && (
                 <AdvancedFilters
-                    value={advancedOptions}
-                    onChange={setAdvancedOptions}
+                    value={advancedFilterValues}
+                    onChange={setAdvancedFilterValues}
                 />
             )}
         </div>

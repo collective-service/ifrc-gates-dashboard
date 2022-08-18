@@ -29,7 +29,10 @@ function Dashboard() {
 
     const [filterValues, setFilterValues] = useState<FilterType | undefined>();
 
-    const [advancedOptions, setAdvancedOptions] = useState<AdvancedOptionType | undefined>();
+    const [
+        advancedFilterValues,
+        setAdvancedFilterValues,
+    ] = useState<AdvancedOptionType | undefined>();
 
     return (
         <div className={styles.dashboardNavigation}>
@@ -73,8 +76,8 @@ function Dashboard() {
                     activeTab={activeTab}
                     value={filterValues}
                     onChange={setFilterValues}
-                    advancedOptions={advancedOptions}
-                    setAdvancedOptions={setAdvancedOptions}
+                    advancedFilterValues={advancedFilterValues}
+                    setAdvancedFilterValues={setAdvancedFilterValues}
                 />
                 <div className={styles.content}>
                     <TabPanel name="overview">

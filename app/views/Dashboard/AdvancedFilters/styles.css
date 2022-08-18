@@ -5,4 +5,13 @@
     border-radius: var(--dui-border-radius-card);
     padding: var(--dui-spacing-medium);
     gap: var(--dui-spacing-large);
+
+    .filter{
+        flex-shrink: 0;
+    }
+
+    .keywords {
+        flex-grow: 1;
+        border-radius: 5px;
+    }
 }
