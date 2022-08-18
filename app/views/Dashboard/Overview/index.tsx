@@ -46,11 +46,13 @@ function Overview(props: Props) {
                             <TabList>
                                 <Tab
                                     name="mapMode"
+                                    fullWidthActiveBorder
                                 >
                                     Map overview
                                 </Tab>
                                 <Tab
                                     name="tableMode"
+                                    fullWidthActiveBorder
                                 >
                                     Table
                                 </Tab>

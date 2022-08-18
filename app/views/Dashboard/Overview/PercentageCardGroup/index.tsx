@@ -65,11 +65,12 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                             dataKey="name"
                             axisLine={false}
                             tickLine={false}
+                            padding={{ left: 20 }}
                         />
                         <YAxis
                             axisLine={false}
                             tickLine={false}
-                            padding={{ top: 30 }}
+                            padding={{ top: 12 }}
                         />
                         <Tooltip
                             allowEscapeViewBox={{
@@ -134,7 +135,7 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                             />
                         </XAxis>
                         <YAxis
-                            padding={{ bottom: 10 }}
+                            padding={{ bottom: 12 }}
                             hide
                         />
                         <Bar
@@ -147,8 +148,8 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                                 position="insideBottomLeft"
                                 fill="#8DD2B1"
                                 angle={-90}
-                                offset={0}
-                                fontSize={25}
+                                offset={-2.8}
+                                fontSize={22}
                             />
                         </Bar>
                     </BarChart>
