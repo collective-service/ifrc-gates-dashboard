@@ -13,11 +13,14 @@ const progressBarKeySelector = (d: ProgressBarRendererProps) => d.id;
 
 const barHeight = 8;
 export interface ProgressBarRendererProps {
+    className?: string,
+    barHeight?: number,
+    suffix?: string,
     barName: string;
     title: string;
     id: string;
     value: number;
-    regional: number;
+    subValue?: number;
     totalValue: number;
     color: string;
 }
@@ -33,7 +36,13 @@ function CombinedIndicators(props: Props) {
             className: styles.progressBarItem,
             barHeight,
             suffix: '%',
-            progressData: data,
+            barName: data.barName,
+            title: data.title,
+            id: data.id,
+            value: data.value,
+            subValue: data.subValue,
+            totalValue: data.totalValue,
+            color: data.color,
         }), [],
     );
 

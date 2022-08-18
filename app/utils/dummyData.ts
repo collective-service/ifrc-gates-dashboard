@@ -14,7 +14,7 @@ export interface ReadinessCardProps {
     value: number;
 }
 
-export const progressDataOne = [
+export const progressDataOne: ProgressBarRendererProps[] = [
     {
         barName: 'Cameroon',
         id: '1',
@@ -57,7 +57,7 @@ export const progressDataOne = [
     },
 ];
 
-export const progressDataTwo = [
+export const progressDataTwo: ProgressBarRendererProps[] = [
     {
         barName: 'Oman',
         id: '13',
@@ -611,7 +611,7 @@ export const sourcesProgressBarData: ProgressBarRendererProps[] = [
         totalValue: 100,
         value: 76,
         color: '#8DD2B1',
-        regional: 30,
+        subValue: 30,
     },
     {
         title: 'communication',
@@ -620,7 +620,7 @@ export const sourcesProgressBarData: ProgressBarRendererProps[] = [
         totalValue: 100,
         value: 56,
         color: '#8DD2B1',
-        regional: 76,
+        subValue: 76,
     },
     {
         title: 'communication',
@@ -629,7 +629,7 @@ export const sourcesProgressBarData: ProgressBarRendererProps[] = [
         totalValue: 100,
         value: 56,
         color: '#8DD2B1',
-        regional: 26,
+        subValue: 26,
     },
     {
         title: 'communication',
@@ -638,7 +638,7 @@ export const sourcesProgressBarData: ProgressBarRendererProps[] = [
         totalValue: 100,
         value: 56,
         color: '#8DD2B1',
-        regional: 26,
+        subValue: 26,
     },
     {
         title: 'communication',
@@ -647,7 +647,7 @@ export const sourcesProgressBarData: ProgressBarRendererProps[] = [
         totalValue: 100,
         value: 56,
         color: '#8DD2B1',
-        regional: 26,
+        subValue: 26,
     },
     {
         title: 'communication',
@@ -656,7 +656,7 @@ export const sourcesProgressBarData: ProgressBarRendererProps[] = [
         totalValue: 100,
         value: 56,
         color: '#8DD2B1',
-        regional: 26,
+        subValue: 26,
     },
     {
         title: 'communication',
@@ -665,7 +665,7 @@ export const sourcesProgressBarData: ProgressBarRendererProps[] = [
         totalValue: 100,
         value: 56,
         color: '#8DD2B1',
-        regional: 26,
+        subValue: 26,
     },
     {
         title: 'communication',
@@ -674,7 +674,7 @@ export const sourcesProgressBarData: ProgressBarRendererProps[] = [
         totalValue: 100,
         value: 56,
         color: '#8DD2B1',
-        regional: 26,
+        subValue: 26,
     },
     {
         title: 'communication',
@@ -683,6 +683,6 @@ export const sourcesProgressBarData: ProgressBarRendererProps[] = [
         totalValue: 100,
         value: 56,
         color: '#8DD2B1',
-        regional: 26,
+        subValue: 26,
     },
 ];

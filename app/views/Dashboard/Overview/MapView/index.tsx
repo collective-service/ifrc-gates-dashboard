@@ -12,6 +12,8 @@ import Map, {
     MapLayer,
 } from '@togglecorp/re-map';
 import ProgressBar from '#components/ProgressBar';
+import { ProgressBarRendererProps } from '#views/Dashboard/CombinedIndicators';
+
 import geoJson from '#utils/geoJson';
 import {
     progressDataOne,
@@ -22,14 +24,6 @@ import {
 import styles from './styles.css';
 
 const progressBarKeySelector = (d: ProgressBarRendererProps) => d.id;
-export interface ProgressBarRendererProps {
-    barName: string;
-    id: string;
-    title: string;
-    color: string;
-    value: number;
-    totalValue: number;
-}
 
 interface MapViewProps {
     className?: string;
@@ -57,7 +51,12 @@ function MapView(props: MapViewProps) {
         (_: string, data: ProgressBarRendererProps) => ({
             barHeight,
             suffix: 'M',
-            progressData: data,
+            barName: data.barName,
+            title: data.title,
+            id: data.id,
+            value: data.value,
+            totalValue: data.totalValue,
+            color: data.color,
         }), [],
     );
 
