@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { _cs } from '@togglecorp/fujs';
+import { isNotDefined, _cs } from '@togglecorp/fujs';
 import {
     LineChart,
     Line,
@@ -27,20 +27,25 @@ import {
     outbreakData,
     statusData,
     genderDisaggregationData,
-    readinessData,
     PercentageStatsProps,
-    ReadinessCardProps,
 } from '#utils/dummyData';
 import { CountryQuery } from '#generated/types';
 
 import styles from './styles.css';
 
-const percentageKeySelector = (d: PercentageStatsProps) => d.id;
-const readinessKeySelector = (d: ReadinessCardProps) => d.id;
-
 interface CountryProps {
     className?: string;
 }
+
+interface ReadinessCardProps {
+    title: string;
+    value?: number;
+    metricType: 'positive' | 'negative';
+    indicator?: 'red' | 'yellow' | 'orange' | 'green' | undefined;
+}
+
+const percentageKeySelector = (d: PercentageStatsProps) => d.id;
+const readinessKeySelector = (d: ReadinessCardProps) => d.title;
 
 const COLORS = ['#567968', '#52625A', '#AFFAD5'];
 
@@ -76,16 +81,66 @@ function Country(props: CountryProps) {
         className,
     } = props;
 
+    const readinessData: ReadinessCardProps[] = [
+        {
+            title: 'Readiness',
+            value: CountryResponse?.countryProfile.readiness ?? undefined,
+            metricType: 'positive',
+        },
+        {
+            title: 'Vulnerability',
+            value: CountryResponse?.countryProfile.vulnerability ?? undefined,
+            metricType: 'negative',
+        },
+        {
+            title: 'Risk',
+            value: CountryResponse?.countryProfile.risk ?? undefined,
+            metricType: 'negative',
+        },
+        {
+            title: 'Response',
+            value: CountryResponse?.countryProfile.response ?? undefined,
+            metricType: 'positive',
+        },
+    ];
+
     const statusRendererParams = useCallback((_, data: PercentageStatsProps) => ({
         heading: data.heading,
         statValue: data.statValue,
         suffix: data.suffix,
     }), []);
 
+    const metricTypeForColor = useCallback((data: ReadinessCardProps) => {
+        if (isNotDefined(data) || isNotDefined(data.metricType) || isNotDefined(data.value)) {
+            return undefined;
+        }
+
+        if (
+            (data.metricType === 'positive' && data.value > 75)
+            || (data.metricType === 'negative' && data.value <= 25)
+        ) {
+            return 'green' as const;
+        }
+        if (
+            (data.metricType === 'positive' && data.value <= 75 && data.value > 50)
+            || (data.metricType === 'negative' && data.value > 25 && data.value <= 50)
+        ) {
+            return 'yellow' as const;
+        }
+        if (
+            (data.metricType === 'positive' && data.value <= 50 && data.value > 25)
+            || (data.metricType === 'negative' && data.value > 50 && data.value <= 75)
+        ) {
+            return 'orange' as const;
+        }
+        return 'red' as const;
+    }, []);
+
     const readinessRendererParams = useCallback((_, data: ReadinessCardProps) => ({
         title: data.title,
         value: data.value,
-    }), []);
+        indicator: metricTypeForColor(data),
+    }), [metricTypeForColor]);
 
     return (
         <div className={_cs(className, styles.countryWrapper)}>

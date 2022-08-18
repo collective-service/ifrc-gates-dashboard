@@ -8,11 +8,6 @@ export interface PercentageStatsProps {
     statValue: number;
     suffix: string;
 }
-export interface ReadinessCardProps {
-    id: number;
-    title: string;
-    value: number;
-}
 
 export const progressDataOne: ProgressBarRendererProps[] = [
     {
@@ -242,28 +237,28 @@ export const statusData: PercentageStatsProps[] = [
     },
 ];
 
-export const readinessData: ReadinessCardProps[] = [
-    {
-        id: 1,
-        title: 'Readiness',
-        value: 10,
-    },
-    {
-        id: 2,
-        title: 'Vulnerability',
-        value: 28,
-    },
-    {
-        id: 3,
-        title: 'Risk',
-        value: 50,
-    },
-    {
-        id: 4,
-        title: 'Response',
-        value: 24.5,
-    },
-];
+// export const readinessData: ReadinessCardProps[] = [
+//    {
+//        id: 1,
+//        title: 'Readiness',
+//        value: 10,
+//    },
+//    {
+//        id: 2,
+//        title: 'Vulnerability',
+//        value: 28,
+//    },
+//    {
+//        id: 3,
+//        title: 'Risk',
+//        value: 50,
+//    },
+//    {
+//        id: 4,
+//        title: 'Response',
+//        value: 24.5,
+//    },
+// ];
 
 export const genderDisaggregationData = [
     {
