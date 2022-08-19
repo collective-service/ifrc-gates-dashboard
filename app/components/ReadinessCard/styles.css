@@ -5,17 +5,16 @@
     flex-direction: column;
     border: var(--width-separator-thin) solid transparent;
     border-radius: var(--dui-border-radius-card);
-    background-color: white;
+    box-shadow: 0px 0px 10px var(--dui-card-box-shadow);
     padding: var(--dui-spacing-medium);
+    color: var(--color-text-secondary);
 
     .readiness-title {
-        color: var(--color-text-secondary);
         font-size: var(--dui-font-size-heading-extra-small);
         font-weight: var(--dui-font-weight-regular);
     }
 
     .readiness-value {
-        color: var(--color-text-secondary);
         font-size: var(--dui-font-size-mega-large);
         font-weight: var(--dui-font-weight-bold);
 

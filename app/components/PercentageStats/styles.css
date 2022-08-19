@@ -1,6 +1,8 @@
 .percentage-stats-card {
     display: flex;
     flex-shrink: 0;
+    border-radius: 0;
+    box-shadow: 0px 0px 10px var(--dui-card-box-shadow);
 
     .percentage-heading {
         font-weight: var(--dui-font-weight-regular);

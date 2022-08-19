@@ -26,7 +26,6 @@ import {
     indicatorData,
     outbreakData,
     genderDisaggregationData,
-    PercentageStatsProps,
 } from '#utils/dummyData';
 import { CountryQuery } from '#generated/types';
 
@@ -35,17 +34,21 @@ import styles from './styles.css';
 interface CountryProps {
     className?: string;
 }
-
-type countryEmergencyProfileType = NonNullable<CountryQuery['countryEmergencyProfile']>[number];
-
 interface ReadinessCardProps {
     title: string;
     value?: number;
     metricType: 'positive' | 'negative';
     indicator?: 'red' | 'yellow' | 'orange' | 'green' | undefined;
 }
+interface countryWiseOutbreakCases {
+    key: string;
+    iso3: string;
+    emergency: string;
+    contextIndicatorValue?: number | null | undefined;
+    contextIndicatorId: string;
+}
 
-const percentageKeySelector = (d: countryEmergencyProfileType) => d.;
+const percentageKeySelector = (d: countryWiseOutbreakCases) => d.key;
 const readinessKeySelector = (d: ReadinessCardProps) => d.title;
 
 const COLORS = ['#567968', '#52625A', '#AFFAD5'];
@@ -84,13 +87,13 @@ function Country(props: CountryProps) {
         { variables: { iso3: 'IND', contextIndicatorsIds: 'total_cases' } },
     );
 
-    console.log(CountryResponse);
-
-    const percentageKeySelectorsId = CountryResponse?.countryEmergencyProfile.map((item) => {
-        return {
-            key: `${item.iso3}${item.contextIndicatorId}${item.emergency}`
-        }
-    })
+    const countryWiseOutbreakCases: countryWiseOutbreakCases[] | undefined = CountryResponse
+        ?.countryEmergencyProfile.map((item) => (
+            {
+                ...item,
+                key: `${item.iso3}${item.contextIndicatorId}${item.emergency}`,
+            }
+        ));
 
     const {
         className,
@@ -119,33 +122,6 @@ function Country(props: CountryProps) {
         },
     ];
 
-    const statusData: PercentageStatsProps[] = [
-        {
-            id: 1,
-            heading: 'Total number of COVID-19 cases',
-            statValue: 65,
-            suffix: '%',
-        },
-        {
-            id: 2,
-            heading: 'Total number of Monkey pox cases',
-            statValue: 1,
-            suffix: 'M',
-        },
-        {
-            id: 3,
-            heading: 'Total number of Monkey pox cases',
-            statValue: 1,
-            suffix: 'M',
-        },
-    ];
-
-    const statusRendererParams = useCallback((_, data: countryEmergencyProfileType) => ({
-        heading: data.emergency,
-        statValue: data.contextIndicatorValue,
-        suffix: 'M',
-    }), []);
-
     const metricTypeForColor = useCallback((data: ReadinessCardProps) => {
         if (isNotDefined(data) || isNotDefined(data.metricType) || isNotDefined(data.value)) {
             return undefined;
@@ -172,6 +148,11 @@ function Country(props: CountryProps) {
         return 'red' as const;
     }, []);
 
+    const statusRendererParams = useCallback((_, data: countryWiseOutbreakCases) => ({
+        heading: data.emergency,
+        statValue: data.contextIndicatorValue,
+    }), []);
+
     const readinessRendererParams = useCallback((_, data: ReadinessCardProps) => ({
         title: data.title,
         value: data.value,
@@ -190,7 +171,7 @@ function Country(props: CountryProps) {
                             className={styles.infoCards}
                             renderer={PercentageStats}
                             rendererParams={statusRendererParams}
-                            data={CountryResponse?.countryEmergencyProfile}
+                            data={countryWiseOutbreakCases}
                             keySelector={percentageKeySelector}
                             errored={false}
                             filtered={false}
