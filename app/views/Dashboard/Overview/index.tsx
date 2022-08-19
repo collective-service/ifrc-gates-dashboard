@@ -11,7 +11,7 @@ import { _cs } from '@togglecorp/fujs';
 import RegionalBreakdownCard from './RegionalBreakdownCard';
 import PercentageCardGroup from './PercentageCardGroup';
 import MapView from './MapView';
-import TableView from './TableView';
+import OverviewTable from './OverviewTable';
 import styles from './styles.css';
 
 interface Props {
@@ -37,11 +37,8 @@ function Overview(props: Props) {
                     onChange={setCurrentTab}
                 >
                     <ContainerCard
-                        heading={currentTab === 'mapMode' ? 'Overview map' : 'Tabular data'}
-                        headingSize="extraSmall"
-                        headerDescription={currentTab === 'mapMode'
-                            ? 'Overview of the average indicator value weighted by  populations'
-                            : 'Interpretation of the data in table'}
+                        heading={currentTab === 'mapMode' ? 'Overview map' : 'Overview Table'}
+                        headingSize="medium"
                         headerActions={(
                             <TabList>
                                 <Tab
@@ -67,7 +64,7 @@ function Overview(props: Props) {
                         <TabPanel
                             name="tableMode"
                         >
-                            <TableView />
+                            <OverviewTable />
                         </TabPanel>
                     </ContainerCard>
                 </Tabs>

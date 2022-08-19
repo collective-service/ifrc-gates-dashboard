@@ -1,0 +1,17 @@
+.table-wrapper {
+    display: flex;
+
+    .each-table-cell {
+        border-right: 1px solid var(--dui-color-line-separator);
+    }
+
+    .header-row-style {
+        border-right: 1px solid var(--dui-color-line-separator);
+        background-color: var(--dui-column-background);
+    }
+}
+
+.country-list-header-cell {
+    background-color: var(--dui-column-background);
+    padding: var(--dui-spacing-large) !important;
+}

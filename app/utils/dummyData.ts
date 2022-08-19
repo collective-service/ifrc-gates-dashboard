@@ -579,3 +579,72 @@ export const sourcesProgressBarData: ProgressBarRendererProps[] = [
         subValue: 26,
     },
 ];
+
+export const overviewTableData = [
+    {
+        id: '12',
+        country: 'Nepal',
+        value: '10%',
+        month: 'Jan',
+    },
+    {
+        id: '10',
+        country: 'India',
+        value: '70%',
+        month: 'Feb',
+    },
+    {
+        id: '21',
+        country: 'China',
+        value: '50%',
+        month: 'Jan',
+    },
+    {
+        id: '32',
+        country: 'Bangladesh',
+        value: '20%',
+        month: 'Mar',
+    },
+    {
+        id: '56',
+        country: 'SriLanka',
+        value: '25%',
+        month: 'Apr',
+    },
+    {
+        id: '45',
+        country: 'Afganisthan',
+        value: '20%',
+        month: 'May',
+    },
+    {
+        id: '22',
+        country: 'Maldives',
+        value: '34%',
+        month: 'June',
+    },
+    {
+        id: '27',
+        country: 'Nambia',
+        value: '34%',
+        month: 'June',
+    },
+    {
+        id: '42',
+        country: 'Mongolia',
+        value: '6.7%',
+        month: 'June',
+    },
+    {
+        id: '58',
+        country: 'Nigeria',
+        value: '74%',
+        month: 'June',
+    },
+    {
+        id: '20',
+        country: 'Congo',
+        value: '94%',
+        month: 'June',
+    },
+];
