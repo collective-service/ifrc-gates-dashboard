@@ -9,10 +9,10 @@ import {
 import styles from './styles.css';
 
 export interface AdvancedOptionType {
-    type?: string | undefined;
-    thematic?: string | undefined;
-    topic?: string | undefined;
-    keywords?: string[] | undefined;
+    type?: string;
+    thematic?: string;
+    topic?: string;
+    keywords?: string[];
 }
 
 interface FilterType {

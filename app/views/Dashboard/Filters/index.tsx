@@ -114,10 +114,10 @@ const countriesKeySelector = (d: Country) => d.key;
 const countriesLabelSelector = (d: Country) => d.name;
 
 export interface FilterType {
-    outbreak?: string | undefined;
-    region?: string | undefined;
-    indicator?: string | undefined;
-    country?: string | undefined;
+    outbreak?: string;
+    region?: string;
+    indicator?: string;
+    country?: string;
 }
 
 interface Props {
