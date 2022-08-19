@@ -10,7 +10,7 @@
         .progress-bar-container {
             display: flex;
             flex-direction: column;
-            gap: var(--dui-spacing-small);
+            gap: var(--dui-spacing-medium);
 
             .progress-bar-card {
                 border: var(--width-separator-thin) solid var(--color-separator-light);
@@ -19,7 +19,12 @@
                 .progress-bar {
                     display: flex;
                     flex-wrap: wrap;
-                    gap: var(--dui-spacing-super-large);
+                    gap: var(--dui-spacing-large);
+
+                    .progress-bar-item {
+                        flex-basis: 30%;
+                        border-bottom: var(--dui-width-separator-thin) solid var(--dui-color-line-separator);
+                    }
                 }
             }
         }

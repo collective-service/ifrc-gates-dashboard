@@ -14,9 +14,9 @@ export interface ReadinessCardProps {
     value: number;
 }
 
-export const progressDataOne = [
+export const progressDataOne: ProgressBarRendererProps[] = [
     {
-        countryName: 'Cameroon',
+        barName: 'Cameroon',
         id: '1',
         title: 'Vulnerable cases',
         color: 'var(--dui-color-progress-alt)',
@@ -24,7 +24,7 @@ export const progressDataOne = [
         totalValue: 200,
     },
     {
-        countryName: 'Algeria',
+        barName: 'Algeria',
         id: '2',
         title: 'Vulnerable cases',
         color: 'var(--dui-color-progress-alt)',
@@ -32,7 +32,7 @@ export const progressDataOne = [
         totalValue: 200,
     },
     {
-        countryName: 'Bulgaria',
+        barName: 'Bulgaria',
         id: '3',
         title: 'Vulnerable cases',
         color: 'var(--dui-color-progress-alt)',
@@ -40,7 +40,7 @@ export const progressDataOne = [
         totalValue: 200,
     },
     {
-        countryName: 'Democratic Republic of Congo',
+        barName: 'Democratic Republic of Congo',
         id: '4',
         title: 'Vulnerable cases',
         color: 'var(--dui-color-progress-alt)',
@@ -48,7 +48,7 @@ export const progressDataOne = [
         totalValue: 200,
     },
     {
-        countryName: 'Belarus',
+        barName: 'Belarus',
         id: '5',
         title: 'Vulnerable cases',
         color: 'var(--dui-color-progress-alt)',
@@ -57,9 +57,9 @@ export const progressDataOne = [
     },
 ];
 
-export const progressDataTwo = [
+export const progressDataTwo: ProgressBarRendererProps[] = [
     {
-        countryName: 'Oman',
+        barName: 'Oman',
         id: '13',
         title: 'Vulnerable cases',
         color: 'var(--dui-color-progress-alt)',
@@ -67,7 +67,7 @@ export const progressDataTwo = [
         totalValue: 200,
     },
     {
-        countryName: 'Malaysia',
+        barName: 'Malaysia',
         id: '29',
         title: 'Vulnerable cases',
         color: 'var(--dui-color-progress-alt)',
@@ -75,7 +75,7 @@ export const progressDataTwo = [
         totalValue: 200,
     },
     {
-        countryName: 'Viet Nam',
+        barName: 'Viet Nam',
         id: '23',
         title: 'Vulnerable cases',
         color: 'var(--dui-color-progress-alt)',
@@ -83,7 +83,7 @@ export const progressDataTwo = [
         totalValue: 200,
     },
     {
-        countryName: 'Lao PDR',
+        barName: 'Lao PDR',
         id: '26',
         title: 'Vulnerable cases',
         color: 'var(--dui-color-progress-alt)',
@@ -605,66 +605,84 @@ export const regionalBreakdownPieData = [
 
 export const sourcesProgressBarData: ProgressBarRendererProps[] = [
     {
-        title: 'Demand all',
+        title: 'communication',
+        barName: 'Demand all',
         id: '1',
         totalValue: 100,
-        country: 76,
-        regional: 16,
+        value: 76,
+        color: '#8DD2B1',
+        subValue: 30,
     },
     {
-        title: 'Officials',
+        title: 'communication',
+        barName: 'Officials',
         id: '2',
         totalValue: 100,
-        country: 56,
-        regional: 76,
+        value: 56,
+        color: '#8DD2B1',
+        subValue: 76,
     },
     {
-        title: 'WHO',
+        title: 'communication',
+        barName: 'WHO',
         id: '3',
         totalValue: 100,
-        country: 56,
-        regional: 26,
+        value: 56,
+        color: '#8DD2B1',
+        subValue: 26,
     },
     {
-        title: 'Demand Evolution',
+        title: 'communication',
+        barName: 'Demand Evolution',
         id: '4',
         totalValue: 100,
-        country: 56,
-        regional: 26,
+        value: 56,
+        color: '#8DD2B1',
+        subValue: 26,
     },
     {
-        title: 'Newspapers',
+        title: 'communication',
+        barName: 'Newspapers',
         id: '5',
         totalValue: 100,
-        country: 56,
-        regional: 26,
+        value: 56,
+        color: '#8DD2B1',
+        subValue: 26,
     },
     {
-        title: 'Officials',
+        title: 'communication',
+        barName: 'Officials',
         id: '6',
         totalValue: 100,
-        country: 56,
-        regional: 26,
+        value: 56,
+        color: '#8DD2B1',
+        subValue: 26,
     },
     {
-        title: 'Demand prevention',
+        title: 'communication',
+        barName: 'Demand prevention',
         id: '7',
         totalValue: 100,
-        country: 56,
-        regional: 26,
+        value: 56,
+        color: '#8DD2B1',
+        subValue: 26,
     },
     {
-        title: 'Radio',
+        title: 'communication',
+        barName: 'Radio',
         id: '8',
         totalValue: 100,
-        country: 56,
-        regional: 26,
+        value: 56,
+        color: '#8DD2B1',
+        subValue: 26,
     },
     {
-        title: 'Social media',
+        title: 'communication',
+        barName: 'Social media',
         id: '9',
         totalValue: 100,
-        country: 56,
-        regional: 26,
+        value: 56,
+        color: '#8DD2B1',
+        subValue: 26,
     },
 ];

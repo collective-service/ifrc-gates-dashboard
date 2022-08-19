@@ -1,63 +1,74 @@
 import React, { useMemo } from 'react';
 import { _cs } from '@togglecorp/fujs';
+import { IoInformationCircleOutline } from 'react-icons/io5';
 
 import styles from './styles.css';
 
 export interface Props {
     className?: string | undefined;
     barHeight: number;
-    progressData: {
-        countryName: string | undefined,
-        id: string,
-        title: string | undefined,
-        color?: string | undefined,
-        value: number | undefined,
-        totalValue: number | undefined,
-    };
+    suffix?: string;
+    barName: string | undefined,
+    id: string,
+    title: string | undefined,
+    color?: string,
+    value: number | undefined,
+    subValue?: number,
+    totalValue: number | undefined,
 }
 
 function ProgressBar(props: Props) {
     const {
         className,
         barHeight,
-        progressData,
+        suffix,
+        barName,
+        id,
+        title,
+        color,
+        value,
+        subValue,
+        totalValue,
     } = props;
 
-    const avgResult = useMemo(
-        () => ({
-            percentage: progressData?.value && progressData?.totalValue
-                && (((progressData.value / progressData.totalValue) * 100).toFixed(1)
-                    ?? undefined),
-        }),
-        [progressData],
+    const countryPercentage = useMemo(
+        () => (
+            value && totalValue
+            && ((value / totalValue) * 100).toFixed(0)
+        ), [totalValue, value],
+    );
+
+    const subValuePercentage = useMemo(
+        () => (
+            subValue && totalValue
+            && ((subValue / totalValue) * 100).toFixed(0)
+        ), [totalValue, subValue],
     );
 
     const tooltip = useMemo(
-        () => ((progressData?.value && progressData?.totalValue)
-            && ((`${progressData.title}: ${progressData.value ?? '0'}`) ?? undefined)
-        ),
-        [
-            progressData,
-        ],
+        () => ((value && totalValue)
+            && ((`${title}: ${value ?? '0'}`) ?? undefined)
+        ), [totalValue, value, title],
     );
 
     return (
-        <div className={styles.progressInfo}>
-            <div>
-                {progressData.countryName}
+        <div className={_cs(className, styles.progressInfo)}>
+            <div className={styles.progressTitle}>
+                {barName}
+                <IoInformationCircleOutline />
             </div>
             <div className={styles.progressValueWrapper}>
                 <div
-                    className={_cs(styles.progressBarWrapper, className)}
+                    className={styles.progressBarWrapper}
                     style={{ height: `${barHeight}px` }}
                     title={tooltip as string}
                 >
                     <div
                         className={styles.progressBarStyle}
-                        key={progressData.id}
+                        key={id}
                         style={{
-                            width: `${avgResult.percentage}%`,
-                            backgroundColor: progressData.color ?? 'blue',
+                            width: `${countryPercentage}%`,
+                            backgroundColor: color ?? 'blue',
                         }}
                     />
                 </div>
@@ -65,10 +76,15 @@ function ProgressBar(props: Props) {
                     className={styles.progressValue}
                     title={tooltip as string}
                 >
-                    {avgResult?.percentage}
-                    M
+                    {countryPercentage}
+                    {suffix}
                 </div>
             </div>
+            {subValuePercentage && (
+                <div className={styles.subValue}>
+                    {`Regional ${subValue}${suffix}`}
+                </div>
+            )}
         </div>
     );
 }
