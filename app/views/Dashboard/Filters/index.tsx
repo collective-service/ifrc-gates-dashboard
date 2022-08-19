@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 import {
     SelectInput,
 } from '@the-deep/deep-ui';
 
 import { TabTypes } from '..';
-import AdvancedFilters from '../AdvancedFilters';
+import AdvancedFilters, { AdvancedOptionType } from '../AdvancedFilters';
 import styles from './styles.css';
 
 interface Outbreak {
@@ -113,34 +113,41 @@ const countries: Country[] = [
 const countriesKeySelector = (d: Country) => d.key;
 const countriesLabelSelector = (d: Country) => d.name;
 
+export interface FilterType {
+    outbreak?: string;
+    region?: string;
+    indicator?: string;
+    country?: string;
+}
+
 interface Props {
+    value: FilterType | undefined;
+    onChange: React.Dispatch<React.SetStateAction<FilterType| undefined>>;
     activeTab?: TabTypes;
+    advancedOptions: AdvancedOptionType | undefined;
+    setAdvancedOptions: React.Dispatch<React.SetStateAction<AdvancedOptionType | undefined>>;
 }
 
 function Filters(props: Props) {
     const {
         activeTab,
+        onChange,
+        value,
+        advancedOptions,
+        setAdvancedOptions,
     } = props;
 
-    const [
-        selectedOutbreak,
-        setSelectedOutbreak,
-    ] = useState<string | undefined>();
-
-    const [
-        selectedRegion,
-        setSelectedRegion,
-    ] = useState<string | undefined>();
-
-    const [
-        selectedIndicator,
-        setSelectedIndicator,
-    ] = useState<string | undefined>();
-
-    const [
-        selectedCountry,
-        setSelectedCountry,
-    ] = useState<string | undefined>();
+    const handleInputChange = React.useCallback(
+        (newValue: string | undefined, name: keyof FilterType) => {
+            if (onChange) {
+                onChange((oldValue) => ({
+                    ...oldValue,
+                    [name]: newValue,
+                }));
+            }
+        },
+        [onChange],
+    );
 
     return (
         <div className={styles.filtersWrapper}>
@@ -151,45 +158,48 @@ function Filters(props: Props) {
                     placeholder="Outbreak"
                     keySelector={outbreakKeySelector}
                     labelSelector={outbreakLabelSelector}
-                    value={selectedOutbreak}
-                    onChange={setSelectedOutbreak}
+                    value={value?.outbreak}
+                    onChange={handleInputChange}
                 />
                 {(activeTab !== 'country') && (
                     <SelectInput
-                        name="regions"
+                        name="region"
                         options={regions}
                         placeholder="Regions"
                         keySelector={regionsKeySelector}
                         labelSelector={regionsLabelSelector}
-                        value={selectedRegion}
-                        onChange={setSelectedRegion}
+                        value={value?.region}
+                        onChange={handleInputChange}
                     />
                 )}
                 {(activeTab !== 'combinedIndicators') && (
                     <SelectInput
-                        name="indicators"
+                        name="indicator"
                         options={indicators}
                         placeholder="Indicators"
                         keySelector={indicatorKeySelector}
                         labelSelector={indicatorLabelSelector}
-                        value={selectedIndicator}
-                        onChange={setSelectedIndicator}
+                        value={value?.indicator}
+                        onChange={handleInputChange}
                     />
                 )}
                 {(activeTab !== 'overview') && (
                     <SelectInput
-                        name="countries"
+                        name="country"
                         options={countries}
                         placeholder="Countries"
                         keySelector={countriesKeySelector}
                         labelSelector={countriesLabelSelector}
-                        value={selectedCountry}
-                        onChange={setSelectedCountry}
+                        value={value?.country}
+                        onChange={handleInputChange}
                     />
                 )}
             </div>
             {activeTab === 'combinedIndicators' && (
-                <AdvancedFilters />
+                <AdvancedFilters
+                    value={advancedOptions}
+                    onChange={setAdvancedOptions}
+                />
             )}
         </div>
     );

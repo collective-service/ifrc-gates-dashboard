@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import {
     Tabs,
     TabList,
@@ -14,23 +14,18 @@ import MapView from './MapView';
 import TableView from './TableView';
 import styles from './styles.css';
 
-interface OverviewProps {
+interface Props {
     className?: string;
 }
 
-function Overview(props: OverviewProps) {
+function Overview(props: Props) {
     const {
         className,
     } = props;
 
+    // TODO: Rename this to better suit the behavior
+    // TODO: define strict type mapMode and tableMode instead of string
     const [currentTab, setCurrentTab] = useState<string | undefined>('mapMode');
-
-    const handleMapView = useCallback(
-        (tabName: string | undefined) => {
-            setCurrentTab(tabName);
-        },
-        [],
-    );
 
     return (
         <div className={_cs(className, styles.overviewMain)}>
@@ -39,7 +34,7 @@ function Overview(props: OverviewProps) {
             <div className={styles.mapContainer}>
                 <Tabs
                     value={currentTab}
-                    onChange={handleMapView}
+                    onChange={setCurrentTab}
                 >
                     <ContainerCard
                         heading={currentTab === 'mapMode' ? 'Overview map' : 'Tabular data'}

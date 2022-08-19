@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback } from 'react';
 
 import {
     RadioInput,
@@ -7,6 +7,13 @@ import {
 } from '@the-deep/deep-ui';
 
 import styles from './styles.css';
+
+export interface AdvancedOptionType {
+    type?: string;
+    thematic?: string;
+    topic?: string;
+    keywords?: string[];
+}
 
 interface FilterType {
     key: string;
@@ -111,21 +118,28 @@ const topic: Topic[] = [
 const topicKeySelector = (d: Topic) => d.key;
 const topicLabelSelector = (d: Topic) => d.label;
 
-function AdvancedFilters() {
-    const [
-        selectedThematic,
-        setSelectedThematic,
-    ] = useState<string | undefined>('1');
+interface Props {
+    value: AdvancedOptionType | undefined;
+    onChange: React.Dispatch<React.SetStateAction<AdvancedOptionType | undefined>>;
+}
 
-    const [
-        selectedFilterType,
-        setSelectedFilterType,
-    ] = useState<string | undefined>('1');
+function AdvancedFilters(props: Props) {
+    const {
+        value,
+        onChange,
+    } = props;
 
-    const [
-        selectedTopic,
-        setSelectedTopic,
-    ] = useState<string | undefined>('1');
+    const handleInputChange = useCallback(
+        (newValue: string | undefined, name: keyof AdvancedOptionType) => {
+            if (onChange) {
+                onChange((oldValue) => ({
+                    ...oldValue,
+                    [name]: newValue,
+                }));
+            }
+        },
+        [onChange],
+    );
 
     return (
         <div className={styles.advancedFilters}>
@@ -135,8 +149,8 @@ function AdvancedFilters() {
                 label="Type"
                 labelSelector={filterTypeLabelSelector}
                 options={filterType}
-                value={selectedFilterType}
-                onChange={setSelectedFilterType}
+                value={value?.type}
+                onChange={handleInputChange}
             />
             <SelectInput
                 name="thematic"
@@ -144,8 +158,8 @@ function AdvancedFilters() {
                 placeholder="Thematic"
                 keySelector={thematicKeySelector}
                 labelSelector={thematicLabelSelector}
-                value={selectedThematic}
-                onChange={setSelectedThematic}
+                value={value?.thematic}
+                onChange={handleInputChange}
             />
             <SelectInput
                 name="topic"
@@ -153,10 +167,13 @@ function AdvancedFilters() {
                 placeholder="Topic"
                 keySelector={topicKeySelector}
                 labelSelector={topicLabelSelector}
-                value={selectedTopic}
-                onChange={setSelectedTopic}
+                value={value?.topic}
+                onChange={handleInputChange}
             />
-            {/* FIX ME: MAKE MULTI SELECT INPUTS */}
+            {/* FIXME: MAKE MULTI SELECT INPUTS */}
+            {/*
+                FIXME: Use values and onChange handlers as above after the multiselect input is used
+            */}
             <TextInput
                 name="keywords"
                 placeholder="Keywords"
