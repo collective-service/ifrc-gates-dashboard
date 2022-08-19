@@ -16,7 +16,7 @@ export interface Props {
     headerDescription?: React.ReactNode;
     headingSize?: headingSizeType;
     suffix?: string;
-    statValue: number;
+    statValue: number | null | undefined;
     subValue?: number;
 }
 

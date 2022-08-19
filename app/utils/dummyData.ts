@@ -216,47 +216,24 @@ export const outbreakData = [
 
 ];
 
-export const statusData: PercentageStatsProps[] = [
-    {
-        id: 1,
-        heading: 'Total number of COVID-19 cases',
-        statValue: 65,
-        suffix: '%',
-    },
-    {
-        id: 2,
-        heading: 'Total number of Monkey pox cases',
-        statValue: 1,
-        suffix: 'M',
-    },
-    {
-        id: 3,
-        heading: 'Total number of Monkey pox cases',
-        statValue: 1,
-        suffix: 'M',
-    },
-];
-
-// export const readinessData: ReadinessCardProps[] = [
+// export const statusData: PercentageStatsProps[] = [
 //    {
 //        id: 1,
-//        title: 'Readiness',
-//        value: 10,
+//        heading: 'Total number of COVID-19 cases',
+//        statValue: 65,
+//        suffix: '%',
 //    },
 //    {
 //        id: 2,
-//        title: 'Vulnerability',
-//        value: 28,
+//        heading: 'Total number of Monkey pox cases',
+//        statValue: 1,
+//        suffix: 'M',
 //    },
 //    {
 //        id: 3,
-//        title: 'Risk',
-//        value: 50,
-//    },
-//    {
-//        id: 4,
-//        title: 'Response',
-//        value: 24.5,
+//        heading: 'Total number of Monkey pox cases',
+//        statValue: 1,
+//        suffix: 'M',
 //    },
 // ];
 

@@ -9,32 +9,32 @@
     padding: var(--dui-spacing-medium);
 
     .readiness-title {
-        /* color: var(--color-text-title-secondary); */
+        color: var(--color-text-secondary);
         font-size: var(--dui-font-size-heading-extra-small);
         font-weight: var(--dui-font-weight-regular);
     }
 
     .readiness-value {
-        /* color: var(--color-text-secondary); */
+        color: var(--color-text-secondary);
         font-size: var(--dui-font-size-mega-large);
         font-weight: var(--dui-font-weight-bold);
 
     }
 
-    .green {
-        color: var(--color-indicator-high);
-    }
+}
 
-    .yellow {
-        color: var(--color-indicator-medium-high);
-    }
+.green {
+    background-color: var(--color-indicator-high);
+}
 
-    .orange {
-        color: var(--color-indicator-medium-low);
-    }
+.yellow {
+    background-color: var(--color-indicator-medium-high);
+}
 
-    .red {
-        color: var(--color-indicator-low);
-    }
+.orange {
+    background-color: var(--color-indicator-medium-low);
+}
 
+.red {
+    background-color: var(--color-indicator-low);
 }
