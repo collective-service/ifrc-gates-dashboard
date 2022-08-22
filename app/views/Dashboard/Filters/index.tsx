@@ -6,8 +6,10 @@ import {
 } from '@the-deep/deep-ui';
 
 import {
-    CountryListQuery,
-    CountryListQueryVariables,
+    CountryListWithRegionQuery,
+    CountryListWithRegionQueryVariables,
+    OutbreaksQuery,
+    OutbreaksQueryVariables,
 } from '#generated/types';
 
 import { TabTypes } from '..';
@@ -15,21 +17,9 @@ import AdvancedFilters, { AdvancedOptionType } from '../AdvancedFilters';
 import styles from './styles.css';
 
 interface Outbreak {
-    key: 'Monkeypox' | 'COVID-19';
+    key: string;
     label: string;
 }
-
-// FIXME: Data to be fetched from graphql
-const outbreaks: Outbreak[] = [
-    {
-        key: 'Monkeypox',
-        label: 'Monkeypox',
-    },
-    {
-        key: 'COVID-19',
-        label: 'COVID-19',
-    },
-];
 
 const outbreakKeySelector = (d: Outbreak) => d.key;
 const outbreakLabelSelector = (d: Outbreak) => d.label;
@@ -64,6 +54,16 @@ const indicators: Indicator[] = [
 const indicatorKeySelector = (d: Indicator) => d.key;
 const indicatorLabelSelector = (d: Indicator) => d.name;
 
+const OUTBREAKS = gql`
+    query Outbreaks {
+        outBreaks {
+            active
+            outbreak
+            __typename
+        }
+    }
+`;
+
 const COUNTRY_LIST_WITH_REGION = gql`
     query CountryListWithRegion {
         countryProfiles {
@@ -74,7 +74,7 @@ const COUNTRY_LIST_WITH_REGION = gql`
     }
 `;
 
-type Country = NonNullable<CountryListQuery['countryProfiles']>[number];
+type Country = NonNullable<CountryListWithRegionQuery['countryProfiles']>[number];
 const countriesKeySelector = (d: Country) => d.iso3;
 const countriesLabelSelector = (d: Country) => d.countryName ?? '';
 
@@ -117,11 +117,22 @@ function Filters(props: Props) {
     const {
         data: countryList,
         loading: countryListLoading,
-    } = useQuery<CountryListQuery, CountryListQueryVariables>(
+    } = useQuery<CountryListWithRegionQuery, CountryListWithRegionQueryVariables>(
         COUNTRY_LIST_WITH_REGION,
     );
 
-    // const countryMap = countryList?.countryProfiles.map((c) => c.region);
+    const {
+        data: emergencies,
+        loading: emergenciesLoading,
+    } = useQuery<OutbreaksQuery, OutbreaksQueryVariables>(
+        OUTBREAKS,
+    );
+
+    const outbreaks = emergencies?.outBreaks?.map((e) => ({
+        key: e.outbreak,
+        label: e.outbreak,
+    }));
+
     const regionGroupedCountryList = listToGroupList(
         countryList?.countryProfiles,
         (country) => country.region ?? '__null',
@@ -145,6 +156,7 @@ function Filters(props: Props) {
                     value={value?.outbreak}
                     onChange={handleInputChange}
                     variant="general"
+                    disabled={emergenciesLoading}
                 />
                 {(activeTab !== 'country') && (
                     <SelectInput
@@ -156,6 +168,7 @@ function Filters(props: Props) {
                         value={value?.region}
                         onChange={handleInputChange}
                         variant="general"
+                        disabled={countryListLoading}
                     />
                 )}
                 {(activeTab !== 'combinedIndicators') && (
