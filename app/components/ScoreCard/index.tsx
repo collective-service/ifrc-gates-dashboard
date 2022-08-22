@@ -9,7 +9,7 @@ interface Props {
     indicator?: 'red' | 'yellow' | 'orange' | 'green' | undefined;
 }
 
-function ReadinessCard(props: Props) {
+function ScoreCard(props: Props) {
     const {
         className,
         title,
@@ -31,10 +31,10 @@ function ReadinessCard(props: Props) {
                 styles.readinessValue,
             )}
             >
-                {value}
+                {`${value}%`}
             </div>
         </div>
     );
 }
 
-export default ReadinessCard;
+export default ScoreCard;

@@ -70,4 +70,8 @@ export function removeNull<T>(
     }
 
     return data as PurgeNull<T>;
+export function decimalToPercentage(value: number | null | undefined) {
+    return (
+        value ? (value * 100).toFixed(2) : undefined
+    );
 }
