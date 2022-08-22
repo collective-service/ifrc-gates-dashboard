@@ -35,21 +35,27 @@ function Overview(props: Props) {
                 <Tabs
                     value={currentTab}
                     onChange={setCurrentTab}
+                    variant="secondary"
                 >
                     <ContainerCard
+                        spacing="none"
                         heading={currentTab === 'mapMode' ? 'Overview map' : 'Overview Table'}
                         headingSize="medium"
+                        headingContainerClassName={styles.mapHeaderContainer}
+                        headerActionsContainerClassName={styles.mapActionTabs}
                         headerActions={(
-                            <TabList>
+                            <TabList className={styles.dashboardTabList}>
                                 <Tab
                                     name="mapMode"
-                                    fullWidthActiveBorder
+                                    className={styles.defaultTabMode}
+                                    activeClassName={styles.activeTab}
                                 >
                                     Map overview
                                 </Tab>
                                 <Tab
                                     name="tableMode"
-                                    fullWidthActiveBorder
+                                    className={styles.defaultTabMode}
+                                    activeClassName={styles.activeTab}
                                 >
                                     Table
                                 </Tab>

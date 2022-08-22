@@ -60,20 +60,23 @@ function Dashboard() {
                     </Button>
                     <TabList className={styles.dashboardTabList}>
                         <Tab
-                            className={styles.tabName}
                             name="overview"
+                            className={styles.defaultTabMode}
+                            activeClassName={styles.activeTab}
                         >
                             Overview
                         </Tab>
                         <Tab
-                            className={styles.tabName}
                             name="country"
+                            className={styles.defaultTabMode}
+                            activeClassName={styles.activeTab}
                         >
                             Country
                         </Tab>
                         <Tab
-                            className={styles.tabName}
                             name="combinedIndicators"
+                            className={styles.defaultTabMode}
+                            activeClassName={styles.activeTab}
                         >
                             Combined Indicators
                         </Tab>

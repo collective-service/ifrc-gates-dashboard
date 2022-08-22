@@ -8,6 +8,34 @@
         flex-grow: 1;
         border: var(--width-separator-medium) solid var(--color-separator-light);
         border-radius: var(--dui-border-radius-card);
-        padding: var(--dui-spacing-ultra-small);
+
+        .map-header-container {
+            padding: var(--dui-spacing-large);
+        }
+
+        .map-action-tabs {
+            padding: var(--dui-spacing-large);
+        }
+    }
+
+    .dashboard-tab-list {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        border: var(--width-separator-thin) solid var(--dui-tab-background-color);
+        border-radius: var(--dui-border-radius-progress-bar);
+
+        .default-tab-mode {
+            padding: var(--dui-spacing-small) var(--dui-spacing-large);
+        }
+
+        .active-tab {
+            background-color: var(--dui-tab-background-color);
+            color: white;
+
+            &:hover {
+                background-color: var(--dui-tab-background-color);
+            }
+        }
     }
 }

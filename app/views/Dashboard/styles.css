@@ -16,6 +16,8 @@
 
     .button {
         border-radius: var(--dui-border-radius-button);
+        background-color: var(--dui-tab-background-color);
+        color: white;
     }
 
     .dashboard-tab-list {
@@ -23,11 +25,20 @@
         flex-wrap: wrap;
         justify-content: flex-end;
         border: var(--width-separator-thin) solid var(--color-separator);
-        border-radius: var(--dui-border-radius-button);
-    }
+        border-radius: var(--dui-border-radius-progress-bar);
 
-    .tab-name {
-        padding: var(--dui-spacing-small) var(--dui-spacing-large);
+        .default-tab-mode {
+            padding: var(--dui-spacing-small) var(--dui-spacing-large);
+        }
+
+        .active-tab {
+            background-color: var(--dui-tab-background-color);
+            color: white;
+
+            &:hover {
+                background-color: var(--dui-tab-background-color);
+            }
+        }
     }
 
     .content {

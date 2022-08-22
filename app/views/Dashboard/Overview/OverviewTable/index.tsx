@@ -5,8 +5,6 @@ import {
     TableView,
     createStringColumn,
     TableColumn,
-    TableHeaderCell,
-    TableHeaderCellProps,
 } from '@the-deep/deep-ui';
 import {
     IoIosSearch,
@@ -20,8 +18,10 @@ const tableKeySelector = (p: TableViewProps) => p.id;
 export interface TableViewProps {
     id: string;
     country: string;
-    value: string;
-    month: string
+    valueOne: string;
+    valueTwo: string;
+    month: string;
+    high?: boolean;
 }
 interface CountryListHeaderCellProps {
     className: string;
@@ -94,65 +94,174 @@ function OverviewTable(props: OverviewTableProps) {
                 createStringColumn<TableViewProps, string>(
                     'month',
                     'Jan',
-                    (item) => item.value,
+                    (item) => {
+                        if (item.high) {
+                            return (
+                                <div style={{ color: 'blue' }}>
+                                    {item?.valueTwo}
+                                </div>
+                            );
+                        }
+                        return item?.valueOne;
+                    },
                 ),
                 createStringColumn<TableViewProps, string>(
                     'month',
                     'Feb',
-                    (item) => item?.value,
+                    (item) => {
+                        if (item.high) {
+                            return (
+                                <div style={{ color: 'blue' }}>
+                                    {item?.valueTwo}
+                                </div>
+                            );
+                        }
+                        return item?.valueTwo;
+                    },
                 ),
                 createStringColumn<TableViewProps, string>(
                     'month',
                     'Mar',
-                    (item) => item?.value,
+                    (item) => {
+                        if (item.high) {
+                            return (
+                                <div style={{ color: 'blue' }}>
+                                    {item?.valueTwo}
+                                </div>
+                            );
+                        }
+                        return item?.valueTwo;
+                    },
                 ),
                 createStringColumn<TableViewProps, string>(
                     'month',
                     'Apr',
-                    (item) => item?.value,
+                    (item) => {
+                        if (item.high) {
+                            return (
+                                <div style={{ color: 'blue' }}>
+                                    {item?.valueTwo}
+                                </div>
+                            );
+                        }
+                        return item?.valueTwo;
+                    },
                 ),
                 createStringColumn<TableViewProps, string>(
                     'month',
                     'May',
-                    (item) => item?.value,
+                    (item) => {
+                        if (item.high) {
+                            return (
+                                <div style={{ color: 'blue' }}>
+                                    {item?.valueTwo}
+                                </div>
+                            );
+                        }
+                        return item?.valueOne;
+                    },
                 ),
                 createStringColumn<TableViewProps, string>(
                     'month',
                     'Jun',
-                    (item) => item?.value,
+                    (item) => {
+                        if (item.high) {
+                            return (
+                                <div style={{ color: 'blue' }}>
+                                    {item?.valueTwo}
+                                </div>
+                            );
+                        }
+                        return item?.valueTwo;
+                    },
                 ),
                 createStringColumn<TableViewProps, string>(
                     'month',
                     'Jul',
-                    (item) => item?.value,
+                    (item) => {
+                        if (item.high) {
+                            return (
+                                <div style={{ color: 'blue' }}>
+                                    {item?.valueTwo}
+                                </div>
+                            );
+                        }
+                        return item?.valueTwo;
+                    },
                 ),
                 createStringColumn<TableViewProps, string>(
                     'month',
                     'Aug',
-                    (item) => item?.value,
+                    (item) => {
+                        if (item.high) {
+                            return (
+                                <div style={{ color: 'blue' }}>
+                                    {item?.valueTwo}
+                                </div>
+                            );
+                        }
+                        return item?.valueOne;
+                    },
                 ),
                 createStringColumn<TableViewProps, string>(
                     'month',
                     'Sep',
-                    (item) => item?.value,
+                    (item) => {
+                        if (item.high) {
+                            return (
+                                <div style={{ color: 'blue' }}>
+                                    {item?.valueTwo}
+                                </div>
+                            );
+                        }
+                        return item?.valueTwo;
+                    },
                 ),
                 createStringColumn<TableViewProps, string>(
                     'month',
                     'Oct',
-                    (item) => item?.value,
+                    (item) => {
+                        if (item.high) {
+                            return (
+                                <div style={{ color: 'blue' }}>
+                                    {item?.valueTwo}
+                                </div>
+                            );
+                        }
+                        return item?.valueTwo;
+                    },
                 ),
                 createStringColumn<TableViewProps, string>(
                     'month',
                     'Nov',
-                    (item) => item?.value,
+                    (item) => {
+                        if (item.high) {
+                            return (
+                                <div style={{ color: 'blue' }}>
+                                    {item?.valueTwo}
+                                </div>
+                            );
+                        }
+                        return item?.valueTwo;
+                    },
                 ),
                 createStringColumn<TableViewProps, string>(
                     'month',
                     'Dec',
-                    (item) => item?.value,
+                    (item) => {
+                        if (item.high) {
+                            return (
+                                <div style={{ color: 'blue' }}>
+                                    {item?.valueTwo}
+                                </div>
+                            );
+                        }
+                        return item?.valueTwo;
+                    },
                 ),
             ];
-        }, []);
+        }, [],
+    );
 
     return (
         <TableView
@@ -165,8 +274,6 @@ function OverviewTable(props: OverviewTableProps) {
             errored={false}
             pending={false}
             filtered={false}
-            messageShown
-            messageIconShown
             emptyMessage="No projects to show."
         />
     );
