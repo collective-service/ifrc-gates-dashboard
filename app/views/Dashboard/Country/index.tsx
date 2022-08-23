@@ -1,5 +1,10 @@
-import React, { useCallback } from 'react';
-import { isNotDefined, listToGroupList, _cs, mapToList } from '@togglecorp/fujs';
+import React, { useCallback, useMemo } from 'react';
+import {
+    isNotDefined,
+    listToGroupList,
+    _cs,
+    mapToList,
+} from '@togglecorp/fujs';
 import {
     LineChart,
     Line,
@@ -34,10 +39,8 @@ import {
 } from '#generated/types';
 
 import styles from './styles.css';
+import { FilterType } from '../Filters';
 
-interface CountryProps {
-    className?: string;
-}
 interface ReadinessCardProps {
     title: string;
     value?: number;
@@ -58,7 +61,11 @@ const readinessKeySelector = (d: ReadinessCardProps) => d.title;
 const COLORS = ['#567968', '#52625A', '#AFFAD5'];
 
 const COUNTRY_PROFILE = gql`
-    query Country($iso3: String!, $contextIndicatorsIds: [String!], $emergencies: [String!]) {
+    query Country(
+        $iso3: String!,
+        $contextIndicatorsIds: [String!],
+        $emergencies: [String!]
+    ) {
         countryProfile(iso3: $iso3) {
             iso3
             countryName
@@ -74,7 +81,12 @@ const COUNTRY_PROFILE = gql`
             risk
             response
         }
-        countryEmergencyProfile(filters: {iso3: $iso3, contextIndicatorIds: $contextIndicatorsIds, emergencies: $emergencies}) {
+        countryEmergencyProfile(
+            filters: {
+                iso3: $iso3,
+                contextIndicatorIds: $contextIndicatorsIds,
+                emergencies: $emergencies,
+        }) {
             iso3
             emergency
             contextIndicatorValue
@@ -86,18 +98,30 @@ const COUNTRY_PROFILE = gql`
 
 const LINE_COLORS = ['#FFDD98', '#ACA28E'];
 
-function Country(props: CountryProps) {
+interface Props{
+    className?: string;
+    filterValues?: FilterType | undefined;
+}
+
+function Country(props: Props) {
+    const {
+        filterValues,
+    } = props;
+
+    const variables = useMemo(() => ({
+        iso3: filterValues?.country ?? 'AFG',
+        contextIndicatorsIds: ['total_cases'],
+        emergencies: [],
+    }), [
+        filterValues?.country,
+    ]);
+
     const {
         data: countryResponse,
     } = useQuery<CountryQuery, CountryQueryVariables>(
         COUNTRY_PROFILE,
         {
-            // TODO: Get variables through filters
-            variables: {
-                iso3: 'IND',
-                contextIndicatorsIds: ['total_cases'],
-                emergencies: [],
-            },
+            variables,
         },
     );
 

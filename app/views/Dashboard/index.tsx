@@ -34,11 +34,18 @@ function Dashboard() {
         setAdvancedFilterValues,
     ] = useState<AdvancedOptionType | undefined>();
 
+    const handleActiveTabChange = (newActiveTab: TabTypes | undefined) => {
+        setActiveTab(newActiveTab);
+        if (newActiveTab === 'country') {
+            setFilterValues({ country: 'AFG' });
+        }
+    };
+
     return (
         <div className={styles.dashboardNavigation}>
             <Tabs
                 value={activeTab}
-                onChange={setActiveTab}
+                onChange={handleActiveTabChange}
                 variant="secondary"
             >
                 <div className={styles.dashboardButtons}>
@@ -84,7 +91,9 @@ function Dashboard() {
                         <Overview />
                     </TabPanel>
                     <TabPanel name="country">
-                        <Country />
+                        <Country
+                            filterValues={filterValues}
+                        />
                     </TabPanel>
                     <TabPanel
                         name="combinedIndicators"
