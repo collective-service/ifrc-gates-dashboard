@@ -13,5 +13,20 @@
 
 .country-list-header-cell {
     background-color: var(--dui-column-background);
-    padding: var(--dui-spacing-large) !important;
+    padding: var(--dui-spacing-medium) !important;
+}
+
+.search-column-cell {
+    font-weight: bold;
+}
+
+.default-indicator {
+    background-color: none;
+}
+
+.high-indicator {
+    border-radius: 10px;
+    background-color: #eaeaea;
+    text-align: center;
+    color: blue;
 }

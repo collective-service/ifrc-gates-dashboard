@@ -1,10 +1,15 @@
 import React, { useMemo } from 'react';
-import { _cs } from '@togglecorp/fujs';
+import { compareString, _cs } from '@togglecorp/fujs';
 import {
     TextInput,
     TableView,
-    createStringColumn,
     TableColumn,
+    TableHeaderCell,
+    TableHeaderCellProps,
+    TableCell,
+    TableCellProps,
+    TableSortDirection,
+    TableFilterType,
 } from '@the-deep/deep-ui';
 import {
     IoIosSearch,
@@ -46,23 +51,81 @@ function countryListHeaderCell(props: CountryListHeaderCellProps) {
     );
 }
 interface CountryListCellProps {
-    className: string;
     title: string;
 }
 
 function countryListCell(props: CountryListCellProps) {
     const {
-        className,
         title,
     } = props;
 
     return (
-        <div className={_cs(styles.countryListCell, className)}>
+        <div className={styles.searchColumnCell}>
             {title}
         </div>
     );
 }
-
+function MyCell<T>(props: TableCellProps<T>) {
+    const { className, ...otherProps } = props;
+    return (
+        <div className={_cs(otherProps.value && +(otherProps.value) > 40 && styles.highIndicator)}>
+            <TableCell {...otherProps} />
+        </div>
+    );
+}
+function createIndicatorColumn(
+    id: string,
+    title: string,
+    accessor: (item: TableViewProps) => string,
+    options?: {
+        cellAsHeader?: boolean,
+        sortable?: boolean,
+        defaultSortDirection?: TableSortDirection,
+        filterType?: TableFilterType,
+        orderable?: boolean;
+        hideable?: boolean;
+        columnCellClassName?: string;
+        columnClassName?: string;
+        columnWidth?: TableColumn<TableViewProps, string, TableCellProps<string>, TableHeaderCellProps>['columnWidth'];
+        columnStyle?: TableColumn<TableViewProps, string, TableCellProps<string>, TableHeaderCellProps>['columnStyle'];
+    },
+) {
+    const item: TableColumn<
+        TableViewProps,
+        string,
+        TableCellProps<string>,
+        TableHeaderCellProps
+    > & {
+        valueSelector: (item: TableViewProps) => string | undefined | null,
+        valueComparator: (foo: TableViewProps, bar: TableViewProps) => number,
+    } = {
+        id,
+        title,
+        cellAsHeader: options?.cellAsHeader,
+        headerCellRenderer: TableHeaderCell,
+        headerCellRendererParams: {
+            sortable: options?.sortable,
+            filterType: options?.filterType,
+            orderable: options?.orderable,
+            hideable: options?.hideable,
+        },
+        cellRenderer: MyCell,
+        cellRendererParams: (_: string, datum: TableViewProps): TableCellProps<string> => ({
+            value: accessor(datum),
+            tooltip: accessor(datum),
+            className: options?.columnCellClassName,
+        }),
+        valueSelector: accessor,
+        valueComparator: (
+            foo: TableViewProps,
+            bar: TableViewProps,
+        ) => compareString(accessor(foo), accessor(bar)),
+        columnClassName: options?.columnClassName,
+        columnWidth: options?.columnWidth,
+        columnStyle: options?.columnStyle,
+    };
+    return item;
+}
 interface OverviewTableProps {
     className?: string;
 }
@@ -76,7 +139,7 @@ function OverviewTable(props: OverviewTableProps) {
         () => {
             // eslint-disable-next-line max-len
             const searchColumn: TableColumn<TableViewProps, string, CountryListCellProps, CountryListHeaderCellProps> = {
-                id: 'action',
+                id: 'search',
                 title: '',
                 headerCellRenderer: countryListHeaderCell,
                 headerCellRendererClassName: styles.countryListHeaderCell,
@@ -87,176 +150,106 @@ function OverviewTable(props: OverviewTableProps) {
                 cellRendererParams: (_, datum) => ({
                     title: datum.country,
                 }),
-                columnWidth: 400,
+                columnWidth: 130,
             };
+
             return [
                 searchColumn,
-                createStringColumn<TableViewProps, string>(
-                    'month',
+                // TODO: FIX COLOR INDICATORS FOR TABLE
+                createIndicatorColumn(
+                    'jan',
                     'Jan',
-                    (item) => {
-                        if (item.high) {
-                            return (
-                                <div style={{ color: 'blue' }}>
-                                    {item?.valueTwo}
-                                </div>
-                            );
-                        }
-                        return item?.valueOne;
+                    (item) => item.valueTwo,
+                    {
+                        columnWidth: 30,
                     },
                 ),
-                createStringColumn<TableViewProps, string>(
-                    'month',
+                createIndicatorColumn(
+                    'feb',
                     'Feb',
-                    (item) => {
-                        if (item.high) {
-                            return (
-                                <div style={{ color: 'blue' }}>
-                                    {item?.valueTwo}
-                                </div>
-                            );
-                        }
-                        return item?.valueTwo;
+                    (item) => item.valueOne,
+                    {
+                        columnWidth: 30,
                     },
                 ),
-                createStringColumn<TableViewProps, string>(
-                    'month',
+                createIndicatorColumn(
+                    'mar',
                     'Mar',
-                    (item) => {
-                        if (item.high) {
-                            return (
-                                <div style={{ color: 'blue' }}>
-                                    {item?.valueTwo}
-                                </div>
-                            );
-                        }
-                        return item?.valueTwo;
+                    (item) => item.valueOne,
+                    {
+                        columnWidth: 30,
                     },
                 ),
-                createStringColumn<TableViewProps, string>(
-                    'month',
+                createIndicatorColumn(
+                    'apr',
                     'Apr',
-                    (item) => {
-                        if (item.high) {
-                            return (
-                                <div style={{ color: 'blue' }}>
-                                    {item?.valueTwo}
-                                </div>
-                            );
-                        }
-                        return item?.valueTwo;
+                    (item) => item.valueOne,
+                    {
+                        columnWidth: 30,
                     },
                 ),
-                createStringColumn<TableViewProps, string>(
-                    'month',
+                createIndicatorColumn(
+                    'may',
                     'May',
-                    (item) => {
-                        if (item.high) {
-                            return (
-                                <div style={{ color: 'blue' }}>
-                                    {item?.valueTwo}
-                                </div>
-                            );
-                        }
-                        return item?.valueOne;
+                    (item) => item.valueOne,
+                    {
+                        columnWidth: 30,
                     },
                 ),
-                createStringColumn<TableViewProps, string>(
-                    'month',
+                createIndicatorColumn(
+                    'jun',
                     'Jun',
-                    (item) => {
-                        if (item.high) {
-                            return (
-                                <div style={{ color: 'blue' }}>
-                                    {item?.valueTwo}
-                                </div>
-                            );
-                        }
-                        return item?.valueTwo;
+                    (item) => item.valueOne,
+                    {
+                        columnWidth: 30,
                     },
                 ),
-                createStringColumn<TableViewProps, string>(
-                    'month',
-                    'Jul',
-                    (item) => {
-                        if (item.high) {
-                            return (
-                                <div style={{ color: 'blue' }}>
-                                    {item?.valueTwo}
-                                </div>
-                            );
-                        }
-                        return item?.valueTwo;
+                createIndicatorColumn(
+                    'jul',
+                    'July',
+                    (item) => item.valueOne,
+                    {
+                        columnWidth: 30,
                     },
                 ),
-                createStringColumn<TableViewProps, string>(
-                    'month',
+                createIndicatorColumn(
+                    'aug',
                     'Aug',
-                    (item) => {
-                        if (item.high) {
-                            return (
-                                <div style={{ color: 'blue' }}>
-                                    {item?.valueTwo}
-                                </div>
-                            );
-                        }
-                        return item?.valueOne;
+                    (item) => item.valueOne,
+                    {
+                        columnWidth: 30,
                     },
                 ),
-                createStringColumn<TableViewProps, string>(
-                    'month',
+                createIndicatorColumn(
+                    'sep',
                     'Sep',
-                    (item) => {
-                        if (item.high) {
-                            return (
-                                <div style={{ color: 'blue' }}>
-                                    {item?.valueTwo}
-                                </div>
-                            );
-                        }
-                        return item?.valueTwo;
+                    (item) => item.valueOne,
+                    {
+                        columnWidth: 30,
                     },
                 ),
-                createStringColumn<TableViewProps, string>(
-                    'month',
+                createIndicatorColumn(
+                    'oct',
                     'Oct',
-                    (item) => {
-                        if (item.high) {
-                            return (
-                                <div style={{ color: 'blue' }}>
-                                    {item?.valueTwo}
-                                </div>
-                            );
-                        }
-                        return item?.valueTwo;
+                    (item) => item.valueOne,
+                    {
+                        columnWidth: 30,
                     },
                 ),
-                createStringColumn<TableViewProps, string>(
-                    'month',
+                createIndicatorColumn(
+                    'nov',
                     'Nov',
-                    (item) => {
-                        if (item.high) {
-                            return (
-                                <div style={{ color: 'blue' }}>
-                                    {item?.valueTwo}
-                                </div>
-                            );
-                        }
-                        return item?.valueTwo;
+                    (item) => item.valueOne,
+                    {
+                        columnWidth: 30,
                     },
                 ),
-                createStringColumn<TableViewProps, string>(
-                    'month',
+                createIndicatorColumn(
+                    'dec',
                     'Dec',
-                    (item) => {
-                        if (item.high) {
-                            return (
-                                <div style={{ color: 'blue' }}>
-                                    {item?.valueTwo}
-                                </div>
-                            );
-                        }
-                        return item?.valueTwo;
+                    (item) => item.valueOne,
+                    {
+                        columnWidth: 30,
                     },
                 ),
             ];

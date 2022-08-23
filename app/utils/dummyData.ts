@@ -600,7 +600,7 @@ export const overviewTableData = [
     {
         id: '21',
         country: 'China',
-        valueOne: '50%',
+        valueOne: '50',
         valueTwo: '23%',
         month: 'Jan',
         high: true,
@@ -624,7 +624,7 @@ export const overviewTableData = [
     {
         id: '45',
         country: 'Afganisthan',
-        valueOne: '56%',
+        valueOne: '56',
         valueTwo: '',
         month: 'May',
         high: true,
@@ -656,7 +656,7 @@ export const overviewTableData = [
     {
         id: '58',
         country: 'Nigeria',
-        valueOne: '74%',
+        valueOne: '74',
         valueTwo: '',
         month: 'June',
         high: true,

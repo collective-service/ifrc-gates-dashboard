@@ -15,7 +15,6 @@
     }
 
     .regions-card {
-        /* flex-basis: calc(35% - var(--dui-spacing-small)); */
         flex-grow: 1;
         border: var(--width-separator-medium) solid var(--color-separator-light);
         border-radius: var(--dui-border-radius-card);
