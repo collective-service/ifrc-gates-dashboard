@@ -31,7 +31,7 @@ function ScoreCard(props: Props) {
                 styles.readinessValue,
             )}
             >
-                {`${value}%`}
+                {(value ? `${value}%` : 'N/A')}
             </div>
         </div>
     );
