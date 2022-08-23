@@ -5,42 +5,44 @@
 
     .country-main {
         display: flex;
-        gap: var(--dui-spacing-small);
+        gap: var(--dui-spacing-large);
 
         .country-detail-wrapper {
             display: flex;
             flex-direction: column;
             flex-grow: 1;
             flex-wrap: wrap;
-            gap: var(--dui-spacing-small);
+            gap: var(--dui-spacing-large);
 
             .status-card-container {
+                border-radius: 0; /* By default, ContainerCard has border-radius */
+                background-color: var(--color-background);
                 padding: 0;
 
                 .status-container {
                     display: flex;
-                    gap: var(--dui-spacing-medium);
+                    flex-wrap: wrap-reverse;
+                    gap: var(--dui-spacing-large);
 
                     .info-cards {
                         display: flex;
-                        gap: var(--dui-spacing-small);
+                        gap: var(--dui-spacing-large);
                     }
 
                     .readinessListCard {
                         display: flex;
-                        flex-basis: 62%;
-                        justify-content: space-between;
-                        border: var(--width-separator-thin);
-                        border-radius: var(--dui-border-radius-card);
+                        flex-grow: 1;
+                        box-shadow: 0px 0px 10px var(--dui-card-box-shadow);
                         background-color: var(--color-background-alt);
                         padding: var(--dui-spacing-medium);
+                        gap: var(--dui-spacing-medium);
                     }
                 }
             }
 
             .country-trend {
-                border: var(--width-separator-thin) solid var(--color-separator-light);
-                border-radius: var(--dui-border-radius-card);
+                border-radius: 0; /* By default, ContainerCard has border-radius */
+                box-shadow: 0px 0px 10px var(--dui-card-box-shadow);
 
                 .responsive-content {
                     min-height: 20rem;
@@ -54,30 +56,30 @@
             .indicator-wrapper {
                 display: flex;
                 flex-wrap: wrap;
-                gap: var(--dui-spacing-small);
-
-                .indicators-card {
-                    border: var(--width-separator-thin) solid var(--color-separator-light);
-                    border-radius: var(--dui-border-radius-card);
-                }
+                gap: var(--dui-spacing-large);
 
                 .percentage-card {
-                    flex-basis: 40%;
+                    flex-basis: calc(40% - var(--dui-spacing-large));
                     flex-grow: 1;
                     gap: var(--dui-spacing-mega-large);
                 }
 
                 .indicators-chart {
                     flex-basis: calc(60% - var(--dui-spacing-small));
+                    box-shadow: 0px 0px 10px var(--dui-card-box-shadow);
                 }
 
                 .gender-disaggregation {
-                    flex-basis: 40%;
+                    flex-basis: calc(40% - var(--dui-spacing-large));
                     flex-grow: 1;
+                    border-radius: 0; /* By default, ContainerCard has border-radius */
+                    box-shadow: 0px 0px 10px var(--dui-card-box-shadow);
                 }
 
                 .age-disaggregation {
                     flex-basis: calc(60% - var(--dui-spacing-small));
+                    border-radius: 0; /* By default, ContainerCard has border-radius */
+                    box-shadow: 0px 0px 10px var(--dui-card-box-shadow);
                 }
 
                 .responsive-content {
@@ -92,8 +94,8 @@
         }
 
         .country-info {
-            border: var(--width-separator-thin) solid var(--color-separator-light);
-            border-radius: var(--dui-border-radius-card);
+            border-radius: 0; /* By default, ContainerCard has border-radius */
+            box-shadow: 0px 0px 10px var(--dui-card-box-shadow);
             background-color: var(--dui-color-foreground);
             min-width: var(--dui-width-min-modal);
 

@@ -194,6 +194,8 @@ function Filters(props: Props) {
                         onChange={handleInputChange}
                         disabled={countryListLoading}
                         variant="general"
+                        // TODO: Make this clearable in combined indicators tab
+                        nonClearable
                     />
                 )}
             </div>

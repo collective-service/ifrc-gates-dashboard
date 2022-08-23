@@ -16,7 +16,7 @@ export interface Props {
     headerDescription?: React.ReactNode;
     headingSize?: headingSizeType;
     suffix?: string;
-    statValue: number;
+    statValue: number | null | undefined;
     subValue?: number;
 }
 
@@ -36,7 +36,7 @@ function PercentageStats(props: Props) {
         <ContainerCard
             className={_cs(className, styles.percentageStatsCard)}
             headingClassName={styles.percentageHeading}
-            heading={heading}
+            heading={heading ? `Total number of ${heading} cases` : 'Total number of cases'}
             headingSize={headingSize}
             headerDescription={headerDescription}
             headerIconsContainerClassName={styles.iconContainer}
@@ -47,6 +47,8 @@ function PercentageStats(props: Props) {
                     <NumberOutput
                         className={styles.valueText}
                         value={statValue}
+                        normal
+                        precision="auto"
                         suffix={suffix}
                     />
                     {subValue && (

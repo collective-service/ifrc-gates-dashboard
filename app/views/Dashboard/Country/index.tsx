@@ -1,5 +1,10 @@
-import React, { useCallback } from 'react';
-import { _cs } from '@togglecorp/fujs';
+import React, { useCallback, useMemo } from 'react';
+import {
+    isNotDefined,
+    listToGroupList,
+    _cs,
+    mapToList,
+} from '@togglecorp/fujs';
 import {
     LineChart,
     Line,
@@ -16,47 +21,215 @@ import {
     ContainerCard,
     TextOutput,
     ListView,
+    NumberOutput,
 } from '@the-deep/deep-ui';
+import { useQuery, gql } from '@apollo/client';
 
 import IndicatorChart from '#components/IndicatorChart';
 import PercentageStats from '#components/PercentageStats';
-import ReadinessCard from '#components/ReadinessCard';
+import ScoreCard from '#components/ScoreCard';
 import {
     indicatorData,
-    outbreakData,
-    statusData,
     genderDisaggregationData,
-    readinessData,
-    PercentageStatsProps,
-    ReadinessCardProps,
 } from '#utils/dummyData';
+import { decimalToPercentage } from '#utils/common';
+import {
+    CountryQuery,
+    CountryQueryVariables,
+} from '#generated/types';
 
 import styles from './styles.css';
+import { FilterType } from '../Filters';
 
-const percentageKeySelector = (d: PercentageStatsProps) => d.id;
-const readinessKeySelector = (d: ReadinessCardProps) => d.id;
-
-interface CountryProps {
-    className?: string;
+interface ReadinessCardProps {
+    title: string;
+    value?: number;
+    metricType: 'positive' | 'negative';
+    indicator?: 'red' | 'yellow' | 'orange' | 'green' | undefined;
 }
+interface countryWiseOutbreakCases {
+    key: string;
+    iso3: string;
+    emergency: string;
+    contextIndicatorValue?: number | null | undefined;
+    contextIndicatorId: string;
+}
+
+const percentageKeySelector = (d: countryWiseOutbreakCases) => d.key;
+const readinessKeySelector = (d: ReadinessCardProps) => d.title;
 
 const COLORS = ['#567968', '#52625A', '#AFFAD5'];
 
-function Country(props: CountryProps) {
+const COUNTRY_PROFILE = gql`
+    query Country(
+        $iso3: String!,
+        $contextIndicatorsIds: [String!],
+        $emergencies: [String!]
+    ) {
+        countryProfile(iso3: $iso3) {
+            iso3
+            countryName
+            populationSize
+            internetAccess
+            literacyRate
+            washAccessNational
+            medicalStaff
+            stringency
+            economicSupportIndex
+            readiness
+            vulnerability
+            risk
+            response
+        }
+        countryEmergencyProfile(
+            filters: {
+                iso3: $iso3,
+                contextIndicatorIds: $contextIndicatorsIds,
+                emergencies: $emergencies,
+        }) {
+            iso3
+            emergency
+            contextIndicatorValue
+            contextIndicatorId
+            contextDate
+        }
+    }
+`;
+
+const LINE_COLORS = ['#FFDD98', '#ACA28E'];
+
+interface Props{
+    className?: string;
+    filterValues?: FilterType | undefined;
+}
+
+function Country(props: Props) {
+    const {
+        filterValues,
+    } = props;
+
+    const variables = useMemo(() => ({
+        iso3: filterValues?.country ?? 'AFG',
+        contextIndicatorsIds: ['total_cases'],
+        emergencies: [],
+    }), [
+        filterValues?.country,
+    ]);
+
+    const {
+        data: countryResponse,
+    } = useQuery<CountryQuery, CountryQueryVariables>(
+        COUNTRY_PROFILE,
+        {
+            variables,
+        },
+    );
+
+    const internetAccess = decimalToPercentage(countryResponse?.countryProfile.internetAccess);
+    const literacyRate = decimalToPercentage(countryResponse?.countryProfile.literacyRate);
+    const washAccessNational = decimalToPercentage(countryResponse
+        ?.countryProfile.washAccessNational);
+    const stringency = decimalToPercentage(countryResponse?.countryProfile.stringency);
+    const economicSupportIndex = decimalToPercentage(countryResponse
+        ?.countryProfile.economicSupportIndex);
+
+    const countryWiseOutbreakCases: countryWiseOutbreakCases[] | undefined = countryResponse
+        ?.countryEmergencyProfile.map((item) => (
+            {
+                ...item,
+                key: `${item.iso3}${item.contextIndicatorId}${item.emergency}`,
+            }
+        ));
+
+    const outbreakGroupList = listToGroupList(
+        countryResponse?.countryEmergencyProfile,
+        (date) => date.contextDate ?? '',
+    );
+
+    const outbreakLineChart = mapToList(
+        outbreakGroupList,
+        (group, key) => group.reduce(
+            (acc, item) => ({
+                ...acc,
+                [item.emergency]: item.contextIndicatorValue,
+            }),
+            { date: key },
+        ),
+    );
+
+    const outbreaks = countryResponse?.countryEmergencyProfile.map((item) => {
+        const colors = LINE_COLORS[Number(item.contextIndicatorValue) % LINE_COLORS.length];
+        return (
+            {
+                emergency: item.emergency,
+                fill: colors,
+            }
+        );
+    });
+
     const {
         className,
     } = props;
 
-    const statusRendererParams = useCallback((_, data: PercentageStatsProps) => ({
-        heading: data.heading,
-        statValue: data.statValue,
-        suffix: data.suffix,
+    const readinessData: ReadinessCardProps[] = [
+        {
+            title: 'Readiness',
+            value: countryResponse?.countryProfile.readiness ?? undefined,
+            metricType: 'positive',
+        },
+        {
+            title: 'Vulnerability',
+            value: countryResponse?.countryProfile.vulnerability ?? undefined,
+            metricType: 'negative',
+        },
+        {
+            title: 'Risk',
+            value: countryResponse?.countryProfile.risk ?? undefined,
+            metricType: 'negative',
+        },
+        {
+            title: 'Response',
+            value: countryResponse?.countryProfile.response ?? undefined,
+            metricType: 'positive',
+        },
+    ];
+
+    const metricTypeForColor = useCallback((data: ReadinessCardProps) => {
+        if (isNotDefined(data) || isNotDefined(data.metricType) || isNotDefined(data.value)) {
+            return undefined;
+        }
+
+        if (
+            (data.metricType === 'positive' && data.value > 75)
+            || (data.metricType === 'negative' && data.value <= 25)
+        ) {
+            return 'green' as const;
+        }
+        if (
+            (data.metricType === 'positive' && data.value <= 75 && data.value > 50)
+            || (data.metricType === 'negative' && data.value > 25 && data.value <= 50)
+        ) {
+            return 'yellow' as const;
+        }
+        if (
+            (data.metricType === 'positive' && data.value <= 50 && data.value > 25)
+            || (data.metricType === 'negative' && data.value > 50 && data.value <= 75)
+        ) {
+            return 'orange' as const;
+        }
+        return 'red' as const;
+    }, []);
+
+    const statusRendererParams = useCallback((_, data: countryWiseOutbreakCases) => ({
+        heading: data.emergency,
+        statValue: data.contextIndicatorValue,
     }), []);
 
     const readinessRendererParams = useCallback((_, data: ReadinessCardProps) => ({
         title: data.title,
         value: data.value,
-    }), []);
+        indicator: metricTypeForColor(data),
+    }), [metricTypeForColor]);
 
     return (
         <div className={_cs(className, styles.countryWrapper)}>
@@ -70,7 +243,7 @@ function Country(props: CountryProps) {
                             className={styles.infoCards}
                             renderer={PercentageStats}
                             rendererParams={statusRendererParams}
-                            data={statusData}
+                            data={countryWiseOutbreakCases}
                             keySelector={percentageKeySelector}
                             errored={false}
                             filtered={false}
@@ -78,7 +251,7 @@ function Country(props: CountryProps) {
                         />
                         <ListView
                             className={styles.readinessListCard}
-                            renderer={ReadinessCard}
+                            renderer={ScoreCard}
                             rendererParams={readinessRendererParams}
                             data={readinessData}
                             keySelector={readinessKeySelector}
@@ -95,10 +268,10 @@ function Country(props: CountryProps) {
                     >
                         <ResponsiveContainer className={styles.responsiveContainer}>
                             <LineChart
-                                data={outbreakData}
+                                data={outbreakLineChart}
                             >
                                 <XAxis
-                                    dataKey="month"
+                                    dataKey="date"
                                     tickLine={false}
                                 />
                                 <YAxis
@@ -112,22 +285,16 @@ function Country(props: CountryProps) {
                                     align="right"
                                     verticalAlign="bottom"
                                 />
-                                <Line
-                                    dataKey="covid"
-                                    type="monotone"
-                                    stroke="#ACA28E"
-                                    name="COVID 19"
-                                    strokeWidth={3}
-                                    dot={false}
-                                />
-                                <Line
-                                    dataKey="monkeyPox"
-                                    type="monotone"
-                                    stroke="#FFDD98"
-                                    name="Monkey Pox"
-                                    strokeWidth={3}
-                                    dot={false}
-                                />
+                                {outbreaks && outbreaks.map((item) => (
+                                    <Line
+                                        key={item.emergency}
+                                        dataKey={item.emergency}
+                                        type="monotone"
+                                        stroke={item.fill}
+                                        strokeWidth={3}
+                                        dot={false}
+                                    />
+                                ))}
                             </LineChart>
                         </ResponsiveContainer>
                     </ContainerCard>
@@ -141,13 +308,13 @@ function Country(props: CountryProps) {
                             icon={null}
                         />
                         <IndicatorChart
-                            className={_cs(styles.indicatorsCard, styles.indicatorsChart)}
+                            className={styles.indicatorsChart}
                             heading="Indicator overview over the last 12 months"
                             headerDescription="Lorem ipsum"
                             chartData={indicatorData}
                         />
                         <ContainerCard
-                            className={_cs(styles.indicatorsCard, styles.genderDisaggregation)}
+                            className={styles.genderDisaggregation}
                             contentClassName={styles.responsiveContent}
                             heading="Percentage of unvaccinated individuals who have tried to get vaccinated"
                             headerDescription="Lorem ipsum explaining the topic"
@@ -180,7 +347,7 @@ function Country(props: CountryProps) {
                             </ResponsiveContainer>
                         </ContainerCard>
                         <ContainerCard
-                            className={_cs(styles.indicatorsCard, styles.ageDisaggregation)}
+                            className={styles.ageDisaggregation}
                             contentClassName={styles.responsiveContent}
                             heading="Age disaggregation"
                             headerDescription="Lorem ipsum explaining the topic"
@@ -224,7 +391,7 @@ function Country(props: CountryProps) {
                         <img src="https://picsum.photos/50" alt="country-avatar" />
                     )}
                     headingSize="small"
-                    heading="<Country-Name>"
+                    heading={countryResponse?.countryProfile.countryName}
                 >
                     <div className={styles.countryDetails}>
                         <TextOutput
@@ -233,7 +400,14 @@ function Country(props: CountryProps) {
                             labelContainerClassName={styles.labelText}
                             hideLabelColon
                             label="Population"
-                            value="38,928,346"
+                            value={(
+                                countryResponse?.countryProfile.populationSize
+                                    ? (
+                                        <NumberOutput
+                                            value={countryResponse?.countryProfile.populationSize}
+                                        />
+                                    ) : 'N/A'
+                            )}
                         />
                         <TextOutput
                             className={styles.countryTextOutput}
@@ -243,7 +417,7 @@ function Country(props: CountryProps) {
                             label="Internet access"
                             value={(
                                 <>
-                                    11.4%
+                                    {internetAccess ? `${internetAccess}%` : 'N/A'}
                                     <div className={styles.regionalText}>
                                         Regional 30%
                                     </div>
@@ -258,7 +432,7 @@ function Country(props: CountryProps) {
                             label="Literacy rate"
                             value={(
                                 <>
-                                    90%
+                                    {literacyRate ? `${literacyRate}%` : 'N/A'}
                                     <div className={styles.regionalText}>
                                         Regional 30%
                                     </div>
@@ -273,7 +447,7 @@ function Country(props: CountryProps) {
                             label="Access to basic washing facilities"
                             value={(
                                 <>
-                                    35%
+                                    {washAccessNational ? `${washAccessNational}%` : 'N/A'}
                                     <div className={styles.regionalText}>
                                         Regional 30%
                                     </div>
@@ -288,7 +462,9 @@ function Country(props: CountryProps) {
                             label="Doctors and nurses per 1000 people"
                             value={(
                                 <>
-                                    6.2
+                                    {countryResponse?.countryProfile.medicalStaff
+                                        ? (countryResponse?.countryProfile.medicalStaff)?.toFixed(1)
+                                        : 'N/A'}
                                     <div className={styles.regionalText}>
                                         Regional 30%
                                     </div>
@@ -303,7 +479,7 @@ function Country(props: CountryProps) {
                             label="Stringency"
                             value={(
                                 <>
-                                    11.8%
+                                    {stringency ? `${stringency}%` : 'N/A'}
                                     <div className={styles.regionalText}>
                                         Regional 30%
                                     </div>
@@ -333,7 +509,7 @@ function Country(props: CountryProps) {
                             label="Economic support index"
                             value={(
                                 <>
-                                    37.5%
+                                    {economicSupportIndex ? `${economicSupportIndex}%` : 'N/A'}
                                     <div className={styles.regionalText}>
                                         Regional 30%
                                     </div>

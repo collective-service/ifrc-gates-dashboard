@@ -25,13 +25,13 @@ export function parseQueryString(value: string) {
 
 export type PurgeNull<T> = (
     T extends (infer Z)[]
-        ? PurgeNull<Z>[]
-        : (
-            // eslint-disable-next-line @typescript-eslint/ban-types
-            T extends object
-                ? { [K in keyof T]: PurgeNull<T[K]> }
-                : (T extends null ? undefined : T)
-        )
+    ? PurgeNull<Z>[]
+    : (
+        // eslint-disable-next-line @typescript-eslint/ban-types
+        T extends object
+        ? { [K in keyof T]: PurgeNull<T[K]> }
+        : (T extends null ? undefined : T)
+    )
 )
 
 export function removeNull<T>(
@@ -70,4 +70,10 @@ export function removeNull<T>(
     }
 
     return data as PurgeNull<T>;
+}
+
+export function decimalToPercentage(value: number | null | undefined) {
+    return (
+        value ? (value * 100).toFixed(2) : undefined
+    );
 }

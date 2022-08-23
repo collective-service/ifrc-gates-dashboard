@@ -8,11 +8,6 @@ export interface PercentageStatsProps {
     statValue: number;
     suffix: string;
 }
-export interface ReadinessCardProps {
-    id: number;
-    title: string;
-    value: number;
-}
 
 export const progressDataOne: ProgressBarRendererProps[] = [
     {
@@ -154,108 +149,6 @@ export const indicatorData = [
         id: 12,
         month: 'Dec',
         percentage: 5,
-    },
-];
-
-export const outbreakData = [
-    {
-        month: 'Jan',
-        covid: 20,
-        monkeyPox: 5,
-    },
-    {
-        month: 'Feb',
-        covid: 30,
-        monkeyPox: 15,
-    },
-    {
-        month: 'Mar',
-        covid: 35,
-        monkeyPox: 20,
-    },
-    {
-        month: 'Apr',
-        covid: 25,
-        monkeyPox: 25,
-    },
-    {
-        month: 'May',
-        covid: 40,
-        monkeyPox: 35,
-    },
-    {
-        month: 'Jun',
-        covid: 45,
-        monkeyPox: 15,
-    },
-    {
-        month: 'Jul',
-        covid: 55,
-        monkeyPox: 25,
-    },
-    {
-        month: 'Aug',
-        covid: 65,
-        monkeyPox: 55,
-    },
-    {
-        month: 'Sept',
-        covid: 70,
-        monkeyPox: 50,
-    },
-    {
-        month: 'Oct',
-        covid: 65,
-        monkeyPox: 45,
-    },
-    {
-        month: 'Nov',
-        covid: 80,
-        monkeyPox: 65,
-    },
-    {
-        month: 'Dec',
-        covid: 60,
-        monkeyPox: 5,
-    },
-
-];
-
-export const statusData: PercentageStatsProps[] = [
-    {
-        id: 1,
-        heading: 'Total number of COVID-19 cases',
-        statValue: 65,
-        suffix: '%',
-    },
-    {
-        id: 2,
-        heading: 'Total number of Monkey pox cases',
-        statValue: 1,
-        suffix: 'M',
-    },
-];
-
-export const readinessData: ReadinessCardProps[] = [
-    {
-        id: 1,
-        title: 'Readiness',
-        value: 10,
-    },
-    {
-        id: 2,
-        title: 'Vulnerability',
-        value: 28,
-    },
-    {
-        id: 3,
-        title: 'Risk',
-        value: 50,
-    },
-    {
-        id: 4,
-        title: 'Response',
-        value: 24.5,
     },
 ];
 
