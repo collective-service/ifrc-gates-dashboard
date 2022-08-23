@@ -28,7 +28,10 @@ import {
     genderDisaggregationData,
 } from '#utils/dummyData';
 import { decimalToPercentage } from '#utils/common';
-import { CountryQuery } from '#generated/types';
+import {
+    CountryQuery,
+    CountryQueryVariables,
+} from '#generated/types';
 
 import styles from './styles.css';
 
@@ -85,21 +88,28 @@ const LINE_COLORS = ['#FFDD98', '#ACA28E'];
 
 function Country(props: CountryProps) {
     const {
-        data: CountryResponse,
-    } = useQuery<CountryQuery>(
+        data: countryResponse,
+    } = useQuery<CountryQuery, CountryQueryVariables>(
         COUNTRY_PROFILE,
-        { variables: { iso3: 'IND', contextIndicatorsIds: 'total_cases', emergencies: [] } },
+        {
+            // TODO: Get variables through filters
+            variables: {
+                iso3: 'IND',
+                contextIndicatorsIds: ['total_cases'],
+                emergencies: [],
+            },
+        },
     );
 
-    const internetAccess = decimalToPercentage(CountryResponse?.countryProfile.internetAccess);
-    const literacyRate = decimalToPercentage(CountryResponse?.countryProfile.literacyRate);
-    const washAccessNational = decimalToPercentage(CountryResponse
+    const internetAccess = decimalToPercentage(countryResponse?.countryProfile.internetAccess);
+    const literacyRate = decimalToPercentage(countryResponse?.countryProfile.literacyRate);
+    const washAccessNational = decimalToPercentage(countryResponse
         ?.countryProfile.washAccessNational);
-    const stringency = decimalToPercentage(CountryResponse?.countryProfile.stringency);
-    const economicSupportIndex = decimalToPercentage(CountryResponse
+    const stringency = decimalToPercentage(countryResponse?.countryProfile.stringency);
+    const economicSupportIndex = decimalToPercentage(countryResponse
         ?.countryProfile.economicSupportIndex);
 
-    const countryWiseOutbreakCases: countryWiseOutbreakCases[] | undefined = CountryResponse
+    const countryWiseOutbreakCases: countryWiseOutbreakCases[] | undefined = countryResponse
         ?.countryEmergencyProfile.map((item) => (
             {
                 ...item,
@@ -108,7 +118,7 @@ function Country(props: CountryProps) {
         ));
 
     const outbreakGroupList = listToGroupList(
-        CountryResponse?.countryEmergencyProfile,
+        countryResponse?.countryEmergencyProfile,
         (date) => date.contextDate ?? '',
     );
 
@@ -123,7 +133,7 @@ function Country(props: CountryProps) {
         ),
     );
 
-    const outbreaks = CountryResponse?.countryEmergencyProfile.map((item) => {
+    const outbreaks = countryResponse?.countryEmergencyProfile.map((item) => {
         const colors = LINE_COLORS[Number(item.contextIndicatorValue) % LINE_COLORS.length];
         return (
             {
@@ -140,22 +150,22 @@ function Country(props: CountryProps) {
     const readinessData: ReadinessCardProps[] = [
         {
             title: 'Readiness',
-            value: CountryResponse?.countryProfile.readiness ?? undefined,
+            value: countryResponse?.countryProfile.readiness ?? undefined,
             metricType: 'positive',
         },
         {
             title: 'Vulnerability',
-            value: CountryResponse?.countryProfile.vulnerability ?? undefined,
+            value: countryResponse?.countryProfile.vulnerability ?? undefined,
             metricType: 'negative',
         },
         {
             title: 'Risk',
-            value: CountryResponse?.countryProfile.risk ?? undefined,
+            value: countryResponse?.countryProfile.risk ?? undefined,
             metricType: 'negative',
         },
         {
             title: 'Response',
-            value: CountryResponse?.countryProfile.response ?? undefined,
+            value: countryResponse?.countryProfile.response ?? undefined,
             metricType: 'positive',
         },
     ];
@@ -357,7 +367,7 @@ function Country(props: CountryProps) {
                         <img src="https://picsum.photos/50" alt="country-avatar" />
                     )}
                     headingSize="small"
-                    heading={CountryResponse?.countryProfile.countryName}
+                    heading={countryResponse?.countryProfile.countryName}
                 >
                     <div className={styles.countryDetails}>
                         <TextOutput
@@ -367,10 +377,10 @@ function Country(props: CountryProps) {
                             hideLabelColon
                             label="Population"
                             value={(
-                                CountryResponse?.countryProfile.populationSize
+                                countryResponse?.countryProfile.populationSize
                                     ? (
                                         <NumberOutput
-                                            value={CountryResponse?.countryProfile.populationSize}
+                                            value={countryResponse?.countryProfile.populationSize}
                                         />
                                     ) : 'N/A'
                             )}
@@ -428,8 +438,8 @@ function Country(props: CountryProps) {
                             label="Doctors and nurses per 1000 people"
                             value={(
                                 <>
-                                    {CountryResponse?.countryProfile.medicalStaff
-                                        ? (CountryResponse?.countryProfile.medicalStaff)?.toFixed(1)
+                                    {countryResponse?.countryProfile.medicalStaff
+                                        ? (countryResponse?.countryProfile.medicalStaff)?.toFixed(1)
                                         : 'N/A'}
                                     <div className={styles.regionalText}>
                                         Regional 30%
