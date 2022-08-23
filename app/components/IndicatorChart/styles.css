@@ -1,7 +1,7 @@
 .indicator-chart-card {
     display: flex;
     flex-shrink: 0;
-    border-radius: 0;
+    border-radius: 0; /* By default, ContainerCard has border-radius */
 
     .responsive-container {
         min-height: 15rem;

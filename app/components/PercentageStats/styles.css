@@ -1,7 +1,7 @@
 .percentage-stats-card {
     display: flex;
     flex-shrink: 0;
-    border-radius: 0;
+    border-radius: 0; /* By default, ContainerCard has border-radius */
     box-shadow: 0px 0px 10px var(--dui-card-box-shadow);
 
     .percentage-heading {
