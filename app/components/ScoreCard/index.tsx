@@ -17,23 +17,25 @@ function ScoreCard(props: Props) {
         indicator,
     } = props;
     return (
-        <div className={_cs(
-            className,
-            styles.readinessContainer,
-            indicator === 'green' && styles.green,
-            indicator === 'yellow' && styles.yellow,
-            indicator === 'orange' && styles.orange,
-            indicator === 'red' && styles.red,
-        )}
-        >
-            <div className={styles.readinessTitle}>{title}</div>
+        value ? (
             <div className={_cs(
-                styles.readinessValue,
+                className,
+                styles.readinessContainer,
+                indicator === 'green' && styles.green,
+                indicator === 'yellow' && styles.yellow,
+                indicator === 'orange' && styles.orange,
+                indicator === 'red' && styles.red,
             )}
             >
-                {(value ? `${value}%` : 'N/A')}
+                <div className={styles.readinessTitle}>{title}</div>
+                <div className={_cs(
+                    styles.readinessValue,
+                )}
+                >
+                    {(value ? `${value}%` : 'N/A')}
+                </div>
             </div>
-        </div>
+        ) : null
     );
 }
 

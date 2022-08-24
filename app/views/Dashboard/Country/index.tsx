@@ -4,6 +4,7 @@ import {
     listToGroupList,
     _cs,
     mapToList,
+    unique,
 } from '@togglecorp/fujs';
 import {
     LineChart,
@@ -41,7 +42,7 @@ import {
 import styles from './styles.css';
 import { FilterType } from '../Filters';
 
-interface ReadinessCardProps {
+interface ScoreCardProps {
     title: string;
     value?: number;
     metricType: 'positive' | 'negative';
@@ -56,7 +57,7 @@ interface countryWiseOutbreakCases {
 }
 
 const percentageKeySelector = (d: countryWiseOutbreakCases) => d.key;
-const readinessKeySelector = (d: ReadinessCardProps) => d.title;
+const readinessKeySelector = (d: ScoreCardProps) => d.title;
 
 const COLORS = ['#567968', '#52625A', '#AFFAD5'];
 
@@ -96,9 +97,7 @@ const COUNTRY_PROFILE = gql`
     }
 `;
 
-const LINE_COLORS = ['#FFDD98', '#ACA28E'];
-
-interface Props{
+interface Props {
     className?: string;
     filterValues?: FilterType | undefined;
 }
@@ -146,7 +145,7 @@ function Country(props: Props) {
         (date) => date.contextDate ?? '',
     );
 
-    const outbreakLineChart = mapToList(
+    const outbreakLineChartData = mapToList(
         outbreakGroupList,
         (group, key) => group.reduce(
             (acc, item) => ({
@@ -157,21 +156,26 @@ function Country(props: Props) {
         ),
     );
 
-    const outbreaks = countryResponse?.countryEmergencyProfile.map((item) => {
-        const colors = LINE_COLORS[Number(item.contextIndicatorValue) % LINE_COLORS.length];
-        return (
-            {
-                emergency: item.emergency,
-                fill: colors,
-            }
-        );
+    const outbreaks = unique(
+        countryResponse?.countryEmergencyProfile ?? [],
+        (d) => d.emergency,
+    ).map((item) => {
+        const colors: Record<string, string> = {
+            'COVID-19': '#FFDD98',
+            Monkeypox: '#ACA28E',
+        };
+
+        return ({
+            emergency: item.emergency,
+            fill: colors[item.emergency] ?? 'pink',
+        });
     });
 
     const {
         className,
     } = props;
 
-    const readinessData: ReadinessCardProps[] = [
+    const scoreCardData: ScoreCardProps[] = [
         {
             title: 'Readiness',
             value: countryResponse?.countryProfile.readiness ?? undefined,
@@ -194,7 +198,9 @@ function Country(props: Props) {
         },
     ];
 
-    const metricTypeForColor = useCallback((data: ReadinessCardProps) => {
+    const isScoreCardValueEmpty = scoreCardData.every((score) => isNotDefined(score.value));
+
+    const metricTypeForColor = useCallback((data: ScoreCardProps) => {
         if (isNotDefined(data) || isNotDefined(data.metricType) || isNotDefined(data.value)) {
             return undefined;
         }
@@ -225,7 +231,7 @@ function Country(props: Props) {
         statValue: data.contextIndicatorValue,
     }), []);
 
-    const readinessRendererParams = useCallback((_, data: ReadinessCardProps) => ({
+    const readinessRendererParams = useCallback((_, data: ScoreCardProps) => ({
         title: data.title,
         value: data.value,
         indicator: metricTypeForColor(data),
@@ -249,16 +255,19 @@ function Country(props: Props) {
                             filtered={false}
                             pending={false}
                         />
-                        <ListView
-                            className={styles.readinessListCard}
-                            renderer={ScoreCard}
-                            rendererParams={readinessRendererParams}
-                            data={readinessData}
-                            keySelector={readinessKeySelector}
-                            errored={false}
-                            filtered={false}
-                            pending={false}
-                        />
+                        {!isScoreCardValueEmpty
+                            && (
+                                <ListView
+                                    className={styles.readinessListCard}
+                                    renderer={ScoreCard}
+                                    rendererParams={readinessRendererParams}
+                                    data={scoreCardData}
+                                    keySelector={readinessKeySelector}
+                                    errored={false}
+                                    filtered={false}
+                                    pending={false}
+                                />
+                            )}
                     </ContainerCard>
                     <ContainerCard
                         className={styles.countryTrend}
@@ -268,7 +277,7 @@ function Country(props: Props) {
                     >
                         <ResponsiveContainer className={styles.responsiveContainer}>
                             <LineChart
-                                data={outbreakLineChart}
+                                data={outbreakLineChartData}
                             >
                                 <XAxis
                                     dataKey="date"
@@ -285,12 +294,12 @@ function Country(props: Props) {
                                     align="right"
                                     verticalAlign="bottom"
                                 />
-                                {outbreaks && outbreaks.map((item) => (
+                                {outbreaks.map((outbreak) => (
                                     <Line
-                                        key={item.emergency}
-                                        dataKey={item.emergency}
+                                        key={outbreak.emergency}
+                                        dataKey={outbreak.emergency}
                                         type="monotone"
-                                        stroke={item.fill}
+                                        stroke={outbreak.fill}
                                         strokeWidth={3}
                                         dot={false}
                                     />
