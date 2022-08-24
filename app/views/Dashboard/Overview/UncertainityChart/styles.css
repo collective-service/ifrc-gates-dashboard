@@ -1,0 +1,13 @@
+.area-chart {
+    display: flex;
+    flex: flex-start;
+    padding: var(--dui-spacing-medium);
+}
+
+.responsive-content {
+    min-height: 20rem;
+
+    .responsive-container {
+        overflow: hidden;
+    }
+}

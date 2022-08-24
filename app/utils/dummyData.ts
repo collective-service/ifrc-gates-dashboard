@@ -670,3 +670,77 @@ export const overviewTableData = [
         high: true,
     },
 ];
+
+export const rangeData = [
+    {
+        date: 'Jan',
+        temperature: [
+            1,
+            10,
+        ],
+        amt: 5,
+    },
+    {
+        date: 'Feb',
+        temperature: [
+            2,
+            15,
+        ],
+        amt: 7,
+    },
+    {
+        date: 'Mar',
+        temperature: [
+            3,
+            12,
+        ],
+        amt: 7,
+    },
+    {
+        date: 'Apr',
+        temperature: [
+            4,
+            12,
+        ],
+    },
+    {
+        date: 'May',
+        temperature: [
+            12,
+            16,
+        ],
+        amt: 14,
+    },
+    {
+        date: 'Jun',
+        temperature: [
+            5,
+            16,
+        ],
+        amt: 11,
+    },
+    {
+        date: 'Jul',
+        temperature: [
+            3,
+            12,
+        ],
+        amt: 7,
+    },
+    {
+        date: 'Aug',
+        temperature: [
+            1,
+            8,
+        ],
+        amt: 4,
+    },
+    {
+        date: 'Sep',
+        temperature: [
+            -3,
+            5,
+        ],
+        amt: 2,
+    },
+];

@@ -10,6 +10,7 @@ import { _cs } from '@togglecorp/fujs';
 
 import RegionalBreakdownCard from './RegionalBreakdownCard';
 import PercentageCardGroup from './PercentageCardGroup';
+import UncertainityChart from './UncertainityChart';
 import MapView from './MapView';
 import OverviewTable from './OverviewTable';
 import styles from './styles.css';
@@ -31,6 +32,7 @@ function Overview(props: Props) {
         <div className={_cs(className, styles.overviewMain)}>
             <PercentageCardGroup />
             <RegionalBreakdownCard />
+            <UncertainityChart />
             <div className={styles.mapContainer}>
                 <Tabs
                     value={currentTab}

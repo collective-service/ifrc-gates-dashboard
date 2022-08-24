@@ -18,7 +18,6 @@ import { _cs } from '@togglecorp/fujs';
 import {
     totalCasesBarChart,
     regionalBreakdownPieData,
-
 } from '#utils/dummyData';
 
 import PieChartInfo, { RegionalDataType } from './PieChartInfo';
