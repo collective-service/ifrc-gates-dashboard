@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import { _cs } from '@togglecorp/fujs';
-import { IoInformationCircleOutline } from 'react-icons/io5';
 
 import styles from './styles.css';
 
@@ -15,6 +14,7 @@ export interface Props {
     value: number | undefined,
     subValue?: number,
     totalValue: number | undefined,
+    icon?: React.ReactNode
 }
 
 function ProgressBar(props: Props) {
@@ -29,6 +29,7 @@ function ProgressBar(props: Props) {
         value,
         subValue,
         totalValue,
+        icon,
     } = props;
 
     const countryPercentage = useMemo(
@@ -55,7 +56,7 @@ function ProgressBar(props: Props) {
         <div className={_cs(className, styles.progressInfo)}>
             <div className={styles.progressTitle}>
                 {barName}
-                <IoInformationCircleOutline />
+                {icon}
             </div>
             <div className={styles.progressValueWrapper}>
                 <div

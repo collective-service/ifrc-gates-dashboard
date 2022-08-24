@@ -6,6 +6,7 @@ import {
 } from '@the-deep/deep-ui';
 import ProgressBar from '#components/ProgressBar';
 import { sourcesProgressBarData } from '#utils/dummyData';
+import { IoInformationCircleOutline } from 'react-icons/io5';
 
 import styles from './styles.css';
 
@@ -45,6 +46,7 @@ function CombinedIndicators(props: Props) {
             subValue: data.subValue,
             totalValue: data.totalValue,
             color: data.color,
+            icon: <IoInformationCircleOutline />,
         }), [],
     );
 
