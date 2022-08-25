@@ -62,9 +62,9 @@ const COLORS = ['#567968', '#52625A', '#AFFAD5'];
 
 const COUNTRY_PROFILE = gql`
     query Country(
-        $iso3: String!,
-        $contextIndicatorsIds: [String!],
-        $emergencies: [String!]
+        $iso3: String,
+        $contextIndicatorsId: String,
+        $emergency: String
     ) {
         countryProfile(iso3: $iso3) {
             iso3
@@ -84,8 +84,8 @@ const COUNTRY_PROFILE = gql`
         countryEmergencyProfile(
             filters: {
                 iso3: $iso3,
-                contextIndicatorIds: $contextIndicatorsIds,
-                emergencies: $emergencies,
+                contextIndicatorId: $contextIndicatorsId,
+                emergency: $emergency,
         }) {
             iso3
             emergency
@@ -110,8 +110,8 @@ function Country(props: Props) {
 
     const variables = useMemo(() => ({
         iso3: filterValues?.country ?? 'AFG',
-        contextIndicatorsIds: ['total_cases'],
-        emergencies: [],
+        contextIndicatorsId: 'total_cases',
+        emergency: '',
     }), [
         filterValues?.country,
     ]);

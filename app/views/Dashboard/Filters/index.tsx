@@ -6,8 +6,8 @@ import {
 } from '@the-deep/deep-ui';
 
 import {
-    CountryListWithRegionQuery,
-    CountryListWithRegionQueryVariables,
+    CountryListQuery,
+    CountryListQueryVariables,
     OutbreaksQuery,
     OutbreaksQueryVariables,
 } from '#generated/types';
@@ -31,6 +31,11 @@ interface Region {
 
 const regionsKeySelector = (d: Region) => d.key;
 const regionsLabelSelector = (d: Region) => d.title;
+
+function doesObjectHaveAnyEmptyValue<T extends Record<string, unknown>>(obj: T) {
+    const valueList = Object.values(obj);
+    return valueList.some((val) => val === null);
+}
 
 interface Indicator {
     key: string;
@@ -64,9 +69,9 @@ const OUTBREAKS = gql`
     }
 `;
 
-const COUNTRY_LIST_WITH_REGION = gql`
-    query CountryListWithRegion {
-        countryProfiles {
+const COUNTRY_LIST = gql`
+    query CountryList{
+        countries {
             iso3
             countryName
             region
@@ -74,7 +79,7 @@ const COUNTRY_LIST_WITH_REGION = gql`
     }
 `;
 
-type Country = NonNullable<CountryListWithRegionQuery['countryProfiles']>[number];
+type Country = NonNullable<CountryListQuery['countries']>[number];
 const countriesKeySelector = (d: Country) => d.iso3;
 const countriesLabelSelector = (d: Country) => d.countryName ?? '';
 
@@ -117,8 +122,8 @@ function Filters(props: Props) {
     const {
         data: countryList,
         loading: countryListLoading,
-    } = useQuery<CountryListWithRegionQuery, CountryListWithRegionQueryVariables>(
-        COUNTRY_LIST_WITH_REGION,
+    } = useQuery<CountryListQuery, CountryListQueryVariables>(
+        COUNTRY_LIST,
     );
 
     const {
@@ -128,13 +133,16 @@ function Filters(props: Props) {
         OUTBREAKS,
     );
 
+    const countriesWithNull = countryList?.countries ?? [];
+    const countries = countriesWithNull.filter((country) => !doesObjectHaveAnyEmptyValue(country));
+
     const outbreaks = emergencies?.outBreaks?.map((e) => ({
         key: e.outbreak,
         label: e.outbreak,
     }));
 
     const regionGroupedCountryList = listToGroupList(
-        countryList?.countryProfiles,
+        countryList?.countries,
         (country) => country.region ?? '__null',
     );
 
@@ -186,7 +194,7 @@ function Filters(props: Props) {
                 {(activeTab !== 'overview') && (
                     <SelectInput
                         name="country"
-                        options={countryList?.countryProfiles ?? []}
+                        options={countries}
                         placeholder="Country"
                         keySelector={countriesKeySelector}
                         labelSelector={countriesLabelSelector}
