@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { listToMap } from '@togglecorp/fujs';
-import Select from 'react-select';
+import Select, { MultiValue } from 'react-select';
 
 import {
     RadioInput,
@@ -172,7 +172,7 @@ function AdvancedFilters(props: Props) {
     );
 
     const handleSelectChange = useCallback(
-        (newValue: LabelValue[] | undefined) => {
+        (newValue: MultiValue<LabelValue>) => {
             const newValueList = newValue?.map((v) => v.value);
             handleInputChange(newValueList, 'keywords');
         },
@@ -189,14 +189,14 @@ function AdvancedFilters(props: Props) {
         label: keyword.label,
     })), []);
 
-    const keywordValue = React.useMemo(() => {
+    const keywordValue = React.useMemo(() => (
         value?.keywords?.map(
             (keyword) => ({
                 label: keywordOptionsMap[keyword].label,
                 value: keywordOptionsMap[keyword].key,
             }),
-        );
-    }, [value?.keywords, keywordOptionsMap]);
+        )
+    ), [value?.keywords, keywordOptionsMap]);
 
     return (
         <div className={styles.advancedFilters}>
