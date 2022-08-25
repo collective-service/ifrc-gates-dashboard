@@ -15,9 +15,9 @@ const progressBarKeySelector = (d: ProgressBarRendererProps) => d.id;
 const barHeight = 8;
 
 export interface ProgressBarRendererProps {
-    className?: string,
-    barHeight?: number,
-    suffix?: string,
+    className?: string;
+    barHeight?: number;
+    suffix?: string;
     barName: string;
     title: string;
     id: string;

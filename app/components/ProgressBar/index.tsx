@@ -7,14 +7,14 @@ export interface Props {
     className?: string | undefined;
     barHeight: number;
     suffix?: string;
-    barName: string | undefined,
-    id: string,
-    title: string | undefined,
-    color?: string,
-    value: number | undefined,
-    subValue?: number,
-    totalValue: number | undefined,
-    icon?: React.ReactNode
+    barName: string | undefined;
+    id: string;
+    title: string | undefined;
+    color?: string;
+    value: number | undefined;
+    subValue?: number;
+    totalValue: number | undefined;
+    icon?: React.ReactNode;
 }
 
 function ProgressBar(props: Props) {

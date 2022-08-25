@@ -20,10 +20,6 @@
     font-weight: bold;
 }
 
-.default-indicator {
-    background-color: none;
-}
-
 .high-indicator {
     border-radius: 10px;
     background-color: #eaeaea;

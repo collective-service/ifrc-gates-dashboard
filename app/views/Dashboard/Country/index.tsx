@@ -124,52 +124,63 @@ function Country(props: Props) {
         },
     );
 
-    const internetAccess = decimalToPercentage(countryResponse?.countryProfile.internetAccess);
-    const literacyRate = decimalToPercentage(countryResponse?.countryProfile.literacyRate);
-    const washAccessNational = decimalToPercentage(countryResponse
-        ?.countryProfile.washAccessNational);
-    const stringency = decimalToPercentage(countryResponse?.countryProfile.stringency);
-    const economicSupportIndex = decimalToPercentage(countryResponse
-        ?.countryProfile.economicSupportIndex);
+    const internetAccess = useMemo(() => (
+        decimalToPercentage(countryResponse?.countryProfile.internetAccess)
+    ), [countryResponse?.countryProfile.internetAccess]);
 
-    const countryWiseOutbreakCases: countryWiseOutbreakCases[] | undefined = countryResponse
-        ?.countryEmergencyProfile.map((item) => (
+    const literacyRate = useMemo(() => (
+        decimalToPercentage(countryResponse?.countryProfile.literacyRate)
+    ), [countryResponse?.countryProfile.literacyRate]);
+
+    const washAccessNational = useMemo(() => (
+        decimalToPercentage(countryResponse?.countryProfile.washAccessNational)
+    ), [countryResponse?.countryProfile.washAccessNational]);
+
+    const stringency = useMemo(() => (
+        decimalToPercentage(countryResponse?.countryProfile.stringency)
+    ), [countryResponse?.countryProfile.stringency]);
+
+    const economicSupportIndex = useMemo(() => (
+        decimalToPercentage(countryResponse?.countryProfile.economicSupportIndex)
+    ), [countryResponse?.countryProfile.economicSupportIndex]);
+
+    const countryWiseOutbreakCases: countryWiseOutbreakCases[] | undefined = useMemo(() => (
+        countryResponse?.countryEmergencyProfile.map((item) => (
             {
                 ...item,
                 key: `${item.iso3}${item.contextIndicatorId}${item.emergency}`,
             }
-        ));
+        ))
+    ), [countryResponse?.countryEmergencyProfile]);
 
-    const outbreakGroupList = listToGroupList(
-        countryResponse?.countryEmergencyProfile,
-        (date) => date.contextDate ?? '',
-    );
+    const outbreakLineChartData = useMemo(() => {
+        const outbreakGroupList = listToGroupList(
+            countryResponse?.countryEmergencyProfile,
+            (date) => date.contextDate ?? '',
+        );
+        return mapToList(outbreakGroupList,
+            (group, key) => group.reduce(
+                (acc, item) => ({
+                    ...acc,
+                    [item.emergency]: item.contextIndicatorValue,
+                }), { date: key },
+            ));
+    }, [countryResponse?.countryEmergencyProfile]);
 
-    const outbreakLineChartData = mapToList(
-        outbreakGroupList,
-        (group, key) => group.reduce(
-            (acc, item) => ({
-                ...acc,
-                [item.emergency]: item.contextIndicatorValue,
-            }),
-            { date: key },
-        ),
-    );
+    const outbreaks = useMemo(() => (
+        unique(countryResponse?.countryEmergencyProfile ?? [],
+            (d) => d.emergency).map((item) => {
+            const colors: Record<string, string> = {
+                'COVID-19': '#FFDD98',
+                Monkeypox: '#ACA28E',
+            };
 
-    const outbreaks = unique(
-        countryResponse?.countryEmergencyProfile ?? [],
-        (d) => d.emergency,
-    ).map((item) => {
-        const colors: Record<string, string> = {
-            'COVID-19': '#FFDD98',
-            Monkeypox: '#ACA28E',
-        };
-
-        return ({
-            emergency: item.emergency,
-            fill: colors[item.emergency] ?? 'pink',
-        });
-    });
+            return ({
+                emergency: item.emergency,
+                fill: colors[item.emergency] ?? 'pink',
+            });
+        })
+    ), [countryResponse?.countryEmergencyProfile]);
 
     const {
         className,
@@ -255,19 +266,18 @@ function Country(props: Props) {
                             filtered={false}
                             pending={false}
                         />
-                        {!isScoreCardValueEmpty
-                            && (
-                                <ListView
-                                    className={styles.readinessListCard}
-                                    renderer={ScoreCard}
-                                    rendererParams={readinessRendererParams}
-                                    data={scoreCardData}
-                                    keySelector={readinessKeySelector}
-                                    errored={false}
-                                    filtered={false}
-                                    pending={false}
-                                />
-                            )}
+                        {!isScoreCardValueEmpty && (
+                            <ListView
+                                className={styles.readinessListCard}
+                                renderer={ScoreCard}
+                                rendererParams={readinessRendererParams}
+                                data={scoreCardData}
+                                keySelector={readinessKeySelector}
+                                errored={false}
+                                filtered={false}
+                                pending={false}
+                            />
+                        )}
                     </ContainerCard>
                     <ContainerCard
                         className={styles.countryTrend}
@@ -477,10 +487,7 @@ function Country(props: Props) {
                                 label="Doctors and nurses per 999 people"
                                 value={(
                                     <>
-                                        {countryResponse?.countryProfile.medicalStaff
-                                            ? (countryResponse
-                                                ?.countryProfile.medicalStaff)?.toFixed(0)
-                                            : 'N/A'}
+                                        {(countryResponse?.countryProfile.medicalStaff)?.toFixed(0)}
                                         <div className={styles.regionalText}>
                                             Regional 29%
                                         </div>
@@ -497,7 +504,7 @@ function Country(props: Props) {
                                 label="Stringency"
                                 value={(
                                     <>
-                                        {stringency ? `${stringency}%` : 'N/A'}
+                                        {`${stringency}%`}
                                         <div className={styles.regionalText}>
                                             Regional 30%
                                         </div>
@@ -529,7 +536,7 @@ function Country(props: Props) {
                                 label="Economic support index"
                                 value={(
                                     <>
-                                        {economicSupportIndex ? `${economicSupportIndex}%` : 'N/A'}
+                                        {`${economicSupportIndex}%`}
                                         <div className={styles.regionalText}>
                                             Regional 30%
                                         </div>
