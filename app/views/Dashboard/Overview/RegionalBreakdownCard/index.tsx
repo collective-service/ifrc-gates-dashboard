@@ -122,7 +122,7 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
                             />
                         </XAxis>
                         <YAxis
-                            padding={{ bottom: 10 }}
+                            padding={{ bottom: 12 }}
                             hide
                         />
                         <Bar
@@ -140,8 +140,8 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
                                 dataKey="range"
                                 position="insideBottomLeft"
                                 angle={270}
-                                offset={0}
-                                fontSize={25}
+                                offset={-2.8}
+                                fontSize={22}
                             />
                         </Bar>
                     </BarChart>

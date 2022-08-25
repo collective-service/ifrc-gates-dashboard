@@ -85,6 +85,7 @@
     --dui-color-accent: rgb(65, 131, 196);
     --dui-color-brand: rgb(25, 50, 86);
     --dui-color-brand-hover: #06179E;
+    --dui-tab-background-color: #0d2f54;
 
     --dui-color-text: rgb(100, 99, 99);
     --dui-filter-background-color: #EFF4FA;
@@ -100,6 +101,8 @@
     --dui-color-background-progress-bar-light: #f2f2f2;
     --dui-color-progress-alt: #98A6B5;
     --dui-color-line-separator: #D9D9D9;
+    --dui-column-background: #F2F2F2;
+    --dui-high-indicator-cell-background: #eaeaea;
 
     --color-foreground: #ffffff;
     --color-background: #F5F5F5;

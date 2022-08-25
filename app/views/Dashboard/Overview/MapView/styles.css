@@ -14,12 +14,11 @@
         flex-shrink: 0;
 
         .low-progress-box {
-            padding-top: var(--dui-spacing-large);
-
+            padding-top: none;
         }
 
         .high-progress-box {
-            padding-top: var(--dui-spacing-super-large);
+            padding-top: var(--dui-spacing-extra-large);
         }
 
         .progress-list-header {

@@ -11,7 +11,7 @@ import { _cs } from '@togglecorp/fujs';
 import RegionalBreakdownCard from './RegionalBreakdownCard';
 import PercentageCardGroup from './PercentageCardGroup';
 import MapView from './MapView';
-import TableView from './TableView';
+import OverviewTable from './OverviewTable';
 import styles from './styles.css';
 
 interface Props {
@@ -35,22 +35,27 @@ function Overview(props: Props) {
                 <Tabs
                     value={currentTab}
                     onChange={setCurrentTab}
+                    variant="secondary"
                 >
                     <ContainerCard
-                        heading={currentTab === 'mapMode' ? 'Overview map' : 'Tabular data'}
-                        headingSize="extraSmall"
-                        headerDescription={currentTab === 'mapMode'
-                            ? 'Overview of the average indicator value weighted by  populations'
-                            : 'Interpretation of the data in table'}
+                        spacing="none"
+                        heading={currentTab === 'mapMode' ? 'Overview map' : 'Overview Table'}
+                        headingSize="medium"
+                        headingContainerClassName={styles.mapHeaderContainer}
+                        headerActionsContainerClassName={styles.mapActionTabs}
                         headerActions={(
-                            <TabList>
+                            <TabList className={styles.dashboardTabList}>
                                 <Tab
                                     name="mapMode"
+                                    className={styles.defaultTabMode}
+                                    activeClassName={styles.activeTab}
                                 >
                                     Map overview
                                 </Tab>
                                 <Tab
                                     name="tableMode"
+                                    className={styles.defaultTabMode}
+                                    activeClassName={styles.activeTab}
                                 >
                                     Table
                                 </Tab>
@@ -65,7 +70,7 @@ function Overview(props: Props) {
                         <TabPanel
                             name="tableMode"
                         >
-                            <TableView />
+                            <OverviewTable />
                         </TabPanel>
                     </ContainerCard>
                 </Tabs>
