@@ -403,98 +403,108 @@ function Country(props: Props) {
                     heading={countryResponse?.countryProfile.countryName}
                 >
                     <div className={styles.countryDetails}>
-                        <TextOutput
-                            className={styles.countryTextOutput}
-                            valueContainerClassName={styles.valueText}
-                            labelContainerClassName={styles.labelText}
-                            hideLabelColon
-                            label="Population"
-                            value={(
-                                countryResponse?.countryProfile.populationSize
-                                    ? (
-                                        <NumberOutput
-                                            value={countryResponse?.countryProfile.populationSize}
-                                        />
-                                    ) : 'N/A'
-                            )}
-                        />
-                        <TextOutput
-                            className={styles.countryTextOutput}
-                            valueContainerClassName={styles.valueText}
-                            labelContainerClassName={styles.labelText}
-                            hideLabelColon
-                            label="Internet access"
-                            value={(
-                                <>
-                                    {internetAccess ? `${internetAccess}%` : 'N/A'}
-                                    <div className={styles.regionalText}>
-                                        Regional 30%
-                                    </div>
-                                </>
-                            )}
-                        />
-                        <TextOutput
-                            className={styles.countryTextOutput}
-                            valueContainerClassName={styles.valueText}
-                            labelContainerClassName={styles.labelText}
-                            hideLabelColon
-                            label="Literacy rate"
-                            value={(
-                                <>
-                                    {literacyRate ? `${literacyRate}%` : 'N/A'}
-                                    <div className={styles.regionalText}>
-                                        Regional 30%
-                                    </div>
-                                </>
-                            )}
-                        />
-                        <TextOutput
-                            className={styles.countryTextOutput}
-                            valueContainerClassName={styles.valueText}
-                            labelContainerClassName={styles.labelText}
-                            hideLabelColon
-                            label="Access to basic washing facilities"
-                            value={(
-                                <>
-                                    {washAccessNational ? `${washAccessNational}%` : 'N/A'}
-                                    <div className={styles.regionalText}>
-                                        Regional 30%
-                                    </div>
-                                </>
-                            )}
-                        />
-                        <TextOutput
-                            className={styles.countryTextOutput}
-                            valueContainerClassName={styles.valueText}
-                            labelContainerClassName={styles.labelText}
-                            hideLabelColon
-                            label="Doctors and nurses per 1000 people"
-                            value={(
-                                <>
-                                    {countryResponse?.countryProfile.medicalStaff
-                                        ? (countryResponse?.countryProfile.medicalStaff)?.toFixed(1)
-                                        : 'N/A'}
-                                    <div className={styles.regionalText}>
-                                        Regional 30%
-                                    </div>
-                                </>
-                            )}
-                        />
-                        <TextOutput
-                            className={styles.countryTextOutput}
-                            valueContainerClassName={styles.valueText}
-                            labelContainerClassName={styles.labelText}
-                            hideLabelColon
-                            label="Stringency"
-                            value={(
-                                <>
-                                    {stringency ? `${stringency}%` : 'N/A'}
-                                    <div className={styles.regionalText}>
-                                        Regional 30%
-                                    </div>
-                                </>
-                            )}
-                        />
+                        {countryResponse?.countryProfile.populationSize && (
+                            <TextOutput
+                                className={styles.countryTextOutput}
+                                valueContainerClassName={styles.valueText}
+                                labelContainerClassName={styles.labelText}
+                                hideLabelColon
+                                label="Population"
+                                value={(
+                                    <NumberOutput
+                                        value={countryResponse?.countryProfile.populationSize}
+                                    />
+                                )}
+                            />
+                        )}
+                        {internetAccess && (
+                            <TextOutput
+                                className={styles.countryTextOutput}
+                                valueContainerClassName={styles.valueText}
+                                labelContainerClassName={styles.labelText}
+                                hideLabelColon
+                                label="Internet access"
+                                value={(
+                                    <>
+                                        {`${internetAccess}%`}
+                                        <div className={styles.regionalText}>
+                                            Regional 30%
+                                        </div>
+                                    </>
+                                )}
+                            />
+                        )}
+                        {literacyRate && (
+                            <TextOutput
+                                className={styles.countryTextOutput}
+                                valueContainerClassName={styles.valueText}
+                                labelContainerClassName={styles.labelText}
+                                hideLabelColon
+                                label="Literacy rate"
+                                value={(
+                                    <>
+                                        {`${literacyRate}%`}
+                                        <div className={styles.regionalText}>
+                                            Regional 30%
+                                        </div>
+                                    </>
+                                )}
+                            />
+                        )}
+                        {washAccessNational && (
+                            <TextOutput
+                                className={styles.countryTextOutput}
+                                valueContainerClassName={styles.valueText}
+                                labelContainerClassName={styles.labelText}
+                                hideLabelColon
+                                label="Access to basic washing facilities"
+                                value={(
+                                    <>
+                                        {`${washAccessNational}%`}
+                                        <div className={styles.regionalText}>
+                                            Regional 30%
+                                        </div>
+                                    </>
+                                )}
+                            />
+                        )}
+                        {countryResponse?.countryProfile.medicalStaff && (
+                            <TextOutput
+                                className={styles.countryTextOutput}
+                                valueContainerClassName={styles.valueText}
+                                labelContainerClassName={styles.labelText}
+                                hideLabelColon
+                                label="Doctors and nurses per 999 people"
+                                value={(
+                                    <>
+                                        {countryResponse?.countryProfile.medicalStaff
+                                            ? (countryResponse
+                                                ?.countryProfile.medicalStaff)?.toFixed(0)
+                                            : 'N/A'}
+                                        <div className={styles.regionalText}>
+                                            Regional 29%
+                                        </div>
+                                    </>
+                                )}
+                            />
+                        )}
+                        {stringency && (
+                            <TextOutput
+                                className={styles.countryTextOutput}
+                                valueContainerClassName={styles.valueText}
+                                labelContainerClassName={styles.labelText}
+                                hideLabelColon
+                                label="Stringency"
+                                value={(
+                                    <>
+                                        {stringency ? `${stringency}%` : 'N/A'}
+                                        <div className={styles.regionalText}>
+                                            Regional 30%
+                                        </div>
+                                    </>
+                                )}
+                            />
+                        )}
                         <TextOutput
                             className={styles.countryTextOutput}
                             valueContainerClassName={styles.valueText}
@@ -510,21 +520,23 @@ function Country(props: Props) {
                                 </>
                             )}
                         />
-                        <TextOutput
-                            className={styles.countryTextOutput}
-                            valueContainerClassName={styles.valueText}
-                            labelContainerClassName={styles.labelText}
-                            hideLabelColon
-                            label="Economic support index"
-                            value={(
-                                <>
-                                    {economicSupportIndex ? `${economicSupportIndex}%` : 'N/A'}
-                                    <div className={styles.regionalText}>
-                                        Regional 30%
-                                    </div>
-                                </>
-                            )}
-                        />
+                        {economicSupportIndex && (
+                            <TextOutput
+                                className={styles.countryTextOutput}
+                                valueContainerClassName={styles.valueText}
+                                labelContainerClassName={styles.labelText}
+                                hideLabelColon
+                                label="Economic support index"
+                                value={(
+                                    <>
+                                        {economicSupportIndex ? `${economicSupportIndex}%` : 'N/A'}
+                                        <div className={styles.regionalText}>
+                                            Regional 30%
+                                        </div>
+                                    </>
+                                )}
+                            />
+                        )}
                     </div>
                 </ContainerCard>
             </div>
