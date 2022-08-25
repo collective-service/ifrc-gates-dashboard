@@ -170,6 +170,7 @@ function Country(props: Props) {
     const outbreaks = useMemo(() => (
         unique(countryResponse?.countryEmergencyProfile ?? [],
             (d) => d.emergency).map((item) => {
+
             const colors: Record<string, string> = {
                 'COVID-19': '#FFDD98',
                 Monkeypox: '#ACA28E',

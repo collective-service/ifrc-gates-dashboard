@@ -57,7 +57,7 @@ function MapView(props: MapViewProps) {
             value: data.value,
             totalValue: data.totalValue,
             color: data.color,
-        }), [],
+        }), [barHeight],
     );
 
     return (

@@ -47,7 +47,7 @@ function CombinedIndicators(props: Props) {
             totalValue: data.totalValue,
             color: data.color,
             icon: <IoInformationCircleOutline />,
-        }), [],
+        }), [barHeight],
     );
 
     return (
