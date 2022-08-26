@@ -16,6 +16,11 @@ function ScoreCard(props: Props) {
         value,
         indicator,
     } = props;
+
+    if (!value) {
+        return null;
+    }
+
     return (
         <div className={_cs(
             className,

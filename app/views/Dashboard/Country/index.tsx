@@ -4,6 +4,7 @@ import {
     listToGroupList,
     _cs,
     mapToList,
+    unique,
 } from '@togglecorp/fujs';
 import {
     LineChart,
@@ -41,7 +42,7 @@ import {
 import styles from './styles.css';
 import { FilterType } from '../Filters';
 
-interface ReadinessCardProps {
+interface ScoreCardProps {
     title: string;
     value?: number;
     metricType: 'positive' | 'negative';
@@ -56,7 +57,7 @@ interface countryWiseOutbreakCases {
 }
 
 const percentageKeySelector = (d: countryWiseOutbreakCases) => d.key;
-const readinessKeySelector = (d: ReadinessCardProps) => d.title;
+const readinessKeySelector = (d: ScoreCardProps) => d.title;
 
 const COLORS = ['#567968', '#52625A', '#AFFAD5'];
 
@@ -96,9 +97,7 @@ const COUNTRY_PROFILE = gql`
     }
 `;
 
-const LINE_COLORS = ['#FFDD98', '#ACA28E'];
-
-interface Props{
+interface Props {
     className?: string;
     filterValues?: FilterType | undefined;
 }
@@ -125,53 +124,69 @@ function Country(props: Props) {
         },
     );
 
-    const internetAccess = decimalToPercentage(countryResponse?.countryProfile.internetAccess);
-    const literacyRate = decimalToPercentage(countryResponse?.countryProfile.literacyRate);
-    const washAccessNational = decimalToPercentage(countryResponse
-        ?.countryProfile.washAccessNational);
-    const stringency = decimalToPercentage(countryResponse?.countryProfile.stringency);
-    const economicSupportIndex = decimalToPercentage(countryResponse
-        ?.countryProfile.economicSupportIndex);
+    const internetAccess = useMemo(() => (
+        decimalToPercentage(countryResponse?.countryProfile.internetAccess)
+    ), [countryResponse?.countryProfile.internetAccess]);
 
-    const countryWiseOutbreakCases: countryWiseOutbreakCases[] | undefined = countryResponse
-        ?.countryEmergencyProfile.map((item) => (
+    const literacyRate = useMemo(() => (
+        decimalToPercentage(countryResponse?.countryProfile.literacyRate)
+    ), [countryResponse?.countryProfile.literacyRate]);
+
+    const washAccessNational = useMemo(() => (
+        decimalToPercentage(countryResponse?.countryProfile.washAccessNational)
+    ), [countryResponse?.countryProfile.washAccessNational]);
+
+    const stringency = useMemo(() => (
+        decimalToPercentage(countryResponse?.countryProfile.stringency)
+    ), [countryResponse?.countryProfile.stringency]);
+
+    const economicSupportIndex = useMemo(() => (
+        decimalToPercentage(countryResponse?.countryProfile.economicSupportIndex)
+    ), [countryResponse?.countryProfile.economicSupportIndex]);
+
+    const countryWiseOutbreakCases: countryWiseOutbreakCases[] | undefined = useMemo(() => (
+        countryResponse?.countryEmergencyProfile.map((item) => (
             {
                 ...item,
                 key: `${item.iso3}${item.contextIndicatorId}${item.emergency}`,
             }
-        ));
+        ))
+    ), [countryResponse?.countryEmergencyProfile]);
 
-    const outbreakGroupList = listToGroupList(
-        countryResponse?.countryEmergencyProfile,
-        (date) => date.contextDate ?? '',
-    );
-
-    const outbreakLineChart = mapToList(
-        outbreakGroupList,
-        (group, key) => group.reduce(
-            (acc, item) => ({
-                ...acc,
-                [item.emergency]: item.contextIndicatorValue,
-            }),
-            { date: key },
-        ),
-    );
-
-    const outbreaks = countryResponse?.countryEmergencyProfile.map((item) => {
-        const colors = LINE_COLORS[Number(item.contextIndicatorValue) % LINE_COLORS.length];
-        return (
-            {
-                emergency: item.emergency,
-                fill: colors,
-            }
+    const outbreakLineChartData = useMemo(() => {
+        const outbreakGroupList = listToGroupList(
+            countryResponse?.countryEmergencyProfile,
+            (date) => date.contextDate ?? '',
         );
-    });
+        return mapToList(outbreakGroupList,
+            (group, key) => group.reduce(
+                (acc, item) => ({
+                    ...acc,
+                    [item.emergency]: item.contextIndicatorValue,
+                }), { date: key },
+            ));
+    }, [countryResponse?.countryEmergencyProfile]);
+
+    const outbreaks = useMemo(() => (
+        unique(countryResponse?.countryEmergencyProfile ?? [],
+            (d) => d.emergency).map((item) => {
+            const colors: Record<string, string> = {
+                'COVID-19': '#FFDD98',
+                Monkeypox: '#ACA28E',
+            };
+
+            return ({
+                emergency: item.emergency,
+                fill: colors[item.emergency] ?? 'pink',
+            });
+        })
+    ), [countryResponse?.countryEmergencyProfile]);
 
     const {
         className,
     } = props;
 
-    const readinessData: ReadinessCardProps[] = [
+    const scoreCardData: ScoreCardProps[] = [
         {
             title: 'Readiness',
             value: countryResponse?.countryProfile.readiness ?? undefined,
@@ -194,7 +209,9 @@ function Country(props: Props) {
         },
     ];
 
-    const metricTypeForColor = useCallback((data: ReadinessCardProps) => {
+    const isScoreCardValueEmpty = scoreCardData.every((score) => isNotDefined(score.value));
+
+    const metricTypeForColor = useCallback((data: ScoreCardProps) => {
         if (isNotDefined(data) || isNotDefined(data.metricType) || isNotDefined(data.value)) {
             return undefined;
         }
@@ -225,7 +242,7 @@ function Country(props: Props) {
         statValue: data.contextIndicatorValue,
     }), []);
 
-    const readinessRendererParams = useCallback((_, data: ReadinessCardProps) => ({
+    const readinessRendererParams = useCallback((_, data: ScoreCardProps) => ({
         title: data.title,
         value: data.value,
         indicator: metricTypeForColor(data),
@@ -249,16 +266,18 @@ function Country(props: Props) {
                             filtered={false}
                             pending={false}
                         />
-                        <ListView
-                            className={styles.readinessListCard}
-                            renderer={ScoreCard}
-                            rendererParams={readinessRendererParams}
-                            data={readinessData}
-                            keySelector={readinessKeySelector}
-                            errored={false}
-                            filtered={false}
-                            pending={false}
-                        />
+                        {!isScoreCardValueEmpty && (
+                            <ListView
+                                className={styles.readinessListCard}
+                                renderer={ScoreCard}
+                                rendererParams={readinessRendererParams}
+                                data={scoreCardData}
+                                keySelector={readinessKeySelector}
+                                errored={false}
+                                filtered={false}
+                                pending={false}
+                            />
+                        )}
                     </ContainerCard>
                     <ContainerCard
                         className={styles.countryTrend}
@@ -268,7 +287,7 @@ function Country(props: Props) {
                     >
                         <ResponsiveContainer className={styles.responsiveContainer}>
                             <LineChart
-                                data={outbreakLineChart}
+                                data={outbreakLineChartData}
                             >
                                 <XAxis
                                     dataKey="date"
@@ -285,12 +304,12 @@ function Country(props: Props) {
                                     align="right"
                                     verticalAlign="bottom"
                                 />
-                                {outbreaks && outbreaks.map((item) => (
+                                {outbreaks.map((outbreak) => (
                                     <Line
-                                        key={item.emergency}
-                                        dataKey={item.emergency}
+                                        key={outbreak.emergency}
+                                        dataKey={outbreak.emergency}
                                         type="monotone"
-                                        stroke={item.fill}
+                                        stroke={outbreak.fill}
                                         strokeWidth={3}
                                         dot={false}
                                     />
@@ -394,98 +413,105 @@ function Country(props: Props) {
                     heading={countryResponse?.countryProfile.countryName}
                 >
                     <div className={styles.countryDetails}>
-                        <TextOutput
-                            className={styles.countryTextOutput}
-                            valueContainerClassName={styles.valueText}
-                            labelContainerClassName={styles.labelText}
-                            hideLabelColon
-                            label="Population"
-                            value={(
-                                countryResponse?.countryProfile.populationSize
-                                    ? (
-                                        <NumberOutput
-                                            value={countryResponse?.countryProfile.populationSize}
-                                        />
-                                    ) : 'N/A'
-                            )}
-                        />
-                        <TextOutput
-                            className={styles.countryTextOutput}
-                            valueContainerClassName={styles.valueText}
-                            labelContainerClassName={styles.labelText}
-                            hideLabelColon
-                            label="Internet access"
-                            value={(
-                                <>
-                                    {internetAccess ? `${internetAccess}%` : 'N/A'}
-                                    <div className={styles.regionalText}>
-                                        Regional 30%
-                                    </div>
-                                </>
-                            )}
-                        />
-                        <TextOutput
-                            className={styles.countryTextOutput}
-                            valueContainerClassName={styles.valueText}
-                            labelContainerClassName={styles.labelText}
-                            hideLabelColon
-                            label="Literacy rate"
-                            value={(
-                                <>
-                                    {literacyRate ? `${literacyRate}%` : 'N/A'}
-                                    <div className={styles.regionalText}>
-                                        Regional 30%
-                                    </div>
-                                </>
-                            )}
-                        />
-                        <TextOutput
-                            className={styles.countryTextOutput}
-                            valueContainerClassName={styles.valueText}
-                            labelContainerClassName={styles.labelText}
-                            hideLabelColon
-                            label="Access to basic washing facilities"
-                            value={(
-                                <>
-                                    {washAccessNational ? `${washAccessNational}%` : 'N/A'}
-                                    <div className={styles.regionalText}>
-                                        Regional 30%
-                                    </div>
-                                </>
-                            )}
-                        />
-                        <TextOutput
-                            className={styles.countryTextOutput}
-                            valueContainerClassName={styles.valueText}
-                            labelContainerClassName={styles.labelText}
-                            hideLabelColon
-                            label="Doctors and nurses per 1000 people"
-                            value={(
-                                <>
-                                    {countryResponse?.countryProfile.medicalStaff
-                                        ? (countryResponse?.countryProfile.medicalStaff)?.toFixed(1)
-                                        : 'N/A'}
-                                    <div className={styles.regionalText}>
-                                        Regional 30%
-                                    </div>
-                                </>
-                            )}
-                        />
-                        <TextOutput
-                            className={styles.countryTextOutput}
-                            valueContainerClassName={styles.valueText}
-                            labelContainerClassName={styles.labelText}
-                            hideLabelColon
-                            label="Stringency"
-                            value={(
-                                <>
-                                    {stringency ? `${stringency}%` : 'N/A'}
-                                    <div className={styles.regionalText}>
-                                        Regional 30%
-                                    </div>
-                                </>
-                            )}
-                        />
+                        {countryResponse?.countryProfile.populationSize && (
+                            <TextOutput
+                                className={styles.countryTextOutput}
+                                valueContainerClassName={styles.valueText}
+                                labelContainerClassName={styles.labelText}
+                                hideLabelColon
+                                label="Population"
+                                value={(
+                                    <NumberOutput
+                                        value={countryResponse?.countryProfile.populationSize}
+                                    />
+                                )}
+                            />
+                        )}
+                        {internetAccess && (
+                            <TextOutput
+                                className={styles.countryTextOutput}
+                                valueContainerClassName={styles.valueText}
+                                labelContainerClassName={styles.labelText}
+                                hideLabelColon
+                                label="Internet access"
+                                value={(
+                                    <>
+                                        {`${internetAccess}%`}
+                                        <div className={styles.regionalText}>
+                                            Regional 30%
+                                        </div>
+                                    </>
+                                )}
+                            />
+                        )}
+                        {literacyRate && (
+                            <TextOutput
+                                className={styles.countryTextOutput}
+                                valueContainerClassName={styles.valueText}
+                                labelContainerClassName={styles.labelText}
+                                hideLabelColon
+                                label="Literacy rate"
+                                value={(
+                                    <>
+                                        {`${literacyRate}%`}
+                                        <div className={styles.regionalText}>
+                                            Regional 30%
+                                        </div>
+                                    </>
+                                )}
+                            />
+                        )}
+                        {washAccessNational && (
+                            <TextOutput
+                                className={styles.countryTextOutput}
+                                valueContainerClassName={styles.valueText}
+                                labelContainerClassName={styles.labelText}
+                                hideLabelColon
+                                label="Access to basic washing facilities"
+                                value={(
+                                    <>
+                                        {`${washAccessNational}%`}
+                                        <div className={styles.regionalText}>
+                                            Regional 30%
+                                        </div>
+                                    </>
+                                )}
+                            />
+                        )}
+                        {countryResponse?.countryProfile.medicalStaff && (
+                            <TextOutput
+                                className={styles.countryTextOutput}
+                                valueContainerClassName={styles.valueText}
+                                labelContainerClassName={styles.labelText}
+                                hideLabelColon
+                                label="Doctors and nurses per 999 people"
+                                value={(
+                                    <>
+                                        {(countryResponse?.countryProfile.medicalStaff)?.toFixed(0)}
+                                        <div className={styles.regionalText}>
+                                            Regional 29%
+                                        </div>
+                                    </>
+                                )}
+                            />
+                        )}
+                        {stringency && (
+                            <TextOutput
+                                className={styles.countryTextOutput}
+                                valueContainerClassName={styles.valueText}
+                                labelContainerClassName={styles.labelText}
+                                hideLabelColon
+                                label="Stringency"
+                                value={(
+                                    <>
+                                        {`${stringency}%`}
+                                        <div className={styles.regionalText}>
+                                            Regional 30%
+                                        </div>
+                                    </>
+                                )}
+                            />
+                        )}
                         <TextOutput
                             className={styles.countryTextOutput}
                             valueContainerClassName={styles.valueText}
@@ -501,21 +527,23 @@ function Country(props: Props) {
                                 </>
                             )}
                         />
-                        <TextOutput
-                            className={styles.countryTextOutput}
-                            valueContainerClassName={styles.valueText}
-                            labelContainerClassName={styles.labelText}
-                            hideLabelColon
-                            label="Economic support index"
-                            value={(
-                                <>
-                                    {economicSupportIndex ? `${economicSupportIndex}%` : 'N/A'}
-                                    <div className={styles.regionalText}>
-                                        Regional 30%
-                                    </div>
-                                </>
-                            )}
-                        />
+                        {economicSupportIndex && (
+                            <TextOutput
+                                className={styles.countryTextOutput}
+                                valueContainerClassName={styles.valueText}
+                                labelContainerClassName={styles.labelText}
+                                hideLabelColon
+                                label="Economic support index"
+                                value={(
+                                    <>
+                                        {`${economicSupportIndex}%`}
+                                        <div className={styles.regionalText}>
+                                            Regional 30%
+                                        </div>
+                                    </>
+                                )}
+                            />
+                        )}
                     </div>
                 </ContainerCard>
             </div>
