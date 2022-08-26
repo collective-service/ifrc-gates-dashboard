@@ -37,6 +37,8 @@ import { decimalToPercentage } from '#utils/common';
 import {
     CountryQuery,
     CountryQueryVariables,
+    IndicatorQuery,
+    IndicatorQueryVariables,
 } from '#generated/types';
 
 import styles from './styles.css';
@@ -59,13 +61,13 @@ interface countryWiseOutbreakCases {
 const percentageKeySelector = (d: countryWiseOutbreakCases) => d.key;
 const readinessKeySelector = (d: ScoreCardProps) => d.title;
 
-const COLORS = ['#567968', '#52625A', '#AFFAD5'];
+const COLORS = ['#52625A', '#567968', '#69A688', '#7AD6A8', '#AFFAD5', '#D6F9E8'];
 
 const COUNTRY_PROFILE = gql`
     query Country(
-        $iso3: String,
-        $contextIndicatorsId: String,
-        $emergency: String
+    $iso3: String,
+    $contextIndicatorsId: String,
+    $emergency: String
     ) {
         countryProfile(iso3: $iso3) {
             iso3
@@ -83,16 +85,33 @@ const COUNTRY_PROFILE = gql`
             response
         }
         countryEmergencyProfile(
-            filters: {
-                iso3: $iso3,
-                contextIndicatorId: $contextIndicatorsId,
-                emergency: $emergency,
+        filters: {
+            iso3: $iso3,
+            contextIndicatorId: $contextIndicatorsId,
+            emergency: $emergency,
         }) {
             iso3
             emergency
             contextIndicatorValue
             contextIndicatorId
             contextDate
+        }
+    }
+`;
+
+const INDICATOR = gql`
+    query Indicator(
+    $iso3: String!,
+    ) {
+        disaggregation {
+            ageDisaggregation(iso3: $iso3) {
+                category
+                indicatorValue
+            }
+            genderDisaggregation(iso3: $iso3) {
+                category
+                indicatorValue
+            }
         }
     }
 `;
@@ -107,8 +126,8 @@ function Country(props: Props) {
         filterValues,
     } = props;
 
-    const variables = useMemo(() => ({
-        iso3: filterValues?.country ?? 'AFG',
+    const countryVariables = useMemo(() => ({
+        iso3: filterValues?.country ?? 'NPL',
         contextIndicatorsId: 'total_cases',
         emergency: '',
     }), [
@@ -120,9 +139,24 @@ function Country(props: Props) {
     } = useQuery<CountryQuery, CountryQueryVariables>(
         COUNTRY_PROFILE,
         {
-            variables,
+            variables: countryVariables,
         },
     );
+
+    const indicatorVariables = useMemo(() => ({
+        iso3: filterValues?.country ?? 'NPL',
+    }), [filterValues?.country]);
+
+    const {
+        data: indicatorResponse,
+    } = useQuery<IndicatorQuery, IndicatorQueryVariables>(
+        INDICATOR,
+        {
+            variables: indicatorVariables,
+        },
+    );
+
+    console.log(indicatorResponse);
 
     const internetAccess = useMemo(() => (
         decimalToPercentage(countryResponse?.countryProfile.internetAccess)
@@ -336,15 +370,16 @@ function Country(props: Props) {
                         <ContainerCard
                             className={styles.genderDisaggregation}
                             contentClassName={styles.responsiveContent}
-                            heading="Percentage of unvaccinated individuals who have tried to get vaccinated"
+                            heading="Gender disaggregation"
                             headerDescription="Lorem ipsum explaining the topic"
                             headingSize="extraSmall"
                         >
                             <ResponsiveContainer className={styles.responsiveContainer}>
                                 <PieChart>
                                     <Pie
-                                        data={genderDisaggregationData}
-                                        dataKey="percentage"
+                                        data={indicatorResponse
+                                            ?.disaggregation.genderDisaggregation}
+                                        dataKey="indicatorValue"
                                         labelLine={false}
                                         cx={100}
                                         cy={100}
@@ -358,7 +393,6 @@ function Country(props: Props) {
                                         ))}
                                     </Pie>
                                     <Legend
-                                        name="gender"
                                         verticalAlign="middle"
                                         align="right"
                                         layout="vertical"
@@ -376,8 +410,9 @@ function Country(props: Props) {
                             <ResponsiveContainer className={styles.responsiveContainer}>
                                 <PieChart>
                                     <Pie
-                                        data={genderDisaggregationData}
-                                        dataKey="percentage"
+                                        data={indicatorResponse
+                                            ?.disaggregation.ageDisaggregation}
+                                        dataKey="indicatorValue"
                                         labelLine={false}
                                         cx={100}
                                         cy={100}
@@ -391,7 +426,6 @@ function Country(props: Props) {
                                         ))}
                                     </Pie>
                                     <Legend
-                                        name="gender"
                                         verticalAlign="middle"
                                         align="right"
                                         layout="vertical"
