@@ -5,14 +5,18 @@ import {
     Tab,
     TabPanel,
     ContainerCard,
+    Button,
+    Modal,
 } from '@the-deep/deep-ui';
 import { _cs } from '@togglecorp/fujs';
+import { useModalState } from '#utils/hooks/stateManagement';
 
 import RegionalBreakdownCard from './RegionalBreakdownCard';
 import PercentageCardGroup from './PercentageCardGroup';
 import UncertainityChart from './UncertainityChart';
 import MapView from './MapView';
 import OverviewTable from './OverviewTable';
+import MapModal from './MapView/MapModal';
 import styles from './styles.css';
 
 interface Props {
@@ -28,11 +32,32 @@ function Overview(props: Props) {
     // TODO: define strict type mapMode and tableMode instead of string
     const [currentTab, setCurrentTab] = useState<string | undefined>('mapMode');
 
+    const [
+        mapModalShown,
+        setMapModalVisible,
+        setMapModalHidden,
+    ] = useModalState(false);
+
+    const handleMapModal = () => {
+        console.log('Handle map modal:::>>>>>', mapModalShown);
+        setMapModalVisible();
+    };
+
     return (
         <div className={_cs(className, styles.overviewMain)}>
             <PercentageCardGroup />
             <RegionalBreakdownCard />
-            <UncertainityChart />
+            <div className={styles.areaChartBox}>
+                <UncertainityChart />
+                <Button
+                    name="map_modal"
+                    className={styles.modalButton}
+                    onClick={handleMapModal}
+                    variant="nlp-tertiary"
+                >
+                    Map Modal
+                </Button>
+            </div>
             <div className={styles.mapContainer}>
                 <Tabs
                     value={currentTab}
@@ -76,6 +101,11 @@ function Overview(props: Props) {
                         </TabPanel>
                     </ContainerCard>
                 </Tabs>
+                {mapModalShown && (
+                    <MapModal
+                        onModalClose={setMapModalHidden}
+                    />
+                )}
             </div>
         </div>
     );

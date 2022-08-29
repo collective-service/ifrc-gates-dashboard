@@ -33,8 +33,6 @@ function UncertainityChart(props: UncertainityChartProps) {
         >
             <ResponsiveContainer
                 className={styles.responsiveContainer}
-                width={700}
-                height={250}
             >
                 <ComposedChart
                     data={rangeData}
@@ -42,13 +40,20 @@ function UncertainityChart(props: UncertainityChartProps) {
                     <XAxis
                         dataKey="date"
                         padding={{
-                            left: 40,
-                            right: 40,
+                            left: 30,
+                            right: 30,
                         }}
                     />
-                    <YAxis hide />
+                    <YAxis
+                        label={{
+                            value: 'Country Trend on (%)',
+                            angle: -90,
+                            position: 'insideBottomLeft',
+                            offset: 16,
+                        }}
+                    />
                     <Area
-                        dataKey="temperature"
+                        dataKey="uncertainData"
                         stroke="#8884d8"
                         fill="#8884d8"
                     />

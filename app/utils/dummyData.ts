@@ -674,73 +674,82 @@ export const overviewTableData = [
 export const rangeData = [
     {
         date: 'Jan',
-        temperature: [
-            1,
+        range: '0.0%',
+        uncertainData: [
             10,
+            50,
         ],
-        amt: 5,
+        amt: 30,
     },
     {
         date: 'Feb',
-        temperature: [
-            2,
-            15,
+        range: '10.0%',
+        uncertainData: [
+            20,
+            100,
         ],
-        amt: 7,
+        amt: 40,
     },
     {
         date: 'Mar',
-        temperature: [
-            3,
-            12,
+        range: '20.0%',
+        uncertainData: [
+            30,
+            120,
         ],
-        amt: 7,
+        amt: 70,
     },
     {
         date: 'Apr',
-        temperature: [
-            4,
-            12,
+        range: '30.0%',
+        uncertainData: [
+            40,
+            120,
         ],
     },
     {
         date: 'May',
-        temperature: [
-            12,
-            16,
+        range: '40.0%',
+        uncertainData: [
+            120,
+            160,
         ],
-        amt: 14,
+        amt: 140,
     },
     {
         date: 'Jun',
-        temperature: [
-            5,
-            16,
+        range: '50.0%',
+        uncertainData: [
+            50,
+            120,
         ],
-        amt: 11,
+        amt: 80,
     },
     {
         date: 'Jul',
-        temperature: [
-            3,
-            12,
+        range: '60.0%',
+        uncertainData: [
+            30,
+            100,
         ],
-        amt: 7,
+        amt: 70,
     },
     {
         date: 'Aug',
-        temperature: [
-            1,
-            8,
+        range: '70.0%',
+        uncertainData: [
+            10,
+            80,
         ],
-        amt: 4,
+        amt: 40,
     },
     {
         date: 'Sep',
-        temperature: [
-            -3,
-            5,
+        range: '80.0%',
+        uncertainData: [
+            30,
+            80,
         ],
-        amt: 2,
+        amt: 50,
     },
 ];

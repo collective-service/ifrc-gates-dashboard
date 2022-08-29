@@ -1,10 +1,5 @@
-.area-chart {
-    flex-basis: 60%;
-    flex-grow: 1;
-}
-
 .responsive-content {
-    min-height: 12rem;
+    min-height: 10rem;
 
     .responsive-container {
         overflow: hidden;

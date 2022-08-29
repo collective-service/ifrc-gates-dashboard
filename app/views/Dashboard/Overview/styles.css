@@ -18,10 +18,15 @@
         }
     }
 
+    .area-chart-box {
+        display: flex;
+        gap: var(--dui-spacing-extra-large);
+    }
+
     .dashboard-tab-list {
         display: flex;
+        align-items: center;
         flex-wrap: wrap;
-        justify-content: flex-end;
         border: var(--width-separator-thin) solid var(--dui-tab-background-color);
         border-radius: var(--dui-border-radius-progress-bar);
 
