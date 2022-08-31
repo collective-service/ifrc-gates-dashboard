@@ -15,7 +15,8 @@
             gap: var(--dui-spacing-large);
 
             .status-card-container {
-                border-radius: 0; /* By default, ContainerCard has border-radius */
+                border-radius: 0;
+                /* By default, ContainerCard has border-radius */
                 background-color: var(--color-background);
                 padding: 0;
 
@@ -41,7 +42,8 @@
             }
 
             .country-trend {
-                border-radius: 0; /* By default, ContainerCard has border-radius */
+                border-radius: 0;
+                /* By default, ContainerCard has border-radius */
                 box-shadow: 0px 0px 10px var(--dui-card-box-shadow);
 
                 .responsive-content {
@@ -59,34 +61,60 @@
                 gap: var(--dui-spacing-large);
 
                 .percentage-card {
-                    flex-basis: calc(40% - var(--dui-spacing-large));
+                    flex-basis: calc(45% - var(--dui-spacing-large));
                     flex-grow: 1;
                     gap: var(--dui-spacing-mega-large);
                 }
 
                 .indicators-chart {
-                    flex-basis: calc(60% - var(--dui-spacing-small));
+                    flex-basis: calc(55% - var(--dui-spacing-small));
                     box-shadow: 0px 0px 10px var(--dui-card-box-shadow);
                 }
 
                 .gender-disaggregation {
-                    flex-basis: calc(40% - var(--dui-spacing-large));
+                    flex-basis: calc(45% - var(--dui-spacing-large));
                     flex-grow: 1;
-                    border-radius: 0; /* By default, ContainerCard has border-radius */
+                    border-radius: 0;
+                    /* By default, ContainerCard has border-radius */
                     box-shadow: 0px 0px 10px var(--dui-card-box-shadow);
                 }
 
                 .age-disaggregation {
-                    flex-basis: calc(60% - var(--dui-spacing-small));
-                    border-radius: 0; /* By default, ContainerCard has border-radius */
+                    flex-basis: calc(55% - var(--dui-spacing-small));
+                    border-radius: 0;
+                    /* By default, ContainerCard has border-radius */
                     box-shadow: 0px 0px 10px var(--dui-card-box-shadow);
                 }
 
                 .responsive-content {
-                    min-height: 15rem;
+                    min-height: 22rem;
 
                     .responsive-container {
                         overflow: hidden;
+
+                        .legend-list {
+                            display: flex;
+                            border-bottom: var(--dui-width-separator-thin) solid var(--dui-color-line-separator);
+                            padding: var(--dui-spacing-small);
+                            gap: var(--dui-spacing-medium);
+                            list-style: none;
+
+                            .legend-box {
+                                padding: var(--dui-spacing-extra-small);
+                            }
+
+                            .legend-details {
+                                display: flex;
+                                align-items: baseline;
+                                flex-direction: column;
+
+                                .regional-text {
+                                    color: var(--color-text-secondary);
+                                    font-size: var(--dui-font-size-small);
+                                }
+                            }
+
+                        }
                     }
                 }
 
@@ -94,7 +122,8 @@
         }
 
         .country-info {
-            border-radius: 0; /* By default, ContainerCard has border-radius */
+            border-radius: 0;
+            /* By default, ContainerCard has border-radius */
             box-shadow: 0px 0px 10px var(--dui-card-box-shadow);
             background-color: var(--dui-color-foreground);
             min-width: var(--dui-width-min-modal);

@@ -31,10 +31,11 @@ import PercentageStats from '#components/PercentageStats';
 import ScoreCard from '#components/ScoreCard';
 import {
     indicatorData,
-    genderDisaggregationData,
 } from '#utils/dummyData';
 import { decimalToPercentage } from '#utils/common';
 import {
+    ContextualQuery,
+    ContextualQueryVariables,
     CountryQuery,
     CountryQueryVariables,
     IndicatorQuery,
@@ -65,9 +66,7 @@ const COLORS = ['#52625A', '#567968', '#69A688', '#7AD6A8', '#AFFAD5', '#D6F9E8'
 
 const COUNTRY_PROFILE = gql`
     query Country(
-    $iso3: String,
-    $contextIndicatorsId: String,
-    $emergency: String
+        $iso3: String,
     ) {
         countryProfile(iso3: $iso3) {
             iso3
@@ -83,25 +82,21 @@ const COUNTRY_PROFILE = gql`
             vulnerability
             risk
             response
-        }
-        countryEmergencyProfile(
-        filters: {
-            iso3: $iso3,
-            contextIndicatorId: $contextIndicatorsId,
-            emergency: $emergency,
-        }) {
-            iso3
-            emergency
-            contextIndicatorValue
-            contextIndicatorId
-            contextDate
+            newCasesRegionShare
+            region
+            stringencyRegion
+            washAccessNationalRegion
+            literacyRateRegion
+            internetAccessRegion
+            economicSupportIndexRegion
+            medicalStaffRegion
         }
     }
 `;
 
 const INDICATOR = gql`
     query Indicator(
-    $iso3: String!,
+        $iso3: String!,
     ) {
         disaggregation {
             ageDisaggregation(iso3: $iso3) {
@@ -116,9 +111,33 @@ const INDICATOR = gql`
     }
 `;
 
+const CONTEXTUAL = gql`
+    query Contextual(
+        $iso3: String,
+        $contextIndicatorId: String!,
+    ) {
+        contextualData(
+            iso3: $iso3,
+            contextIndicatorId:$contextIndicatorId,
+        ) {
+            iso3
+            emergency
+            contextIndicatorId
+            contextIndicatorValue
+            contextDate
+        }
+    }
+`;
+
 interface Props {
     className?: string;
     filterValues?: FilterType | undefined;
+}
+
+interface legend {
+    age?: string;
+    gender?: string;
+    fill: string;
 }
 
 function Country(props: Props) {
@@ -155,8 +174,22 @@ function Country(props: Props) {
             variables: indicatorVariables,
         },
     );
+    const contextVariables = useMemo(() => ({
+        iso3: filterValues?.country ?? 'NPL',
+        contextIndicatorId: 'total_cases',
+        emergency: '',
+    }), [
+        filterValues?.country,
+    ]);
 
-    console.log(indicatorResponse);
+    const {
+        data: contextResponse,
+    } = useQuery<ContextualQuery, ContextualQueryVariables>(
+        CONTEXTUAL,
+        {
+            variables: contextVariables,
+        },
+    );
 
     const internetAccess = useMemo(() => (
         decimalToPercentage(countryResponse?.countryProfile.internetAccess)
@@ -178,18 +211,48 @@ function Country(props: Props) {
         decimalToPercentage(countryResponse?.countryProfile.economicSupportIndex)
     ), [countryResponse?.countryProfile.economicSupportIndex]);
 
-    const countryWiseOutbreakCases: countryWiseOutbreakCases[] | undefined = useMemo(() => (
-        countryResponse?.countryEmergencyProfile.map((item) => (
-            {
-                ...item,
-                key: `${item.iso3}${item.contextIndicatorId}${item.emergency}`,
-            }
-        ))
-    ), [countryResponse?.countryEmergencyProfile]);
+    const economicSupportIndexRegion = useMemo(() => (
+        decimalToPercentage(countryResponse?.countryProfile.economicSupportIndexRegion)
+    ), [countryResponse?.countryProfile.economicSupportIndexRegion]);
+
+    const stringencyRegion = useMemo(() => (
+        decimalToPercentage(countryResponse?.countryProfile.stringencyRegion)
+    ), [countryResponse?.countryProfile.stringencyRegion]);
+
+    const washAccessNationalRegion = useMemo(() => (
+        decimalToPercentage(countryResponse?.countryProfile.washAccessNationalRegion)
+    ), [countryResponse?.countryProfile.washAccessNationalRegion]);
+
+    const literacyRateRegion = useMemo(() => (
+        decimalToPercentage(countryResponse?.countryProfile.literacyRateRegion)
+    ), [countryResponse?.countryProfile.literacyRateRegion]);
+
+    const internetAccessRegion = useMemo(() => (
+        decimalToPercentage(countryResponse?.countryProfile.internetAccessRegion)
+    ), [countryResponse?.countryProfile.internetAccessRegion]);
+
+    const regional = useMemo(() => (
+        decimalToPercentage(countryResponse?.countryProfile.newCasesRegionShare)
+    ), [countryResponse?.countryProfile.newCasesRegionShare]);
+
+    const countryWiseOutbreakCases: countryWiseOutbreakCases[] | undefined = useMemo(() => {
+        const casesGroupList = listToGroupList(
+            contextResponse?.contextualData || [],
+            (emergency) => emergency.emergency,
+        );
+        return (
+            Object.entries(casesGroupList).map(([emergency, emergencyItems]) => (
+                {
+                    ...emergencyItems[0],
+                    key: `${emergency}`,
+                }
+            ))
+        );
+    }, [contextResponse?.contextualData]);
 
     const outbreakLineChartData = useMemo(() => {
         const outbreakGroupList = listToGroupList(
-            countryResponse?.countryEmergencyProfile,
+            contextResponse?.contextualData,
             (date) => date.contextDate ?? '',
         );
         return mapToList(outbreakGroupList,
@@ -197,14 +260,19 @@ function Country(props: Props) {
                 (acc, item) => ({
                     ...acc,
                     [item.emergency]: item.contextIndicatorValue,
+                    date: new Date(item.contextDate)
+                        .toLocaleString(
+                            'default', { month: 'short' },
+                        ),
                 }), { date: key },
             ));
-    }, [countryResponse?.countryEmergencyProfile]);
+    }, [contextResponse?.contextualData]);
 
     const outbreaks = useMemo(() => (
-        unique(countryResponse?.countryEmergencyProfile ?? [],
-            (d) => d.emergency).map((item) => {
-
+        unique(
+            contextResponse?.contextualData ?? [],
+            (d) => d.emergency,
+        ).map((item) => {
             const colors: Record<string, string> = {
                 'COVID-19': '#FFDD98',
                 Monkeypox: '#ACA28E',
@@ -215,7 +283,55 @@ function Country(props: Props) {
                 fill: colors[item.emergency] ?? 'pink',
             });
         })
-    ), [countryResponse?.countryEmergencyProfile]);
+    ), [contextResponse?.contextualData]);
+
+    const genders = useMemo(() => (
+        unique(
+            indicatorResponse?.disaggregation.genderDisaggregation ?? [],
+            (d) => d.category,
+        ).map((item, index) => (
+            {
+                gender: item.category,
+                fill: COLORS[index % COLORS.length] ?? 'green',
+            }
+        ))
+    ), [indicatorResponse?.disaggregation.genderDisaggregation]);
+
+    const age = useMemo(() => (
+        unique(
+            indicatorResponse?.disaggregation.ageDisaggregation ?? [],
+            (d) => d.category,
+        ).map((item, index) => (
+            {
+                age: item.category,
+                fill: COLORS[index % COLORS.length] ?? 'green',
+            }
+        ))
+    ), [indicatorResponse?.disaggregation.ageDisaggregation]);
+
+    const ageCustomLegend = (legendData: legend[]) => (
+        <ul>
+            {
+                legendData.map((item) => (
+                    <li className={styles.legendList}>
+                        <div
+                            className={styles.legendBox}
+                            style={{ backgroundColor: item.fill }}
+                        />
+                        <div className={styles.legendDetails}>
+                            {item.age
+                                && <div className={styles.legendTitle}>{item.age}</div>}
+                            {item.gender
+                                && <div className={styles.legendTitle}>{item.gender}</div>}
+                            <div className={styles.regionalText}>
+                                Regional 30%
+                            </div>
+                        </div>
+                    </li>
+                ))
+            }
+        </ul>
+    );
 
     const {
         className,
@@ -327,6 +443,7 @@ function Country(props: Props) {
                                 <XAxis
                                     dataKey="date"
                                     tickLine={false}
+                                    reversed
                                 />
                                 <YAxis
                                     axisLine={false}
@@ -380,19 +497,21 @@ function Country(props: Props) {
                                         data={indicatorResponse
                                             ?.disaggregation.genderDisaggregation}
                                         dataKey="indicatorValue"
-                                        labelLine={false}
+                                        // labelLine={false}
                                         cx={100}
                                         cy={100}
                                         outerRadius={70}
                                     >
-                                        {genderDisaggregationData.map((entry) => (
+                                        {genders.map((entry) => (
                                             <Cell
-                                                key={`Cell -${entry.id}`}
-                                                fill={COLORS[entry.id % COLORS.length]}
+                                                key={entry.gender}
+                                                fill={entry.fill}
                                             />
                                         ))}
                                     </Pie>
                                     <Legend
+                                        width={200}
+                                        content={ageCustomLegend(genders)}
                                         verticalAlign="middle"
                                         align="right"
                                         layout="vertical"
@@ -418,14 +537,16 @@ function Country(props: Props) {
                                         cy={100}
                                         outerRadius={70}
                                     >
-                                        {genderDisaggregationData.map((entry) => (
+                                        {age.map((entry) => (
                                             <Cell
-                                                key={`Cell -${entry.id}`}
-                                                fill={COLORS[entry.id % COLORS.length]}
+                                                key={entry.age}
+                                                fill={entry.fill}
                                             />
                                         ))}
                                     </Pie>
                                     <Legend
+                                        width={300}
+                                        content={ageCustomLegend(age)}
                                         verticalAlign="middle"
                                         align="right"
                                         layout="vertical"
@@ -472,9 +593,12 @@ function Country(props: Props) {
                                 value={(
                                     <>
                                         {`${internetAccess}%`}
-                                        <div className={styles.regionalText}>
-                                            Regional 30%
-                                        </div>
+                                        <TextOutput
+                                            className={styles.regionalText}
+                                            labelContainerClassName={styles.regionalText}
+                                            label={countryResponse?.countryProfile.region}
+                                            value={`${internetAccessRegion}%`}
+                                        />
                                     </>
                                 )}
                             />
@@ -490,7 +614,7 @@ function Country(props: Props) {
                                     <>
                                         {`${literacyRate}%`}
                                         <div className={styles.regionalText}>
-                                            Regional 30%
+                                            {`${countryResponse?.countryProfile.region}: ${literacyRateRegion}%`}
                                         </div>
                                     </>
                                 )}
@@ -507,7 +631,7 @@ function Country(props: Props) {
                                     <>
                                         {`${washAccessNational}%`}
                                         <div className={styles.regionalText}>
-                                            Regional 30%
+                                            {`${countryResponse?.countryProfile.region}: ${washAccessNationalRegion}%`}
                                         </div>
                                     </>
                                 )}
@@ -519,12 +643,12 @@ function Country(props: Props) {
                                 valueContainerClassName={styles.valueText}
                                 labelContainerClassName={styles.labelText}
                                 hideLabelColon
-                                label="Doctors and nurses per 999 people"
+                                label="Doctors and nurses per 1000 people"
                                 value={(
                                     <>
                                         {(countryResponse?.countryProfile.medicalStaff)?.toFixed(0)}
                                         <div className={styles.regionalText}>
-                                            Regional 29%
+                                            {`${countryResponse?.countryProfile.region}: ${(countryResponse.countryProfile.medicalStaffRegion)?.toFixed(0)}`}
                                         </div>
                                     </>
                                 )}
@@ -541,7 +665,7 @@ function Country(props: Props) {
                                     <>
                                         {`${stringency}%`}
                                         <div className={styles.regionalText}>
-                                            Regional 30%
+                                            {`${countryResponse?.countryProfile.region}: ${stringencyRegion}%`}
                                         </div>
                                     </>
                                 )}
@@ -553,14 +677,7 @@ function Country(props: Props) {
                             labelContainerClassName={styles.labelText}
                             hideLabelColon
                             label="Regional cases %"
-                            value={(
-                                <>
-                                    34%
-                                    <div className={styles.regionalText}>
-                                        Regional 30%
-                                    </div>
-                                </>
-                            )}
+                            value={`${regional}%`}
                         />
                         {economicSupportIndex && (
                             <TextOutput
@@ -573,7 +690,7 @@ function Country(props: Props) {
                                     <>
                                         {`${economicSupportIndex}%`}
                                         <div className={styles.regionalText}>
-                                            Regional 30%
+                                            {`${countryResponse?.countryProfile.region}: ${economicSupportIndexRegion}%`}
                                         </div>
                                     </>
                                 )}
