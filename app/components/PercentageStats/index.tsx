@@ -36,7 +36,7 @@ function PercentageStats(props: Props) {
         <ContainerCard
             className={_cs(className, styles.percentageStatsCard)}
             headingClassName={styles.percentageHeading}
-            heading={heading ? `${heading}` : 'Total number of cases'}
+            heading={heading ? `Total number of ${heading} cases` : 'Total number of cases'}
             headingSize={headingSize}
             headerDescription={headerDescription}
             headerIconsContainerClassName={styles.iconContainer}

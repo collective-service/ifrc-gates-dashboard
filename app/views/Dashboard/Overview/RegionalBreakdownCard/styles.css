@@ -6,14 +6,12 @@
     .global-stat-card {
         flex-basis: 40%;
         flex-shrink: 0;
-        border: var(--width-separator-medium) solid var(--color-separator-light);
         border-radius: var(--dui-border-radius-card);
     }
 
 
     .regions-pie-chart {
         flex-grow: 1;
-        border: var(--width-separator-medium) solid var(--color-separator-light);
         border-radius: var(--dui-border-radius-card);
 
         .pie-chart-collection {

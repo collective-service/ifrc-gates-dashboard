@@ -6,10 +6,9 @@ import {
     TabPanel,
     ContainerCard,
     Button,
-    Modal,
+    useModalState,
 } from '@the-deep/deep-ui';
 import { _cs } from '@togglecorp/fujs';
-import { useModalState } from '#utils/hooks/stateManagement';
 
 import RegionalBreakdownCard from './RegionalBreakdownCard';
 import PercentageCardGroup from './PercentageCardGroup';
@@ -34,14 +33,9 @@ function Overview(props: Props) {
 
     const [
         mapModalShown,
-        setMapModalVisible,
-        setMapModalHidden,
+        showMapModal,
+        hideMapModal,
     ] = useModalState(false);
-
-    const handleMapModal = () => {
-        console.log('Handle map modal:::>>>>>', mapModalShown);
-        setMapModalVisible();
-    };
 
     return (
         <div className={_cs(className, styles.overviewMain)}>
@@ -51,8 +45,7 @@ function Overview(props: Props) {
                 <UncertainityChart />
                 <Button
                     name="map_modal"
-                    className={styles.modalButton}
-                    onClick={handleMapModal}
+                    onClick={showMapModal}
                     variant="nlp-tertiary"
                 >
                     Map Modal
@@ -103,7 +96,7 @@ function Overview(props: Props) {
                 </Tabs>
                 {mapModalShown && (
                     <MapModal
-                        onModalClose={setMapModalHidden}
+                        onModalClose={hideMapModal}
                     />
                 )}
             </div>

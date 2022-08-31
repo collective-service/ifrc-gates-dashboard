@@ -2,16 +2,17 @@ import React from 'react';
 import { _cs } from '@togglecorp/fujs';
 import {
     Modal,
-    ContainerCard,
+    Heading,
 } from '@the-deep/deep-ui';
 import {
     LineChart,
     Line,
     XAxis,
     YAxis,
-    Legend,
     ResponsiveContainer,
 } from 'recharts';
+import { IoInformationCircleOutline } from 'react-icons/io5';
+
 import {
     lineChartData,
 } from '#utils/dummyData';
@@ -33,19 +34,36 @@ function MapModal(props: ModalProps) {
         <Modal
             onCloseButtonClick={onModalClose}
             className={_cs(className, styles.responsiveContent)}
-            heading="Country Name"
+            size="medium"
+            heading="<--Country Name-->"
             headingDescription={(
-                <div>
-                    Total amount  --Year
+                <div className={styles.modalDescription}>
+                    <Heading
+                        size="extraLarge"
+                        className={styles.countryCaseData}
+                    >
+                        132M
+                    </Heading>
+                    <Heading
+                        className={styles.countrySurveyDate}
+                    >
+                        Nov, 2022
+                    </Heading>
                 </div>
             )}
-            size="small"
+            footer={(
+                <text>
+                    <IoInformationCircleOutline />
+                    COVID-19 Vaccine Perceptions in | CountryName | 2021-02-01
+                </text>
+            )}
         >
             <ResponsiveContainer className={styles.responsiveContainer}>
                 <LineChart
                     data={lineChartData}
                     margin={{
                         right: 10,
+                        left: -20,
                     }}
                 >
                     <XAxis
@@ -56,23 +74,26 @@ function MapModal(props: ModalProps) {
                     <YAxis
                         axisLine={false}
                         tickLine={false}
-                        padding={{ top: 18 }}
-                    />
-                    <Legend
-                        iconType="square"
-                        align="center"
+                        padding={{ top: 5 }}
                     />
                     <Line
                         type="monotone"
                         dataKey="MonkeyPox"
-                        stroke="#4bda8a"
+                        stroke="#C09A57"
                         strokeWidth={2}
                         dot={false}
                     />
                     <Line
                         type="monotone"
                         dataKey="Covid"
-                        stroke="#2169bb"
+                        stroke="#FFDD98"
+                        strokeWidth={2}
+                        dot={false}
+                    />
+                    <Line
+                        type="monotone"
+                        dataKey="Ebola"
+                        stroke="#C7BCA9"
                         strokeWidth={2}
                         dot={false}
                     />

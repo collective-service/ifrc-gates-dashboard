@@ -27,7 +27,7 @@ function UncertainityChart(props: UncertainityChartProps) {
         <ContainerCard
             className={_cs(className, styles.areaChart)}
             contentClassName={styles.responsiveContent}
-            heading="Total number of cases"
+            heading="Uncertainty cases"
             headingSize="extraSmall"
             headerDescription="Loreum epsum epsum 2022"
         >
@@ -54,12 +54,17 @@ function UncertainityChart(props: UncertainityChartProps) {
                     />
                     <Area
                         dataKey="uncertainData"
-                        stroke="#8884d8"
-                        fill="#8884d8"
+                        stroke="#8DD2B1"
+                        fill="#8DD2B1"
                     />
                     <Line
                         dataKey="amt"
-                        stroke="#ff7300"
+                        stroke="#2F9C67"
+                        strokeWidth={2}
+                        dot={{
+                            stroke: '#2F9C67',
+                            strokeWidth: 2,
+                        }}
                     />
                     <Tooltip />
                 </ComposedChart>

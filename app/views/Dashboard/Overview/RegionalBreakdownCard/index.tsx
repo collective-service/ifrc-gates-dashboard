@@ -109,6 +109,7 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
                                 x: false,
                                 y: false,
                             }}
+                            cursor={false}
                         />
                         <XAxis
                             dataKey="name"

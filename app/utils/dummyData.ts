@@ -261,7 +261,6 @@ export const totalCasesBarChart = [
         range: '500M',
         pv: 2100,
         amt: 2010,
-        color: 'red',
     },
     {
         id: 23,
@@ -269,7 +268,6 @@ export const totalCasesBarChart = [
         range: '300M',
         pv: 3098,
         amt: 1450,
-        color: 'blue',
     },
     {
         id: 34,
@@ -277,7 +275,6 @@ export const totalCasesBarChart = [
         range: '400M',
         pv: 5800,
         amt: 1900,
-        color: 'green',
     },
     {
         id: 56,
@@ -285,7 +282,6 @@ export const totalCasesBarChart = [
         range: '200M',
         pv: 3908,
         amt: 1500,
-        color: 'purple',
     },
     {
         id: 78,
@@ -293,7 +289,6 @@ export const totalCasesBarChart = [
         range: '300M',
         pv: 4800,
         amt: 1881,
-        color: 'yellow',
     },
 ];
 

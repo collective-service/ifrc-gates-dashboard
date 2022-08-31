@@ -4,19 +4,16 @@
 
     .global-stat-card {
         flex-basis: 20%;
-        border: var(--width-separator-medium) solid var(--color-separator-light);
         border-radius: var(--dui-border-radius-card);
     }
 
     .trends-card {
         flex-basis: calc(42% - var(--dui-spacing-small));
-        border: var(--width-separator-medium) solid var(--color-separator-light);
         border-radius: var(--dui-border-radius-card);
     }
 
     .regions-card {
         flex-grow: 1;
-        border: var(--width-separator-medium) solid var(--color-separator-light);
         border-radius: var(--dui-border-radius-card);
     }
 
