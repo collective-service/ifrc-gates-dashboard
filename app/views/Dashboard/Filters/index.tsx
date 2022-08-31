@@ -10,6 +10,10 @@ import {
     CountryListQueryVariables,
     OutbreaksQuery,
     OutbreaksQueryVariables,
+    IndicatorsQuery,
+    IndicatorsQueryVariables,
+    IndicatorsForCountryQuery,
+    IndicatorsForCountryQueryVariables,
 } from '#generated/types';
 
 import { TabTypes } from '..';
@@ -83,6 +87,77 @@ type Country = NonNullable<CountryListQuery['countries']>[number];
 const countriesKeySelector = (d: Country) => d.iso3;
 const countriesLabelSelector = (d: Country) => d.countryName ?? '';
 
+const INDICATORS = gql`
+    query Indicators (
+        $indicatorName: String,
+        $iso3: String,
+        $outbreak: String
+    ) {
+        filterOptions{
+            indicators(
+                indicatorName: $indicatorName,
+                iso3: $iso3,
+                outBreak: $outbreak,
+            ) {
+                indicatorDescription
+                indicatorName
+                outbreak
+                subvariable
+            }
+        }
+    }
+`;
+
+type Indicator = NonNullable<NonNullable<IndicatorsQuery['filterOptions']>['indicators']>[number];
+const indicatorKeySelector = (d: Indicator) => d.indicatorName;
+const indicatorLabelSelector = (d: Indicator) => d.indicatorDescription;
+
+const INDICATORS_FOR_COUNTRY = gql`
+    query IndicatorsForCountry (
+        $indicatorName: String,
+        $iso3: String,
+        $outbreak: String
+    ) {
+        filterOptions {
+            indicators(
+                indicatorName: $indicatorName,
+                iso3: $iso3,
+                outBreak: $outbreak,
+            ) {
+                indicatorDescription
+                indicatorName
+                outbreak
+                subvariable
+            }
+        }
+    }
+`;
+
+type Indicator = NonNullable<NonNullable<IndicatorsForCountryQuery['filterOptions']>['indicators']>[number];
+const indicatorKeySelector = (d: Indicator) => d.indicatorName;
+const indicatorLabelSelector = (d: Indicator) => d.indicatorDescription;
+
+const INDICATORS = gql`
+    query Indicators(
+        $outbreak: String,
+        $region: String,
+    ) {
+        filterOptions {
+            overviewIndicators(
+                outBreak: $outbreak,
+                region: $region
+            ) {
+                indicatorName
+            }
+        }
+    }
+`;
+
+type GlobalIndicator = NonNullable<NonNullable<IndicatorsQuery['filterOptions']>['overviewIndicators']>[number];
+const globalIndicatorKeySelector = (d: GlobalIndicator) => d.indicatorName;
+const globalIndicatorLabelSelector = (d: GlobalIndicator) => d.indicatorDescription;
+
+>>>>>>> 272ad68 (Add indicator filter options)
 export interface FilterType {
     outbreak?: string;
     region?: string;
@@ -131,6 +206,41 @@ function Filters(props: Props) {
         loading: emergenciesLoading,
     } = useQuery<OutbreaksQuery, OutbreaksQueryVariables>(
         OUTBREAKS,
+    );
+    const indicatorListForCountryVariables = useMemo(() => ({
+        iso3: value?.country,
+        outbreak: value?.outbreak,
+    }), [
+        value?.country,
+        value?.outbreak,
+    ]);
+
+    const {
+        data: indicatorList,
+        loading: indicatorsLoading,
+    } = useQuery<IndicatorsForCountryQuery, IndicatorsForCountryQueryVariables>(
+        INDICATORS_FOR_COUNTRY,
+        {
+            variables: indicatorListForCountryVariables,
+        },
+    );
+
+    const indicatorVariables = useMemo(() => ({
+        outbreak: value?.outbreak,
+        region: value?.region,
+    }), [
+        value?.outbreak,
+        value?.region,
+    ]);
+
+    const {
+        data: globalIndicatorList,
+        loading: globalIndicatorsLoading,
+    } = useQuery<IndicatorsQuery, IndicatorsQueryVariables>(
+        INDICATORS,
+        {
+            variables: indicatorVariables,
+        },
     );
 
     const countriesWithNull = countryList?.countries ?? [];
@@ -184,8 +294,16 @@ function Filters(props: Props) {
                         name="indicator"
                         options={indicators}
                         placeholder="Indicator"
-                        keySelector={indicatorKeySelector}
-                        labelSelector={indicatorLabelSelector}
+                        // NOTE: This type error will be fixed when the
+                        // global filter values are fetched from API
+                        keySelector={activeTab === 'country'
+                            ? indicatorKeySelector
+                            : globalIndicatorKeySelector}
+                        // NOTE: This type error will be fixed when the
+                        // global filter values are fetched from API
+                        labelSelector={activeTab === 'country'
+                            ? indicatorLabelSelector
+                            : globalIndicatorLabelSelector}
                         value={value?.indicator}
                         onChange={handleInputChange}
                         variant="general"
