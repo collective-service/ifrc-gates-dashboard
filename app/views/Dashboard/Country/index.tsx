@@ -135,6 +135,7 @@ interface Props {
 }
 
 interface legend {
+    key: string;
     age?: string;
     gender?: string;
     fill: string;
@@ -291,6 +292,7 @@ function Country(props: Props) {
             (d) => d.category,
         ).map((item, index) => (
             {
+                key: `${item.category}${item.indicatorValue}`,
                 gender: item.category,
                 fill: COLORS[index % COLORS.length] ?? 'green',
             }
@@ -303,6 +305,7 @@ function Country(props: Props) {
             (d) => d.category,
         ).map((item, index) => (
             {
+                key: `${item.category}${item.indicatorValue}`,
                 age: item.category,
                 fill: COLORS[index % COLORS.length] ?? 'green',
             }
@@ -313,16 +316,19 @@ function Country(props: Props) {
         <ul>
             {
                 legendData.map((item) => (
-                    <li className={styles.legendList}>
+                    <li
+                        key={item.key}
+                        className={styles.legendList}
+                    >
                         <div
                             className={styles.legendBox}
                             style={{ backgroundColor: item.fill }}
                         />
                         <div className={styles.legendDetails}>
                             {item.age
-                                && <div className={styles.legendTitle}>{item.age}</div>}
+                                && <div>{item.age}</div>}
                             {item.gender
-                                && <div className={styles.legendTitle}>{item.gender}</div>}
+                                && <div>{item.gender}</div>}
                             <div className={styles.regionalText}>
                                 Regional 30%
                             </div>
@@ -594,8 +600,8 @@ function Country(props: Props) {
                                     <>
                                         {`${internetAccess}%`}
                                         <TextOutput
-                                            className={styles.regionalText}
                                             labelContainerClassName={styles.regionalText}
+                                            valueContainerClassName={styles.regionalText}
                                             label={countryResponse?.countryProfile.region}
                                             value={`${internetAccessRegion}%`}
                                         />
@@ -613,9 +619,12 @@ function Country(props: Props) {
                                 value={(
                                     <>
                                         {`${literacyRate}%`}
-                                        <div className={styles.regionalText}>
-                                            {`${countryResponse?.countryProfile.region}: ${literacyRateRegion}%`}
-                                        </div>
+                                        <TextOutput
+                                            labelContainerClassName={styles.regionalText}
+                                            valueContainerClassName={styles.regionalText}
+                                            label={countryResponse?.countryProfile.region}
+                                            value={`${literacyRateRegion}%`}
+                                        />
                                     </>
                                 )}
                             />
@@ -630,9 +639,12 @@ function Country(props: Props) {
                                 value={(
                                     <>
                                         {`${washAccessNational}%`}
-                                        <div className={styles.regionalText}>
-                                            {`${countryResponse?.countryProfile.region}: ${washAccessNationalRegion}%`}
-                                        </div>
+                                        <TextOutput
+                                            labelContainerClassName={styles.regionalText}
+                                            valueContainerClassName={styles.regionalText}
+                                            label={countryResponse?.countryProfile.region}
+                                            value={`${washAccessNationalRegion}%`}
+                                        />
                                     </>
                                 )}
                             />
@@ -647,9 +659,15 @@ function Country(props: Props) {
                                 value={(
                                     <>
                                         {(countryResponse?.countryProfile.medicalStaff)?.toFixed(0)}
-                                        <div className={styles.regionalText}>
-                                            {`${countryResponse?.countryProfile.region}: ${(countryResponse.countryProfile.medicalStaffRegion)?.toFixed(0)}`}
-                                        </div>
+
+                                        <TextOutput
+                                            labelContainerClassName={styles.regionalText}
+                                            valueContainerClassName={styles.regionalText}
+                                            label={countryResponse?.countryProfile.region}
+                                            value={(countryResponse
+                                                ?.countryProfile.medicalStaffRegion)
+                                                ?.toFixed(0)}
+                                        />
                                     </>
                                 )}
                             />
@@ -664,9 +682,12 @@ function Country(props: Props) {
                                 value={(
                                     <>
                                         {`${stringency}%`}
-                                        <div className={styles.regionalText}>
-                                            {`${countryResponse?.countryProfile.region}: ${stringencyRegion}%`}
-                                        </div>
+                                        <TextOutput
+                                            labelContainerClassName={styles.regionalText}
+                                            valueContainerClassName={styles.regionalText}
+                                            label={countryResponse?.countryProfile.region}
+                                            value={`${stringencyRegion}%`}
+                                        />
                                     </>
                                 )}
                             />
@@ -689,9 +710,12 @@ function Country(props: Props) {
                                 value={(
                                     <>
                                         {`${economicSupportIndex}%`}
-                                        <div className={styles.regionalText}>
-                                            {`${countryResponse?.countryProfile.region}: ${economicSupportIndexRegion}%`}
-                                        </div>
+                                        <TextOutput
+                                            labelContainerClassName={styles.regionalText}
+                                            valueContainerClassName={styles.regionalText}
+                                            label={countryResponse?.countryProfile.region}
+                                            value={`${economicSupportIndexRegion}%`}
+                                        />
                                     </>
                                 )}
                             />

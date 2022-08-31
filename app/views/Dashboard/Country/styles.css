@@ -168,6 +168,7 @@
                         .regional-text {
                             color: var(--color-text-secondary);
                             font-size: var(--dui-font-size-small);
+                            font-weight: var(--dui-font-weight-light);
                         }
                     }
                 }
