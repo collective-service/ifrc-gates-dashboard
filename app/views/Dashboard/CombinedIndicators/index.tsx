@@ -56,6 +56,7 @@ function CombinedIndicators(props: Props) {
                 className={styles.combinedIndicatorMain}
                 contentClassName={styles.progressBarContainer}
                 heading="Communication"
+                headerClassName={styles.combinedIndicatorHeader}
                 headingSize="extraSmall"
                 headerDescription="Lorem ipsum explaining the topic"
             >
