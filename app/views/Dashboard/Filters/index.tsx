@@ -87,8 +87,8 @@ const INDICATORS_FOR_COUNTRY = gql`
 `;
 
 type Indicator = NonNullable<NonNullable<IndicatorsForCountryQuery['filterOptions']>['indicators']>[number];
-const indicatorKeySelector = (d: Indicator) => d.indicatorName;
-const indicatorLabelSelector = (d: Indicator) => d.indicatorDescription;
+const indicatorKeySelector = (d: Indicator) => d.indicatorName ?? '';
+const indicatorLabelSelector = (d: Indicator) => d.indicatorDescription ?? '';
 
 const INDICATORS = gql`
     query Indicators(
@@ -108,8 +108,8 @@ const INDICATORS = gql`
 `;
 
 type GlobalIndicator = NonNullable<NonNullable<IndicatorsQuery['filterOptions']>['overviewIndicators']>[number];
-const globalIndicatorKeySelector = (d: GlobalIndicator) => d.indicatorName;
-const globalIndicatorLabelSelector = (d: GlobalIndicator) => d.indicatorDescription;
+const globalIndicatorKeySelector = (d: GlobalIndicator) => d.indicatorName ?? '';
+const globalIndicatorLabelSelector = (d: GlobalIndicator) => d.indicatorDescription ?? '';
 
 export interface FilterType {
     outbreak?: string;
@@ -246,21 +246,30 @@ function Filters(props: Props) {
                         disabled={countryListLoading}
                     />
                 )}
-                {(activeTab !== 'combinedIndicators') && (
+                {(activeTab === 'country') && (
                     <SelectInput
                         name="indicator"
-                        options={activeTab === 'country' ? indicators : globalIndicators}
+                        options={indicators}
                         placeholder="Indicator"
-                        keySelector={activeTab === 'country'
-                            ? indicatorKeySelector
-                            : globalIndicatorKeySelector}
-                        labelSelector={activeTab === 'country'
-                            ? indicatorLabelSelector
-                            : globalIndicatorLabelSelector}
+                        keySelector={indicatorKeySelector}
+                        labelSelector={indicatorLabelSelector}
                         value={value?.indicator}
                         onChange={handleInputChange}
                         variant="general"
-                        disabled={activeTab === 'country' ? indicatorsLoading : globalIndicatorsLoading}
+                        disabled={indicatorsLoading}
+                    />
+                )}
+                {(activeTab === 'overview') && (
+                    <SelectInput
+                        name="indicator"
+                        options={globalIndicators}
+                        placeholder="Indicator"
+                        keySelector={globalIndicatorKeySelector}
+                        labelSelector={globalIndicatorLabelSelector}
+                        value={value?.indicator}
+                        onChange={handleInputChange}
+                        variant="general"
+                        disabled={globalIndicatorsLoading}
                     />
                 )}
                 {(activeTab !== 'overview') && (
