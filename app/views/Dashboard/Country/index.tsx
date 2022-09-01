@@ -29,17 +29,14 @@ import { useQuery, gql } from '@apollo/client';
 import IndicatorChart from '#components/IndicatorChart';
 import PercentageStats from '#components/PercentageStats';
 import ScoreCard from '#components/ScoreCard';
+import CustomLegend from '#components/CustomLegend';
 import {
     indicatorData,
 } from '#utils/dummyData';
 import { decimalToPercentage } from '#utils/common';
 import {
-    ContextualQuery,
-    ContextualQueryVariables,
     CountryQuery,
     CountryQueryVariables,
-    IndicatorQuery,
-    IndicatorQueryVariables,
 } from '#generated/types';
 
 import styles from './styles.css';
@@ -51,22 +48,45 @@ interface ScoreCardProps {
     metricType: 'positive' | 'negative';
     indicator?: 'red' | 'yellow' | 'orange' | 'green' | undefined;
 }
-interface countryWiseOutbreakCases {
+interface CountryWiseOutbreakCases {
     key: string;
     iso3: string;
     emergency: string;
-    contextIndicatorValue?: number | null | undefined;
+    contextIndicatorValue?: number | null;
     contextIndicatorId: string;
+    contextDate: string;
+}
+interface EmergencyItems {
+    iso3: string;
+    emergency: string;
+    contextIndicatorValue?: number | null;
+    contextIndicatorId: string;
+    contextDate: string;
 }
 
-const percentageKeySelector = (d: countryWiseOutbreakCases) => d.key;
+interface Props {
+    className?: string;
+    filterValues?: FilterType | undefined;
+}
+
+interface CustomLegendProps {
+    key: string;
+    age?: string;
+    gender?: string;
+    fill: string;
+}
+
+const percentageKeySelector = (d: CountryWiseOutbreakCases) => d.key;
 const readinessKeySelector = (d: ScoreCardProps) => d.title;
+const customLegendKeySelector = (d: CustomLegendProps) => d.key;
 
 const COLORS = ['#52625A', '#567968', '#69A688', '#7AD6A8', '#AFFAD5', '#D6F9E8'];
 
 const COUNTRY_PROFILE = gql`
     query Country(
         $iso3: String,
+        $disaggregationIso3: String!,
+        $contextIndicatorId: String!,
     ) {
         countryProfile(iso3: $iso3) {
             iso3
@@ -91,31 +111,16 @@ const COUNTRY_PROFILE = gql`
             economicSupportIndexRegion
             medicalStaffRegion
         }
-    }
-`;
-
-const INDICATOR = gql`
-    query Indicator(
-        $iso3: String!,
-    ) {
         disaggregation {
-            ageDisaggregation(iso3: $iso3) {
+            ageDisaggregation(iso3: $disaggregationIso3) {
                 category
                 indicatorValue
             }
-            genderDisaggregation(iso3: $iso3) {
+            genderDisaggregation(iso3: $disaggregationIso3) {
                 category
                 indicatorValue
             }
         }
-    }
-`;
-
-const CONTEXTUAL = gql`
-    query Contextual(
-        $iso3: String,
-        $contextIndicatorId: String!,
-    ) {
         contextualData(
             iso3: $iso3,
             contextIndicatorId:$contextIndicatorId,
@@ -129,27 +134,15 @@ const CONTEXTUAL = gql`
     }
 `;
 
-interface Props {
-    className?: string;
-    filterValues?: FilterType | undefined;
-}
-
-interface legend {
-    key: string;
-    age?: string;
-    gender?: string;
-    fill: string;
-}
-
 function Country(props: Props) {
     const {
         filterValues,
     } = props;
 
     const countryVariables = useMemo(() => ({
-        iso3: filterValues?.country ?? 'NPL',
-        contextIndicatorsId: 'total_cases',
-        emergency: '',
+        iso3: filterValues?.country ?? 'AFG',
+        contextIndicatorId: 'total_cases',
+        disaggregationIso3: filterValues?.country ?? 'AFG',
     }), [
         filterValues?.country,
     ]);
@@ -160,35 +153,6 @@ function Country(props: Props) {
         COUNTRY_PROFILE,
         {
             variables: countryVariables,
-        },
-    );
-
-    const indicatorVariables = useMemo(() => ({
-        iso3: filterValues?.country ?? 'NPL',
-    }), [filterValues?.country]);
-
-    const {
-        data: indicatorResponse,
-    } = useQuery<IndicatorQuery, IndicatorQueryVariables>(
-        INDICATOR,
-        {
-            variables: indicatorVariables,
-        },
-    );
-    const contextVariables = useMemo(() => ({
-        iso3: filterValues?.country ?? 'NPL',
-        contextIndicatorId: 'total_cases',
-        emergency: '',
-    }), [
-        filterValues?.country,
-    ]);
-
-    const {
-        data: contextResponse,
-    } = useQuery<ContextualQuery, ContextualQueryVariables>(
-        CONTEXTUAL,
-        {
-            variables: contextVariables,
         },
     );
 
@@ -236,24 +200,30 @@ function Country(props: Props) {
         decimalToPercentage(countryResponse?.countryProfile.newCasesRegionShare)
     ), [countryResponse?.countryProfile.newCasesRegionShare]);
 
-    const countryWiseOutbreakCases: countryWiseOutbreakCases[] | undefined = useMemo(() => {
+    const countryWiseOutbreakCases: CountryWiseOutbreakCases[] | undefined = useMemo(() => {
         const casesGroupList = listToGroupList(
-            contextResponse?.contextualData || [],
+            countryResponse?.contextualData ?? [],
             (emergency) => emergency.emergency,
         );
+        const findLatestDate = (items: EmergencyItems[]) => {
+            const date = items.map((element) => element.contextDate);
+            const latestDate = date.reduce((acc, item) => (item > acc ? item : acc));
+            const indexOfLatestDate = date.indexOf(latestDate);
+            return items[indexOfLatestDate];
+        };
         return (
             Object.entries(casesGroupList).map(([emergency, emergencyItems]) => (
                 {
-                    ...emergencyItems[0],
+                    ...findLatestDate(emergencyItems),
                     key: `${emergency}`,
                 }
             ))
         );
-    }, [contextResponse?.contextualData]);
+    }, [countryResponse?.contextualData]);
 
     const outbreakLineChartData = useMemo(() => {
         const outbreakGroupList = listToGroupList(
-            contextResponse?.contextualData,
+            countryResponse?.contextualData,
             (date) => date.contextDate ?? '',
         );
         return mapToList(outbreakGroupList,
@@ -267,11 +237,11 @@ function Country(props: Props) {
                         ),
                 }), { date: key },
             ));
-    }, [contextResponse?.contextualData]);
+    }, [countryResponse?.contextualData]);
 
     const outbreaks = useMemo(() => (
         unique(
-            contextResponse?.contextualData ?? [],
+            countryResponse?.contextualData ?? [],
             (d) => d.emergency,
         ).map((item) => {
             const colors: Record<string, string> = {
@@ -281,63 +251,36 @@ function Country(props: Props) {
 
             return ({
                 emergency: item.emergency,
-                fill: colors[item.emergency] ?? 'pink',
+                fill: colors[item.emergency] ?? '#FFDD98',
             });
         })
-    ), [contextResponse?.contextualData]);
+    ), [countryResponse?.contextualData]);
 
-    const genders = useMemo(() => (
+    const genders: CustomLegendProps[] = useMemo(() => (
         unique(
-            indicatorResponse?.disaggregation.genderDisaggregation ?? [],
+            countryResponse?.disaggregation.genderDisaggregation ?? [],
             (d) => d.category,
         ).map((item, index) => (
             {
                 key: `${item.category}${item.indicatorValue}`,
                 gender: item.category,
-                fill: COLORS[index % COLORS.length] ?? 'green',
+                fill: COLORS[index % COLORS.length] ?? '#52625A',
             }
         ))
-    ), [indicatorResponse?.disaggregation.genderDisaggregation]);
+    ), [countryResponse?.disaggregation.genderDisaggregation]);
 
-    const age = useMemo(() => (
+    const age: CustomLegendProps[] = useMemo(() => (
         unique(
-            indicatorResponse?.disaggregation.ageDisaggregation ?? [],
+            countryResponse?.disaggregation.ageDisaggregation ?? [],
             (d) => d.category,
         ).map((item, index) => (
             {
                 key: `${item.category}${item.indicatorValue}`,
                 age: item.category,
-                fill: COLORS[index % COLORS.length] ?? 'green',
+                fill: COLORS[index % COLORS.length] ?? '#52625A',
             }
         ))
-    ), [indicatorResponse?.disaggregation.ageDisaggregation]);
-
-    const ageCustomLegend = (legendData: legend[]) => (
-        <ul>
-            {
-                legendData.map((item) => (
-                    <li
-                        key={item.key}
-                        className={styles.legendList}
-                    >
-                        <div
-                            className={styles.legendBox}
-                            style={{ backgroundColor: item.fill }}
-                        />
-                        <div className={styles.legendDetails}>
-                            {item.age
-                                && <div>{item.age}</div>}
-                            {item.gender
-                                && <div>{item.gender}</div>}
-                            <div className={styles.regionalText}>
-                                Regional 30%
-                            </div>
-                        </div>
-                    </li>
-                ))
-            }
-        </ul>
-    );
+    ), [countryResponse?.disaggregation.ageDisaggregation]);
 
     const {
         className,
@@ -394,7 +337,7 @@ function Country(props: Props) {
         return 'red' as const;
     }, []);
 
-    const statusRendererParams = useCallback((_, data: countryWiseOutbreakCases) => ({
+    const statusRendererParams = useCallback((_, data: CountryWiseOutbreakCases) => ({
         heading: data.emergency,
         statValue: data.contextIndicatorValue,
     }), []);
@@ -404,6 +347,24 @@ function Country(props: Props) {
         value: data.value,
         indicator: metricTypeForColor(data),
     }), [metricTypeForColor]);
+
+    const customLegendParams = useCallback((_, data: CustomLegendProps) => ({
+        age: data.age,
+        genders: data.gender,
+        fill: data.fill,
+    }), []);
+
+    const ageCustomLegend = (legendData: CustomLegendProps[]) => (
+        <ListView
+            renderer={CustomLegend}
+            rendererParams={customLegendParams}
+            keySelector={customLegendKeySelector}
+            data={legendData}
+            errored={false}
+            filtered={false}
+            pending={false}
+        />
+    );
 
     return (
         <div className={_cs(className, styles.countryWrapper)}>
@@ -500,10 +461,9 @@ function Country(props: Props) {
                             <ResponsiveContainer className={styles.responsiveContainer}>
                                 <PieChart>
                                     <Pie
-                                        data={indicatorResponse
+                                        data={countryResponse
                                             ?.disaggregation.genderDisaggregation}
                                         dataKey="indicatorValue"
-                                        // labelLine={false}
                                         cx={100}
                                         cy={100}
                                         outerRadius={70}
@@ -535,7 +495,7 @@ function Country(props: Props) {
                             <ResponsiveContainer className={styles.responsiveContainer}>
                                 <PieChart>
                                     <Pie
-                                        data={indicatorResponse
+                                        data={countryResponse
                                             ?.disaggregation.ageDisaggregation}
                                         dataKey="indicatorValue"
                                         labelLine={false}
