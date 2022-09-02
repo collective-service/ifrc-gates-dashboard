@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { listToGroupList } from '@togglecorp/fujs';
 import { gql, useQuery } from '@apollo/client';
 import {
@@ -10,6 +10,10 @@ import {
     CountryListQueryVariables,
     OutbreaksQuery,
     OutbreaksQueryVariables,
+    IndicatorsQuery,
+    IndicatorsQueryVariables,
+    IndicatorsForCountryQuery,
+    IndicatorsForCountryQueryVariables,
 } from '#generated/types';
 
 import { TabTypes } from '..';
@@ -37,28 +41,6 @@ function doesObjectHaveAnyEmptyValue<T extends Record<string, unknown>>(obj: T) 
     return valueList.some((val) => val === null);
 }
 
-interface Indicator {
-    key: string;
-    name: string;
-}
-const indicators: Indicator[] = [
-    {
-        key: '1',
-        name: 'Percentage of individuals who receive information from the government',
-    },
-    {
-        key: '2',
-        name: 'Percentage of individuals who trust information they receive from the newspapers',
-    },
-    {
-        key: '3',
-        name: 'Percentage of individuals who seek information about prevention of the disease',
-    },
-];
-
-const indicatorKeySelector = (d: Indicator) => d.key;
-const indicatorLabelSelector = (d: Indicator) => d.name;
-
 const OUTBREAKS = gql`
     query Outbreaks {
         outBreaks {
@@ -82,6 +64,52 @@ const COUNTRY_LIST = gql`
 type Country = NonNullable<CountryListQuery['countries']>[number];
 const countriesKeySelector = (d: Country) => d.iso3;
 const countriesLabelSelector = (d: Country) => d.countryName ?? '';
+
+const INDICATORS_FOR_COUNTRY = gql`
+    query IndicatorsForCountry (
+        $indicatorName: String,
+        $iso3: String,
+        $outbreak: String
+    ) {
+        filterOptions {
+            indicators(
+                indicatorName: $indicatorName,
+                iso3: $iso3,
+                outBreak: $outbreak,
+            ) {
+                indicatorDescription
+                indicatorName
+                outbreak
+                subvariable
+            }
+        }
+    }
+`;
+
+type Indicator = NonNullable<NonNullable<IndicatorsForCountryQuery['filterOptions']>['indicators']>[number];
+const indicatorKeySelector = (d: Indicator) => d.indicatorName ?? '';
+const indicatorLabelSelector = (d: Indicator) => d.indicatorDescription ?? '';
+
+const INDICATORS = gql`
+    query Indicators(
+        $outbreak: String,
+        $region: String,
+    ) {
+        filterOptions {
+            overviewIndicators(
+                outBreak: $outbreak,
+                region: $region
+            ) {
+                indicatorName
+                indicatorDescription
+            }
+        }
+    }
+`;
+
+type GlobalIndicator = NonNullable<NonNullable<IndicatorsQuery['filterOptions']>['overviewIndicators']>[number];
+const globalIndicatorKeySelector = (d: GlobalIndicator) => d.indicatorName ?? '';
+const globalIndicatorLabelSelector = (d: GlobalIndicator) => d.indicatorDescription ?? '';
 
 export interface FilterType {
     outbreak?: string;
@@ -132,6 +160,45 @@ function Filters(props: Props) {
     } = useQuery<OutbreaksQuery, OutbreaksQueryVariables>(
         OUTBREAKS,
     );
+    const indicatorListForCountryVariables = useMemo(() => ({
+        iso3: value?.country,
+        outbreak: value?.outbreak,
+    }), [
+        value?.country,
+        value?.outbreak,
+    ]);
+
+    const {
+        data: indicatorList,
+        loading: indicatorsLoading,
+    } = useQuery<IndicatorsForCountryQuery, IndicatorsForCountryQueryVariables>(
+        INDICATORS_FOR_COUNTRY,
+        {
+            variables: indicatorListForCountryVariables,
+        },
+    );
+
+    const indicators = indicatorList?.filterOptions?.indicators;
+
+    const indicatorVariables = useMemo(() => ({
+        outbreak: value?.outbreak,
+        region: value?.region,
+    }), [
+        value?.outbreak,
+        value?.region,
+    ]);
+
+    const {
+        data: globalIndicatorList,
+        loading: globalIndicatorsLoading,
+    } = useQuery<IndicatorsQuery, IndicatorsQueryVariables>(
+        INDICATORS,
+        {
+            variables: indicatorVariables,
+        },
+    );
+
+    const globalIndicators = globalIndicatorList?.filterOptions?.overviewIndicators;
 
     const countriesWithNull = countryList?.countries ?? [];
     const countries = countriesWithNull.filter((country) => !doesObjectHaveAnyEmptyValue(country));
@@ -179,7 +246,7 @@ function Filters(props: Props) {
                         disabled={countryListLoading}
                     />
                 )}
-                {(activeTab !== 'combinedIndicators') && (
+                {(activeTab === 'country') && (
                     <SelectInput
                         name="indicator"
                         options={indicators}
@@ -189,6 +256,20 @@ function Filters(props: Props) {
                         value={value?.indicator}
                         onChange={handleInputChange}
                         variant="general"
+                        disabled={indicatorsLoading}
+                    />
+                )}
+                {(activeTab === 'overview') && (
+                    <SelectInput
+                        name="indicator"
+                        options={globalIndicators}
+                        placeholder="Indicator"
+                        keySelector={globalIndicatorKeySelector}
+                        labelSelector={globalIndicatorLabelSelector}
+                        value={value?.indicator}
+                        onChange={handleInputChange}
+                        variant="general"
+                        disabled={globalIndicatorsLoading}
                     />
                 )}
                 {(activeTab !== 'overview') && (
