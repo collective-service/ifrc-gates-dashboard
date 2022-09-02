@@ -10,9 +10,9 @@ import {
 } from '@the-deep/deep-ui';
 import { _cs } from '@togglecorp/fujs';
 
+import IndicatorChart from '#components/IndicatorChart';
 import RegionalBreakdownCard from './RegionalBreakdownCard';
 import PercentageCardGroup from './PercentageCardGroup';
-import UncertainityChart from './UncertainityChart';
 import MapView from './MapView';
 import OverviewTable from './OverviewTable';
 import MapModal from './MapView/MapModal';
@@ -42,7 +42,7 @@ function Overview(props: Props) {
             <PercentageCardGroup />
             <RegionalBreakdownCard />
             <div className={styles.areaChartBox}>
-                <UncertainityChart />
+                <IndicatorChart />
                 <Button
                     name="map_modal"
                     onClick={showMapModal}
