@@ -5,6 +5,8 @@ import {
     _cs,
     mapToList,
     unique,
+    compareDate,
+    isDefined,
 } from '@togglecorp/fujs';
 import {
     LineChart,
@@ -31,9 +33,9 @@ import PercentageStats from '#components/PercentageStats';
 import ScoreCard from '#components/ScoreCard';
 import CustomLegend from '#components/CustomLegend';
 import {
-    indicatorData,
-} from '#utils/dummyData';
-import { decimalToPercentage } from '#utils/common';
+    decimalToPercentage,
+    getShortMonth,
+} from '#utils/common';
 import {
     CountryQuery,
     CountryQueryVariables,
@@ -48,20 +50,15 @@ interface ScoreCardProps {
     metricType: 'positive' | 'negative';
     indicator?: 'red' | 'yellow' | 'orange' | 'green' | undefined;
 }
-interface CountryWiseOutbreakCases {
-    key: string;
-    iso3: string;
-    emergency: string;
-    contextIndicatorValue?: number | null;
-    contextIndicatorId: string;
-    contextDate: string;
-}
 interface EmergencyItems {
     iso3: string;
     emergency: string;
     contextIndicatorValue?: number | null;
     contextIndicatorId: string;
     contextDate: string;
+}
+interface CountryWiseOutbreakCases extends EmergencyItems {
+    key: string;
 }
 
 interface Props {
@@ -139,7 +136,7 @@ function Country(props: Props) {
         filterValues,
     } = props;
 
-    const countryVariables = useMemo(() => ({
+    const countryVariables = useMemo((): CountryQueryVariables => ({
         iso3: filterValues?.country ?? 'AFG',
         contextIndicatorId: 'total_cases',
         disaggregationIso3: filterValues?.country ?? 'AFG',
@@ -205,17 +202,18 @@ function Country(props: Props) {
             countryResponse?.contextualData ?? [],
             (emergency) => emergency.emergency,
         );
-        const findLatestDate = (items: EmergencyItems[]) => {
-            const date = items.map((element) => element.contextDate);
-            const latestDate = date.reduce((acc, item) => (item > acc ? item : acc));
-            const indexOfLatestDate = date.indexOf(latestDate);
-            return items[indexOfLatestDate];
+
+        const getLatestDateItems = (items: EmergencyItems[]) => {
+            [...items].sort((a, b) => compareDate(a.contextDate, b.contextDate, -1));
+
+            return items[0];
         };
+
         return (
             Object.entries(casesGroupList).map(([emergency, emergencyItems]) => (
                 {
-                    ...findLatestDate(emergencyItems),
-                    key: `${emergency}`,
+                    ...getLatestDateItems(emergencyItems),
+                    key: emergency,
                 }
             ))
         );
@@ -231,10 +229,7 @@ function Country(props: Props) {
                 (acc, item) => ({
                     ...acc,
                     [item.emergency]: item.contextIndicatorValue,
-                    date: new Date(item.contextDate)
-                        .toLocaleString(
-                            'default', { month: 'short' },
-                        ),
+                    date: getShortMonth(item.contextDate),
                 }), { date: key },
             ));
     }, [countryResponse?.contextualData]);
@@ -257,12 +252,13 @@ function Country(props: Props) {
     ), [countryResponse?.contextualData]);
 
     const genders: CustomLegendProps[] = useMemo(() => (
+        // FIXME: Remove unique function after getting key
         unique(
             countryResponse?.disaggregation.genderDisaggregation ?? [],
             (d) => d.category,
         ).map((item, index) => (
             {
-                key: `${item.category}${item.indicatorValue}`,
+                key: `${item.category}-${item.indicatorValue}`,
                 gender: item.category,
                 fill: COLORS[index % COLORS.length] ?? '#52625A',
             }
@@ -270,12 +266,13 @@ function Country(props: Props) {
     ), [countryResponse?.disaggregation.genderDisaggregation]);
 
     const age: CustomLegendProps[] = useMemo(() => (
+        // FIXME: Remove unique function after getting key
         unique(
             countryResponse?.disaggregation.ageDisaggregation ?? [],
             (d) => d.category,
         ).map((item, index) => (
             {
-                key: `${item.category}${item.indicatorValue}`,
+                key: `${item.category}-${item.indicatorValue}`,
                 age: item.category,
                 fill: COLORS[index % COLORS.length] ?? '#52625A',
             }
@@ -350,21 +347,9 @@ function Country(props: Props) {
 
     const customLegendParams = useCallback((_, data: CustomLegendProps) => ({
         age: data.age,
-        genders: data.gender,
+        gender: data.gender,
         fill: data.fill,
     }), []);
-
-    const ageCustomLegend = (legendData: CustomLegendProps[]) => (
-        <ListView
-            renderer={CustomLegend}
-            rendererParams={customLegendParams}
-            keySelector={customLegendKeySelector}
-            data={legendData}
-            errored={false}
-            filtered={false}
-            pending={false}
-        />
-    );
 
     return (
         <div className={_cs(className, styles.countryWrapper)}>
@@ -447,9 +432,6 @@ function Country(props: Props) {
                         />
                         <IndicatorChart
                             className={styles.indicatorsChart}
-                            heading="Indicator overview over the last 12 months"
-                            headerDescription="Lorem ipsum"
-                            chartData={indicatorData}
                         />
                         <ContainerCard
                             className={styles.genderDisaggregation}
@@ -477,7 +459,17 @@ function Country(props: Props) {
                                     </Pie>
                                     <Legend
                                         width={200}
-                                        content={ageCustomLegend(genders)}
+                                        content={(
+                                            <ListView
+                                                renderer={CustomLegend}
+                                                rendererParams={customLegendParams}
+                                                keySelector={customLegendKeySelector}
+                                                data={genders}
+                                                errored={false}
+                                                filtered={false}
+                                                pending={false}
+                                            />
+                                        )}
                                         verticalAlign="middle"
                                         align="right"
                                         layout="vertical"
@@ -512,7 +504,17 @@ function Country(props: Props) {
                                     </Pie>
                                     <Legend
                                         width={300}
-                                        content={ageCustomLegend(age)}
+                                        content={(
+                                            <ListView
+                                                renderer={CustomLegend}
+                                                rendererParams={customLegendParams}
+                                                keySelector={customLegendKeySelector}
+                                                data={age}
+                                                errored={false}
+                                                filtered={false}
+                                                pending={false}
+                                            />
+                                        )}
                                         verticalAlign="middle"
                                         align="right"
                                         layout="vertical"
@@ -535,7 +537,7 @@ function Country(props: Props) {
                     heading={countryResponse?.countryProfile.countryName}
                 >
                     <div className={styles.countryDetails}>
-                        {countryResponse?.countryProfile.populationSize && (
+                        {isDefined(countryResponse?.countryProfile.populationSize) && (
                             <TextOutput
                                 className={styles.countryTextOutput}
                                 valueContainerClassName={styles.valueText}
@@ -549,7 +551,7 @@ function Country(props: Props) {
                                 )}
                             />
                         )}
-                        {internetAccess && (
+                        {isDefined(internetAccess) && (
                             <TextOutput
                                 className={styles.countryTextOutput}
                                 valueContainerClassName={styles.valueText}
@@ -559,17 +561,19 @@ function Country(props: Props) {
                                 value={(
                                     <>
                                         {`${internetAccess}%`}
-                                        <TextOutput
-                                            labelContainerClassName={styles.regionalText}
-                                            valueContainerClassName={styles.regionalText}
-                                            label={countryResponse?.countryProfile.region}
-                                            value={`${internetAccessRegion}%`}
-                                        />
+                                        {isDefined(internetAccessRegion) && (
+                                            <TextOutput
+                                                labelContainerClassName={styles.regionalText}
+                                                valueContainerClassName={styles.regionalText}
+                                                label={countryResponse?.countryProfile.region}
+                                                value={`${internetAccessRegion}%`}
+                                            />
+                                        )}
                                     </>
                                 )}
                             />
                         )}
-                        {literacyRate && (
+                        {isDefined(literacyRate) && (
                             <TextOutput
                                 className={styles.countryTextOutput}
                                 valueContainerClassName={styles.valueText}
@@ -579,17 +583,19 @@ function Country(props: Props) {
                                 value={(
                                     <>
                                         {`${literacyRate}%`}
-                                        <TextOutput
-                                            labelContainerClassName={styles.regionalText}
-                                            valueContainerClassName={styles.regionalText}
-                                            label={countryResponse?.countryProfile.region}
-                                            value={`${literacyRateRegion}%`}
-                                        />
+                                        {isDefined(literacyRateRegion) && (
+                                            <TextOutput
+                                                labelContainerClassName={styles.regionalText}
+                                                valueContainerClassName={styles.regionalText}
+                                                label={countryResponse?.countryProfile.region}
+                                                value={`${literacyRateRegion}%`}
+                                            />
+                                        )}
                                     </>
                                 )}
                             />
                         )}
-                        {washAccessNational && (
+                        {isDefined(washAccessNational) && (
                             <TextOutput
                                 className={styles.countryTextOutput}
                                 valueContainerClassName={styles.valueText}
@@ -599,17 +605,19 @@ function Country(props: Props) {
                                 value={(
                                     <>
                                         {`${washAccessNational}%`}
-                                        <TextOutput
-                                            labelContainerClassName={styles.regionalText}
-                                            valueContainerClassName={styles.regionalText}
-                                            label={countryResponse?.countryProfile.region}
-                                            value={`${washAccessNationalRegion}%`}
-                                        />
+                                        {isDefined(washAccessNationalRegion) && (
+                                            <TextOutput
+                                                labelContainerClassName={styles.regionalText}
+                                                valueContainerClassName={styles.regionalText}
+                                                label={countryResponse?.countryProfile.region}
+                                                value={`${washAccessNationalRegion}%`}
+                                            />
+                                        )}
                                     </>
                                 )}
                             />
                         )}
-                        {countryResponse?.countryProfile.medicalStaff && (
+                        {isDefined(countryResponse?.countryProfile.medicalStaff) && (
                             <TextOutput
                                 className={styles.countryTextOutput}
                                 valueContainerClassName={styles.valueText}
@@ -618,21 +626,23 @@ function Country(props: Props) {
                                 label="Doctors and nurses per 1000 people"
                                 value={(
                                     <>
-                                        {(countryResponse?.countryProfile.medicalStaff)?.toFixed(0)}
-
-                                        <TextOutput
-                                            labelContainerClassName={styles.regionalText}
-                                            valueContainerClassName={styles.regionalText}
-                                            label={countryResponse?.countryProfile.region}
-                                            value={(countryResponse
-                                                ?.countryProfile.medicalStaffRegion)
-                                                ?.toFixed(0)}
-                                        />
+                                        {(countryResponse?.countryProfile.medicalStaff)?.toFixed(2)}
+                                        {isDefined(countryResponse
+                                            ?.countryProfile.medicalStaffRegion) && (
+                                            <TextOutput
+                                                labelContainerClassName={styles.regionalText}
+                                                valueContainerClassName={styles.regionalText}
+                                                label={countryResponse?.countryProfile.region}
+                                                value={(countryResponse
+                                                    ?.countryProfile.medicalStaffRegion)
+                                                    ?.toFixed(2)}
+                                            />
+                                        )}
                                     </>
                                 )}
                             />
                         )}
-                        {stringency && (
+                        {isDefined(stringency) && (
                             <TextOutput
                                 className={styles.countryTextOutput}
                                 valueContainerClassName={styles.valueText}
@@ -642,12 +652,14 @@ function Country(props: Props) {
                                 value={(
                                     <>
                                         {`${stringency}%`}
-                                        <TextOutput
-                                            labelContainerClassName={styles.regionalText}
-                                            valueContainerClassName={styles.regionalText}
-                                            label={countryResponse?.countryProfile.region}
-                                            value={`${stringencyRegion}%`}
-                                        />
+                                        {isDefined(stringencyRegion) && (
+                                            <TextOutput
+                                                labelContainerClassName={styles.regionalText}
+                                                valueContainerClassName={styles.regionalText}
+                                                label={countryResponse?.countryProfile.region}
+                                                value={`${stringencyRegion}%`}
+                                            />
+                                        )}
                                     </>
                                 )}
                             />
@@ -660,7 +672,7 @@ function Country(props: Props) {
                             label="Regional cases %"
                             value={`${regional}%`}
                         />
-                        {economicSupportIndex && (
+                        {isDefined(economicSupportIndex) && (
                             <TextOutput
                                 className={styles.countryTextOutput}
                                 valueContainerClassName={styles.valueText}
@@ -670,12 +682,14 @@ function Country(props: Props) {
                                 value={(
                                     <>
                                         {`${economicSupportIndex}%`}
-                                        <TextOutput
-                                            labelContainerClassName={styles.regionalText}
-                                            valueContainerClassName={styles.regionalText}
-                                            label={countryResponse?.countryProfile.region}
-                                            value={`${economicSupportIndexRegion}%`}
-                                        />
+                                        {isDefined(economicSupportIndexRegion) && (
+                                            <TextOutput
+                                                labelContainerClassName={styles.regionalText}
+                                                valueContainerClassName={styles.regionalText}
+                                                label={countryResponse?.countryProfile.region}
+                                                value={`${economicSupportIndexRegion}%`}
+                                            />
+                                        )}
                                     </>
                                 )}
                             />

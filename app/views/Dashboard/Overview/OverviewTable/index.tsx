@@ -68,8 +68,10 @@ function countryListCell(props: CountryListCellProps) {
 
 function MyCell<T>(props: TableCellProps<T>) {
     const { className, value } = props;
+    const highValueIndicator = value && +(value) > 40;
+
     return (
-        <div className={_cs(className, (value && +(value) > 40 && styles.highIndicator))}>
+        <div className={_cs(className, highValueIndicator && styles.highIndicator)}>
             <TableCell value={value} />
         </div>
     );

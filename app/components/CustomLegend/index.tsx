@@ -5,7 +5,7 @@ import styles from './styles.css';
 export interface Props {
     className?: string;
     age?: string
-    genders?: string;
+    gender?: string;
     fill: string;
 }
 
@@ -13,7 +13,7 @@ function CustomLegend(props: Props) {
     const {
         className,
         age,
-        genders,
+        gender,
         fill,
     } = props;
     return (
@@ -27,9 +27,9 @@ function CustomLegend(props: Props) {
             <div className={styles.legendDetails}>
                 {age
                     && <div>{age}</div>}
-                {genders
-                    && <div>{genders}</div>}
-                {/* FIX ME: Add regional data */}
+                {gender
+                    && <div>{gender}</div>}
+                {/* FIXME: Add regional data */}
                 <div className={styles.regionalText}>
                     Regional 30%
                 </div>

@@ -5,7 +5,7 @@
     gap: var(--dui-spacing-super-large);
 
     .combined-indicator-header {
-        background-color: white;
+        background-color: var(--color-foreground);
         padding: var(--spacing);
     }
 
