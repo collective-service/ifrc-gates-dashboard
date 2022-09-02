@@ -261,7 +261,6 @@ export const totalCasesBarChart = [
         range: '500M',
         pv: 2100,
         amt: 2010,
-        color: 'red',
     },
     {
         id: 23,
@@ -269,7 +268,6 @@ export const totalCasesBarChart = [
         range: '300M',
         pv: 3098,
         amt: 1450,
-        color: 'blue',
     },
     {
         id: 34,
@@ -277,7 +275,6 @@ export const totalCasesBarChart = [
         range: '400M',
         pv: 5800,
         amt: 1900,
-        color: 'green',
     },
     {
         id: 56,
@@ -285,7 +282,6 @@ export const totalCasesBarChart = [
         range: '200M',
         pv: 3908,
         amt: 1500,
-        color: 'purple',
     },
     {
         id: 78,
@@ -293,7 +289,6 @@ export const totalCasesBarChart = [
         range: '300M',
         pv: 4800,
         amt: 1881,
-        color: 'yellow',
     },
 ];
 
@@ -668,5 +663,88 @@ export const overviewTableData = [
         valueTwo: '',
         month: 'June',
         high: true,
+    },
+];
+
+export const rangeData = [
+    {
+        date: 'Jan',
+        range: '0.0%',
+        uncertainData: [
+            10,
+            50,
+        ],
+        amt: 30,
+    },
+    {
+        date: 'Feb',
+        range: '10.0%',
+        uncertainData: [
+            20,
+            100,
+        ],
+        amt: 40,
+    },
+    {
+        date: 'Mar',
+        range: '20.0%',
+        uncertainData: [
+            30,
+            120,
+        ],
+        amt: 70,
+    },
+    {
+        date: 'Apr',
+        range: '30.0%',
+        uncertainData: [
+            40,
+            120,
+        ],
+    },
+    {
+        date: 'May',
+        range: '40.0%',
+        uncertainData: [
+            120,
+            160,
+        ],
+        amt: 140,
+    },
+    {
+        date: 'Jun',
+        range: '50.0%',
+        uncertainData: [
+            50,
+            120,
+        ],
+        amt: 80,
+    },
+    {
+        date: 'Jul',
+        range: '60.0%',
+        uncertainData: [
+            30,
+            100,
+        ],
+        amt: 70,
+    },
+    {
+        date: 'Aug',
+        range: '70.0%',
+        uncertainData: [
+            10,
+            80,
+        ],
+        amt: 40,
+    },
+    {
+        date: 'Sep',
+        range: '80.0%',
+        uncertainData: [
+            30,
+            80,
+        ],
+        amt: 50,
     },
 ];

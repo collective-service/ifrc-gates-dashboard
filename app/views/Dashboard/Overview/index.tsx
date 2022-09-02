@@ -5,13 +5,17 @@ import {
     Tab,
     TabPanel,
     ContainerCard,
+    Button,
+    useModalState,
 } from '@the-deep/deep-ui';
 import { _cs } from '@togglecorp/fujs';
 
+import IndicatorChart from '#components/IndicatorChart';
 import RegionalBreakdownCard from './RegionalBreakdownCard';
 import PercentageCardGroup from './PercentageCardGroup';
 import MapView from './MapView';
 import OverviewTable from './OverviewTable';
+import MapModal from './MapView/MapModal';
 import styles from './styles.css';
 
 interface Props {
@@ -27,10 +31,26 @@ function Overview(props: Props) {
     // TODO: define strict type mapMode and tableMode instead of string
     const [currentTab, setCurrentTab] = useState<string | undefined>('mapMode');
 
+    const [
+        mapModalShown,
+        showMapModal,
+        hideMapModal,
+    ] = useModalState(false);
+
     return (
         <div className={_cs(className, styles.overviewMain)}>
             <PercentageCardGroup />
             <RegionalBreakdownCard />
+            <div className={styles.areaChartBox}>
+                <IndicatorChart />
+                <Button
+                    name="map_modal"
+                    onClick={showMapModal}
+                    variant="nlp-tertiary"
+                >
+                    Map Modal
+                </Button>
+            </div>
             <div className={styles.mapContainer}>
                 <Tabs
                     value={currentTab}
@@ -74,6 +94,11 @@ function Overview(props: Props) {
                         </TabPanel>
                     </ContainerCard>
                 </Tabs>
+                {mapModalShown && (
+                    <MapModal
+                        onModalClose={hideMapModal}
+                    />
+                )}
             </div>
         </div>
     );

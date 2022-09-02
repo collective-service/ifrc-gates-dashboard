@@ -1,86 +1,75 @@
 import React from 'react';
 import {
-    ContainerCard,
-    ContainerCardProps,
-} from '@the-deep/deep-ui';
-import { _cs } from '@togglecorp/fujs';
-import {
-    Line,
-    LineChart,
-    ResponsiveContainer,
+    ComposedChart,
+    Area,
     XAxis,
     YAxis,
     Tooltip,
-    Legend,
+    Line,
+    ResponsiveContainer,
 } from 'recharts';
+import {
+    ContainerCard,
+} from '@the-deep/deep-ui';
+import { _cs } from '@togglecorp/fujs';
 
+import { rangeData } from '#utils/dummyData';
 import styles from './styles.css';
 
-type IndicatorOverviewType = {
-    id: number;
-    month: string;
-    percentage: number;
-};
-type headingSizeType = ContainerCardProps['headingSize']
 interface IndicatorChartProps {
     className?: string;
-    heading?: React.ReactNode;
-    headerDescription?: React.ReactNode;
-    headingSize?: headingSizeType;
-    chartData: IndicatorOverviewType[];
 }
 
 function IndicatorChart(props: IndicatorChartProps) {
-    const {
-        className,
-        heading,
-        headerDescription,
-        headingSize = 'extraSmall',
-        chartData,
-    } = props;
+    const { className } = props;
+
     return (
         <ContainerCard
-            className={_cs(className, styles.indicatorChartCard)}
-            heading={heading}
-            headerDescription={headerDescription}
-            headingSize={headingSize}
-            contentClassName={styles.responsiveContainer}
+            className={_cs(className, styles.areaChart)}
+            contentClassName={styles.responsiveContent}
+            heading="Uncertainty cases"
+            headingSize="extraSmall"
+            headerDescription="Loreum epsum epsum 2022"
         >
-            <ResponsiveContainer className={styles.responsiveContent}>
-                <LineChart
-                    data={chartData}
-                    margin={{
-                        left: 0,
-                        right: 20,
-                    }}
+            <ResponsiveContainer
+                className={styles.responsiveContainer}
+            >
+                <ComposedChart
+                    data={rangeData}
                 >
                     <XAxis
-                        dataKey="month"
-                        tickLine={false}
+                        dataKey="date"
+                        padding={{
+                            left: 30,
+                            right: 30,
+                        }}
                     />
                     <YAxis
-                        axisLine={false}
-                        tickLine={false}
-                        padding={{ top: 30 }}
+                        label={{
+                            value: 'Country Trend on (%)',
+                            angle: -90,
+                            position: 'insideBottomLeft',
+                            offset: 16,
+                        }}
                     />
-                    <Legend
-                        iconType="rect"
-                        align="right"
-                        verticalAlign="top"
+                    <Area
+                        dataKey="uncertainData"
+                        stroke="#8DD2B1"
+                        fill="#8DD2B1"
+                    />
+                    <Line
+                        dataKey="amt"
+                        stroke="#2F9C67"
+                        strokeWidth={2}
+                        dot={{
+                            stroke: '#2F9C67',
+                            strokeWidth: 2,
+                        }}
                     />
                     <Tooltip />
-                    <Line
-                        type="monotone"
-                        stroke="#2F9C67"
-                        name="Percentage"
-                        strokeWidth={3}
-                        dot={false}
-                        dataKey="percentage"
-                    />
-                </LineChart>
+                </ComposedChart>
             </ResponsiveContainer>
         </ContainerCard>
     );
 }
-
 export default IndicatorChart;

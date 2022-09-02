@@ -1,13 +1,12 @@
-.indicator-chart-card {
-    display: flex;
-    flex-shrink: 0;
-    border-radius: 0; /* By default, ContainerCard has border-radius */
+.area-chart {
+    flex-basis: 60%;
+    flex-grow: 1;
+}
+
+.responsive-content {
+    min-height: 12rem;
 
     .responsive-container {
-        min-height: 15rem;
-
-        .responsive-content {
-            overflow: hidden;
-        }
+        overflow: hidden;
     }
 }

@@ -37,7 +37,6 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
         <div className={_cs(className, styles.cardInfo)}>
             <PercentageStats
                 className={styles.globalStatCard}
-                heading="Total number of cases"
                 headingSize="extraSmall"
                 headerDescription={(
                     <p>
@@ -123,6 +122,7 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                                 x: true,
                                 y: true,
                             }}
+                            cursor={false}
                         />
                         <XAxis
                             dataKey="name"
