@@ -65,14 +65,18 @@ function countryListCell(props: CountryListCellProps) {
         </div>
     );
 }
+
 function MyCell<T>(props: TableCellProps<T>) {
-    const { className, ...otherProps } = props;
+    const { className, value } = props;
+    const highValueIndicator = value && +(value) > 40;
+
     return (
-        <div className={_cs(otherProps.value && +(otherProps.value) > 40 && styles.highIndicator)}>
-            <TableCell {...otherProps} />
+        <div className={_cs(className, highValueIndicator && styles.highIndicator)}>
+            <TableCell value={value} />
         </div>
     );
 }
+
 function createIndicatorColumn(
     id: string,
     title: string,

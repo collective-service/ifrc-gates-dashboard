@@ -77,3 +77,10 @@ export function decimalToPercentage(value: number | null | undefined) {
         value ? (value * 100).toFixed(2) : undefined
     );
 }
+
+export function getShortMonth(date: string) {
+    return (
+        new Date(date)
+            .toLocaleString('default', { month: 'short' })
+    );
+}

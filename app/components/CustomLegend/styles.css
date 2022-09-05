@@ -1,0 +1,23 @@
+.legend-list {
+    display: flex;
+    border-bottom: var(--dui-width-separator-thin) solid var(--dui-color-line-separator);
+    padding: var(--dui-spacing-small);
+    gap: var(--dui-spacing-medium);
+    list-style: none;
+
+    .legend-box {
+        padding: var(--dui-spacing-extra-small);
+    }
+
+    .legend-details {
+        display: flex;
+        align-items: baseline;
+        flex-direction: column;
+
+        .regional-text {
+            color: var(--color-text-secondary);
+            font-size: var(--dui-font-size-small);
+        }
+    }
+
+}

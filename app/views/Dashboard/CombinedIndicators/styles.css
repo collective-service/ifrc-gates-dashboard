@@ -4,8 +4,14 @@
     justify-content: center;
     gap: var(--dui-spacing-super-large);
 
+    .combined-indicator-header {
+        background-color: var(--color-foreground);
+        padding: var(--spacing);
+    }
+
     .combined-indicator-main {
         display: flex;
+        background-color: var(--color-background);
 
         .progress-bar-container {
             display: flex;
@@ -13,8 +19,8 @@
             gap: var(--dui-spacing-medium);
 
             .progress-bar-card {
-                border: var(--width-separator-thin) solid var(--color-separator-light);
-                border-radius: var(--dui-border-radius-card);
+                border-radius: 0;
+                box-shadow: 0px 0px 10px var(--dui-card-box-shadow);
 
                 .progress-bar {
                     display: flex;
