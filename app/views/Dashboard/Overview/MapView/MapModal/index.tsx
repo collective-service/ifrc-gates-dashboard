@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { _cs } from '@togglecorp/fujs';
 import {
     Modal,
     Heading,
+    Button,
 } from '@the-deep/deep-ui';
 import {
     LineChart,
@@ -17,25 +18,47 @@ import {
     lineChartData,
 } from '#utils/dummyData';
 
+import { FilterType } from '../../../Filters';
 import styles from './styles.css';
 
+export type TabTypes = 'country' | 'overview' | 'combinedIndicators';
 interface ModalProps {
     className?: string;
     onModalClose: () => void;
+    setActiveTab: React.Dispatch<React.SetStateAction<TabTypes | undefined>>;
+    setFilterValues: React.Dispatch<React.SetStateAction<FilterType | undefined>>;
 }
 
 function MapModal(props: ModalProps) {
     const {
         className,
         onModalClose,
+        setActiveTab,
+        setFilterValues,
     } = props;
+
+    const handleModalCountryName = useCallback(() => {
+        setActiveTab('country');
+        setFilterValues({ country: 'AFG' });
+    }, [
+        setActiveTab,
+        setFilterValues,
+    ]);
 
     return (
         <Modal
             onCloseButtonClick={onModalClose}
             className={_cs(className, styles.responsiveContent)}
             size="medium"
-            heading="<--Country Name-->"
+            heading={(
+                <Button
+                    name="map_modal"
+                    onClick={handleModalCountryName}
+                    variant="action"
+                >
+                    Afganisthan
+                </Button>
+            )}
             headingDescription={(
                 <div className={styles.modalDescription}>
                     <Heading

@@ -6,6 +6,7 @@ import {
     TabPanel,
     ContainerCard,
     useModalState,
+    Button,
 } from '@the-deep/deep-ui';
 import { _cs } from '@togglecorp/fujs';
 
@@ -17,15 +18,20 @@ import MapModal from './MapView/MapModal';
 import { FilterType } from '../Filters';
 import styles from './styles.css';
 
+export type TabTypes = 'country' | 'overview' | 'combinedIndicators';
 interface Props {
     className?: string;
     filterValues?: FilterType | undefined;
+    setActiveTab: React.Dispatch<React.SetStateAction<TabTypes | undefined>>;
+    setFilterValues: React.Dispatch<React.SetStateAction<FilterType | undefined>>;
 }
 
 function Overview(props: Props) {
     const {
         className,
         filterValues,
+        setActiveTab,
+        setFilterValues,
     } = props;
 
     // TODO: Rename this to better suit the behavior
@@ -69,8 +75,7 @@ function Overview(props: Props) {
             {((noFiltersSelected || onlyRegionSelected) && (
                 <RegionalBreakdownCard />
             ))}
-            {/* <div className={styles.areaChartBox}>
-                <UncertainityChart />
+            <div className={styles.areaChartBox}>
                 <Button
                     name="map_modal"
                     onClick={showMapModal}
@@ -78,7 +83,7 @@ function Overview(props: Props) {
                 >
                     Map Modal
                 </Button>
-            </div> */}
+            </div>
             <div className={styles.mapContainer}>
                 <Tabs
                     value={currentTab}
@@ -127,6 +132,8 @@ function Overview(props: Props) {
                 {mapModalShown && (
                     <MapModal
                         onModalClose={hideMapModal}
+                        setActiveTab={setActiveTab}
+                        setFilterValues={setFilterValues}
                     />
                 )}
             </div>

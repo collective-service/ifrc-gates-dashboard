@@ -16,11 +16,11 @@ import { _cs } from '@togglecorp/fujs';
 import { rangeData } from '#utils/dummyData';
 import styles from './styles.css';
 
-interface UncertaintyChartProps {
+interface Props {
     className?: string;
 }
 
-function UncertaintyChart(props: UncertaintyChartProps) {
+function UncertaintyChart(props: Props) {
     const { className } = props;
 
     return (

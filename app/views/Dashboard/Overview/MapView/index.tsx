@@ -14,11 +14,9 @@ import Map, {
 import ProgressBar from '#components/ProgressBar';
 import { ProgressBarRendererProps } from '#views/Dashboard/CombinedIndicators';
 
-import geoJson from '#utils/geoJson';
 import {
     progressDataOne,
     progressDataTwo,
-    boundsData,
 } from '#utils/dummyData';
 
 import styles from './styles.css';
