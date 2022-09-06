@@ -5,44 +5,77 @@ import {
     Tab,
     TabPanel,
     ContainerCard,
-    Button,
     useModalState,
+    Button,
 } from '@the-deep/deep-ui';
 import { _cs } from '@togglecorp/fujs';
 
-import IndicatorChart from '#components/IndicatorChart';
 import RegionalBreakdownCard from './RegionalBreakdownCard';
 import PercentageCardGroup from './PercentageCardGroup';
 import MapView from './MapView';
 import OverviewTable from './OverviewTable';
 import MapModal from './MapView/MapModal';
+import { FilterType } from '../Filters';
 import styles from './styles.css';
 
+export type TabTypes = 'country' | 'overview' | 'combinedIndicators';
 interface Props {
     className?: string;
+    filterValues?: FilterType | undefined;
+    setActiveTab: React.Dispatch<React.SetStateAction<TabTypes | undefined>>;
+    setFilterValues: React.Dispatch<React.SetStateAction<FilterType | undefined>>;
 }
 
 function Overview(props: Props) {
     const {
         className,
+        filterValues,
+        setActiveTab,
+        setFilterValues,
     } = props;
 
     // TODO: Rename this to better suit the behavior
     // TODO: define strict type mapMode and tableMode instead of string
     const [currentTab, setCurrentTab] = useState<string | undefined>('mapMode');
 
+    // TODO: Map modal to be included in the mapbox.
     const [
         mapModalShown,
         showMapModal,
         hideMapModal,
     ] = useModalState(false);
 
+    const noFiltersSelected = !filterValues?.region
+        && !filterValues?.outbreak && !filterValues?.indicator;
+
+    const onlyRegionSelected = !!filterValues?.region && (
+        !filterValues?.indicator && !filterValues?.outbreak);
+
+    const onlyOutbreakSelected = !!filterValues?.outbreak && (
+        !filterValues?.indicator && !filterValues?.region);
+
+    const onlyIndicatorSelected = !!filterValues?.indicator && (
+        !filterValues?.outbreak && !filterValues?.region);
+
+    const isIndicatorSelected = !!filterValues?.indicator;
+
+    const moreThanTwoFilterSelected = (!!filterValues?.region && !!filterValues?.indicator)
+        || (!!filterValues?.outbreak && !!filterValues?.indicator)
+        || (!!filterValues?.region && !!filterValues?.outbreak);
+
+    const uncertaintyChartActive = isIndicatorSelected;
+
     return (
         <div className={_cs(className, styles.overviewMain)}>
-            <PercentageCardGroup />
-            <RegionalBreakdownCard />
+            {((onlyIndicatorSelected || onlyOutbreakSelected || moreThanTwoFilterSelected) && (
+                <PercentageCardGroup
+                    uncertaintyChartActive={uncertaintyChartActive}
+                />
+            ))}
+            {((noFiltersSelected || onlyRegionSelected) && (
+                <RegionalBreakdownCard />
+            ))}
             <div className={styles.areaChartBox}>
-                <IndicatorChart />
                 <Button
                     name="map_modal"
                     onClick={showMapModal}
@@ -85,7 +118,9 @@ function Overview(props: Props) {
                         <TabPanel
                             name="mapMode"
                         >
-                            <MapView />
+                            <MapView
+                                isIndicatorSelected={isIndicatorSelected}
+                            />
                         </TabPanel>
                         <TabPanel
                             name="tableMode"
@@ -97,6 +132,8 @@ function Overview(props: Props) {
                 {mapModalShown && (
                     <MapModal
                         onModalClose={hideMapModal}
+                        setActiveTab={setActiveTab}
+                        setFilterValues={setFilterValues}
                     />
                 )}
             </div>

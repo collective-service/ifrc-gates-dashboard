@@ -4,17 +4,23 @@
 
     .global-stat-card {
         flex-basis: 20%;
-        border-radius: var(--dui-border-radius-card);
+        border-radius: 0;
+        /* By default, ContainerCard has border-radius */
+        box-shadow: 0px 0px 10px var(--dui-card-box-shadow);
     }
 
     .trends-card {
         flex-basis: calc(42% - var(--dui-spacing-small));
-        border-radius: var(--dui-border-radius-card);
+        border-radius: 0;
+        /* By default, ContainerCard has border-radius */
+        box-shadow: 0px 0px 10px var(--dui-card-box-shadow);
     }
 
     .regions-card {
         flex-grow: 1;
-        border-radius: var(--dui-border-radius-card);
+        border-radius: 0;
+        /* By default, ContainerCard has border-radius */
+        box-shadow: 0px 0px 10px var(--dui-card-box-shadow);
     }
 
     .responsive-content {

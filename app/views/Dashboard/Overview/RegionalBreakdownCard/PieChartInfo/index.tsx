@@ -32,6 +32,9 @@ function PieChartInfo(props: PieChartInfoProps) {
 
     return (
         <div className={_cs(className, styles.pieChartWrapper)}>
+            <div className={styles.pieChartHeader}>
+                {country}
+            </div>
             <div className={styles.pieChartHolder}>
                 <ResponsiveContainer
                     className={styles.responsiveContainer}
@@ -57,9 +60,6 @@ function PieChartInfo(props: PieChartInfoProps) {
                         </Pie>
                     </PieChart>
                 </ResponsiveContainer>
-            </div>
-            <div className={styles.pieChartHeader}>
-                {country}
             </div>
         </div>
     );

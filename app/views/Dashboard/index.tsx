@@ -21,18 +21,17 @@ export type TabTypes = 'country' | 'overview' | 'combinedIndicators';
 
 function Dashboard() {
     const [activeTab, setActiveTab] = useState<TabTypes | undefined>('overview');
-
-    const handleExport = () => {
-        // eslint-disable-next-line no-console
-        console.log('Handled the export::>>');
-    };
-
     const [filterValues, setFilterValues] = useState<FilterType | undefined>();
 
     const [
         advancedFilterValues,
         setAdvancedFilterValues,
     ] = useState<AdvancedOptionType | undefined>();
+
+    const handleExport = () => {
+        // eslint-disable-next-line no-console
+        console.log('Handled the export::>>');
+    };
 
     const handleActiveTabChange = (newActiveTab: TabTypes | undefined) => {
         setActiveTab(newActiveTab);
@@ -91,7 +90,11 @@ function Dashboard() {
                 />
                 <div className={styles.content}>
                     <TabPanel name="overview">
-                        <Overview />
+                        <Overview
+                            filterValues={filterValues}
+                            setActiveTab={setActiveTab}
+                            setFilterValues={setFilterValues}
+                        />
                     </TabPanel>
                     <TabPanel name="country">
                         <Country
