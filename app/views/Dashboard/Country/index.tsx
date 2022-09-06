@@ -11,14 +11,13 @@ import {
 import {
     LineChart,
     Line,
-    PieChart,
-    Pie,
-    Cell,
     XAxis,
     YAxis,
     Tooltip,
     Legend,
     ResponsiveContainer,
+    BarChart,
+    Bar,
 } from 'recharts';
 import {
     ContainerCard,
@@ -31,7 +30,6 @@ import { useQuery, gql } from '@apollo/client';
 import UncertaintyChart from '#components/UncertaintyChart';
 import PercentageStats from '#components/PercentageStats';
 import ScoreCard from '#components/ScoreCard';
-import CustomLegend from '#components/CustomLegend';
 import {
     decimalToPercentage,
     getShortMonth,
@@ -61,29 +59,21 @@ interface CountryWiseOutbreakCases extends EmergencyItems {
     key: string;
 }
 
-interface Props {
-    className?: string;
-    filterValues?: FilterType | undefined;
-}
-
-interface CustomLegendProps {
-    key: string;
-    age?: string;
-    gender?: string;
-    fill: string;
+interface LabelProps {
+    x: number;
+    y: number;
+    value: string;
 }
 
 const percentageKeySelector = (d: CountryWiseOutbreakCases) => d.key;
 const readinessKeySelector = (d: ScoreCardProps) => d.title;
-const customLegendKeySelector = (d: CustomLegendProps) => d.key;
-
-const COLORS = ['#52625A', '#567968', '#69A688', '#7AD6A8', '#AFFAD5', '#D6F9E8'];
 
 const COUNTRY_PROFILE = gql`
     query Country(
         $iso3: String,
         $disaggregationIso3: String!,
         $contextIndicatorId: String!,
+        $emergency: String,
     ) {
         countryProfile(iso3: $iso3) {
             iso3
@@ -121,6 +111,7 @@ const COUNTRY_PROFILE = gql`
         contextualData(
             iso3: $iso3,
             contextIndicatorId:$contextIndicatorId,
+            emergency: $emergency,
         ) {
             iso3
             emergency
@@ -130,18 +121,25 @@ const COUNTRY_PROFILE = gql`
         }
     }
 `;
+interface Props {
+    className?: string;
+    filterValues?: FilterType | undefined;
+}
 
 function Country(props: Props) {
     const {
         filterValues,
+        className,
     } = props;
 
     const countryVariables = useMemo((): CountryQueryVariables => ({
         iso3: filterValues?.country ?? 'AFG',
         contextIndicatorId: 'total_cases',
         disaggregationIso3: filterValues?.country ?? 'AFG',
+        emergency: filterValues?.outbreak,
     }), [
         filterValues?.country,
+        filterValues?.outbreak,
     ]);
 
     const {
@@ -219,6 +217,36 @@ function Country(props: Props) {
         );
     }, [countryResponse?.contextualData]);
 
+    const ageDisaggregation = useMemo(() => countryResponse
+        ?.disaggregation.ageDisaggregation.map((age) => (
+            {
+                category: age.category,
+                indicatorValue: decimalToPercentage(age.indicatorValue),
+            }
+        )), [countryResponse?.disaggregation.ageDisaggregation]);
+
+    const genderDisaggregation = useMemo(() => countryResponse
+        ?.disaggregation.genderDisaggregation.map((gender) => (
+            {
+                category: gender.category,
+                indicatorValue: decimalToPercentage(gender.indicatorValue),
+            }
+        )), [countryResponse?.disaggregation.genderDisaggregation]);
+
+    const disaggregationLabel = (labelProps: LabelProps) => {
+        const { x, y, value } = labelProps;
+
+        return (
+            <text
+                x={x}
+                y={y}
+                dy={-4}
+            >
+                {`${value}%`}
+            </text>
+        );
+    };
+
     const outbreakLineChartData = useMemo(() => {
         const outbreakGroupList = listToGroupList(
             countryResponse?.contextualData,
@@ -250,38 +278,6 @@ function Country(props: Props) {
             });
         })
     ), [countryResponse?.contextualData]);
-
-    const genders: CustomLegendProps[] = useMemo(() => (
-        // FIXME: Remove unique function after getting key
-        unique(
-            countryResponse?.disaggregation.genderDisaggregation ?? [],
-            (d) => d.category,
-        ).map((item, index) => (
-            {
-                key: `${item.category}-${item.indicatorValue}`,
-                gender: item.category,
-                fill: COLORS[index % COLORS.length] ?? '#52625A',
-            }
-        ))
-    ), [countryResponse?.disaggregation.genderDisaggregation]);
-
-    const age: CustomLegendProps[] = useMemo(() => (
-        // FIXME: Remove unique function after getting key
-        unique(
-            countryResponse?.disaggregation?.ageDisaggregation ?? [],
-            (d) => d.category,
-        ).map((item, index) => (
-            {
-                key: `${item.category}-${item.indicatorValue}`,
-                age: item.category,
-                fill: COLORS[index % COLORS.length] ?? '#52625A',
-            }
-        ))
-    ), [countryResponse?.disaggregation?.ageDisaggregation]);
-
-    const {
-        className,
-    } = props;
 
     const scoreCardData: ScoreCardProps[] = [
         {
@@ -345,12 +341,6 @@ function Country(props: Props) {
         indicator: metricTypeForColor(data),
     }), [metricTypeForColor]);
 
-    const customLegendParams = useCallback((_, data: CustomLegendProps) => ({
-        age: data.age,
-        gender: data.gender,
-        fill: data.fill,
-    }), []);
-
     return (
         <div className={_cs(className, styles.countryWrapper)}>
             <div className={styles.countryMain}>
@@ -382,147 +372,125 @@ function Country(props: Props) {
                             />
                         )}
                     </ContainerCard>
-                    <ContainerCard
-                        className={styles.countryTrend}
-                        heading="Outbreaks overview over the last 12 months"
-                        headingSize="extraSmall"
-                        contentClassName={styles.responsiveContent}
-                    >
-                        <ResponsiveContainer className={styles.responsiveContainer}>
-                            <LineChart
-                                data={outbreakLineChartData}
+                    {!filterValues?.indicator && (
+                        <ContainerCard
+                            className={styles.countryTrend}
+                            heading="Outbreaks overview over the last 12 months"
+                            headingSize="extraSmall"
+                            contentClassName={styles.responsiveContent}
+                        >
+                            <ResponsiveContainer className={styles.responsiveContainer}>
+                                <LineChart
+                                    data={outbreakLineChartData}
+                                >
+                                    <XAxis
+                                        dataKey="date"
+                                        tickLine={false}
+                                        reversed
+                                    />
+                                    <YAxis
+                                        axisLine={false}
+                                        tickLine={false}
+                                        padding={{ top: 30 }}
+                                    />
+                                    <Tooltip />
+                                    <Legend
+                                        iconType="rect"
+                                        align="right"
+                                        verticalAlign="bottom"
+                                    />
+                                    {outbreaks.map((outbreak) => (
+                                        <Line
+                                            key={outbreak.emergency}
+                                            dataKey={outbreak.emergency}
+                                            type="monotone"
+                                            stroke={outbreak.fill}
+                                            strokeWidth={3}
+                                            dot={false}
+                                        />
+                                    ))}
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </ContainerCard>
+                    )}
+                    {filterValues?.indicator && (
+                        <div className={styles.indicatorWrapper}>
+                            <PercentageStats
+                                className={styles.percentageCard}
+                                heading="Percentage of unvaccinated individuals who have tried to get vaccinated"
+                                headingSize="extraSmall"
+                                statValue={56}
+                                suffix="%"
+                                icon={null}
+                            />
+                            <UncertaintyChart
+                                className={styles.indicatorsChart}
+                            />
+                            <ContainerCard
+                                className={styles.disaggregation}
+                                contentClassName={styles.disaggregationContent}
+                                heading="Disaggregation"
+                                headerDescription="Lorem ipsum explaining the topic"
+                                headingSize="extraSmall"
                             >
-                                <XAxis
-                                    dataKey="date"
-                                    tickLine={false}
-                                    reversed
-                                />
-                                <YAxis
-                                    axisLine={false}
-                                    tickLine={false}
-                                    padding={{ top: 30 }}
-                                />
-                                <Tooltip />
-                                <Legend
-                                    iconType="rect"
-                                    align="right"
-                                    verticalAlign="bottom"
-                                />
-                                {outbreaks.map((outbreak) => (
-                                    <Line
-                                        key={outbreak.emergency}
-                                        dataKey={outbreak.emergency}
-                                        type="monotone"
-                                        stroke={outbreak.fill}
-                                        strokeWidth={3}
-                                        dot={false}
-                                    />
-                                ))}
-                            </LineChart>
-                        </ResponsiveContainer>
-                    </ContainerCard>
-                    <div className={styles.indicatorWrapper}>
-                        <PercentageStats
-                            className={styles.percentageCard}
-                            heading="Percentage of unvaccinated individuals who have tried to get vaccinated"
-                            headingSize="extraSmall"
-                            statValue={56}
-                            suffix="%"
-                            icon={null}
-                        />
-                        <UncertaintyChart
-                            className={styles.indicatorsChart}
-                        />
-                        <ContainerCard
-                            className={styles.genderDisaggregation}
-                            contentClassName={styles.responsiveContent}
-                            heading="Gender disaggregation"
-                            headerDescription="Lorem ipsum explaining the topic"
-                            headingSize="extraSmall"
-                        >
-                            <ResponsiveContainer className={styles.responsiveContainer}>
-                                <PieChart>
-                                    <Pie
-                                        data={countryResponse
-                                            ?.disaggregation.genderDisaggregation}
-                                        dataKey="indicatorValue"
-                                        cx={100}
-                                        cy={100}
-                                        outerRadius={70}
-                                    >
-                                        {genders.map((entry) => (
-                                            <Cell
-                                                key={entry.gender}
-                                                fill={entry.fill}
-                                            />
-                                        ))}
-                                    </Pie>
-                                    <Legend
-                                        width={200}
-                                        content={(
-                                            <ListView
-                                                renderer={CustomLegend}
-                                                rendererParams={customLegendParams}
-                                                keySelector={customLegendKeySelector}
-                                                data={genders}
-                                                errored={false}
-                                                filtered={false}
-                                                pending={false}
-                                            />
-                                        )}
-                                        verticalAlign="middle"
-                                        align="right"
-                                        layout="vertical"
-                                    />
-                                </PieChart>
-                            </ResponsiveContainer>
-                        </ContainerCard>
-                        <ContainerCard
-                            className={styles.ageDisaggregation}
-                            contentClassName={styles.responsiveContent}
-                            heading="Age disaggregation"
-                            headerDescription="Lorem ipsum explaining the topic"
-                            headingSize="extraSmall"
-                        >
-                            <ResponsiveContainer className={styles.responsiveContainer}>
-                                <PieChart>
-                                    <Pie
-                                        data={countryResponse
-                                            ?.disaggregation.ageDisaggregation}
-                                        dataKey="indicatorValue"
-                                        labelLine={false}
-                                        cx={100}
-                                        cy={100}
-                                        outerRadius={70}
-                                    >
-                                        {age.map((entry) => (
-                                            <Cell
-                                                key={entry.age}
-                                                fill={entry.fill}
-                                            />
-                                        ))}
-                                    </Pie>
-                                    <Legend
-                                        width={300}
-                                        content={(
-                                            <ListView
-                                                renderer={CustomLegend}
-                                                rendererParams={customLegendParams}
-                                                keySelector={customLegendKeySelector}
-                                                data={age}
-                                                errored={false}
-                                                filtered={false}
-                                                pending={false}
-                                            />
-                                        )}
-                                        verticalAlign="middle"
-                                        align="right"
-                                        layout="vertical"
-                                    />
-                                </PieChart>
-                            </ResponsiveContainer>
-                        </ContainerCard>
-                    </div>
+                                {genderDisaggregation && genderDisaggregation.length > 0 && (
+                                    <div className={styles.genderDisaggregation}>
+                                        <div>Gender Disaggregation</div>
+                                        <ResponsiveContainer className={styles.responsiveContainer}>
+                                            <BarChart
+                                                data={genderDisaggregation}
+                                            >
+                                                <Bar
+                                                    dataKey="indicatorValue"
+                                                    fill="#8DD2B1"
+                                                    label={disaggregationLabel}
+                                                    barSize={50}
+                                                />
+                                                <XAxis
+                                                    dataKey="category"
+                                                    tickLine={false}
+                                                />
+                                                <YAxis
+                                                    type="number"
+                                                    axisLine={false}
+                                                    tickLine={false}
+                                                    domain={[0, 100]}
+                                                />
+                                            </BarChart>
+                                        </ResponsiveContainer>
+                                    </div>
+                                )}
+                                {ageDisaggregation && ageDisaggregation.length > 0 && (
+                                    <div className={styles.ageDisaggregation}>
+                                        <div>Age Disaggregation</div>
+                                        <ResponsiveContainer className={styles.responsiveContainer}>
+                                            <BarChart
+                                                data={ageDisaggregation}
+                                            >
+                                                <Bar
+                                                    dataKey="indicatorValue"
+                                                    fill="#8DD2B1"
+                                                    label={disaggregationLabel}
+                                                    barSize={50}
+                                                />
+                                                <XAxis
+                                                    dataKey="category"
+                                                    tickLine={false}
+                                                />
+                                                <YAxis
+                                                    type="number"
+                                                    axisLine={false}
+                                                    tickLine={false}
+                                                    domain={[0, 100]}
+                                                />
+                                            </BarChart>
+                                        </ResponsiveContainer>
+                                    </div>
+
+                                )}
+                            </ContainerCard>
+                        </div>
+                    )}
                 </div>
                 <ContainerCard
                     className={styles.countryInfo}
@@ -627,8 +595,9 @@ function Country(props: Props) {
                                 value={(
                                     <>
                                         {(countryResponse?.countryProfile.medicalStaff)?.toFixed(2)}
-                                        {isDefined(countryResponse
-                                            ?.countryProfile.medicalStaffRegion) && (
+                                        {isDefined(
+                                            countryResponse?.countryProfile.medicalStaffRegion,
+                                        ) && (
                                             <TextOutput
                                                 labelContainerClassName={styles.regionalText}
                                                 valueContainerClassName={styles.regionalText}
