@@ -71,28 +71,36 @@
                     box-shadow: 0px 0px 10px var(--dui-card-box-shadow);
                 }
 
-                .gender-disaggregation {
-                    flex-basis: calc(45% - var(--dui-spacing-large));
+                .disaggregation {
                     flex-grow: 1;
                     border-radius: 0;
                     /* By default, ContainerCard has border-radius */
                     box-shadow: 0px 0px 10px var(--dui-card-box-shadow);
-                }
 
-                .age-disaggregation {
-                    flex-basis: calc(55% - var(--dui-spacing-small));
-                    border-radius: 0;
-                    /* By default, ContainerCard has border-radius */
-                    box-shadow: 0px 0px 10px var(--dui-card-box-shadow);
-                }
+                    .disaggregation-content {
+                        display: flex;
+                        gap: var(--dui-spacing-large);
 
-                .responsive-content {
-                    min-height: 22rem;
+                        .gender-disaggregation {
+                            display: flex;
+                            flex-basis: calc(45% - var(--dui-spacing-large));
+                            flex-direction: column;
+                            flex-grow: 1;
+                            min-height: 22rem;
+                            overflow: hidden;
 
-                    .responsive-container {
-                        overflow: hidden;
+                        }
+
+                        .age-disaggregation {
+                            display: flex;
+                            flex-basis: calc(55% - var(--dui-spacing-small));
+                            flex-direction: column;
+                            min-height: 22rem;
+                            overflow: hidden;
+                        }
                     }
                 }
+
 
             }
         }
