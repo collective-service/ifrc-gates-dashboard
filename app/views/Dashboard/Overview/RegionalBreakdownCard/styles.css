@@ -6,13 +6,17 @@
     .global-stat-card {
         flex-basis: 40%;
         flex-shrink: 0;
-        border-radius: var(--dui-border-radius-card);
+        border-radius: 0;
+        /* By default, ContainerCard has border-radius */
+        box-shadow: 0px 0px 10px var(--dui-card-box-shadow);
     }
 
 
     .regions-pie-chart {
         flex-grow: 1;
-        border-radius: var(--dui-border-radius-card);
+        border-radius: 0;
+        /* By default, ContainerCard has border-radius */
+        box-shadow: 0px 0px 10px var(--dui-card-box-shadow);
 
         .pie-chart-collection {
             display: flex;
@@ -29,11 +33,12 @@
     }
 }
 
-.breakdown-label {
+.breakdown-label-wrapper {
     display: flex;
     justify-content: space-around;
+    padding-top: var(--dui-spacing-medium);
 
-    .breakdown-label-wrapper {
+    .breakdown-label {
         display: flex;
         gap: var(--dui-spacing-small);
         align-items: center;

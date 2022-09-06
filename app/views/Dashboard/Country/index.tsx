@@ -28,7 +28,7 @@ import {
 } from '@the-deep/deep-ui';
 import { useQuery, gql } from '@apollo/client';
 
-import IndicatorChart from '#components/IndicatorChart';
+import UncertaintyChart from '#components/UncertaintyChart';
 import PercentageStats from '#components/PercentageStats';
 import ScoreCard from '#components/ScoreCard';
 import CustomLegend from '#components/CustomLegend';
@@ -268,7 +268,7 @@ function Country(props: Props) {
     const age: CustomLegendProps[] = useMemo(() => (
         // FIXME: Remove unique function after getting key
         unique(
-            countryResponse?.disaggregation.ageDisaggregation ?? [],
+            countryResponse?.disaggregation?.ageDisaggregation ?? [],
             (d) => d.category,
         ).map((item, index) => (
             {
@@ -277,7 +277,7 @@ function Country(props: Props) {
                 fill: COLORS[index % COLORS.length] ?? '#52625A',
             }
         ))
-    ), [countryResponse?.disaggregation.ageDisaggregation]);
+    ), [countryResponse?.disaggregation?.ageDisaggregation]);
 
     const {
         className,
@@ -430,7 +430,7 @@ function Country(props: Props) {
                             suffix="%"
                             icon={null}
                         />
-                        <IndicatorChart
+                        <UncertaintyChart
                             className={styles.indicatorsChart}
                         />
                         <ContainerCard

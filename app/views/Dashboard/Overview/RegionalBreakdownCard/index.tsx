@@ -47,7 +47,7 @@ function RegionalBreakdownLabel(props: RegionalBreakdownLabelProps) {
 
     return (
         <div
-            className={styles.breakdownLabelWrapper}
+            className={styles.breakdownLabel}
             key={regionId}
         >
             <div
@@ -155,21 +155,21 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
                 headerDescription="Loreum Ipsum epsum san-diego"
             >
                 <ListView
-                    className={styles.breakdownLabel}
-                    keySelector={breakdownLabelKeySelector}
-                    data={regionalBreakdownPieData}
-                    renderer={RegionalBreakdownLabel}
-                    rendererParams={regionalBreakdownLabelParams}
-                    filtered={false}
-                    errored={false}
-                    pending={false}
-                />
-                <ListView
                     className={styles.pieChartCollection}
                     keySelector={pieChartInfoKeySelector}
                     data={regionalBreakdownPieData}
                     renderer={PieChartInfo}
                     rendererParams={pieChartInfoRendererParams}
+                    filtered={false}
+                    errored={false}
+                    pending={false}
+                />
+                <ListView
+                    className={styles.breakdownLabelWrapper}
+                    keySelector={breakdownLabelKeySelector}
+                    data={regionalBreakdownPieData}
+                    renderer={RegionalBreakdownLabel}
+                    rendererParams={regionalBreakdownLabelParams}
                     filtered={false}
                     errored={false}
                     pending={false}

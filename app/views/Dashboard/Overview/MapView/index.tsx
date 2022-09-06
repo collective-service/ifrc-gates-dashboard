@@ -27,6 +27,7 @@ const progressBarKeySelector = (d: ProgressBarRendererProps) => d.id;
 
 interface MapViewProps {
     className?: string;
+    isIndicatorSelected: boolean;
 }
 
 const lightStyle = 'mapbox://styles/mapbox/light-v10';
@@ -45,19 +46,20 @@ const barHeight = 10;
 function MapView(props: MapViewProps) {
     const {
         className,
+        isIndicatorSelected,
     } = props;
 
     const progressBarRendererParams = useCallback(
         (_: string, data: ProgressBarRendererProps) => ({
             barHeight,
-            suffix: 'M',
+            suffix: isIndicatorSelected ? '%' : 'M',
             barName: data.barName,
             title: data.title,
             id: data.id,
             value: data.value,
             totalValue: data.totalValue,
             color: data.color,
-        }), [],
+        }), [isIndicatorSelected],
     );
 
     return (
@@ -73,7 +75,7 @@ function MapView(props: MapViewProps) {
                 >
                     <MapContainer className={styles.mapContainer} />
                     <MapBounds
-                        bounds={boundsData}
+                        bounds={undefined}
                         padding={50}
                     />
                     <MapSource
@@ -81,7 +83,7 @@ function MapView(props: MapViewProps) {
                         sourceOptions={{
                             type: 'geojson',
                         }}
-                        geoJson={geoJson}
+                        geoJson="https://rcce-dashboard.s3.eu-west-3.amazonaws.com/countries.json"
                     >
                         <MapLayer
                             layerKey="country-fill"

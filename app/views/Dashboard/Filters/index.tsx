@@ -120,7 +120,7 @@ export interface FilterType {
 
 interface Props {
     value: FilterType | undefined;
-    onChange: React.Dispatch<React.SetStateAction<FilterType| undefined>>;
+    onChange: React.Dispatch<React.SetStateAction<FilterType | undefined>>;
     activeTab?: TabTypes;
     advancedFilterValues: AdvancedOptionType | undefined;
     setAdvancedFilterValues: React.Dispatch<React.SetStateAction<AdvancedOptionType | undefined>>;

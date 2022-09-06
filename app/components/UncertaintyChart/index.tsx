@@ -16,11 +16,11 @@ import { _cs } from '@togglecorp/fujs';
 import { rangeData } from '#utils/dummyData';
 import styles from './styles.css';
 
-interface IndicatorChartProps {
+interface UncertaintyChartProps {
     className?: string;
 }
 
-function IndicatorChart(props: IndicatorChartProps) {
+function UncertaintyChart(props: UncertaintyChartProps) {
     const { className } = props;
 
     return (
@@ -72,4 +72,4 @@ function IndicatorChart(props: IndicatorChartProps) {
         </ContainerCard>
     );
 }
-export default IndicatorChart;
+export default UncertaintyChart;

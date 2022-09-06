@@ -690,33 +690,33 @@ export const rangeData = [
         range: '20.0%',
         uncertainData: [
             30,
-            120,
+            70,
         ],
-        amt: 70,
+        amt: 60,
     },
     {
         date: 'Apr',
         range: '30.0%',
         uncertainData: [
             40,
-            120,
+            90,
         ],
     },
     {
         date: 'May',
         range: '40.0%',
         uncertainData: [
-            120,
-            160,
+            20,
+            60,
         ],
-        amt: 140,
+        amt: 40,
     },
     {
         date: 'Jun',
         range: '50.0%',
         uncertainData: [
             50,
-            120,
+            85,
         ],
         amt: 80,
     },

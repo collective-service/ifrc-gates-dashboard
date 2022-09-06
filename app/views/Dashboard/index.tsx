@@ -91,7 +91,9 @@ function Dashboard() {
                 />
                 <div className={styles.content}>
                     <TabPanel name="overview">
-                        <Overview />
+                        <Overview
+                            filterValues={filterValues}
+                        />
                     </TabPanel>
                     <TabPanel name="country">
                         <Country

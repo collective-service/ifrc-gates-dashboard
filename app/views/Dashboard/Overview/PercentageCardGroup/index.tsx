@@ -17,6 +17,7 @@ import {
 import { _cs } from '@togglecorp/fujs';
 
 import PercentageStats from '#components/PercentageStats';
+import UncertainityChart from '#components/UncertaintyChart';
 import {
     lineChartData,
     barChartData,
@@ -26,11 +27,13 @@ import styles from './styles.css';
 
 interface PercentageCardGroupProps {
     className?: string;
+    uncertaintyChartActive: boolean;
 }
 
 function PercentageCardGroup(props: PercentageCardGroupProps) {
     const {
         className,
+        uncertaintyChartActive,
     } = props;
 
     return (
@@ -43,68 +46,73 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                         All Outbreak numbers:
                     </p>
                 )}
-                statValue={600}
-                suffix="M"
+                statValue={90}
+                suffix={(uncertaintyChartActive ? '%' : 'M')}
             />
-            <ContainerCard
-                className={styles.trendsCard}
-                heading="Outbreak over last 12 months"
-                headingSize="extraSmall"
-                contentClassName={styles.responsiveContent}
-                headerDescription="Average indicator value weighted by country's populations"
-            >
-                <ResponsiveContainer className={styles.responsiveContainer}>
-                    <LineChart
-                        data={lineChartData}
-                        margin={{
-                            right: 20,
-                        }}
+            {uncertaintyChartActive
+                ? <UncertainityChart />
+                : (
+                    <ContainerCard
+                        className={styles.trendsCard}
+                        heading="Outbreak over last 12 months"
+                        headingSize="extraSmall"
+                        contentClassName={styles.responsiveContent}
+                        headerDescription="Average indicator value weighted by country's populations"
                     >
-                        <XAxis
-                            dataKey="name"
-                            axisLine={false}
-                            tickLine={false}
-                            padding={{ left: 20 }}
-                        />
-                        <YAxis
-                            axisLine={false}
-                            tickLine={false}
-                            padding={{ top: 12 }}
-                        />
-                        <Tooltip
-                            allowEscapeViewBox={{
-                                x: true,
-                                y: true,
-                            }}
-                        />
-                        <Legend
-                            iconType="square"
-                            align="right"
-                        />
-                        <Line
-                            type="monotone"
-                            dataKey="MonkeyPox"
-                            stroke="#4bda8a"
-                            strokeWidth={2}
-                            dot={false}
-                        />
-                        <Line
-                            type="monotone"
-                            dataKey="Covid"
-                            stroke="#2169bb"
-                            strokeWidth={2}
-                            dot={false}
-                        />
-                        <Line
-                            type="monotone"
-                            dataKey="Ebola"
-                            stroke="#ba2123"
-                            strokeWidth={2}
-                            dot={false}
-                        />
-                    </LineChart>
-                </ResponsiveContainer>
-            </ContainerCard>
+                        <ResponsiveContainer className={styles.responsiveContainer}>
+                            <LineChart
+                                data={lineChartData}
+                                margin={{
+                                    right: 20,
+                                }}
+                            >
+                                <XAxis
+                                    dataKey="name"
+                                    axisLine={false}
+                                    tickLine={false}
+                                    padding={{ left: 20 }}
+                                />
+                                <YAxis
+                                    axisLine={false}
+                                    tickLine={false}
+                                    padding={{ top: 12 }}
+                                />
+                                <Tooltip
+                                    allowEscapeViewBox={{
+                                        x: true,
+                                        y: true,
+                                    }}
+                                />
+                                <Legend
+                                    iconType="square"
+                                    align="right"
+                                />
+                                <Line
+                                    type="monotone"
+                                    dataKey="MonkeyPox"
+                                    stroke="#4bda8a"
+                                    strokeWidth={2}
+                                    dot={false}
+                                />
+                                <Line
+                                    type="monotone"
+                                    dataKey="Covid"
+                                    stroke="#2169bb"
+                                    strokeWidth={2}
+                                    dot={false}
+                                />
+                                <Line
+                                    type="monotone"
+                                    dataKey="Ebola"
+                                    stroke="#ba2123"
+                                    strokeWidth={2}
+                                    dot={false}
+                                />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </ContainerCard>
+                )}
+
             <ContainerCard
                 className={styles.regionsCard}
                 contentClassName={styles.responsiveContent}
