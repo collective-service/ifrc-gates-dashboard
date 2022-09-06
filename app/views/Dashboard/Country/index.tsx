@@ -423,7 +423,7 @@ function Country(props: Props) {
                                 suffix="%"
                                 icon={null}
                             />
-                            <IndicatorChart
+                            <UncertaintyChart
                                 className={styles.indicatorsChart}
                             />
                             <ContainerCard
@@ -433,56 +433,61 @@ function Country(props: Props) {
                                 headerDescription="Lorem ipsum explaining the topic"
                                 headingSize="extraSmall"
                             >
-                                <div className={styles.genderDisaggregation}>
-                                    <div>Gender Disaggregation</div>
-                                    <ResponsiveContainer className={styles.responsiveContainer}>
-                                        <BarChart
-                                            data={genderDisaggregation}
-                                        >
-                                            <Bar
-                                                dataKey="indicatorValue"
-                                                fill="#8DD2B1"
-                                                label={disaggregationLabel}
-                                                barSize={50}
-                                            />
-                                            <XAxis
-                                                dataKey="category"
-                                                tickLine={false}
-                                            />
-                                            <YAxis
-                                                type="number"
-                                                axisLine={false}
-                                                tickLine={false}
-                                                domain={[0, 100]}
-                                            />
-                                        </BarChart>
-                                    </ResponsiveContainer>
-                                </div>
-                                <div className={styles.ageDisaggregation}>
-                                    <div>Age Disaggregation</div>
-                                    <ResponsiveContainer className={styles.responsiveContainer}>
-                                        <BarChart
-                                            data={ageDisaggregation}
-                                        >
-                                            <Bar
-                                                dataKey="indicatorValue"
-                                                fill="#8DD2B1"
-                                                label={disaggregationLabel}
-                                                barSize={50}
-                                            />
-                                            <XAxis
-                                                dataKey="category"
-                                                tickLine={false}
-                                            />
-                                            <YAxis
-                                                type="number"
-                                                axisLine={false}
-                                                tickLine={false}
-                                                domain={[0, 100]}
-                                            />
-                                        </BarChart>
-                                    </ResponsiveContainer>
-                                </div>
+                                {genderDisaggregation && genderDisaggregation.length > 0 && (
+                                    <div className={styles.genderDisaggregation}>
+                                        <div>Gender Disaggregation</div>
+                                        <ResponsiveContainer className={styles.responsiveContainer}>
+                                            <BarChart
+                                                data={genderDisaggregation}
+                                            >
+                                                <Bar
+                                                    dataKey="indicatorValue"
+                                                    fill="#8DD2B1"
+                                                    label={disaggregationLabel}
+                                                    barSize={50}
+                                                />
+                                                <XAxis
+                                                    dataKey="category"
+                                                    tickLine={false}
+                                                />
+                                                <YAxis
+                                                    type="number"
+                                                    axisLine={false}
+                                                    tickLine={false}
+                                                    domain={[0, 100]}
+                                                />
+                                            </BarChart>
+                                        </ResponsiveContainer>
+                                    </div>
+                                )}
+                                {ageDisaggregation && ageDisaggregation.length > 0 && (
+                                    <div className={styles.ageDisaggregation}>
+                                        <div>Age Disaggregation</div>
+                                        <ResponsiveContainer className={styles.responsiveContainer}>
+                                            <BarChart
+                                                data={ageDisaggregation}
+                                            >
+                                                <Bar
+                                                    dataKey="indicatorValue"
+                                                    fill="#8DD2B1"
+                                                    label={disaggregationLabel}
+                                                    barSize={50}
+                                                />
+                                                <XAxis
+                                                    dataKey="category"
+                                                    tickLine={false}
+                                                />
+                                                <YAxis
+                                                    type="number"
+                                                    axisLine={false}
+                                                    tickLine={false}
+                                                    domain={[0, 100]}
+                                                />
+                                            </BarChart>
+                                        </ResponsiveContainer>
+                                    </div>
+
+                                )}
                             </ContainerCard>
                         </div>
                     )}
@@ -593,7 +598,7 @@ function Country(props: Props) {
                                         {isDefined(
                                             countryResponse?.countryProfile.medicalStaffRegion,
                                         ) && (
-                                              <TextOutput
+                                            <TextOutput
                                                 labelContainerClassName={styles.regionalText}
                                                 valueContainerClassName={styles.regionalText}
                                                 label={countryResponse?.countryProfile.region}
