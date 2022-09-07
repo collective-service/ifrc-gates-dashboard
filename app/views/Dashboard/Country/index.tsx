@@ -26,6 +26,8 @@ import {
     NumberOutput,
 } from '@the-deep/deep-ui';
 import { useQuery, gql } from '@apollo/client';
+import { IoInformationCircle } from 'react-icons/io5';
+import { BiLinkExternal } from 'react-icons/bi';
 
 import UncertaintyChart from '#components/UncertaintyChart';
 import PercentageStats from '#components/PercentageStats';
@@ -54,6 +56,8 @@ interface EmergencyItems {
     contextIndicatorValue?: number | null;
     contextIndicatorId: string;
     contextDate: string;
+    newDeaths?: number | null;
+    newCasesPerMillion?: number | null;
 }
 interface CountryWiseOutbreakCases extends EmergencyItems {
     key: string;
@@ -97,6 +101,8 @@ const COUNTRY_PROFILE = gql`
             internetAccessRegion
             economicSupportIndexRegion
             medicalStaffRegion
+            newCasesPerMillion
+            newDeaths
         }
         disaggregation {
             ageDisaggregation(iso3: $disaggregationIso3) {
@@ -212,10 +218,16 @@ function Country(props: Props) {
                 {
                     ...getLatestDateItems(emergencyItems),
                     key: emergency,
+                    newDeaths: countryResponse?.countryProfile.newDeaths,
+                    newCasesPerMillion: countryResponse?.countryProfile.newCasesPerMillion,
                 }
             ))
         );
-    }, [countryResponse?.contextualData]);
+    }, [
+        countryResponse?.contextualData,
+        countryResponse?.countryProfile.newCasesPerMillion,
+        countryResponse?.countryProfile.newDeaths,
+    ]);
 
     const ageDisaggregation = useMemo(() => countryResponse
         ?.disaggregation.ageDisaggregation.map((age) => (
@@ -333,6 +345,8 @@ function Country(props: Props) {
     const statusRendererParams = useCallback((_, data: CountryWiseOutbreakCases) => ({
         heading: data.emergency,
         statValue: data.contextIndicatorValue,
+        newDeaths: data.newDeaths,
+        newCasesPerMillion: data.newCasesPerMillion,
     }), []);
 
     const readinessRendererParams = useCallback((_, data: ScoreCardProps) => ({
@@ -499,7 +513,10 @@ function Country(props: Props) {
                     headingClassName={styles.countryHeading}
                     headerIcons={(
                         // FIX ME: COUNTRY AVATAR
-                        <img src="https://picsum.photos/50" alt="country-avatar" />
+                        <img
+                            src={`https://rcce-dashboard.s3.eu-west-3.amazonaws.com/flags/${filterValues?.country}.png`}
+                            alt="country-avatar"
+                        />
                     )}
                     headingSize="small"
                     heading={countryResponse?.countryProfile.countryName}
@@ -669,9 +686,24 @@ function Country(props: Props) {
             <ContainerCard
                 className={styles.perceptionWrapper}
                 contentClassName={styles.perceptionCard}
-                footerContent="Data collection not completed - as of March 31st"
+                heading="Sources"
+                headingSize="extraSmall"
             >
-                <p>COVID-19 Vaccine Perceptions in Africa</p>
+                <div
+                    className={styles.infoIcon}
+                >
+                    <IoInformationCircle />
+                </div>
+                <p>
+                    {`COVID-19 Vaccine Perceptions in ${countryResponse?.countryProfile.countryName}
+                    (${countryResponse?.countryProfile.countryName} CDC)`}
+                </p>
+                <a
+                    href="https://www.rcce-collective.net/data/data-tracker/"
+                    className={styles.linkIcon}
+                >
+                    <BiLinkExternal />
+                </a>
             </ContainerCard>
         </div>
     );

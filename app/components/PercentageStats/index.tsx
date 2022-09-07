@@ -3,6 +3,7 @@ import {
     ContainerCard,
     NumberOutput,
     ContainerCardProps,
+    Tooltip,
 } from '@the-deep/deep-ui';
 import { _cs } from '@togglecorp/fujs';
 
@@ -18,6 +19,8 @@ export interface Props {
     suffix?: string;
     statValue: number | null | undefined;
     subValue?: number;
+    newDeaths?: number | null;
+    newCasesPerMillion?: number | null;
 }
 
 function PercentageStats(props: Props) {
@@ -30,13 +33,27 @@ function PercentageStats(props: Props) {
         statValue,
         subValue,
         suffix,
+        newDeaths,
+        newCasesPerMillion,
     } = props;
 
     return (
         <ContainerCard
             className={_cs(className, styles.percentageStatsCard)}
             headingClassName={styles.percentageHeading}
-            heading={heading ? `Total number of ${heading} cases` : 'Total number of cases'}
+            heading={(
+                <>
+                    {heading ? `Total number of ${heading} cases` : 'Total number of cases'}
+                    <Tooltip>
+                        <div>
+                            {`Deaths: ${newDeaths}`}
+                        </div>
+                        <div>
+                            {`Cases Per Million: ${newCasesPerMillion}`}
+                        </div>
+                    </Tooltip>
+                </>
+            )}
             headingSize={headingSize}
             headerDescription={headerDescription}
             headerIconsContainerClassName={styles.iconContainer}
@@ -44,6 +61,7 @@ function PercentageStats(props: Props) {
             footerContentClassName={styles.valueAndSubValue}
             footerContent={(
                 <>
+
                     <NumberOutput
                         className={styles.valueText}
                         value={statValue}

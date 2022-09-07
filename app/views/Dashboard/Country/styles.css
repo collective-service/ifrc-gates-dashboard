@@ -114,8 +114,9 @@
 
             .country-avatar {
                 img {
-                    border: var(--width-separator-thin) solid var(--color-separator-light);
                     border-radius: var(--dui-border-radius-avatar);
+                    width: 64px;
+                    height: 64px;
                 }
             }
 
@@ -163,14 +164,23 @@
 
     .perception-wrapper {
         display: flex;
-        flex-direction: column;
         padding: var(--dui-spacing-medium);
 
         .perception-card {
-            width: 20rem;
+            display: flex;
+            align-items: center;
+            width: 33rem;
+            gap: var(--dui-spacing-small);
 
             p {
                 padding-left: var(--dui-spacing-small);
+            }
+            .info-icon {
+                color: var(--color-text-title);
+                font-size: var(--dui-font-size-extra-large);
+            }
+            .link-icon {
+                font-size: var(--dui-font-size-extra-large);
             }
         }
     }
