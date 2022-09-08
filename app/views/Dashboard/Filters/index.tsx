@@ -218,6 +218,54 @@ function Filters(props: Props) {
             getRegionForCountry,
         ],
     );
+    const getRegionForCountry = (country: string | undefined) => (
+        countryList?.countries?.find((c) => c.iso3 === country)?.region);
+
+    const handleInputChange = useCallback(
+        (newValue: string | undefined, name: keyof FilterType) => {
+            if (onChange) {
+                if (name === 'region') {
+                    onChange((oldValue) => ({
+                        ...oldValue,
+                        [name]: newValue,
+                        country: undefined,
+                    }));
+                } else if (name === 'country') {
+                    onChange((oldValue) => {
+                        const newValueForRegion = {
+                            ...oldValue,
+                            [name]: newValue,
+                            region: getRegionForCountry(newValue) ?? undefined,
+                        };
+                        return newValueForRegion;
+                    });
+                } else if (name === 'indicator') {
+                    onChange((oldValue) => ({
+                        ...oldValue,
+                        outbreak: oldValue?.outbreak ?? 'COVID-19',
+                        indicator: newValue,
+                        // FIXME: Add a handler to select a default subvariable on indicator change
+                    }));
+                } else if (name === 'outbreak') {
+                    onChange((oldValue) => ({
+                        ...oldValue,
+                        outbreak: newValue,
+                        indicator: undefined,
+                    }));
+                } else {
+                    onChange((oldValue) => ({
+                        ...oldValue,
+                        [name]: newValue,
+                    }));
+                }
+            }
+        },
+        [
+            onChange,
+            activeTab,
+            getRegionForCountry,
+        ],
+    );
 
     const {
         data: emergencies,

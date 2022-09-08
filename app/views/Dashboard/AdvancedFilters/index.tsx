@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 import Select, { MultiValue } from 'react-select';
 
+import { listToMap } from '@togglecorp/fujs';
 import {
     RadioInput,
     SelectInput,
