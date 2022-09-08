@@ -183,7 +183,11 @@ function AdvancedFilters(props: Props) {
                 options={types}
                 value={value?.type}
                 onChange={handleInputChange}
+<<<<<<< HEAD
                 disabled={advancedFiltersLoading}
+=======
+                disabled={typesLoading}
+>>>>>>> Add filters and advanced filters options
             />
             <SelectInput
                 name="thematic"
@@ -195,7 +199,11 @@ function AdvancedFilters(props: Props) {
                 value={value?.thematic}
                 onChange={handleInputChange}
                 variant="general"
+<<<<<<< HEAD
                 disabled={advancedFiltersLoading}
+=======
+                disabled={thematicsLoading}
+>>>>>>> Add filters and advanced filters options
             />
             <SelectInput
                 name="topic"
@@ -207,7 +215,11 @@ function AdvancedFilters(props: Props) {
                 value={value?.topic}
                 onChange={handleInputChange}
                 variant="general"
+<<<<<<< HEAD
                 disabled={advancedFiltersLoading}
+=======
+                disabled={topicsLoading}
+>>>>>>> Add filters and advanced filters options
             />
             <Select
                 className={styles.keywords}
