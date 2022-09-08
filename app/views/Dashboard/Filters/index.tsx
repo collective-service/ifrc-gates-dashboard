@@ -1,8 +1,14 @@
-import React, { useMemo } from 'react';
-import { listToGroupList } from '@togglecorp/fujs';
+import React, { useMemo, useCallback } from 'react';
+import { IoClose } from 'react-icons/io5';
+
+import {
+    listToGroupList,
+    doesObjectHaveNoData,
+} from '@togglecorp/fujs';
 import { gql, useQuery } from '@apollo/client';
 import {
     SelectInput,
+    Button,
 } from '@the-deep/deep-ui';
 
 import {
@@ -14,6 +20,8 @@ import {
     IndicatorsQueryVariables,
     IndicatorsForCountryQuery,
     IndicatorsForCountryQueryVariables,
+    SubvariablesQuery,
+    SubvariablesQueryVariables,
 } from '#generated/types';
 
 import { TabTypes } from '..';
@@ -67,27 +75,23 @@ const countriesLabelSelector = (d: Country) => d.countryName ?? '';
 
 const INDICATORS_FOR_COUNTRY = gql`
     query IndicatorsForCountry (
-        $indicatorName: String,
-        $iso3: String,
+        $iso3: String!,
         $outbreak: String
     ) {
         filterOptions {
-            indicators(
-                indicatorName: $indicatorName,
+            countryIndicators(
                 iso3: $iso3,
-                outBreak: $outbreak,
+                outbreak: $outbreak,
             ) {
                 indicatorDescription
-                indicatorName
-                outbreak
-                subvariable
+                indicatorId
             }
         }
     }
 `;
 
-type Indicator = NonNullable<NonNullable<IndicatorsForCountryQuery['filterOptions']>['indicators']>[number];
-const indicatorKeySelector = (d: Indicator) => d.indicatorName ?? '';
+type Indicator = NonNullable<NonNullable<IndicatorsForCountryQuery['filterOptions']>['countryIndicators']>[number];
+const indicatorKeySelector = (d: Indicator) => d.indicatorId ?? '';
 const indicatorLabelSelector = (d: Indicator) => d.indicatorDescription ?? '';
 
 const INDICATORS = gql`
@@ -111,11 +115,30 @@ type GlobalIndicator = NonNullable<NonNullable<IndicatorsQuery['filterOptions']>
 const globalIndicatorKeySelector = (d: GlobalIndicator) => d.indicatorName ?? '';
 const globalIndicatorLabelSelector = (d: GlobalIndicator) => d.indicatorDescription ?? '';
 
+const SUBVARIABLES = gql`
+    query Subvariables(
+        $iso3: String!,
+        $indicatorId:String
+    ) {
+        filterOptions {
+            subvariables(iso3: $iso3, indicatorId: $indicatorId)
+        }
+    }
+`;
+
+interface Subvariable {
+    key: string;
+    label: string;
+}
+const subvariableKeySelector = (d: Subvariable) => d.key;
+const subvariableLabelSelector = (d: Subvariable) => d.label;
+
 export interface FilterType {
     outbreak?: string;
     region?: string;
     indicator?: string;
     country?: string;
+    subvariable?: string;
 }
 
 interface Props {
@@ -135,7 +158,7 @@ function Filters(props: Props) {
         setAdvancedFilterValues,
     } = props;
 
-    const handleInputChange = React.useCallback(
+    const handleInputChange = useCallback(
         (newValue: string | undefined, name: keyof FilterType) => {
             if (onChange) {
                 onChange((oldValue) => ({
@@ -146,6 +169,10 @@ function Filters(props: Props) {
         },
         [onChange],
     );
+
+    const handleClear = useCallback(() => {
+        onChange({});
+    }, [onChange]);
 
     const {
         data: countryList,
@@ -161,7 +188,7 @@ function Filters(props: Props) {
         OUTBREAKS,
     );
     const indicatorListForCountryVariables = useMemo(() => ({
-        iso3: value?.country,
+        iso3: value?.country ?? 'AFG',
         outbreak: value?.outbreak,
     }), [
         value?.country,
@@ -178,7 +205,7 @@ function Filters(props: Props) {
         },
     );
 
-    const indicators = indicatorList?.filterOptions?.indicators;
+    const indicators = indicatorList?.filterOptions?.countryIndicators;
 
     const indicatorVariables = useMemo(() => ({
         outbreak: value?.outbreak,
@@ -200,6 +227,29 @@ function Filters(props: Props) {
 
     const globalIndicators = globalIndicatorList?.filterOptions?.overviewIndicators;
 
+    const subvariablesVariables = useMemo(() => ({
+        iso3: value?.country ?? 'AFG',
+        indicatorId: value?.indicator ?? undefined,
+    }), [
+        value?.country,
+        value?.indicator,
+    ]);
+
+    const {
+        data: subvariableList,
+        loading: subvariablesLoading,
+    } = useQuery<SubvariablesQuery, SubvariablesQueryVariables>(
+        SUBVARIABLES,
+        {
+            variables: subvariablesVariables,
+        },
+    );
+
+    const subvariables = subvariableList?.filterOptions?.subvariables.map((sub) => ({
+        key: sub,
+        label: sub,
+    }));
+
     const countriesWithNull = countryList?.countries ?? [];
     const countries = countriesWithNull.filter((country) => !doesObjectHaveAnyEmptyValue(country));
 
@@ -219,74 +269,118 @@ function Filters(props: Props) {
         .filter((r) => r !== '__null')
         .map((r) => ({ key: r, title: r }));
 
+    const isFilterEmpty = useMemo(() => (
+        doesObjectHaveNoData(value, [''])
+    ), [value]);
+
     return (
         <div className={styles.filtersWrapper}>
             <div className={styles.filters}>
-                <SelectInput
-                    name="outbreak"
-                    options={outbreaks}
-                    placeholder="Outbreak"
-                    keySelector={outbreakKeySelector}
-                    labelSelector={outbreakLabelSelector}
-                    value={value?.outbreak}
-                    onChange={handleInputChange}
-                    variant="general"
-                    disabled={emergenciesLoading}
-                />
-                {(activeTab !== 'country') && (
+                <div className={styles.left}>
+                    {(activeTab === 'country') && (
+                        <SelectInput
+                            name="country"
+                            options={countries}
+                            placeholder="Country"
+                            keySelector={countriesKeySelector}
+                            labelSelector={countriesLabelSelector}
+                            value={value?.country}
+                            onChange={handleInputChange}
+                            disabled={countryListLoading}
+                            variant="general"
+                            // TODO: Make this clearable in combined indicators tab
+                            nonClearable
+                        />
+                    )}
                     <SelectInput
-                        name="region"
-                        options={regionList}
-                        placeholder="Region"
-                        keySelector={regionsKeySelector}
-                        labelSelector={regionsLabelSelector}
-                        value={value?.region}
+                        name="outbreak"
+                        options={outbreaks}
+                        placeholder="Outbreak"
+                        keySelector={outbreakKeySelector}
+                        labelSelector={outbreakLabelSelector}
+                        value={value?.outbreak}
                         onChange={handleInputChange}
                         variant="general"
-                        disabled={countryListLoading}
+                        disabled={emergenciesLoading}
                     />
-                )}
-                {(activeTab === 'country') && (
-                    <SelectInput
-                        name="indicator"
-                        options={indicators}
-                        placeholder="Indicator"
-                        keySelector={indicatorKeySelector}
-                        labelSelector={indicatorLabelSelector}
-                        value={value?.indicator}
-                        onChange={handleInputChange}
-                        variant="general"
-                        disabled={indicatorsLoading}
-                    />
-                )}
-                {(activeTab === 'overview') && (
-                    <SelectInput
-                        name="indicator"
-                        options={globalIndicators}
-                        placeholder="Indicator"
-                        keySelector={globalIndicatorKeySelector}
-                        labelSelector={globalIndicatorLabelSelector}
-                        value={value?.indicator}
-                        onChange={handleInputChange}
-                        variant="general"
-                        disabled={globalIndicatorsLoading}
-                    />
-                )}
-                {(activeTab !== 'overview') && (
-                    <SelectInput
-                        name="country"
-                        options={countries}
-                        placeholder="Country"
-                        keySelector={countriesKeySelector}
-                        labelSelector={countriesLabelSelector}
-                        value={value?.country}
-                        onChange={handleInputChange}
-                        disabled={countryListLoading}
-                        variant="general"
-                        // TODO: Make this clearable in combined indicators tab
-                        nonClearable
-                    />
-                )}
+                    {(activeTab !== 'country') && (
+                        <SelectInput
+                            name="region"
+                            options={regionList}
+                            placeholder="Region"
+                            keySelector={regionsKeySelector}
+                            labelSelector={regionsLabelSelector}
+                            value={value?.region}
+                            onChange={handleInputChange}
+                            variant="general"
+                            disabled={countryListLoading}
+                        />
+                    )}
+                    {(activeTab === 'combinedIndicators') && (
+                        <SelectInput
+                            name="country"
+                            options={countries}
+                            placeholder="Country"
+                            keySelector={countriesKeySelector}
+                            labelSelector={countriesLabelSelector}
+                            value={value?.country}
+                            onChange={handleInputChange}
+                            disabled={countryListLoading}
+                            variant="general"
+                            // TODO: Make this clearable in combined indicators tab
+                            nonClearable
+                        />
+                    )}
+                    {(activeTab === 'overview') && (
+                        <SelectInput
+                            name="indicator"
+                            options={globalIndicators}
+                            placeholder="Indicator"
+                            keySelector={globalIndicatorKeySelector}
+                            labelSelector={globalIndicatorLabelSelector}
+                            value={value?.indicator}
+                            onChange={handleInputChange}
+                            variant="general"
+                            disabled={globalIndicatorsLoading}
+                        />
+                    )}
+                    {(activeTab === 'country') && (
+                        <SelectInput
+                            name="indicator"
+                            options={indicators}
+                            placeholder="Indicator"
+                            keySelector={indicatorKeySelector}
+                            labelSelector={indicatorLabelSelector}
+                            value={value?.indicator}
+                            onChange={handleInputChange}
+                            variant="general"
+                            disabled={indicatorsLoading}
+                        />
+                    )}
+                    {(activeTab === 'country' && value?.indicator) && (
+                        <SelectInput
+                            name="subvariable"
+                            options={subvariables}
+                            placeholder="Sub-indicator"
+                            keySelector={subvariableKeySelector}
+                            labelSelector={subvariableLabelSelector}
+                            value={value?.subvariable}
+                            onChange={handleInputChange}
+                            variant="general"
+                            disabled={subvariablesLoading}
+                        />
+                    )}
+                </div>
+                <Button
+                    name={undefined}
+                    variant="transparent"
+                    icons={<IoClose />}
+                    onClick={handleClear}
+                    className={styles.clearButton}
+                    disabled={isFilterEmpty}
+                >
+                    Clear all
+                </Button>
             </div>
             {activeTab === 'combinedIndicators' && (
                 <AdvancedFilters

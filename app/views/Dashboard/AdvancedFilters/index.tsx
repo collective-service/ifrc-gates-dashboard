@@ -1,11 +1,21 @@
 import React, { useCallback, useMemo } from 'react';
-import { listToMap } from '@togglecorp/fujs';
 import Select, { MultiValue } from 'react-select';
 
+import { listToMap } from '@togglecorp/fujs';
 import {
     RadioInput,
     SelectInput,
 } from '@the-deep/deep-ui';
+import { gql, useQuery } from '@apollo/client';
+
+import {
+    ThematicsQuery,
+    ThematicsQueryVariables,
+    TopicsQuery,
+    TopicsQueryVariables,
+    TypesQuery,
+    TypesQueryVariables,
+} from '#generated/types';
 
 import styles from './styles.css';
 
@@ -16,105 +26,50 @@ export interface AdvancedOptionType {
     keywords?: string[];
 }
 
-interface FilterType {
-    key: string;
-    label: string;
-}
-const filterType: FilterType[] = [
-    {
-        key: '1',
-        label: 'Social Behavioural Indicators',
-    },
-    {
-        key: '2',
-        label: 'Contextual Indicators',
-    },
-];
-
-const filterTypeKeySelector = (d: FilterType) => d.key;
-const filterTypeLabelSelector = (d: FilterType) => d.label;
+const THEMATICS = gql`
+    query Thematics($type: String!) {
+        filterOptions {
+            thematics(type: $type)
+        }
+    }
+`;
 
 interface Thematic {
     key: string;
     label: string;
 }
 
-const thematic: Thematic[] = [
-    {
-        key: '1',
-        label: 'Communication',
-    },
-    {
-        key: '2',
-        label: 'Disease',
-    },
-    {
-        key: '3',
-        label: 'Prevention',
-    },
-    {
-        key: '4',
-        label: 'Health Care',
-    },
-    {
-        key: '5',
-        label: 'Community Engagement',
-    },
-    {
-        key: '6',
-        label: 'Impact',
-    },
-    {
-        key: '7',
-        label: 'General',
-    },
-    {
-        key: '8',
-        label: 'Epkeyemiology',
-    },
-    {
-        key: '9',
-        label: 'Health Services',
-    },
-    {
-        key: '10',
-        label: 'Socio-Economic',
-    },
-];
-
 const thematicKeySelector = (d: Thematic) => d.key;
 const thematicLabelSelector = (d: Thematic) => d.label;
+
+const TYPES = gql`
+    query Types {
+        filterOptions {
+            types
+        }
+    }
+`;
+
+interface FilterType {
+    key: string;
+    label: string;
+}
+
+const filterTypeKeySelector = (d: FilterType) => d.key;
+const filterTypeLabelSelector = (d: FilterType) => d.label;
+
+const TOPICS = gql`
+    query Topics($thematic: String!) {
+        filterOptions {
+            topics(thematic: $thematic)
+        }
+    }
+`;
 
 interface Topic {
     key: string;
     label: string;
 }
-const topic: Topic[] = [
-    {
-        key: '1',
-        label: 'Sources',
-    },
-    {
-        key: '2',
-        label: 'Channels',
-    },
-    {
-        key: '3',
-        label: 'Misinformation',
-    },
-    {
-        key: '3',
-        label: 'Misinformation',
-    },
-    {
-        key: '4',
-        label: 'Access',
-    },
-    {
-        key: '5',
-        label: 'Access for other treatments',
-    },
-];
 
 const topicKeySelector = (d: Topic) => d.key;
 const topicLabelSelector = (d: Topic) => d.label;
@@ -179,6 +134,56 @@ function AdvancedFilters(props: Props) {
         [handleInputChange],
     );
 
+    const {
+        data: typeList,
+        loading: typesLoading,
+    } = useQuery<TypesQuery, TypesQueryVariables>(
+        TYPES,
+    );
+
+    const types = typeList?.filterOptions?.types.map((t) => ({
+        key: t,
+        label: t,
+    }));
+
+    const thematicVariables = useMemo(() => ({
+        type: value?.type ?? '',
+    }), [value?.type]);
+
+    const {
+        data: thematicList,
+        loading: thematicsLoading,
+    } = useQuery<ThematicsQuery, ThematicsQueryVariables>(
+        THEMATICS,
+        {
+            variables: thematicVariables,
+        },
+    );
+
+    const thematics = thematicList?.filterOptions?.thematics.map((t) => ({
+        key: t,
+        label: t,
+    }));
+
+    const topicVariables = useMemo(() => ({
+        thematic: value?.thematic ?? '',
+    }), [value?.thematic]);
+
+    const {
+        data: topicList,
+        loading: topicsLoading,
+    } = useQuery<TopicsQuery, TopicsQueryVariables>(
+        TOPICS,
+        {
+            variables: topicVariables,
+        },
+    );
+
+    const topics = topicList?.filterOptions?.topics.map((t) => ({
+        key: t,
+        label: t,
+    }));
+
     const keywordOptionsMap = useMemo(
         () => listToMap(keywords, (d) => d.key, (d) => d),
         [],
@@ -206,31 +211,34 @@ function AdvancedFilters(props: Props) {
                 keySelector={filterTypeKeySelector}
                 label="Type"
                 labelSelector={filterTypeLabelSelector}
-                options={filterType}
+                options={types}
                 value={value?.type}
                 onChange={handleInputChange}
+                disabled={typesLoading}
             />
             <SelectInput
                 name="thematic"
                 className={styles.filter}
-                options={thematic}
+                options={thematics}
                 placeholder="Thematic"
                 keySelector={thematicKeySelector}
                 labelSelector={thematicLabelSelector}
                 value={value?.thematic}
                 onChange={handleInputChange}
                 variant="general"
+                disabled={thematicsLoading}
             />
             <SelectInput
                 name="topic"
                 className={styles.filter}
-                options={topic}
+                options={topics}
                 placeholder="Topic"
                 keySelector={topicKeySelector}
                 labelSelector={topicLabelSelector}
                 value={value?.topic}
                 onChange={handleInputChange}
                 variant="general"
+                disabled={topicsLoading}
             />
             <Select
                 className={styles.keywords}
