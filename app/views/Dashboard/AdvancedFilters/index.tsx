@@ -21,6 +21,11 @@ export interface AdvancedOptionType {
     keywords?: string[];
 }
 
+interface Thematic {
+    key: string;
+    label: string;
+}
+
 const ADVANCED_FILTER_OPTIONS = gql`
 query AdvancedFilterOptions($thematic: String!, $type: String!) {
         filterOptions {
