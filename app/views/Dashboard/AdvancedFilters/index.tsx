@@ -9,12 +9,8 @@ import {
 import { gql, useQuery } from '@apollo/client';
 
 import {
-    ThematicsQuery,
-    ThematicsQueryVariables,
-    TopicsQuery,
-    TopicsQueryVariables,
-    TypesQuery,
-    TypesQueryVariables,
+    AdvancedFilterOptionsQuery,
+    AdvancedFilterOptionsQueryVariables,
 } from '#generated/types';
 
 import styles from './styles.css';
@@ -26,14 +22,6 @@ export interface AdvancedOptionType {
     keywords?: string[];
 }
 
-const THEMATICS = gql`
-    query Thematics($type: String!) {
-        filterOptions {
-            thematics(type: $type)
-        }
-    }
-`;
-
 interface Thematic {
     key: string;
     label: string;
@@ -42,10 +30,12 @@ interface Thematic {
 const thematicKeySelector = (d: Thematic) => d.key;
 const thematicLabelSelector = (d: Thematic) => d.label;
 
-const TYPES = gql`
-    query Types {
+const ADVANCED_FILTER_OPTIONS = gql`
+query AdvancedFilterOptions($thematic: String!, $type: String!) {
         filterOptions {
             types
+            thematics(type: $type)
+            topics(thematic: $thematic)
         }
     }
 `;
@@ -57,14 +47,6 @@ interface FilterType {
 
 const filterTypeKeySelector = (d: FilterType) => d.key;
 const filterTypeLabelSelector = (d: FilterType) => d.label;
-
-const TOPICS = gql`
-    query Topics($thematic: String!) {
-        filterOptions {
-            topics(thematic: $thematic)
-        }
-    }
-`;
 
 interface Topic {
     key: string;
@@ -134,52 +116,32 @@ function AdvancedFilters(props: Props) {
         [handleInputChange],
     );
 
-    const {
-        data: typeList,
-        loading: typesLoading,
-    } = useQuery<TypesQuery, TypesQueryVariables>(
-        TYPES,
-    );
-
-    const types = typeList?.filterOptions?.types.map((t) => ({
-        key: t,
-        label: t,
-    }));
-
-    const thematicVariables = useMemo(() => ({
+    const filterOptionsVariables = useMemo(() => ({
         type: value?.type ?? '',
-    }), [value?.type]);
+        thematic: value?.thematic ?? '',
+    }), [value?.type, value?.thematic]);
 
     const {
-        data: thematicList,
-        loading: thematicsLoading,
-    } = useQuery<ThematicsQuery, ThematicsQueryVariables>(
-        THEMATICS,
+        data: advancedFilterOptions,
+        loading: advancedFiltersLoading,
+    } = useQuery<AdvancedFilterOptionsQuery, AdvancedFilterOptionsQueryVariables>(
+        ADVANCED_FILTER_OPTIONS,
         {
-            variables: thematicVariables,
+            variables: filterOptionsVariables,
         },
     );
 
-    const thematics = thematicList?.filterOptions?.thematics.map((t) => ({
+    const types = advancedFilterOptions?.filterOptions?.types.map((t) => ({
         key: t,
         label: t,
     }));
 
-    const topicVariables = useMemo(() => ({
-        thematic: value?.thematic ?? '',
-    }), [value?.thematic]);
+    const thematics = advancedFilterOptions?.filterOptions?.thematics.map((t) => ({
+        key: t,
+        label: t,
+    }));
 
-    const {
-        data: topicList,
-        loading: topicsLoading,
-    } = useQuery<TopicsQuery, TopicsQueryVariables>(
-        TOPICS,
-        {
-            variables: topicVariables,
-        },
-    );
-
-    const topics = topicList?.filterOptions?.topics.map((t) => ({
+    const topics = advancedFilterOptions?.filterOptions?.topics.map((t) => ({
         key: t,
         label: t,
     }));
@@ -214,7 +176,7 @@ function AdvancedFilters(props: Props) {
                 options={types}
                 value={value?.type}
                 onChange={handleInputChange}
-                disabled={typesLoading}
+                disabled={advancedFiltersLoading}
             />
             <SelectInput
                 name="thematic"
@@ -226,7 +188,7 @@ function AdvancedFilters(props: Props) {
                 value={value?.thematic}
                 onChange={handleInputChange}
                 variant="general"
-                disabled={thematicsLoading}
+                disabled={advancedFiltersLoading}
             />
             <SelectInput
                 name="topic"
@@ -238,7 +200,7 @@ function AdvancedFilters(props: Props) {
                 value={value?.topic}
                 onChange={handleInputChange}
                 variant="general"
-                disabled={topicsLoading}
+                disabled={advancedFiltersLoading}
             />
             <Select
                 className={styles.keywords}
