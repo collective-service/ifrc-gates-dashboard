@@ -35,14 +35,14 @@
         }
 
         .progress-value {
-            font-size: var(--dui-font-size-small);
+            font-size: var(--dui-font-size-medium);
         }
     }
 
     .sub-value {
         align-self: end;
         color: var(--color-text-title);
-        font-size: var(--dui-font-size-extra-small);
+        font-size: var(--dui-font-size-small);
     }
 
 }

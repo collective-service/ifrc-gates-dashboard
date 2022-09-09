@@ -1,6 +1,9 @@
 .advanced-filters {
     display: flex;
     align-items: flex-end;
+    border: 1px solid var(--dui-color-separator);
+    border-radius: var(--dui-border-radius-card);
+    background-color: var(--dui-color-background);
     padding: var(--dui-spacing-medium);
     gap: var(--dui-spacing-large);
 

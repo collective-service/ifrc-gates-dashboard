@@ -5,31 +5,35 @@ import styles from './styles.css';
 
 export interface Props {
     className?: string | undefined;
-    barHeight: number;
+    barHeight?: number;
     suffix?: string;
     barName: string | undefined;
     id: string;
     title: string | undefined;
+    valueTitle?: string | undefined;
     color?: string;
     value: number | undefined;
     subValue?: number;
     totalValue: number | undefined;
     icon?: React.ReactNode;
+    region?: string;
 }
 
 function ProgressBar(props: Props) {
     const {
         className,
-        barHeight,
+        barHeight = 8,
         suffix,
         barName,
         id,
         title,
+        valueTitle,
         color,
         value,
         subValue,
         totalValue,
         icon,
+        region,
     } = props;
 
     const countryPercentage = useMemo(
@@ -46,23 +50,25 @@ function ProgressBar(props: Props) {
         ), [totalValue, subValue],
     );
 
-    const tooltip = useMemo(
-        () => ((value && totalValue)
-            && ((`${title}: ${value ?? '0'}`) ?? undefined)
-        ), [totalValue, value, title],
-    );
+    const valueTooltip = useMemo(() => (
+        (value && totalValue) && (`${valueTitle}: ${value ?? '0'}` ?? undefined)
+    ), [totalValue, value, valueTitle]);
 
     return (
         <div className={_cs(className, styles.progressInfo)}>
             <div className={styles.progressTitle}>
                 {barName}
-                {icon}
+                <div
+                    title={title}
+                >
+                    {icon}
+                </div>
             </div>
             <div className={styles.progressValueWrapper}>
                 <div
                     className={styles.progressBarWrapper}
                     style={{ height: `${barHeight}px` }}
-                    title={tooltip as string}
+                    title={valueTooltip as string}
                 >
                     <div
                         className={styles.progressBarStyle}
@@ -75,7 +81,7 @@ function ProgressBar(props: Props) {
                 </div>
                 <div
                     className={styles.progressValue}
-                    title={tooltip as string}
+                    title={valueTooltip as string}
                 >
                     {countryPercentage}
                     {suffix}
@@ -83,7 +89,7 @@ function ProgressBar(props: Props) {
             </div>
             {subValuePercentage && (
                 <div className={styles.subValue}>
-                    {`Regional ${subValue}${suffix}`}
+                    {`${region}: ${subValuePercentage}${suffix}`}
                 </div>
             )}
         </div>

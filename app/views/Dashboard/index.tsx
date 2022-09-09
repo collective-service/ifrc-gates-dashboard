@@ -104,7 +104,10 @@ function Dashboard() {
                     <TabPanel
                         name="combinedIndicators"
                     >
-                        <CombinedIndicators />
+                        <CombinedIndicators
+                            filterValues={filterValues}
+                            advancedFilterValues={advancedFilterValues}
+                        />
                     </TabPanel>
                 </div>
             </Tabs>

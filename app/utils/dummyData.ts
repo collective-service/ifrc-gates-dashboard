@@ -1,4 +1,4 @@
-import { ProgressBarRendererProps } from '#views/Dashboard/CombinedIndicators';
+import { Props as ProgressBarRendererProps } from '#components/ProgressBar';
 
 type Bounds = [number, number, number, number];
 
