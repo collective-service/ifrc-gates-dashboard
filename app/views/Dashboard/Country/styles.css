@@ -161,27 +161,19 @@
         }
     }
 
-
-    .perception-wrapper {
+    .perception-card {
         display: flex;
-        padding: var(--dui-spacing-medium);
+        justify-content: space-between;
+        width: 31rem;
 
-        .perception-card {
-            display: flex;
-            align-items: center;
-            width: 33rem;
-            gap: var(--dui-spacing-small);
-
-            p {
-                padding-left: var(--dui-spacing-small);
-            }
-            .info-icon {
-                color: var(--color-text-title);
-                font-size: var(--dui-font-size-extra-large);
-            }
-            .link-icon {
-                font-size: var(--dui-font-size-extra-large);
-            }
+        p {
+            padding-left: var(--dui-spacing-small);
         }
+
+        .info-icon {
+            color: var(--color-text-title);
+            font-size: var(--dui-font-size-extra-large);
+        }
+
     }
 }

@@ -14,6 +14,7 @@ export interface Props {
     className?: string;
     icon?: React.ReactNode;
     heading?: React.ReactNode;
+    indicatorDescription?: string | null;
     headerDescription?: React.ReactNode;
     headingSize?: headingSizeType;
     suffix?: string;
@@ -30,6 +31,7 @@ function PercentageStats(props: Props) {
         heading,
         headingSize = 'extraSmall',
         headerDescription,
+        indicatorDescription,
         statValue,
         subValue,
         suffix,
@@ -43,15 +45,21 @@ function PercentageStats(props: Props) {
             headingClassName={styles.percentageHeading}
             heading={(
                 <>
-                    {heading ? `Total number of ${heading} cases` : 'Total number of cases'}
-                    <Tooltip>
-                        <div>
-                            {`Deaths: ${newDeaths}`}
-                        </div>
-                        <div>
-                            {`Cases Per Million: ${newCasesPerMillion}`}
-                        </div>
-                    </Tooltip>
+                    {indicatorDescription && indicatorDescription}
+                    {(!indicatorDescription && !heading) && 'Total number of cases'}
+                    {heading && (
+                        <>
+                            {`Total number of ${heading} cases`}
+                            <Tooltip>
+                                <div>
+                                    {`Deaths: ${newDeaths}`}
+                                </div>
+                                <div>
+                                    {`Cases Per Million: ${newCasesPerMillion}`}
+                                </div>
+                            </Tooltip>
+                        </>
+                    )}
                 </>
             )}
             headingSize={headingSize}
