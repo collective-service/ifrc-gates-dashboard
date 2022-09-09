@@ -5,8 +5,6 @@ import {
     Tab,
     TabPanel,
     ContainerCard,
-    useModalState,
-    Button,
 } from '@the-deep/deep-ui';
 import { _cs } from '@togglecorp/fujs';
 
@@ -14,11 +12,10 @@ import RegionalBreakdownCard from './RegionalBreakdownCard';
 import PercentageCardGroup from './PercentageCardGroup';
 import MapView from './MapView';
 import OverviewTable from './OverviewTable';
-import MapModal from './MapView/MapModal';
 import { FilterType } from '../Filters';
+import { TabTypes } from '..';
 import styles from './styles.css';
 
-export type TabTypes = 'country' | 'overview' | 'combinedIndicators';
 interface Props {
     className?: string;
     filterValues?: FilterType | undefined;
@@ -37,13 +34,6 @@ function Overview(props: Props) {
     // TODO: Rename this to better suit the behavior
     // TODO: define strict type mapMode and tableMode instead of string
     const [currentTab, setCurrentTab] = useState<string | undefined>('mapMode');
-
-    // TODO: Map modal to be included in the mapbox.
-    const [
-        mapModalShown,
-        showMapModal,
-        hideMapModal,
-    ] = useModalState(false);
 
     const noFiltersSelected = !filterValues?.region
         && !filterValues?.outbreak && !filterValues?.indicator;
@@ -75,15 +65,6 @@ function Overview(props: Props) {
             {((noFiltersSelected || onlyRegionSelected) && (
                 <RegionalBreakdownCard />
             ))}
-            <div className={styles.areaChartBox}>
-                <Button
-                    name="map_modal"
-                    onClick={showMapModal}
-                    variant="nlp-tertiary"
-                >
-                    Map Modal
-                </Button>
-            </div>
             <div className={styles.mapContainer}>
                 <Tabs
                     value={currentTab}
@@ -120,6 +101,9 @@ function Overview(props: Props) {
                         >
                             <MapView
                                 isIndicatorSelected={isIndicatorSelected}
+                                filterValues={filterValues}
+                                setActiveTab={setActiveTab}
+                                setFilterValues={setFilterValues}
                             />
                         </TabPanel>
                         <TabPanel
@@ -129,13 +113,6 @@ function Overview(props: Props) {
                         </TabPanel>
                     </ContainerCard>
                 </Tabs>
-                {mapModalShown && (
-                    <MapModal
-                        onModalClose={hideMapModal}
-                        setActiveTab={setActiveTab}
-                        setFilterValues={setFilterValues}
-                    />
-                )}
             </div>
         </div>
     );

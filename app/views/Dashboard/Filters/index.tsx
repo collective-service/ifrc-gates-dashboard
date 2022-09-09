@@ -225,6 +225,7 @@ function Filters(props: Props) {
     } = useQuery<OutbreaksQuery, OutbreaksQueryVariables>(
         OUTBREAKS,
     );
+
     const indicatorListForCountryVariables = useMemo(() => ({
         // FIXME: Take the default country from an index
         iso3: value?.country ?? 'AFG',
