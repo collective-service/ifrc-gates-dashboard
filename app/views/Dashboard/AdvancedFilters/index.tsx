@@ -1,7 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import Select, { MultiValue } from 'react-select';
 
-import { listToMap } from '@togglecorp/fujs';
 import {
     RadioInput,
     SelectInput,
@@ -22,20 +21,13 @@ export interface AdvancedOptionType {
     keywords?: string[];
 }
 
-interface Thematic {
-    key: string;
-    label: string;
-}
-
-const thematicKeySelector = (d: Thematic) => d.key;
-const thematicLabelSelector = (d: Thematic) => d.label;
-
 const ADVANCED_FILTER_OPTIONS = gql`
 query AdvancedFilterOptions($thematic: String!, $type: String!) {
         filterOptions {
             types
             thematics(type: $type)
             topics(thematic: $thematic)
+            keywords
         }
     }
 `;
@@ -48,6 +40,14 @@ interface FilterType {
 const filterTypeKeySelector = (d: FilterType) => d.key;
 const filterTypeLabelSelector = (d: FilterType) => d.label;
 
+interface Thematic {
+    key: string;
+    label: string;
+}
+
+const thematicKeySelector = (d: Thematic) => d.key;
+const thematicLabelSelector = (d: Thematic) => d.label;
+
 interface Topic {
     key: string;
     label: string;
@@ -55,30 +55,6 @@ interface Topic {
 
 const topicKeySelector = (d: Topic) => d.key;
 const topicLabelSelector = (d: Topic) => d.label;
-
-interface Keyword {
-    key: string;
-    label: string;
-}
-
-const keywords: Keyword[] = [
-    {
-        key: '1',
-        label: 'Communication',
-    },
-    {
-        key: '2',
-        label: 'Information',
-    },
-    {
-        key: '3',
-        label: 'Vaccination',
-    },
-    {
-        key: '4',
-        label: 'Recovery',
-    },
-];
 
 interface LabelValue {
     label: string;
@@ -131,39 +107,40 @@ function AdvancedFilters(props: Props) {
         },
     );
 
-    const types = advancedFilterOptions?.filterOptions?.types.map((t) => ({
-        key: t,
-        label: t,
-    }));
+    const types = useMemo(() => (
+        advancedFilterOptions?.filterOptions?.types.map((t) => ({
+            key: t,
+            label: t,
+        }))
+    ), [advancedFilterOptions?.filterOptions?.types]);
 
-    const thematics = advancedFilterOptions?.filterOptions?.thematics.map((t) => ({
-        key: t,
-        label: t,
-    }));
+    const thematics = useMemo(() => (
+        advancedFilterOptions?.filterOptions?.thematics.map((t) => ({
+            key: t,
+            label: t,
+        }))
+    ), [advancedFilterOptions?.filterOptions?.thematics]);
 
-    const topics = advancedFilterOptions?.filterOptions?.topics.map((t) => ({
-        key: t,
-        label: t,
-    }));
+    const topics = useMemo(() => (
+        advancedFilterOptions?.filterOptions?.topics.map((t) => ({
+            key: t,
+            label: t,
+        }))
+    ), [advancedFilterOptions?.filterOptions?.topics]);
 
-    const keywordOptionsMap = useMemo(
-        () => listToMap(keywords, (d) => d.key, (d) => d),
-        [],
-    );
+    const keywords = useMemo(() => (
+        advancedFilterOptions?.filterOptions?.keywords?.map((keyword) => ({
+            value: keyword,
+            label: keyword,
+        }))
+    ), [advancedFilterOptions?.filterOptions?.keywords]);
 
-    const keywordOptions = useMemo(() => keywords.map((keyword) => ({
-        value: keyword.key,
-        label: keyword.label,
-    })), []);
-
-    const keywordValue = React.useMemo(() => (
-        value?.keywords?.map(
-            (keyword) => ({
-                label: keywordOptionsMap[keyword].label,
-                value: keywordOptionsMap[keyword].key,
-            }),
-        )
-    ), [value?.keywords, keywordOptionsMap]);
+    const keywordValue = useMemo(() => (
+        value?.keywords?.map((keyword) => ({
+            value: keyword,
+            label: keyword,
+        }))
+    ), [value?.keywords]);
 
     return (
         <div className={styles.advancedFilters}>
@@ -204,10 +181,12 @@ function AdvancedFilters(props: Props) {
             />
             <Select
                 className={styles.keywords}
+                classNamePrefix="react-select"
                 isMulti
                 onChange={handleSelectChange}
-                options={keywordOptions}
+                options={keywords}
                 value={keywordValue}
+                placeholder="Keywords"
             />
         </div>
     );

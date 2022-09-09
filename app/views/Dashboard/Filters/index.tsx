@@ -188,6 +188,7 @@ function Filters(props: Props) {
         OUTBREAKS,
     );
     const indicatorListForCountryVariables = useMemo(() => ({
+        // FIXME: Take the default country from an index
         iso3: value?.country ?? 'AFG',
         outbreak: value?.outbreak,
     }), [
@@ -245,10 +246,12 @@ function Filters(props: Props) {
         },
     );
 
-    const subvariables = subvariableList?.filterOptions?.subvariables.map((sub) => ({
-        key: sub,
-        label: sub,
-    }));
+    const subvariables = useMemo(() => (
+        subvariableList?.filterOptions?.subvariables.map((sub) => ({
+            key: sub,
+            label: sub,
+        }))
+    ), [subvariableList]);
 
     const countriesWithNull = countryList?.countries ?? [];
     const countries = countriesWithNull.filter((country) => !doesObjectHaveAnyEmptyValue(country));
