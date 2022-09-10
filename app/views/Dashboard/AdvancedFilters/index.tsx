@@ -1,11 +1,16 @@
 import React, { useCallback, useMemo } from 'react';
-import { listToMap } from '@togglecorp/fujs';
 import Select, { MultiValue } from 'react-select';
 
 import {
     RadioInput,
     SelectInput,
 } from '@the-deep/deep-ui';
+import { gql, useQuery } from '@apollo/client';
+
+import {
+    AdvancedFilterOptionsQuery,
+    AdvancedFilterOptionsQueryVariables,
+} from '#generated/types';
 
 import styles from './styles.css';
 
@@ -16,20 +21,21 @@ export interface AdvancedOptionType {
     keywords?: string[];
 }
 
+const ADVANCED_FILTER_OPTIONS = gql`
+query AdvancedFilterOptions($thematic: String!, $type: String!) {
+        filterOptions {
+            types
+            thematics(type: $type)
+            topics(thematic: $thematic)
+            keywords
+        }
+    }
+`;
+
 interface FilterType {
     key: string;
     label: string;
 }
-const filterType: FilterType[] = [
-    {
-        key: '1',
-        label: 'Social Behavioural Indicators',
-    },
-    {
-        key: '2',
-        label: 'Contextual Indicators',
-    },
-];
 
 const filterTypeKeySelector = (d: FilterType) => d.key;
 const filterTypeLabelSelector = (d: FilterType) => d.label;
@@ -39,49 +45,6 @@ interface Thematic {
     label: string;
 }
 
-const thematic: Thematic[] = [
-    {
-        key: '1',
-        label: 'Communication',
-    },
-    {
-        key: '2',
-        label: 'Disease',
-    },
-    {
-        key: '3',
-        label: 'Prevention',
-    },
-    {
-        key: '4',
-        label: 'Health Care',
-    },
-    {
-        key: '5',
-        label: 'Community Engagement',
-    },
-    {
-        key: '6',
-        label: 'Impact',
-    },
-    {
-        key: '7',
-        label: 'General',
-    },
-    {
-        key: '8',
-        label: 'Epkeyemiology',
-    },
-    {
-        key: '9',
-        label: 'Health Services',
-    },
-    {
-        key: '10',
-        label: 'Socio-Economic',
-    },
-];
-
 const thematicKeySelector = (d: Thematic) => d.key;
 const thematicLabelSelector = (d: Thematic) => d.label;
 
@@ -89,59 +52,9 @@ interface Topic {
     key: string;
     label: string;
 }
-const topic: Topic[] = [
-    {
-        key: '1',
-        label: 'Sources',
-    },
-    {
-        key: '2',
-        label: 'Channels',
-    },
-    {
-        key: '3',
-        label: 'Misinformation',
-    },
-    {
-        key: '3',
-        label: 'Misinformation',
-    },
-    {
-        key: '4',
-        label: 'Access',
-    },
-    {
-        key: '5',
-        label: 'Access for other treatments',
-    },
-];
 
 const topicKeySelector = (d: Topic) => d.key;
 const topicLabelSelector = (d: Topic) => d.label;
-
-interface Keyword {
-    key: string;
-    label: string;
-}
-
-const keywords: Keyword[] = [
-    {
-        key: '1',
-        label: 'Communication',
-    },
-    {
-        key: '2',
-        label: 'Information',
-    },
-    {
-        key: '3',
-        label: 'Vaccination',
-    },
-    {
-        key: '4',
-        label: 'Recovery',
-    },
-];
 
 interface LabelValue {
     label: string;
@@ -179,24 +92,55 @@ function AdvancedFilters(props: Props) {
         [handleInputChange],
     );
 
-    const keywordOptionsMap = useMemo(
-        () => listToMap(keywords, (d) => d.key, (d) => d),
-        [],
+    const filterOptionsVariables = useMemo(() => ({
+        type: value?.type ?? '',
+        thematic: value?.thematic ?? '',
+    }), [value?.type, value?.thematic]);
+
+    const {
+        data: advancedFilterOptions,
+        loading: advancedFiltersLoading,
+    } = useQuery<AdvancedFilterOptionsQuery, AdvancedFilterOptionsQueryVariables>(
+        ADVANCED_FILTER_OPTIONS,
+        {
+            variables: filterOptionsVariables,
+        },
     );
 
-    const keywordOptions = useMemo(() => keywords.map((keyword) => ({
-        value: keyword.key,
-        label: keyword.label,
-    })), []);
+    const types = useMemo(() => (
+        advancedFilterOptions?.filterOptions?.types.map((t) => ({
+            key: t,
+            label: t,
+        }))
+    ), [advancedFilterOptions?.filterOptions?.types]);
 
-    const keywordValue = React.useMemo(() => (
-        value?.keywords?.map(
-            (keyword) => ({
-                label: keywordOptionsMap[keyword].label,
-                value: keywordOptionsMap[keyword].key,
-            }),
-        )
-    ), [value?.keywords, keywordOptionsMap]);
+    const thematics = useMemo(() => (
+        advancedFilterOptions?.filterOptions?.thematics.map((t) => ({
+            key: t,
+            label: t,
+        }))
+    ), [advancedFilterOptions?.filterOptions?.thematics]);
+
+    const topics = useMemo(() => (
+        advancedFilterOptions?.filterOptions?.topics.map((t) => ({
+            key: t,
+            label: t,
+        }))
+    ), [advancedFilterOptions?.filterOptions?.topics]);
+
+    const keywords = useMemo(() => (
+        advancedFilterOptions?.filterOptions?.keywords?.map((keyword) => ({
+            value: keyword,
+            label: keyword,
+        }))
+    ), [advancedFilterOptions?.filterOptions?.keywords]);
+
+    const keywordValue = useMemo(() => (
+        value?.keywords?.map((keyword) => ({
+            value: keyword,
+            label: keyword,
+        }))
+    ), [value?.keywords]);
 
     return (
         <div className={styles.advancedFilters}>
@@ -206,38 +150,43 @@ function AdvancedFilters(props: Props) {
                 keySelector={filterTypeKeySelector}
                 label="Type"
                 labelSelector={filterTypeLabelSelector}
-                options={filterType}
+                options={types}
                 value={value?.type}
                 onChange={handleInputChange}
+                disabled={advancedFiltersLoading}
             />
             <SelectInput
                 name="thematic"
                 className={styles.filter}
-                options={thematic}
+                options={thematics}
                 placeholder="Thematic"
                 keySelector={thematicKeySelector}
                 labelSelector={thematicLabelSelector}
                 value={value?.thematic}
                 onChange={handleInputChange}
                 variant="general"
+                disabled={advancedFiltersLoading}
             />
             <SelectInput
                 name="topic"
                 className={styles.filter}
-                options={topic}
+                options={topics}
                 placeholder="Topic"
                 keySelector={topicKeySelector}
                 labelSelector={topicLabelSelector}
                 value={value?.topic}
                 onChange={handleInputChange}
                 variant="general"
+                disabled={advancedFiltersLoading}
             />
             <Select
                 className={styles.keywords}
+                classNamePrefix="react-select"
                 isMulti
                 onChange={handleSelectChange}
-                options={keywordOptions}
+                options={keywords}
                 value={keywordValue}
+                placeholder="Keywords"
             />
         </div>
     );

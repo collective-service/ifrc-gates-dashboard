@@ -11,5 +11,12 @@
     .keywords {
         flex-grow: 1;
         border-radius: 5px;
+
+        :global {
+            .react-select__control {
+                /* TODO: Fix this after the design is finalized for this input */
+                border-radius: 2rem;
+            }
+        }
     }
 }
