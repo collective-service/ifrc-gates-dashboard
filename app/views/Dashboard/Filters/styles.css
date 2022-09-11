@@ -10,6 +10,7 @@
         .left {
             display: flex;
             flex-grow: 1;
+            gap: var(--dui-spacing-medium);
         }
         .clear-button{
             flex-shrink: 0;

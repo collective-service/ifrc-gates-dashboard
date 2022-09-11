@@ -171,8 +171,10 @@ function Filters(props: Props) {
     );
 
     const handleClear = useCallback(() => {
-        onChange({});
-    }, [onChange]);
+        onChange({
+            country: value?.country ?? 'AFG',
+        });
+    }, [onChange, value?.country]);
 
     const {
         data: countryList,
@@ -272,6 +274,7 @@ function Filters(props: Props) {
         .filter((r) => r !== '__null')
         .map((r) => ({ key: r, title: r }));
 
+    // TODO: To be disabled even when a country is selected
     const isFilterEmpty = useMemo(() => (
         doesObjectHaveNoData(value, [''])
     ), [value]);

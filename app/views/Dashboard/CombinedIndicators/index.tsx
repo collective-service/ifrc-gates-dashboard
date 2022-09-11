@@ -1,108 +1,188 @@
-import React, { useCallback } from 'react';
-import { _cs } from '@togglecorp/fujs';
+import React, { useCallback, useMemo } from 'react';
+
+import { gql, useQuery } from '@apollo/client';
+import {
+    listToGroupList,
+    _cs,
+    mapToList,
+} from '@togglecorp/fujs';
 import {
     ContainerCard,
     List,
+    PendingAnimation,
 } from '@the-deep/deep-ui';
-import ProgressBar from '#components/ProgressBar';
-import { sourcesProgressBarData } from '#utils/dummyData';
-import { IoInformationCircleOutline } from 'react-icons/io5';
 
+import {
+    CombinedIndicatorsDataQuery,
+    CombinedIndicatorsDataQueryVariables,
+} from '#generated/types';
+
+import TopicCard from './TopicCard';
+import { AdvancedOptionType } from '../AdvancedFilters';
+import { FilterType } from '../Filters';
 import styles from './styles.css';
 
-const progressBarKeySelector = (d: ProgressBarRendererProps) => d.id;
+const COMBINED_INDICATORS_DATA = gql`
+    query CombinedIndicatorsData (
+        $iso3: String,
+        $emergency: String,
+        $topic: String,
+        $thematic: String,
+        $type: String,
+        $keywords: [String!]
+    ) {
+        dataCountryLevelMostRecent(
+            filters: {
+                iso3: $iso3,
+                emergency: $emergency,
+                type: $type,
+                thematic: $thematic,
+                topic: $topic,
+                keywords: $keywords,
+            }
+        ) {
+            emergency
+            iso3
+            region
+            indicatorName
+            indicatorDescription
+            indicatorValue
+            indicatorValueGradient
+            type
+            thematic
+            topic
+            subvariable
+            indicatorId
+        }
+    }
+`;
 
-const barHeight = 8;
+export type IndicatorDataType = NonNullable<CombinedIndicatorsDataQuery['dataCountryLevelMostRecent']>[number];
 
-export interface ProgressBarRendererProps {
-    className?: string;
-    barHeight?: number;
-    suffix?: string;
-    barName: string;
-    title: string;
-    id: string;
-    value: number;
-    subValue?: number;
-    totalValue: number;
-    color: string;
+interface SeparatedThematic {
+    key: string;
+    items: IndicatorDataType[];
+}
+
+interface ThematicProps {
+    thematicName: string;
+    indicators: IndicatorDataType[];
+}
+
+function ThematicRenderer(props: ThematicProps) {
+    const {
+        thematicName,
+        indicators,
+    } = props;
+
+    const topicKeySelector = (d: SeparatedThematic) => d.key;
+
+    const topicSeparatedIndicators = useMemo(() => {
+        const topicGroupedList = listToGroupList(
+            indicators,
+            (data) => data?.topic ?? '',
+        );
+        const topicSeparatedIndicatorList = mapToList(
+            topicGroupedList,
+            (items, key) => ({
+                key,
+                items,
+            }),
+        );
+        return topicSeparatedIndicatorList;
+    }, [indicators]);
+
+    const topicRendererParams = useCallback((key: string, data: SeparatedThematic) => ({
+        indicatorKey: key,
+        indicators: data.items,
+    }), []);
+
+    return (
+        <div
+            className={styles.thematicContainer}
+        >
+            <ContainerCard
+                className={styles.thematicHeader}
+                heading={thematicName}
+            >
+                The description of the thematic goes here.
+            </ContainerCard>
+            <List
+                data={topicSeparatedIndicators}
+                keySelector={topicKeySelector}
+                renderer={TopicCard}
+                rendererParams={topicRendererParams}
+            />
+        </div>
+    );
 }
 
 interface Props {
     className?: string;
+    filterValues?: FilterType | undefined;
+    advancedFilterValues?: AdvancedOptionType | undefined;
 }
 
 function CombinedIndicators(props: Props) {
-    const { className } = props;
+    const {
+        className,
+        filterValues,
+        advancedFilterValues,
+    } = props;
 
-    const progressBarRendererParams = useCallback(
-        (_: string, data: ProgressBarRendererProps) => ({
-            className: styles.progressBarItem,
-            barHeight,
-            suffix: '%',
-            barName: data.barName,
-            title: data.title,
-            id: data.id,
-            value: data.value,
-            subValue: data.subValue,
-            totalValue: data.totalValue,
-            color: data.color,
-            icon: <IoInformationCircleOutline />,
-        }), [],
+    const combinedIndicatorVariables = useMemo(() => ({
+        iso3: filterValues?.country ?? 'AFG',
+        emergency: filterValues?.outbreak,
+        type: advancedFilterValues?.type,
+        thematic: advancedFilterValues?.thematic,
+        topic: advancedFilterValues?.topic,
+        keywords: advancedFilterValues?.keywords,
+    }), [
+        filterValues,
+        advancedFilterValues,
+    ]);
+
+    const {
+        data: combinedIndicatorsData,
+        loading: combinedIndicatorsLoading,
+    } = useQuery<CombinedIndicatorsDataQuery, CombinedIndicatorsDataQueryVariables>(
+        COMBINED_INDICATORS_DATA,
+        {
+            variables: combinedIndicatorVariables,
+        },
     );
+
+    const thematicSeparatedIndicators = useMemo(() => {
+        const thematicGroupedList = listToGroupList(
+            combinedIndicatorsData?.dataCountryLevelMostRecent,
+            (data) => data?.thematic ?? '',
+        );
+        const thematicSeparatedIndicatorList = mapToList(
+            thematicGroupedList,
+            (items, key) => ({
+                key,
+                items,
+            }),
+        );
+        return thematicSeparatedIndicatorList;
+    }, [combinedIndicatorsData?.dataCountryLevelMostRecent]);
+
+    const thematicRendererParams = useCallback((_: string, item: SeparatedThematic) => ({
+        thematicName: item.key,
+        indicators: item.items,
+    }), []);
+
+    const topicKeySelector = (d: SeparatedThematic) => d.key;
 
     return (
         <div className={_cs(className, styles.combinedIndicatorWrapper)}>
-            <ContainerCard
-                className={styles.combinedIndicatorMain}
-                contentClassName={styles.progressBarContainer}
-                heading="Communication"
-                headerClassName={styles.combinedIndicatorHeader}
-                headingSize="extraSmall"
-                headerDescription="Lorem ipsum explaining the topic"
-            >
-                <ContainerCard
-                    className={styles.progressBarCard}
-                    heading="Information Sources"
-                    headingSize="extraSmall"
-                    headerDescription="Lorem ipsum explaining the topic"
-                    contentClassName={styles.progressBar}
-                >
-                    <List
-                        data={sourcesProgressBarData}
-                        keySelector={progressBarKeySelector}
-                        rendererParams={progressBarRendererParams}
-                        renderer={ProgressBar}
-                    />
-                </ContainerCard>
-                <ContainerCard
-                    className={styles.progressBarCard}
-                    heading="Information Sources"
-                    headingSize="extraSmall"
-                    headerDescription="Lorem ipsum explaining the topic"
-                    contentClassName={styles.progressBar}
-                >
-                    <List
-                        data={sourcesProgressBarData}
-                        keySelector={progressBarKeySelector}
-                        rendererParams={progressBarRendererParams}
-                        renderer={ProgressBar}
-                    />
-                </ContainerCard>
-                <ContainerCard
-                    className={styles.progressBarCard}
-                    heading="Information Sources"
-                    headingSize="extraSmall"
-                    headerDescription="Lorem ipsum explaining the topic"
-                    contentClassName={styles.progressBar}
-                >
-                    <List
-                        data={sourcesProgressBarData}
-                        keySelector={progressBarKeySelector}
-                        rendererParams={progressBarRendererParams}
-                        renderer={ProgressBar}
-                    />
-                </ContainerCard>
-            </ContainerCard>
+            {combinedIndicatorsLoading && <PendingAnimation />}
+            <List
+                data={thematicSeparatedIndicators}
+                renderer={ThematicRenderer}
+                rendererParams={thematicRendererParams}
+                keySelector={topicKeySelector}
+            />
             <ContainerCard
                 className={styles.perceptionWrapper}
                 contentClassName={styles.perceptionCard}
