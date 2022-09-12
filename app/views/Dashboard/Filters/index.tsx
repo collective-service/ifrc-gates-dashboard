@@ -158,18 +158,6 @@ function Filters(props: Props) {
         setAdvancedFilterValues,
     } = props;
 
-    const handleInputChange = useCallback(
-        (newValue: string | undefined, name: keyof FilterType) => {
-            if (onChange) {
-                onChange((oldValue) => ({
-                    ...oldValue,
-                    [name]: newValue,
-                }));
-            }
-        },
-        [onChange],
-    );
-
     const handleClear = useCallback(() => {
         onChange({
             country: value?.country ?? 'AFG',
@@ -181,6 +169,53 @@ function Filters(props: Props) {
         loading: countryListLoading,
     } = useQuery<CountryListQuery, CountryListQueryVariables>(
         COUNTRY_LIST,
+    );
+    const getRegionForCountry = (country: string | undefined) => (
+        countryList?.countries?.find((c) => c.iso3 === country)?.region);
+
+    const handleInputChange = useCallback(
+        (newValue: string | undefined, name: keyof FilterType) => {
+            if (onChange) {
+                if (name === 'region') {
+                    onChange((oldValue) => ({
+                        ...oldValue,
+                        [name]: newValue,
+                        country: undefined,
+                    }));
+                } else if (name === 'country') {
+                    onChange((oldValue) => {
+                        const newValueForRegion = {
+                            ...oldValue,
+                            [name]: newValue,
+                            region: getRegionForCountry(newValue) ?? undefined,
+                        };
+                        return newValueForRegion;
+                    });
+                } else if (name === 'indicator') {
+                    onChange((oldValue) => ({
+                        outbreak: oldValue?.outbreak ?? 'COVID-19',
+                        indicator: newValue,
+                        // FIXME: Add a handler to select a default subvariable on indicator change
+                    }));
+                } else if (name === 'outbreak') {
+                    onChange((oldValue) => ({
+                        ...oldValue,
+                        outbreak: newValue,
+                        indicator: undefined,
+                    }));
+                } else {
+                    onChange((oldValue) => ({
+                        ...oldValue,
+                        [name]: newValue,
+                    }));
+                }
+            }
+        },
+        [
+            onChange,
+            activeTab,
+            getRegionForCountry,
+        ],
     );
 
     const {
@@ -333,6 +368,9 @@ function Filters(props: Props) {
                             onChange={handleInputChange}
                             disabled={countryListLoading}
                             variant="general"
+                            grouped
+                            groupKeySelector={(item) => item.region || 'Unnamed'}
+                            groupLabelSelector={(item) => item.region || 'Unnamed'}
                             // TODO: Make this clearable in combined indicators tab
                             nonClearable
                         />
