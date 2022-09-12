@@ -17,7 +17,7 @@ import styles from './styles.css';
 export interface UncertainData {
     indicatorValue?: string | null;
     date: string;
-    uncertainRange: (string | undefined)[];
+    uncertainRange: string[];
 }
 
 interface Props {

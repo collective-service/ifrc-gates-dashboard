@@ -167,6 +167,7 @@ function Country(props: Props) {
 
     const countryVariables = useMemo((): CountryQueryVariables => ({
         iso3: filterValues?.country ?? 'AFG',
+        // FIXME: filter needed to be handle from backend
         gte: '2021-08-01',
         contextIndicatorId: 'total_cases',
         disaggregationIso3: filterValues?.country ?? 'AFG',
@@ -174,6 +175,7 @@ function Country(props: Props) {
         uncertaintyIso3: filterValues?.country ?? 'AFG',
         subvariable: filterValues?.subvariable ?? '',
         indicatorId: filterValues?.indicator,
+        // NOTE: Only Global response needed
         category: 'Global',
         uncertaintyEmergency: filterValues?.outbreak ?? '',
     }), [
@@ -266,17 +268,21 @@ function Country(props: Props) {
 
     const uncertaintyChart: UncertainData[] | undefined = useMemo(() => (
         countryResponse?.dataCountryLevel.map((country) => {
-            const negativeRange = ((country?.indicatorValue && country?.errorMargin)
-                && country?.indicatorValue - country?.errorMargin);
-            const positiveRange = ((country?.indicatorValue && country?.errorMargin)
-                && country?.indicatorValue + country?.errorMargin);
+            const negativeRange = decimalToPercentage(
+                (country?.indicatorValue && country?.errorMargin)
+                && country?.indicatorValue - country?.errorMargin,
+            );
+            const positiveRange = decimalToPercentage(
+                (country?.indicatorValue && country?.errorMargin)
+                && country?.indicatorValue + country?.errorMargin,
+            );
 
             if (country.interpolated) {
                 return {
                     date: getShortMonth(country.indicatorMonth),
                     uncertainRange: [
-                        decimalToPercentage(negativeRange),
-                        decimalToPercentage(positiveRange),
+                        negativeRange ?? '',
+                        positiveRange ?? '',
                     ],
                 };
             }
@@ -284,8 +290,8 @@ function Country(props: Props) {
                 indicatorValue: decimalToPercentage(country.indicatorValue),
                 date: getShortMonth(country.indicatorMonth),
                 uncertainRange: [
-                    decimalToPercentage(negativeRange),
-                    decimalToPercentage(positiveRange),
+                    negativeRange ?? '',
+                    positiveRange ?? '',
                 ],
             };
         })
@@ -514,7 +520,7 @@ function Country(props: Props) {
                             />
                             <UncertaintyChart
                                 className={styles.indicatorsChart}
-                                uncertainData={uncertaintyChart ?? []}
+                                uncertainData={(uncertaintyChart && uncertaintyChart) ?? []}
                             />
                             {(genderDisaggregation && genderDisaggregation.length > 0
                                 && ageDisaggregation && ageDisaggregation.length > 0

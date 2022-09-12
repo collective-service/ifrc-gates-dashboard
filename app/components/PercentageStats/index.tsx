@@ -45,7 +45,7 @@ function PercentageStats(props: Props) {
             headingClassName={styles.percentageHeading}
             heading={(
                 <>
-                    {indicatorDescription && indicatorDescription}
+                    {indicatorDescription}
                     {(!indicatorDescription && !heading) && 'Total number of cases'}
                     {heading && (
                         <>

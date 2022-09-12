@@ -49,6 +49,9 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                 statValue={90}
                 suffix={(uncertaintyChartActive ? '%' : 'M')}
             />
+            { /* FIXME: (for Priyesh) Either include data in Uncertainty Chart
+                or remove the component altogether
+               */}
             {uncertaintyChartActive
                 ? <UncertainityChart />
                 : (
