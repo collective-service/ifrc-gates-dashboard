@@ -193,6 +193,7 @@ function Filters(props: Props) {
                     });
                 } else if (name === 'indicator') {
                     onChange((oldValue) => ({
+                        ...oldValue,
                         outbreak: oldValue?.outbreak ?? 'COVID-19',
                         indicator: newValue,
                         // FIXME: Add a handler to select a default subvariable on indicator change
