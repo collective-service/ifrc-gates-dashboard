@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
     BarChart,
     Bar,
@@ -15,27 +15,125 @@ import {
     ContainerCard,
 } from '@the-deep/deep-ui';
 import { _cs } from '@togglecorp/fujs';
+import { useQuery, gql } from '@apollo/client';
 
 import PercentageStats from '#components/PercentageStats';
 import UncertainityChart from '#components/UncertaintyChart';
 import {
-    lineChartData,
     barChartData,
     uncertainData,
 } from '#utils/dummyData';
+import {
+    OutbreakQuery,
+    OutbreakQueryVariables,
+    TotalOutbreakCasesQuery,
+    TotalOutbreakCasesQueryVariables,
+} from '#generated/types';
 
 import styles from './styles.css';
+import { FilterType } from '../../Filters';
 
 interface PercentageCardGroupProps {
     className?: string;
+    filterValues?: FilterType | undefined;
     uncertaintyChartActive: boolean;
 }
+
+const TOTAL_OUTBREAK_CASES = gql`
+    query TotalOutbreakCases(
+        $contextIndicatorId: String,
+        $emergency: String,
+        $isGlobal: Boolean,
+        $mostRecent: Boolean,
+    ) {
+        epiDataGlobal(
+            filters: {
+                contextIndicatorId: $contextIndicatorId,
+                emergency: $emergency,
+                isGlobal: $isGlobal,
+                mostRecent: $mostRecent,
+            }
+        ) {
+            contextIndicatorValue
+            emergency
+        }
+    }
+
+`;
+
+const OUTBREAK = gql`
+    query Outbreak(
+        $isTwelveMonth: Boolean,
+        $emergency: String,
+        $isGlobal: Boolean,
+        $contextIndicatorId: String,
+    ) {
+        epiDataGlobal(
+            filters: {
+                isTwelveMonth: $isTwelveMonth,
+                isGlobal: $isGlobal,
+                emergency: $emergency,
+                contextIndicatorId: $contextIndicatorId,
+            }
+        ) {
+            id
+            contextIndicatorValue
+            contextDate
+            emergency
+        }
+    }
+`;
 
 function PercentageCardGroup(props: PercentageCardGroupProps) {
     const {
         className,
         uncertaintyChartActive,
+        filterValues,
     } = props;
+
+    const totalOutbreakCasesVariables = useMemo((): TotalOutbreakCasesQueryVariables => ({
+        contextIndicatorId: 'total_cases',
+        mostRecent: true,
+        isGlobal: true,
+        emergency: filterValues?.outbreak,
+    }), [filterValues?.outbreak]);
+
+    const {
+        data: totalOutbreakCasesResponse,
+    } = useQuery<TotalOutbreakCasesQuery, TotalOutbreakCasesQueryVariables>(
+        TOTAL_OUTBREAK_CASES,
+        {
+            variables: totalOutbreakCasesVariables,
+        },
+    );
+
+    const outbreakVariables = useMemo((): OutbreakQueryVariables => ({
+        contextIndicatorId: 'total_cases',
+        isTwelveMonth: true,
+        isGlobal: true,
+        emergency: filterValues?.outbreak,
+    }), [filterValues?.outbreak]);
+
+    const {
+        data: outbreakResponse,
+    } = useQuery<OutbreakQuery, OutbreakQueryVariables>(
+        OUTBREAK,
+        {
+            variables: outbreakVariables,
+        },
+    );
+
+    console.log(outbreakResponse);
+
+    // const totalCases = listToMap(
+    //    totalOutbreakCasesResponse?.epiDataGlobal,
+    //    (key) => key.emergency,
+    // );
+
+    const totalCase = totalOutbreakCasesResponse?.epiDataGlobal
+        .find(
+            (emergency) => emergency.emergency === filterValues?.outbreak,
+        );
 
     return (
         <div className={_cs(className, styles.cardInfo)}>
@@ -47,8 +145,7 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                         All Outbreak numbers:
                     </p>
                 )}
-                statValue={90}
-                suffix={(uncertaintyChartActive ? '%' : 'M')}
+                statValue={totalCase?.contextIndicatorValue ?? 0}
             />
             { /* FIXME: (for Priyesh) Either include data in Uncertainty Chart
                 or remove the component altogether
@@ -68,13 +165,13 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                     >
                         <ResponsiveContainer className={styles.responsiveContainer}>
                             <LineChart
-                                data={lineChartData}
+                                data={outbreakResponse?.epiDataGlobal}
                                 margin={{
                                     right: 20,
                                 }}
                             >
                                 <XAxis
-                                    dataKey="name"
+                                    dataKey="contextDate"
                                     axisLine={false}
                                     tickLine={false}
                                     padding={{ left: 20 }}
@@ -96,22 +193,8 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                                 />
                                 <Line
                                     type="monotone"
-                                    dataKey="MonkeyPox"
+                                    dataKey="contextIndicatorValue"
                                     stroke="#4bda8a"
-                                    strokeWidth={2}
-                                    dot={false}
-                                />
-                                <Line
-                                    type="monotone"
-                                    dataKey="Covid"
-                                    stroke="#2169bb"
-                                    strokeWidth={2}
-                                    dot={false}
-                                />
-                                <Line
-                                    type="monotone"
-                                    dataKey="Ebola"
-                                    stroke="#ba2123"
                                     strokeWidth={2}
                                     dot={false}
                                 />

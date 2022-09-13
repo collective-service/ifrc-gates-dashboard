@@ -183,7 +183,6 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
         fill: entry.emergency === 'Monkeypox' ? '#ACA28E' : '#FFDD98',
     }));
 
-    console.warn('DATA', regionalLabel);
     const pieChartInfoRendererParams = useCallback(
         (_: string, data: PieChartInfoRendererProps) => ({
             region: data.region,
