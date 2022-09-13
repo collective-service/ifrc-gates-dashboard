@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
     BarChart,
     Bar,
@@ -13,54 +13,101 @@ import {
     ContainerCard,
     ListView,
 } from '@the-deep/deep-ui';
-import { _cs } from '@togglecorp/fujs';
-
 import {
-    totalCasesBarChart,
-    regionalBreakdownPieData,
-} from '#utils/dummyData';
+    listToGroupList,
+    mapToList,
+    unique,
+    _cs,
+} from '@togglecorp/fujs';
+import { useQuery, gql } from '@apollo/client';
+
+import { RegionalQuery, RegionalQueryVariables, TotalQuery, TotalQueryVariables } from '#generated/types';
 
 import PieChartInfo, { RegionalDataType } from './PieChartInfo';
 import { FilterType } from '../../Filters';
 import styles from './styles.css';
 
 const COLORS = ['#C09A57', '#FFDD98', '#C7BCA9', '#ACA28E', '#CCB387'];
-const pieChartInfoKeySelector = (d: PieChartInfoRendererProps) => d.regionId;
-const breakdownLabelKeySelector = (d: RegionalBreakdownLabelProps) => d.regionId;
+const pieChartInfoKeySelector = (d: PieChartInfoRendererProps) => d.region;
+const regionalLabelKeySelector = (d: RegionalLabelRendererProps) => d.emergency;
 export interface PieChartInfoRendererProps {
-    regionId: string;
-    country?: string;
-    color?: string;
+    region: string;
     regionalData?: RegionalDataType[];
 }
-export interface RegionalBreakdownLabelProps {
-    regionId: string;
-    outbreak?: string;
-    color?: string;
+export interface RegionalLabelRendererProps {
+    emergency: string;
+    fill: string;
 }
 
-function RegionalBreakdownLabel(props: RegionalBreakdownLabelProps) {
+type EpiDataGlobal = NonNullable<RegionalQuery>['epiDataGlobal'][number];
+
+const REGIONAL_BREAKDOWN = gql`
+    query Regional(
+        $mostRecent: Boolean,
+        $isGlobal: Boolean,
+        $contextIndicatorId: String,
+    ) {
+        epiDataGlobal(
+            filters: {
+                mostRecent: $mostRecent,
+                isGlobal: $isGlobal,
+                contextIndicatorId: $contextIndicatorId,
+            }
+        ) {
+            region
+            contextIndicatorValue
+            mostRecent
+            emergency
+            id
+        }
+    }
+
+`;
+
+const TOTAL_CASES = gql`
+    query Total(
+        $mostRecent: Boolean,
+        $region: String,
+        $isGlobal: Boolean,
+        $contextIndicatorId: String,
+    ) {
+        epiDataGlobal(
+            filters: {
+                mostRecent: $mostRecent,
+                region: $region,
+                contextIndicatorId: $contextIndicatorId,
+                isGlobal: $isGlobal
+            }
+        ) {
+            region
+            contextIndicatorValue
+            mostRecent
+            emergency
+            id
+        }
+    }
+`;
+
+function RegionalBreakdownLabel(props: RegionalLabelRendererProps) {
     const {
-        regionId,
-        outbreak,
-        color,
+        fill,
+        emergency,
     } = props;
 
     return (
         <div
             className={styles.breakdownLabel}
-            key={regionId}
         >
             <div
                 style={{
-                    backgroundColor: color,
+                    backgroundColor: fill,
                     width: 10,
                     height: 10,
                     borderRadius: 50,
                 }}
             />
             <div className={styles.labelName}>
-                {outbreak}
+                {emergency}
             </div>
         </div>
     );
@@ -77,19 +124,78 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
         filterValues,
     } = props;
 
+    const regionalVariables = useMemo((): RegionalQueryVariables => ({
+        mostRecent: true,
+        isGlobal: false,
+        contextIndicatorId: 'total_cases',
+    }), []);
+
+    const {
+        data: regionalResponse,
+    } = useQuery<RegionalQuery, RegionalQueryVariables>(
+        REGIONAL_BREAKDOWN,
+        {
+            variables: regionalVariables,
+        },
+    );
+
+    const TotalCasesVariable = useMemo((): TotalQueryVariables => ({
+        mostRecent: true,
+        contextIndicatorId: 'total_cases',
+        region: filterValues?.region,
+        isGlobal: !filterValues?.region,
+    }), [filterValues?.region]);
+
+    const {
+        data: totalCasesResponse,
+    } = useQuery<TotalQuery, TotalQueryVariables>(
+        TOTAL_CASES,
+        {
+            variables: TotalCasesVariable,
+        },
+    );
+
+    const regionalPieChart = useMemo(() => {
+        const groupedMap = listToGroupList(
+            regionalResponse?.epiDataGlobal,
+            (region) => region.region,
+            (item) => ({
+                emergency: item.emergency,
+                fill: item.emergency === 'Monkeypox' ? '#ACA28E' : '#FFDD98',
+                contextIndicatorValue: item.contextIndicatorValue,
+            }),
+        );
+
+        return mapToList(
+            groupedMap,
+            (item, key) => ({
+                region: key,
+                regionalData: item,
+            }),
+        );
+    }, [regionalResponse?.epiDataGlobal]);
+
+    const regionalLabel = unique(
+        regionalResponse?.epiDataGlobal ?? [],
+        (item: EpiDataGlobal) => item.emergency,
+    ).map((entry) => ({
+        emergency: entry.emergency,
+        fill: entry.emergency === 'Monkeypox' ? '#ACA28E' : '#FFDD98',
+    }));
+
+    console.warn('DATA', regionalLabel);
     const pieChartInfoRendererParams = useCallback(
         (_: string, data: PieChartInfoRendererProps) => ({
-            country: data.country,
+            region: data.region,
             regionalData: data?.regionalData,
             filterValues,
         }), [filterValues],
     );
 
-    const regionalBreakdownLabelParams = useCallback(
-        (_: string, data: RegionalBreakdownLabelProps) => ({
-            regionId: data.regionId,
-            color: data.color,
-            outbreak: data.outbreak,
+    const regionalLabelRendererParams = useCallback(
+        (_: string, data: RegionalLabelRendererProps) => ({
+            fill: data.fill,
+            emergency: data.emergency,
         }), [],
     );
 
@@ -104,7 +210,7 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
             >
                 <ResponsiveContainer className={styles.responsiveContainer}>
                     <BarChart
-                        data={totalCasesBarChart}
+                        data={totalCasesResponse?.epiDataGlobal}
                         barSize={18}
                     >
                         <Tooltip
@@ -116,11 +222,11 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
                             cursor={false}
                         />
                         <XAxis
-                            dataKey="name"
+                            dataKey="emergency"
                             tickLine={false}
                         >
                             <LabelList
-                                dataKey="name"
+                                dataKey="emergency"
                                 position="bottom"
                                 fontSize="10"
                             />
@@ -130,18 +236,18 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
                             hide
                         />
                         <Bar
-                            dataKey="amt"
+                            dataKey="contextIndicatorValue"
                             isAnimationActive={false}
                             radius={[10, 10, 0, 0]}
                         >
-                            {totalCasesBarChart?.map((entry) => (
+                            {totalCasesResponse?.epiDataGlobal?.map((entry) => (
                                 <Cell
                                     key={`Cell -${entry.id}`}
-                                    fill={COLORS[entry.id % COLORS.length]}
+                                    fill={COLORS[Number(entry.id) % COLORS.length]}
                                 />
                             ))}
                             <LabelList
-                                dataKey="range"
+                                dataKey="contextIndicatorValue"
                                 position="insideBottomLeft"
                                 angle={270}
                                 offset={-2.8}
@@ -161,7 +267,7 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
                 <ListView
                     className={styles.pieChartCollection}
                     keySelector={pieChartInfoKeySelector}
-                    data={regionalBreakdownPieData}
+                    data={regionalPieChart}
                     renderer={PieChartInfo}
                     rendererParams={pieChartInfoRendererParams}
                     filtered={false}
@@ -170,10 +276,10 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
                 />
                 <ListView
                     className={styles.breakdownLabelWrapper}
-                    keySelector={breakdownLabelKeySelector}
-                    data={regionalBreakdownPieData}
+                    keySelector={regionalLabelKeySelector}
+                    data={regionalLabel}
                     renderer={RegionalBreakdownLabel}
-                    rendererParams={regionalBreakdownLabelParams}
+                    rendererParams={regionalLabelRendererParams}
                     filtered={false}
                     errored={false}
                     pending={false}

@@ -10,17 +10,18 @@ import {
 import { FilterType } from '../../../Filters';
 import styles from './styles.css';
 
+// TODO: TO remove after completion
 const COLORS = ['#C09A57', '#FFDD98', '#C7BCA9', '#ACA28E', '#CCB387'];
 
 export type RegionalDataType = {
-    id: number;
-    status: string;
-    percentage: number;
+    fill: string;
+    emergency: string;
+    contextIndicatorValue: number | null | undefined;
 }
 
 interface PieChartInfoProps {
     className?: string;
-    country?: string;
+    region?: string;
     regionalData?: RegionalDataType[];
     filterValues?: FilterType | undefined;
 }
@@ -28,14 +29,14 @@ interface PieChartInfoProps {
 function PieChartInfo(props: PieChartInfoProps) {
     const {
         className,
-        country,
+        region,
         regionalData,
         filterValues,
     } = props;
 
     const isRegionSelected = isDefined(filterValues?.region);
 
-    const selectedRegion = filterValues?.region?.toLowerCase() === country?.toLowerCase();
+    const selectedRegion = filterValues?.region?.toLowerCase() === region?.toLowerCase();
 
     return (
         <div
@@ -46,7 +47,7 @@ function PieChartInfo(props: PieChartInfoProps) {
             style={{ opacity: (selectedRegion || !isRegionSelected) ? 1 : 0.2 }}
         >
             <div className={styles.pieChartHeader}>
-                {country}
+                {region}
             </div>
             <div className={styles.pieChartHolder}>
                 <ResponsiveContainer
@@ -58,7 +59,7 @@ function PieChartInfo(props: PieChartInfoProps) {
                     >
                         <Pie
                             data={regionalData}
-                            dataKey="percentage"
+                            dataKey="contextIndicatorValue"
                             labelLine={false}
                             cx={60}
                             cy={50}
@@ -66,8 +67,8 @@ function PieChartInfo(props: PieChartInfoProps) {
                         >
                             {regionalData?.map((entry) => (
                                 <Cell
-                                    key={`Cell -${entry.id}`}
-                                    fill={COLORS[entry.id % COLORS.length]}
+                                    key={`Cell -${entry.emergency}`}
+                                    fill={entry.fill}
                                 />
                             ))}
                         </Pie>
