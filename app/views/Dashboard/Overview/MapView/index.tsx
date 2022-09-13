@@ -137,6 +137,8 @@ function MapView(props: MapViewProps) {
         return countryIndicator ?? [];
     }, [mapIndicatorValues?.countryEmergencyProfile]);
 
+    console.log('map info', mapIndicatorState);
+
     const handleCountryClick = useCallback(
         (feature: mapboxgl.MapboxGeoJSONFeature) => {
             setCountryData(feature);
