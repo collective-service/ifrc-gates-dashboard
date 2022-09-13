@@ -121,9 +121,11 @@ const COUNTRY_PROFILE = gql`
             }
         }
         contextualData(
-            iso3: $iso3,
-            contextIndicatorId:$contextIndicatorId,
-            emergency: $emergency,
+            filters: {
+                iso3: $iso3,
+                contextIndicatorId:$contextIndicatorId,
+                emergency: $emergency,
+            }
         ) {
             iso3
             emergency
