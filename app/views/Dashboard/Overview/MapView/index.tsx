@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { _cs } from '@togglecorp/fujs';
+import { _cs, isDefined } from '@togglecorp/fujs';
 import {
     Heading,
     ContainerCard,
@@ -59,7 +59,7 @@ const countryFillPaint: mapboxgl.FillPaint = {
         ['coalesce', ['feature-state', 'contextIndicatorValue'], 0],
         0,
         '#2F9F45',
-        500000,
+        5000,
         '#EED322',
         750000,
         '#E6B71E',
@@ -71,9 +71,9 @@ const countryFillPaint: mapboxgl.FillPaint = {
         '#2F9C67',
         7500000,
         '#2F9C67',
-        10000000,
+        60000000,
         '#2F9C67',
-        25000000,
+        91331830,
         '#723122',
     ],
     'fill-opacity': 0.5,
@@ -136,8 +136,6 @@ function MapView(props: MapViewProps) {
             .filter((item) => item.value > 0);
         return countryIndicator ?? [];
     }, [mapIndicatorValues?.countryEmergencyProfile]);
-
-    console.log('map info', mapIndicatorState);
 
     const handleCountryClick = useCallback(
         (feature: mapboxgl.MapboxGeoJSONFeature) => {
