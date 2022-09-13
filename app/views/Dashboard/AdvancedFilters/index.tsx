@@ -72,26 +72,6 @@ function AdvancedFilters(props: Props) {
         onChange,
     } = props;
 
-    const handleInputChange = useCallback(
-        (newValue: string | string[] | undefined, name: keyof AdvancedOptionType) => {
-            if (onChange) {
-                onChange((oldValue) => ({
-                    ...oldValue,
-                    [name]: newValue,
-                }));
-            }
-        },
-        [onChange],
-    );
-
-    const handleSelectChange = useCallback(
-        (newValue: MultiValue<LabelValue>) => {
-            const newValueList = newValue?.map((v) => v.value);
-            handleInputChange(newValueList, 'keywords');
-        },
-        [handleInputChange],
-    );
-
     const filterOptionsVariables = useMemo(() => ({
         type: value?.type ?? '',
         thematic: value?.thematic ?? '',
@@ -134,6 +114,55 @@ function AdvancedFilters(props: Props) {
             label: keyword,
         }))
     ), [advancedFilterOptions?.filterOptions?.keywords]);
+
+    const handleInputChange = useCallback(
+        (newValue: string | string[] | undefined, name: keyof AdvancedOptionType) => {
+            if (onChange) {
+                if (name === 'type') {
+                    onChange((oldValue) => ({
+                        type: newValue as string,
+                        thematic: undefined,
+                        topic: undefined,
+                        keywords: oldValue?.keywords,
+                    }));
+                } else if (name === 'thematic') {
+                    onChange((oldValue) => ({
+                        // FIXME: Get type of the selected thematic
+                        type: oldValue?.type,
+                        thematic: newValue as string,
+                        topic: undefined,
+                        keywords: oldValue?.keywords,
+                    }));
+                } else if (name === 'topic') {
+                    onChange((oldValue) => ({
+                        type: oldValue?.type,
+                        thematic: oldValue?.thematic,
+                        topic: newValue as string,
+                        keywords: oldValue?.keywords,
+                    }));
+                } else if (name === 'keywords') {
+                    onChange((oldValue) => ({
+                        ...oldValue,
+                        keywords: newValue as string[],
+                    }));
+                } else {
+                    onChange((oldValue) => ({
+                        ...oldValue,
+                        [name]: newValue as string,
+                    }));
+                }
+            }
+        },
+        [onChange],
+    );
+
+    const handleSelectChange = useCallback(
+        (newValue: MultiValue<LabelValue>) => {
+            const newValueList = newValue?.map((v) => v.value);
+            handleInputChange(newValueList, 'keywords');
+        },
+        [handleInputChange],
+    );
 
     const keywordValue = useMemo(() => (
         value?.keywords?.map((keyword) => ({

@@ -4,11 +4,13 @@
     flex-grow: 1;
     background-color: var(--color-background);
     padding: 0 var(--dui-spacing-ultra-large);
+    overflow-y: auto;
     gap: var(--dui-spacing-medium);
 
     .dashboard-buttons {
         display: flex;
         align-items: center;
+        flex-shrink: 0;
         justify-content: space-between;
         padding: var(--dui-spacing-medium) var(--dui-spacing-extra-small);
         gap: var(--dui-spacing-medium);
@@ -43,5 +45,6 @@
 
     .content {
         position: relative;
+        flex-grow: 1;
     }
 }
