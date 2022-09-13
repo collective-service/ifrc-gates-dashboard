@@ -295,7 +295,7 @@ export const totalCasesBarChart = [
 export const regionalBreakdownPieData = [
     {
         regionId: '1',
-        country: 'USA',
+        country: 'Americas',
         outbreak: 'COVID-19',
         color: '#C09A57',
         regionalData: [
@@ -328,7 +328,7 @@ export const regionalBreakdownPieData = [
     },
     {
         regionId: '2',
-        country: 'EUR',
+        country: 'Europe',
         outbreak: 'Monkey-pox',
         color: '#FFDD98',
         regionalData: [
@@ -361,7 +361,7 @@ export const regionalBreakdownPieData = [
     },
     {
         regionId: '3',
-        country: 'ASIA',
+        country: 'AsiaPacific',
         outbreak: 'Cholera',
         color: '#C7BCA9',
         regionalData: [
@@ -394,7 +394,7 @@ export const regionalBreakdownPieData = [
     },
     {
         regionId: '4',
-        country: 'IRE',
+        country: 'Mena',
         outbreak: 'Spanish Flu',
         color: '#ACA28E',
         regionalData: [
@@ -427,7 +427,7 @@ export const regionalBreakdownPieData = [
     },
     {
         regionId: '5',
-        country: 'POL',
+        country: 'Esar',
         outbreak: 'Ebola',
         color: '#CCB387',
         regionalData: [

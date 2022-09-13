@@ -33,6 +33,15 @@ import styles from './styles.css';
 
 const progressBarKeySelector = (d: ProgressBarProps) => d.id;
 
+const MAP_INDICATOR = gql`
+    query MapIndicatorValues ($filters: CountryEmergencyProfileFilter) {
+        countryEmergencyProfile(filters: $filters) {
+            contextIndicatorValue
+            iso3
+            id
+        }
+    }
+`;
 interface MapViewProps {
     className?: string;
     isIndicatorSelected: boolean;
@@ -47,37 +56,33 @@ const countryFillPaint: mapboxgl.FillPaint = {
     'fill-color': [
         'interpolate',
         ['linear'],
-        ['feature-state', 'contextIndicatorValue'],
-        1,
-        'rgba(33,102,172,0)',
-        100,
-        'rgb(103,169,207)',
-        200,
-        'rgb(209,229,240)',
-        400,
-        'rgb(253,219,199)',
-        600,
-        'rgb(239,138,98)',
-        1000,
-        'rgb(178,24,43)',
+        ['coalesce', ['feature-state', 'contextIndicatorValue'], 0],
+        0,
+        '#2F9F45',
+        500000,
+        '#EED322',
+        750000,
+        '#E6B71E',
+        1000000,
+        '#2F9C67',
+        2500000,
+        '#2F3345',
+        5000000,
+        '#2F9C67',
+        7500000,
+        '#2F9C67',
+        10000000,
+        '#2F9C67',
+        25000000,
+        '#723122',
     ],
-    'fill-opacity': 0.2,
+    'fill-opacity': 0.5,
 };
 
 const countryLinePaint: mapboxgl.LinePaint = {
     'line-color': '#000000',
     'line-width': 0.2,
 };
-
-const MAP_INDICATOR = gql`
-    query MapIndicatorValues ($filters: CountryEmergencyProfileFilter) {
-        countryEmergencyProfile(filters: $filters) {
-            contextIndicatorValue
-            iso3
-            id
-        }
-    }
-`;
 
 const barHeight = 10;
 
@@ -120,19 +125,20 @@ function MapView(props: MapViewProps) {
         },
     );
 
-    console.log('Filter values in Mapview::>>', filterValues, mapIndicatorValues);
-
     const mapIndicatorState = useMemo(() => {
         const countryIndicator = mapIndicatorValues?.countryEmergencyProfile?.map(
             (indicatorValue) => ({
-                id: indicatorValue?.id,
-                value: 100,
-            }));
-        return countryIndicator;
-    }, []);
+                id: indicatorValue.id,
+                value: indicatorValue.contextIndicatorValue ?? 0,
+                iso: indicatorValue.iso3,
+            }),
+        )
+            .filter((item) => item.value > 0);
+        return countryIndicator ?? [];
+    }, [mapIndicatorValues?.countryEmergencyProfile]);
 
     const handleCountryClick = useCallback(
-        (feature: mapboxgl.MapboxGeoJSONFeature, lngLat: mapboxgl.LngLat) => {
+        (feature: mapboxgl.MapboxGeoJSONFeature) => {
             setCountryData(feature);
             showMapModal();
             return true;
@@ -178,7 +184,7 @@ function MapView(props: MapViewProps) {
                         sourceOptions={{
                             type: 'geojson',
                             // FIXME: set promoteId to whatever we get from geojson properties
-                            // promoteId: 'XXX',
+                            promoteId: 'id',
                         }}
                         geoJson="https://rcce-dashboard.s3.eu-west-3.amazonaws.com/countries.json"
                     >

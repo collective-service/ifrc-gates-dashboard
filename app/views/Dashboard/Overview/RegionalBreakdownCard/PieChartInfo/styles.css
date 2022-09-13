@@ -1,11 +1,16 @@
 .pie-chart-wrapper {
     display: flex;
     flex-direction: column;
+    opacity: 1;
     width: 20%;
+
+    &.less-opacity {
+        opacity: 0.2;
+    }
 
     .pie-chart-header {
         align-self: center;
-        font-size: small;
+        font-size: var(--dui-font-size-small);
     }
 
     .pie-chart-holder {

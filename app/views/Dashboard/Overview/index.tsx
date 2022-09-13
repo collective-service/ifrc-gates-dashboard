@@ -63,7 +63,9 @@ function Overview(props: Props) {
                 />
             ))}
             {((noFiltersSelected || onlyRegionSelected) && (
-                <RegionalBreakdownCard />
+                <RegionalBreakdownCard
+                    filterValues={filterValues}
+                />
             ))}
             <div className={styles.mapContainer}>
                 <Tabs
