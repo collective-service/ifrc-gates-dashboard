@@ -12,16 +12,24 @@ import {
     ContainerCard,
 } from '@the-deep/deep-ui';
 import { _cs } from '@togglecorp/fujs';
-
-import { rangeData } from '#utils/dummyData';
 import styles from './styles.css';
+
+export interface UncertainData {
+    indicatorValue?: string | null;
+    date: string;
+    uncertainRange: string[];
+}
 
 interface Props {
     className?: string;
+    uncertainData: UncertainData[] | undefined;
 }
 
 function UncertaintyChart(props: Props) {
-    const { className } = props;
+    const {
+        className,
+        uncertainData,
+    } = props;
 
     return (
         <ContainerCard
@@ -35,7 +43,7 @@ function UncertaintyChart(props: Props) {
                 className={styles.responsiveContainer}
             >
                 <ComposedChart
-                    data={rangeData}
+                    data={uncertainData}
                 >
                     <XAxis
                         dataKey="date"
@@ -51,14 +59,15 @@ function UncertaintyChart(props: Props) {
                             position: 'insideBottomLeft',
                             offset: 16,
                         }}
+                        domain={[0, 100]}
                     />
                     <Area
-                        dataKey="uncertainData"
+                        dataKey="uncertainRange"
                         stroke="#8DD2B1"
                         fill="#8DD2B1"
                     />
                     <Line
-                        dataKey="amt"
+                        dataKey="indicatorValue"
                         stroke="#2F9C67"
                         strokeWidth={2}
                         dot={{

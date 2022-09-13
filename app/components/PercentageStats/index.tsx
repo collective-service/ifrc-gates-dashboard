@@ -3,6 +3,7 @@ import {
     ContainerCard,
     NumberOutput,
     ContainerCardProps,
+    Tooltip,
 } from '@the-deep/deep-ui';
 import { _cs } from '@togglecorp/fujs';
 
@@ -13,11 +14,14 @@ export interface Props {
     className?: string;
     icon?: React.ReactNode;
     heading?: React.ReactNode;
+    indicatorDescription?: string | null;
     headerDescription?: React.ReactNode;
     headingSize?: headingSizeType;
     suffix?: string;
     statValue: number | null | undefined;
     subValue?: number;
+    newDeaths?: number | null;
+    newCasesPerMillion?: number | null;
 }
 
 function PercentageStats(props: Props) {
@@ -27,16 +31,37 @@ function PercentageStats(props: Props) {
         heading,
         headingSize = 'extraSmall',
         headerDescription,
+        indicatorDescription,
         statValue,
         subValue,
         suffix,
+        newDeaths,
+        newCasesPerMillion,
     } = props;
 
     return (
         <ContainerCard
             className={_cs(className, styles.percentageStatsCard)}
             headingClassName={styles.percentageHeading}
-            heading={heading ? `Total number of ${heading} cases` : 'Total number of cases'}
+            heading={(
+                <>
+                    {indicatorDescription}
+                    {(!indicatorDescription && !heading) && 'Total number of cases'}
+                    {heading && (
+                        <>
+                            {`Total number of ${heading} cases`}
+                            <Tooltip>
+                                <div>
+                                    {`Deaths: ${newDeaths}`}
+                                </div>
+                                <div>
+                                    {`Cases Per Million: ${newCasesPerMillion}`}
+                                </div>
+                            </Tooltip>
+                        </>
+                    )}
+                </>
+            )}
             headingSize={headingSize}
             headerDescription={headerDescription}
             headerIconsContainerClassName={styles.iconContainer}
@@ -44,6 +69,7 @@ function PercentageStats(props: Props) {
             footerContentClassName={styles.valueAndSubValue}
             footerContent={(
                 <>
+
                     <NumberOutput
                         className={styles.valueText}
                         value={statValue}

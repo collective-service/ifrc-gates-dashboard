@@ -26,8 +26,10 @@ import {
     NumberOutput,
 } from '@the-deep/deep-ui';
 import { useQuery, gql } from '@apollo/client';
+import { IoInformationCircle } from 'react-icons/io5';
+import { BiLinkExternal } from 'react-icons/bi';
 
-import UncertaintyChart from '#components/UncertaintyChart';
+import UncertaintyChart, { UncertainData } from '#components/UncertaintyChart';
 import PercentageStats from '#components/PercentageStats';
 import ScoreCard from '#components/ScoreCard';
 import {
@@ -54,6 +56,8 @@ interface EmergencyItems {
     contextIndicatorValue?: number | null;
     contextIndicatorId: string;
     contextDate: string;
+    newDeaths?: number | null;
+    newCasesPerMillion?: number | null;
 }
 interface CountryWiseOutbreakCases extends EmergencyItems {
     key: string;
@@ -74,6 +78,12 @@ const COUNTRY_PROFILE = gql`
         $disaggregationIso3: String!,
         $contextIndicatorId: String!,
         $emergency: String,
+        $gte: Date!,
+        $uncertaintyIso3: String!,
+        $subvariable: String!,
+        $indicatorId: String,
+        $category: String!,
+        $uncertaintyEmergency: String!,
     ) {
         countryProfile(iso3: $iso3) {
             iso3
@@ -97,6 +107,8 @@ const COUNTRY_PROFILE = gql`
             internetAccessRegion
             economicSupportIndexRegion
             medicalStaffRegion
+            newCasesPerMillion
+            newDeaths
         }
         disaggregation {
             ageDisaggregation(iso3: $disaggregationIso3) {
@@ -119,6 +131,27 @@ const COUNTRY_PROFILE = gql`
             contextIndicatorValue
             contextDate
         }
+        dataCountryLevel(
+            filters: {
+                indicatorMonth: {
+                    gte: $gte
+                },
+                iso3: $uncertaintyIso3,
+                subvariable: $subvariable,
+                indicatorId: $indicatorId,
+                category: $category,
+                emergency: $uncertaintyEmergency,
+            }
+        ) {
+            errorMargin
+            indicatorName
+            indicatorValue
+            indicatorMonth
+            indicatorDescription
+            indicatorId
+            subvariable
+            interpolated
+        }
     }
 `;
 interface Props {
@@ -134,12 +167,22 @@ function Country(props: Props) {
 
     const countryVariables = useMemo((): CountryQueryVariables => ({
         iso3: filterValues?.country ?? 'AFG',
+        // FIXME: filter needed to be handle from backend
+        gte: '2021-08-01',
         contextIndicatorId: 'total_cases',
         disaggregationIso3: filterValues?.country ?? 'AFG',
         emergency: filterValues?.outbreak,
+        uncertaintyIso3: filterValues?.country ?? 'AFG',
+        subvariable: filterValues?.subvariable ?? '',
+        indicatorId: filterValues?.indicator,
+        // NOTE: Only Global response needed
+        category: 'Global',
+        uncertaintyEmergency: filterValues?.outbreak ?? '',
     }), [
         filterValues?.country,
         filterValues?.outbreak,
+        filterValues?.indicator,
+        filterValues?.subvariable,
     ]);
 
     const {
@@ -212,10 +255,58 @@ function Country(props: Props) {
                 {
                     ...getLatestDateItems(emergencyItems),
                     key: emergency,
+                    newDeaths: countryResponse?.countryProfile.newDeaths,
+                    newCasesPerMillion: countryResponse?.countryProfile.newCasesPerMillion,
                 }
             ))
         );
-    }, [countryResponse?.contextualData]);
+    }, [
+        countryResponse?.contextualData,
+        countryResponse?.countryProfile.newCasesPerMillion,
+        countryResponse?.countryProfile.newDeaths,
+    ]);
+
+    const uncertaintyChart: UncertainData[] | undefined = useMemo(() => (
+        countryResponse?.dataCountryLevel.map((country) => {
+            const negativeRange = decimalToPercentage(
+                (country?.indicatorValue && country?.errorMargin)
+                && country?.indicatorValue - country?.errorMargin,
+            );
+            const positiveRange = decimalToPercentage(
+                (country?.indicatorValue && country?.errorMargin)
+                && country?.indicatorValue + country?.errorMargin,
+            );
+
+            if (country.interpolated) {
+                return {
+                    date: getShortMonth(country.indicatorMonth),
+                    uncertainRange: [
+                        negativeRange ?? '',
+                        positiveRange ?? '',
+                    ],
+                };
+            }
+            return {
+                indicatorValue: decimalToPercentage(country.indicatorValue),
+                date: getShortMonth(country.indicatorMonth),
+                uncertainRange: [
+                    negativeRange ?? '',
+                    positiveRange ?? '',
+                ],
+            };
+        })
+    ), [countryResponse?.dataCountryLevel]);
+
+    const StatusUncertainty = useMemo(() => {
+        const dataCountryLevel = countryResponse?.dataCountryLevel;
+        if (!dataCountryLevel) {
+            return undefined;
+        }
+        const getLatestUncertain = [...dataCountryLevel].sort(
+            (a, b) => compareDate(a.indicatorMonth, b.indicatorMonth),
+        );
+        return getLatestUncertain[0];
+    }, [countryResponse?.dataCountryLevel]);
 
     const ageDisaggregation = useMemo(() => countryResponse
         ?.disaggregation.ageDisaggregation.map((age) => (
@@ -333,6 +424,8 @@ function Country(props: Props) {
     const statusRendererParams = useCallback((_, data: CountryWiseOutbreakCases) => ({
         heading: data.emergency,
         statValue: data.contextIndicatorValue,
+        newDeaths: data.newDeaths,
+        newCasesPerMillion: data.newCasesPerMillion,
     }), []);
 
     const readinessRendererParams = useCallback((_, data: ScoreCardProps) => ({
@@ -417,78 +510,89 @@ function Country(props: Props) {
                         <div className={styles.indicatorWrapper}>
                             <PercentageStats
                                 className={styles.percentageCard}
-                                heading="Percentage of unvaccinated individuals who have tried to get vaccinated"
+                                indicatorDescription={StatusUncertainty?.indicatorDescription}
                                 headingSize="extraSmall"
-                                statValue={56}
+                                statValue={Number(decimalToPercentage(
+                                    StatusUncertainty?.indicatorValue,
+                                ))}
                                 suffix="%"
                                 icon={null}
                             />
                             <UncertaintyChart
                                 className={styles.indicatorsChart}
+                                uncertainData={(uncertaintyChart && uncertaintyChart) ?? []}
                             />
-                            <ContainerCard
-                                className={styles.disaggregation}
-                                contentClassName={styles.disaggregationContent}
-                                heading="Disaggregation"
-                                headerDescription="Lorem ipsum explaining the topic"
-                                headingSize="extraSmall"
-                            >
-                                {genderDisaggregation && genderDisaggregation.length > 0 && (
-                                    <div className={styles.genderDisaggregation}>
-                                        <div>Gender Disaggregation</div>
-                                        <ResponsiveContainer className={styles.responsiveContainer}>
-                                            <BarChart
-                                                data={genderDisaggregation}
+                            {(genderDisaggregation && genderDisaggregation.length > 0
+                                && ageDisaggregation && ageDisaggregation.length > 0
+                            ) && (
+                                <ContainerCard
+                                    className={styles.disaggregation}
+                                    contentClassName={styles.disaggregationContent}
+                                    heading="Disaggregation"
+                                    headerDescription="Lorem ipsum explaining the topic"
+                                    headingSize="extraSmall"
+                                >
+                                    {genderDisaggregation && genderDisaggregation.length > 0 && (
+                                        <div className={styles.genderDisaggregation}>
+                                            <div>Gender Disaggregation</div>
+                                            <ResponsiveContainer
+                                                className={styles.responsiveContainer}
                                             >
-                                                <Bar
-                                                    dataKey="indicatorValue"
-                                                    fill="#8DD2B1"
-                                                    label={disaggregationLabel}
-                                                    barSize={50}
-                                                />
-                                                <XAxis
-                                                    dataKey="category"
-                                                    tickLine={false}
-                                                />
-                                                <YAxis
-                                                    type="number"
-                                                    axisLine={false}
-                                                    tickLine={false}
-                                                    domain={[0, 100]}
-                                                />
-                                            </BarChart>
-                                        </ResponsiveContainer>
-                                    </div>
-                                )}
-                                {ageDisaggregation && ageDisaggregation.length > 0 && (
-                                    <div className={styles.ageDisaggregation}>
-                                        <div>Age Disaggregation</div>
-                                        <ResponsiveContainer className={styles.responsiveContainer}>
-                                            <BarChart
-                                                data={ageDisaggregation}
+                                                <BarChart
+                                                    data={genderDisaggregation}
+                                                >
+                                                    <Bar
+                                                        dataKey="indicatorValue"
+                                                        fill="#8DD2B1"
+                                                        label={disaggregationLabel}
+                                                        barSize={50}
+                                                    />
+                                                    <XAxis
+                                                        dataKey="category"
+                                                        tickLine={false}
+                                                    />
+                                                    <YAxis
+                                                        type="number"
+                                                        axisLine={false}
+                                                        tickLine={false}
+                                                        domain={[0, 100]}
+                                                    />
+                                                </BarChart>
+                                            </ResponsiveContainer>
+                                        </div>
+                                    )}
+                                    {ageDisaggregation && ageDisaggregation.length > 0 && (
+                                        <div className={styles.ageDisaggregation}>
+                                            <div>Age Disaggregation</div>
+                                            <ResponsiveContainer
+                                                className={styles.responsiveContainer}
                                             >
-                                                <Bar
-                                                    dataKey="indicatorValue"
-                                                    fill="#8DD2B1"
-                                                    label={disaggregationLabel}
-                                                    barSize={50}
-                                                />
-                                                <XAxis
-                                                    dataKey="category"
-                                                    tickLine={false}
-                                                />
-                                                <YAxis
-                                                    type="number"
-                                                    axisLine={false}
-                                                    tickLine={false}
-                                                    domain={[0, 100]}
-                                                />
-                                            </BarChart>
-                                        </ResponsiveContainer>
-                                    </div>
+                                                <BarChart
+                                                    data={ageDisaggregation}
+                                                >
+                                                    <Bar
+                                                        dataKey="indicatorValue"
+                                                        fill="#8DD2B1"
+                                                        label={disaggregationLabel}
+                                                        barSize={50}
+                                                    />
+                                                    <XAxis
+                                                        dataKey="category"
+                                                        tickLine={false}
+                                                    />
+                                                    <YAxis
+                                                        type="number"
+                                                        axisLine={false}
+                                                        tickLine={false}
+                                                        domain={[0, 100]}
+                                                    />
+                                                </BarChart>
+                                            </ResponsiveContainer>
+                                        </div>
 
-                                )}
-                            </ContainerCard>
+                                    )}
+                                </ContainerCard>
+                            )}
                         </div>
                     )}
                 </div>
@@ -499,7 +603,10 @@ function Country(props: Props) {
                     headingClassName={styles.countryHeading}
                     headerIcons={(
                         // FIX ME: COUNTRY AVATAR
-                        <img src="https://picsum.photos/50" alt="country-avatar" />
+                        <img
+                            src={`https://rcce-dashboard.s3.eu-west-3.amazonaws.com/flags/${filterValues?.country}.png`}
+                            alt="country-avatar"
+                        />
                     )}
                     headingSize="small"
                     heading={countryResponse?.countryProfile.countryName}
@@ -666,13 +773,21 @@ function Country(props: Props) {
                     </div>
                 </ContainerCard>
             </div>
-            <ContainerCard
-                className={styles.perceptionWrapper}
-                contentClassName={styles.perceptionCard}
-                footerContent="Data collection not completed - as of March 31st"
-            >
-                <p>COVID-19 Vaccine Perceptions in Africa</p>
-            </ContainerCard>
+            <div className={styles.perceptionCard}>
+                <div className={styles.infoIcon}>
+                    <IoInformationCircle />
+                </div>
+                <div>
+                    {`COVID-19 Vaccine Perceptions in ${countryResponse?.countryProfile.countryName}
+                    (${countryResponse?.countryProfile.countryName} CDC)`}
+                </div>
+                <a
+                    href="https://www.rcce-collective.net/data/data-tracker/"
+                    className={styles.infoIcon}
+                >
+                    <BiLinkExternal />
+                </a>
+            </div>
         </div>
     );
 }
