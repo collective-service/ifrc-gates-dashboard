@@ -22,6 +22,15 @@ import styles from './styles.css';
 
 const progressBarKeySelector = (d: ProgressBarProps) => d.id;
 
+const MAP_INDICATOR = gql`
+    query MapIndicatorValues ($filters: CountryEmergencyProfileFilter) {
+        countryEmergencyProfile(filters: $filters) {
+            contextIndicatorValue
+            iso3
+            id
+        }
+    }
+`;
 interface MapViewProps {
     className?: string;
     isIndicatorSelected: boolean;
@@ -29,8 +38,36 @@ interface MapViewProps {
 
 const lightStyle = 'mapbox://styles/mapbox/light-v10';
 const countryFillPaint: mapboxgl.FillPaint = {
+<<<<<<< HEAD
     'fill-color': '#63ba34', // empty color
     'fill-opacity': 0.2,
+=======
+    // Color each country on the basis of outbreak
+    'fill-color': [
+        'interpolate',
+        ['linear'],
+        ['coalesce', ['feature-state', 'contextIndicatorValue'], 0],
+        0,
+        '#2F9F45',
+        500000,
+        '#EED322',
+        750000,
+        '#E6B71E',
+        1000000,
+        '#2F9C67',
+        2500000,
+        '#2F3345',
+        5000000,
+        '#2F9C67',
+        7500000,
+        '#2F9C67',
+        10000000,
+        '#2F9C67',
+        25000000,
+        '#723122',
+    ],
+    'fill-opacity': 0.5,
+>>>>>>> Add new changes for map and pie-chart
 };
 
 const countryLinePaint: mapboxgl.LinePaint = {
@@ -46,6 +83,60 @@ function MapView(props: MapViewProps) {
         isIndicatorSelected,
     } = props;
 
+<<<<<<< HEAD
+=======
+    // TODO: Map modal to be included in the mapbox.
+    const [
+        mapModalShown,
+        showMapModal,
+        hideMapModal,
+    ] = useModalState(false);
+
+    const [
+        countryData,
+        setCountryData,
+    ] = useState<mapboxgl.MapboxGeoJSONFeature | undefined>();
+
+    const mapIndicatorVariables = useMemo((): MapIndicatorValuesQueryVariables => ({
+        filters: {
+            contextIndicatorId: 'total_cases',
+            emergency: filterValues?.outbreak,
+        },
+    }), [
+        filterValues,
+    ]);
+
+    const {
+        data: mapIndicatorValues,
+    } = useQuery<MapIndicatorValuesQuery, MapIndicatorValuesQueryVariables>(
+        MAP_INDICATOR,
+        {
+            variables: mapIndicatorVariables,
+        },
+    );
+
+    const mapIndicatorState = useMemo(() => {
+        const countryIndicator = mapIndicatorValues?.countryEmergencyProfile?.map(
+            (indicatorValue) => ({
+                id: indicatorValue.id,
+                value: indicatorValue.contextIndicatorValue ?? 0,
+                iso: indicatorValue.iso3,
+            }),
+        )
+            .filter((item) => item.value > 0);
+        return countryIndicator ?? [];
+    }, [mapIndicatorValues?.countryEmergencyProfile]);
+
+    const handleCountryClick = useCallback(
+        (feature: mapboxgl.MapboxGeoJSONFeature) => {
+            setCountryData(feature);
+            showMapModal();
+            return true;
+        },
+        [showMapModal],
+    );
+
+>>>>>>> Add new changes for map and pie-chart
     const progressBarRendererParams = useCallback(
         (_: string, data: ProgressBarProps) => ({
             barHeight,
@@ -79,6 +170,11 @@ function MapView(props: MapViewProps) {
                         sourceKey="country"
                         sourceOptions={{
                             type: 'geojson',
+<<<<<<< HEAD
+=======
+                            // FIXME: set promoteId to whatever we get from geojson properties
+                            promoteId: 'id',
+>>>>>>> Add new changes for map and pie-chart
                         }}
                         geoJson="https://rcce-dashboard.s3.eu-west-3.amazonaws.com/countries.json"
                     >

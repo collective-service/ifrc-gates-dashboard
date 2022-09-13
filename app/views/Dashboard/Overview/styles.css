@@ -19,10 +19,12 @@
         }
     }
 
+    /*
+    FIX: Disabled for later
     .area-chart-box {
         display: flex;
         gap: var(--dui-spacing-extra-large);
-    }
+    } */
 
     .dashboard-tab-list {
         display: flex;
