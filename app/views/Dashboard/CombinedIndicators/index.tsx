@@ -5,6 +5,7 @@ import {
     listToGroupList,
     _cs,
     mapToList,
+    isDefined,
 } from '@togglecorp/fujs';
 import {
     ContainerCard,
@@ -47,7 +48,7 @@ const COMBINED_INDICATORS_DATA = gql`
             indicatorName
             indicatorDescription
             indicatorValue
-            indicatorValueGradient
+            indicatorValueRegional
             type
             thematic
             topic
@@ -67,12 +68,15 @@ interface SeparatedThematic {
 interface ThematicProps {
     thematicName: string;
     indicators: IndicatorDataType[];
+    showRegionalValue: boolean;
 }
 
 function ThematicRenderer(props: ThematicProps) {
     const {
         thematicName,
         indicators,
+        showRegionalValue,
+        indicatorsByRegion,
     } = props;
 
     const topicKeySelector = (d: SeparatedThematic) => d.key;
@@ -95,7 +99,9 @@ function ThematicRenderer(props: ThematicProps) {
     const topicRendererParams = useCallback((key: string, data: SeparatedThematic) => ({
         indicatorKey: key,
         indicators: data.items,
-    }), []);
+        indicatorsByRegion,
+        showRegionalValue,
+    }), [showRegionalValue, indicatorsByRegion]);
 
     return (
         <div
@@ -151,7 +157,6 @@ function CombinedIndicators(props: Props) {
             variables: combinedIndicatorVariables,
         },
     );
-
     const thematicSeparatedIndicators = useMemo(() => {
         const thematicGroupedList = listToGroupList(
             combinedIndicatorsData?.dataCountryLevelMostRecent,
@@ -170,7 +175,10 @@ function CombinedIndicators(props: Props) {
     const thematicRendererParams = useCallback((_: string, item: SeparatedThematic) => ({
         thematicName: item.key,
         indicators: item.items,
-    }), []);
+        showRegionalValue: isDefined(filterValues?.country),
+    }), [
+        filterValues?.country,
+    ]);
 
     const topicKeySelector = (d: SeparatedThematic) => d.key;
 
