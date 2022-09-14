@@ -31,6 +31,9 @@ import {
     TotalOutbreakCasesQueryVariables,
     RegionalBreakdownQuery,
     RegionalBreakdownQueryVariables,
+    UncertaintyGlobalQuery,
+    UncertaintyGlobalQueryVariables,
+    UncertaintyRegionQueryVariables,
 } from '#generated/types';
 
 import styles from './styles.css';
@@ -118,6 +121,70 @@ interface PercentageCardGroupProps {
     filterValues?: FilterType | undefined;
     uncertaintyChartActive: boolean;
 }
+const UNCERTAINTY_GLOBAL = gql`
+    query UncertaintyGlobal(
+        $isTwelveMonth: Boolean,
+        $indicatorId: String,
+        $category: String,
+        $indicatorMonth: Ordering,
+        $offset: Int!,
+        $limit: Int!,
+    ) {
+        globalLevel(
+            filters: {
+                isTwelveMonth: $isTwelveMonth,
+                indicatorId: $indicatorId,
+                category: $category,
+            },
+            order: {
+                indicatorMonth: $indicatorMonth,
+            },
+            pagination: {
+                limit: $limit,
+                offset: $offset,
+            },
+        ) {
+            id
+            errorMargin
+            indicatorMonth
+            indicatorName
+            indicatorValueGlobal
+        }
+    }
+
+`;
+
+const UNCERTAINTY_REGION = gql`
+    query UncertaintyRegion(
+        $indicatorId: String,
+        $isTwelveMonth: Boolean,
+        $region: String,
+        $indicatorMonth: Ordering,
+        $limit: Int!,
+        $offset: Int!,
+    ) {
+        regionLevel(
+            filters: {
+                indicatorId: $indicatorId,
+                isTwelveMonth: $isTwelveMonth,
+                region: $region,
+            },
+            order: {
+                indicatorMonth: $indicatorMonth,
+            },
+            pagination: {
+                limit: $limit,
+                offset: $offset,
+            },
+        ) {
+            id
+            errorMargin
+            indicatorMonth
+            indicatorName
+            indicatorValueRegional
+        }
+    }
+`;
 
 function PercentageCardGroup(props: PercentageCardGroupProps) {
     const {
@@ -176,12 +243,51 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
         filterValues?.region,
     ]);
 
+    const uncertaintyGlobalVariables = useMemo((): UncertaintyGlobalQueryVariables => ({
+        isTwelveMonth: true,
+        indicatorId: filterValues?.indicator,
+        limit: 12,
+        offset: 0,
+        category: 'Global',
+        indicatorMonth: 'DESC',
+    }), [filterValues?.indicator]);
+
+    const {
+        data: uncertaintyGlobalResponse,
+    } = useQuery<UncertaintyGlobalQuery, UncertaintyGlobalQueryVariables>(
+        UNCERTAINTY_GLOBAL,
+        {
+            variables: uncertaintyGlobalVariables,
+        },
+    );
+
+    const uncertaintyRegionVariables = useMemo((): UncertaintyRegionQueryVariables => ({
+        isTwelveMonth: true,
+        indicatorId: filterValues?.indicator,
+        limit: 12,
+        offset: 0,
+        region: filterValues?.region,
+        indicatorMonth: 'DESC',
+    }), [
+        filterValues?.indicator,
+        filterValues?.region,
+    ]);
+
     const {
         data: regionalBreakdownResponse,
     } = useQuery<RegionalBreakdownQuery, RegionalBreakdownQueryVariables>(
         REGIONAL_BREAKDOWN,
         {
             variables: regionalBreakdownVariables,
+        },
+    );
+
+    const {
+        data: uncertaintyRegionResponse,
+    } = useQuery<UncertaintyGlobalQuery, UncertaintyGlobalQueryVariables>(
+        UNCERTAINTY_REGION,
+        {
+            variables: uncertaintyRegionVariables,
         },
     );
 
