@@ -23,6 +23,7 @@ import {
     barChartData,
     uncertainData,
 } from '#utils/dummyData';
+import { getShortMonth } from '#utils/common';
 import {
     OutbreakQuery,
     OutbreakQueryVariables,
@@ -45,6 +46,7 @@ const TOTAL_OUTBREAK_CASES = gql`
         $emergency: String,
         $isGlobal: Boolean,
         $mostRecent: Boolean,
+        $region: String
     ) {
         epiDataGlobal(
             filters: {
@@ -52,6 +54,7 @@ const TOTAL_OUTBREAK_CASES = gql`
                 emergency: $emergency,
                 isGlobal: $isGlobal,
                 mostRecent: $mostRecent,
+                region: $region
             }
         ) {
             contextIndicatorValue
@@ -67,6 +70,7 @@ const OUTBREAK = gql`
         $emergency: String,
         $isGlobal: Boolean,
         $contextIndicatorId: String,
+        $region: String,
     ) {
         epiDataGlobal(
             filters: {
@@ -74,6 +78,7 @@ const OUTBREAK = gql`
                 isGlobal: $isGlobal,
                 emergency: $emergency,
                 contextIndicatorId: $contextIndicatorId,
+                region: $region,
             }
         ) {
             id
@@ -94,9 +99,13 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
     const totalOutbreakCasesVariables = useMemo((): TotalOutbreakCasesQueryVariables => ({
         contextIndicatorId: 'total_cases',
         mostRecent: true,
-        isGlobal: true,
+        isGlobal: !filterValues?.region,
         emergency: filterValues?.outbreak,
-    }), [filterValues?.outbreak]);
+        region: filterValues?.region,
+    }), [
+        filterValues?.outbreak,
+        filterValues?.region,
+    ]);
 
     const {
         data: totalOutbreakCasesResponse,
@@ -110,9 +119,13 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
     const outbreakVariables = useMemo((): OutbreakQueryVariables => ({
         contextIndicatorId: 'total_cases',
         isTwelveMonth: true,
-        isGlobal: true,
+        isGlobal: !filterValues?.region,
         emergency: filterValues?.outbreak,
-    }), [filterValues?.outbreak]);
+        region: filterValues?.region,
+    }), [
+        filterValues?.outbreak,
+        filterValues?.region,
+    ]);
 
     const {
         data: outbreakResponse,
@@ -123,12 +136,16 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
         },
     );
 
-    console.log(outbreakResponse);
-
-    // const totalCases = listToMap(
-    //    totalOutbreakCasesResponse?.epiDataGlobal,
-    //    (key) => key.emergency,
-    // );
+    const outbreakLineChart = useMemo(() => (
+        outbreakResponse?.epiDataGlobal.map((outbreak) => (
+            {
+                id: outbreak.id,
+                emergency: outbreak.emergency,
+                contextDate: getShortMonth(outbreak.contextDate),
+                [outbreak.emergency]: outbreak.contextIndicatorValue,
+            }
+        ))
+    ), [outbreakResponse?.epiDataGlobal]);
 
     const totalCase = totalOutbreakCasesResponse?.epiDataGlobal
         .find(
@@ -139,6 +156,7 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
         <div className={_cs(className, styles.cardInfo)}>
             <PercentageStats
                 className={styles.globalStatCard}
+                heading={totalCase?.emergency}
                 headingSize="extraSmall"
                 headerDescription={(
                     <p>
@@ -165,7 +183,7 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                     >
                         <ResponsiveContainer className={styles.responsiveContainer}>
                             <LineChart
-                                data={outbreakResponse?.epiDataGlobal}
+                                data={outbreakLineChart}
                                 margin={{
                                     right: 20,
                                 }}
@@ -193,7 +211,7 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                                 />
                                 <Line
                                     type="monotone"
-                                    dataKey="contextIndicatorValue"
+                                    dataKey={filterValues?.outbreak}
                                     stroke="#4bda8a"
                                     strokeWidth={2}
                                     dot={false}

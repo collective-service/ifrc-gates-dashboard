@@ -89,69 +89,6 @@ export const progressDataTwo: ProgressBarRendererProps[] = [
 
 export const boundsData: Bounds = [80.088425, 26.397898, 88.174804, 30.422717];
 
-export const indicatorData = [
-    {
-        id: 1,
-        month: 'Jan',
-        percentage: 10,
-    },
-    {
-        id: 2,
-        month: 'Feb',
-        percentage: 15,
-    },
-    {
-        id: 3,
-        month: 'Mar',
-        percentage: 20,
-    },
-    {
-        id: 4,
-        month: 'Apr',
-        percentage: 25,
-    },
-    {
-        id: 5,
-        month: 'May',
-        percentage: 35,
-    },
-    {
-        id: 6,
-        month: 'Jun',
-        percentage: 15,
-    },
-    {
-        id: 7,
-        month: 'Jul',
-        percentage: 25,
-    },
-    {
-        id: 8,
-        month: 'Aug',
-        percentage: 55,
-    },
-    {
-        id: 9,
-        month: 'Sept',
-        percentage: 50,
-    },
-    {
-        id: 10,
-        month: 'Oct',
-        percentage: 45,
-    },
-    {
-        id: 11,
-        month: 'Nov',
-        percentage: 65,
-    },
-    {
-        id: 12,
-        month: 'Dec',
-        percentage: 5,
-    },
-];
-
 export const genderDisaggregationData = [
     {
         id: 1,
