@@ -295,7 +295,7 @@ export const totalCasesBarChart = [
 export const regionalBreakdownPieData = [
     {
         regionId: '1',
-        country: 'USA',
+        country: 'Americas',
         outbreak: 'COVID-19',
         color: '#C09A57',
         regionalData: [
@@ -328,7 +328,7 @@ export const regionalBreakdownPieData = [
     },
     {
         regionId: '2',
-        country: 'EUR',
+        country: 'Europe',
         outbreak: 'Monkey-pox',
         color: '#FFDD98',
         regionalData: [
@@ -361,7 +361,7 @@ export const regionalBreakdownPieData = [
     },
     {
         regionId: '3',
-        country: 'ASIA',
+        country: 'AsiaPacific',
         outbreak: 'Cholera',
         color: '#C7BCA9',
         regionalData: [
@@ -394,7 +394,7 @@ export const regionalBreakdownPieData = [
     },
     {
         regionId: '4',
-        country: 'IRE',
+        country: 'Mena',
         outbreak: 'Spanish Flu',
         color: '#ACA28E',
         regionalData: [
@@ -427,7 +427,7 @@ export const regionalBreakdownPieData = [
     },
     {
         regionId: '5',
-        country: 'POL',
+        country: 'Esar',
         outbreak: 'Ebola',
         color: '#CCB387',
         regionalData: [
@@ -487,6 +487,65 @@ export const regionalBreakdownPieData = [
                 status: 'severe',
                 percentage: 20,
             },
+        ],
+    },
+];
+
+export const uncertainData = [
+    {
+        indicatorValue: '30',
+        date: '2020-03-15',
+        uncertainRange: [
+            '10',
+            '40',
+        ],
+    },
+    {
+        indicatorValue: '60',
+        date: '2020-03-15',
+        uncertainRange: [
+            '30',
+            '80',
+        ],
+    },
+    {
+        indicatorValue: '40',
+        date: '2020-03-15',
+        uncertainRange: [
+            '20',
+            '50',
+        ],
+    },
+    {
+        indicatorValue: '35',
+        date: '2020-03-15',
+        uncertainRange: [
+            '20',
+            '45',
+        ],
+    },
+    {
+        indicatorValue: '60',
+        date: '2020-03-15',
+        uncertainRange: [
+            '40',
+            '80',
+        ],
+    },
+    {
+        indicatorValue: '55',
+        date: '2020-03-15',
+        uncertainRange: [
+            '40',
+            '20',
+        ],
+    },
+    {
+        indicatorValue: '38',
+        date: '2020-03-15',
+        uncertainRange: [
+            '25',
+            '45',
         ],
     },
 ];

@@ -214,7 +214,6 @@ function Filters(props: Props) {
         },
         [
             onChange,
-            activeTab,
             getRegionForCountry,
         ],
     );
@@ -225,6 +224,7 @@ function Filters(props: Props) {
     } = useQuery<OutbreaksQuery, OutbreaksQueryVariables>(
         OUTBREAKS,
     );
+
     const indicatorListForCountryVariables = useMemo(() => ({
         // FIXME: Take the default country from an index
         iso3: value?.country ?? 'AFG',
@@ -310,7 +310,6 @@ function Filters(props: Props) {
         .filter((r) => r !== '__null')
         .map((r) => ({ key: r, title: r }));
 
-    // TODO: To be disabled even when a country is selected
     const isFilterEmpty = useMemo(() => (
         doesObjectHaveNoData(value, [''])
     ), [value]);

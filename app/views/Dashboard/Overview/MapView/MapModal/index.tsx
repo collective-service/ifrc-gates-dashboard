@@ -17,16 +17,17 @@ import { IoInformationCircleOutline } from 'react-icons/io5';
 import {
     lineChartData,
 } from '#utils/dummyData';
+import { FilterType } from '#views/Dashboard/Filters';
+import { TabTypes } from '#views/Dashboard';
 
-import { FilterType } from '../../../Filters';
 import styles from './styles.css';
 
-export type TabTypes = 'country' | 'overview' | 'combinedIndicators';
 interface ModalProps {
     className?: string;
     onModalClose: () => void;
     setActiveTab: React.Dispatch<React.SetStateAction<TabTypes | undefined>>;
     setFilterValues: React.Dispatch<React.SetStateAction<FilterType | undefined>>;
+    countryData: mapboxgl.MapboxGeoJSONFeature | undefined;
 }
 
 function MapModal(props: ModalProps) {
@@ -35,12 +36,15 @@ function MapModal(props: ModalProps) {
         onModalClose,
         setActiveTab,
         setFilterValues,
+        countryData,
     } = props;
 
     const handleModalCountryName = useCallback(() => {
+        const isoName = countryData?.properties?.iso3;
         setActiveTab('country');
-        setFilterValues({ country: 'AFG' });
+        setFilterValues({ country: isoName });
     }, [
+        countryData,
         setActiveTab,
         setFilterValues,
     ]);
@@ -56,7 +60,10 @@ function MapModal(props: ModalProps) {
                     onClick={handleModalCountryName}
                     variant="action"
                 >
-                    Afganisthan
+                    {
+                        // FIXME: here "idmc_short" should be replaced with some other name
+                        countryData?.properties?.idmc_short
+                    }
                 </Button>
             )}
             headingDescription={(

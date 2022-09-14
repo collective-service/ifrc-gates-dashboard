@@ -21,6 +21,7 @@ import UncertainityChart from '#components/UncertaintyChart';
 import {
     lineChartData,
     barChartData,
+    uncertainData,
 } from '#utils/dummyData';
 
 import styles from './styles.css';
@@ -53,8 +54,11 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                 or remove the component altogether
                */}
             {uncertaintyChartActive
-                ? <UncertainityChart />
-                : (
+                ? (
+                    <UncertainityChart
+                        uncertainData={uncertainData}
+                    />
+                ) : (
                     <ContainerCard
                         className={styles.trendsCard}
                         heading="Outbreak over last 12 months"

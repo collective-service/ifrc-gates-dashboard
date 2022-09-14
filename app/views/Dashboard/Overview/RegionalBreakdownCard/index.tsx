@@ -21,6 +21,7 @@ import {
 } from '#utils/dummyData';
 
 import PieChartInfo, { RegionalDataType } from './PieChartInfo';
+import { FilterType } from '../../Filters';
 import styles from './styles.css';
 
 const COLORS = ['#C09A57', '#FFDD98', '#C7BCA9', '#ACA28E', '#CCB387'];
@@ -67,18 +68,21 @@ function RegionalBreakdownLabel(props: RegionalBreakdownLabelProps) {
 
 interface RegionalBreakdownCardProps {
     className?: string;
+    filterValues?: FilterType | undefined;
 }
 
 function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
     const {
         className,
+        filterValues,
     } = props;
 
     const pieChartInfoRendererParams = useCallback(
         (_: string, data: PieChartInfoRendererProps) => ({
             country: data.country,
             regionalData: data?.regionalData,
-        }), [],
+            filterValues,
+        }), [filterValues],
     );
 
     const regionalBreakdownLabelParams = useCallback(

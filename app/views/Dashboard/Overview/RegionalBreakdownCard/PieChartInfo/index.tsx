@@ -1,5 +1,5 @@
 import React from 'react';
-import { _cs } from '@togglecorp/fujs';
+import { _cs, isDefined } from '@togglecorp/fujs';
 import {
     ResponsiveContainer,
     Pie,
@@ -7,6 +7,7 @@ import {
     Cell,
 } from 'recharts';
 
+import { FilterType } from '../../../Filters';
 import styles from './styles.css';
 
 const COLORS = ['#C09A57', '#FFDD98', '#C7BCA9', '#ACA28E', '#CCB387'];
@@ -21,6 +22,7 @@ interface PieChartInfoProps {
     className?: string;
     country?: string;
     regionalData?: RegionalDataType[];
+    filterValues?: FilterType | undefined;
 }
 
 function PieChartInfo(props: PieChartInfoProps) {
@@ -28,10 +30,21 @@ function PieChartInfo(props: PieChartInfoProps) {
         className,
         country,
         regionalData,
+        filterValues,
     } = props;
 
+    const isRegionSelected = isDefined(filterValues?.region);
+
+    const selectedRegion = filterValues?.region?.toLowerCase() === country?.toLowerCase();
+
     return (
-        <div className={_cs(className, styles.pieChartWrapper)}>
+        <div
+            className={_cs(
+                className, styles.pieChartWrapper,
+                isRegionSelected && styles.lessOpacity,
+            )}
+            style={{ opacity: (selectedRegion || !isRegionSelected) ? 1 : 0.2 }}
+        >
             <div className={styles.pieChartHeader}>
                 {country}
             </div>
