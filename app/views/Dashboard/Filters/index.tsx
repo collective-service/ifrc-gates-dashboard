@@ -104,7 +104,7 @@ const INDICATORS = gql`
                 outBreak: $outbreak,
                 region: $region
             ) {
-                indicatorName
+                indicatorId
                 indicatorDescription
             }
         }
@@ -112,7 +112,7 @@ const INDICATORS = gql`
 `;
 
 type GlobalIndicator = NonNullable<NonNullable<IndicatorsQuery['filterOptions']>['overviewIndicators']>[number];
-const globalIndicatorKeySelector = (d: GlobalIndicator) => d.indicatorName ?? '';
+const globalIndicatorKeySelector = (d: GlobalIndicator) => d.indicatorId ?? '';
 const globalIndicatorLabelSelector = (d: GlobalIndicator) => d.indicatorDescription ?? '';
 
 const SUBVARIABLES = gql`

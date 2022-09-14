@@ -183,6 +183,13 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
         fill: entry.emergency === 'Monkeypox' ? '#ACA28E' : '#FFDD98',
     }));
 
+    const totalBarChart = totalCasesResponse?.epiDataGlobal.map((total) => (
+        {
+            ...total,
+            fill: total.emergency === 'Monkeypox' ? '#ACA28E' : '#FFDD98',
+        }
+    ));
+
     const pieChartInfoRendererParams = useCallback(
         (_: string, data: PieChartInfoRendererProps) => ({
             region: data.region,
@@ -209,7 +216,7 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
             >
                 <ResponsiveContainer className={styles.responsiveContainer}>
                     <BarChart
-                        data={totalCasesResponse?.epiDataGlobal}
+                        data={totalBarChart}
                         barSize={18}
                     >
                         <Tooltip
@@ -239,10 +246,10 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
                             isAnimationActive={false}
                             radius={[10, 10, 0, 0]}
                         >
-                            {totalCasesResponse?.epiDataGlobal?.map((entry) => (
+                            {totalBarChart?.map((entry) => (
                                 <Cell
                                     key={`Cell -${entry.id}`}
-                                    fill={COLORS[Number(entry.id) % COLORS.length]}
+                                    fill={entry.fill}
                                 />
                             ))}
                             <LabelList
