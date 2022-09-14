@@ -5,6 +5,10 @@ import {
     isDefined,
 } from '@togglecorp/fujs';
 
+import { CountryListQuery } from '#generated/types';
+
+type CountryListType = NonNullable<CountryListQuery['countries']>[number];
+
 const standaloneMode = (window as { standaloneMode?: boolean }).standaloneMode ?? false;
 
 export function getDashboardLink() {
@@ -91,4 +95,8 @@ export function normalFormatter() {
             'en', { notation: 'compact' },
         )
     );
+}
+
+export function getRegionForCountry(country: string | undefined, list: CountryListType[]) {
+    return list?.find((c) => c.iso3 === country)?.region;
 }

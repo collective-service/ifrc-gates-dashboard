@@ -23,8 +23,9 @@ import {
     SubvariablesQuery,
     SubvariablesQueryVariables,
 } from '#generated/types';
+import { getRegionForCountry } from '#utils/common';
 
-import { TabTypes } from '..';
+import { TabTypes, COUNTRY_LIST } from '..';
 import AdvancedFilters, { AdvancedOptionType } from '../AdvancedFilters';
 import styles from './styles.css';
 
@@ -55,16 +56,6 @@ const OUTBREAKS = gql`
             active
             outbreak
             __typename
-        }
-    }
-`;
-
-const COUNTRY_LIST = gql`
-    query CountryList{
-        countries {
-            iso3
-            countryName
-            region
         }
     }
 `;
@@ -182,13 +173,16 @@ function Filters(props: Props) {
                         ...oldValue,
                         [name]: newValue,
                         country: undefined,
+                        indicator: undefined,
                     }));
                 } else if (name === 'country') {
                     onChange((oldValue) => {
                         const newValueForRegion = {
                             ...oldValue,
                             [name]: newValue,
-                            region: getRegionForCountry(newValue) ?? undefined,
+                            region: getRegionForCountry(
+                                newValue,
+                            ) ?? undefined,
                         };
                         return newValueForRegion;
                     });
@@ -215,7 +209,7 @@ function Filters(props: Props) {
         },
         [
             onChange,
-            getRegionForCountry,
+            countryList?.countries,
         ],
     );
 

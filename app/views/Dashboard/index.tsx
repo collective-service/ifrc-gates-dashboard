@@ -9,6 +9,7 @@ import {
     TabPanel,
     Button,
 } from '@the-deep/deep-ui';
+import { gql } from '@apollo/client';
 
 import Overview from './Overview';
 import Country from './Country';
@@ -18,6 +19,16 @@ import { AdvancedOptionType } from './AdvancedFilters';
 import styles from './styles.css';
 
 export type TabTypes = 'country' | 'overview' | 'combinedIndicators';
+
+export const COUNTRY_LIST = gql`
+    query CountryList{
+        countries {
+            iso3
+            countryName
+            region
+        }
+    }
+`;
 
 function Dashboard() {
     const [activeTab, setActiveTab] = useState<TabTypes | undefined>('overview');
