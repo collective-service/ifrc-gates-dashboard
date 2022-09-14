@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { _cs, isDefined } from '@togglecorp/fujs';
+import { _cs } from '@togglecorp/fujs';
 import {
     Heading,
     ContainerCard,
@@ -25,9 +25,9 @@ import {
     progressDataOne,
     progressDataTwo,
 } from '#utils/dummyData';
+import { TabTypes } from '#views/Dashboard';
+import { FilterType } from '#views/Dashboard/Filters';
 
-import { TabTypes } from '../..';
-import { FilterType } from '../../Filters';
 import MapModal from './MapModal';
 import styles from './styles.css';
 

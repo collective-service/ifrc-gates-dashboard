@@ -17,9 +17,9 @@ import { IoInformationCircleOutline } from 'react-icons/io5';
 import {
     lineChartData,
 } from '#utils/dummyData';
+import { FilterType } from '#views/Dashboard/Filters';
+import { TabTypes } from '#views/Dashboard';
 
-import { FilterType } from '../../../Filters';
-import { TabTypes } from '../../..';
 import styles from './styles.css';
 
 interface ModalProps {
@@ -60,7 +60,10 @@ function MapModal(props: ModalProps) {
                     onClick={handleModalCountryName}
                     variant="action"
                 >
-                    {countryData?.properties?.idmc_short}
+                    {
+                        // FIXME: here "idmc_short" should be replaced with some other name
+                        countryData?.properties?.idmc_short
+                    }
                 </Button>
             )}
             headingDescription={(

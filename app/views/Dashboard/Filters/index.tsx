@@ -214,7 +214,6 @@ function Filters(props: Props) {
         },
         [
             onChange,
-            activeTab,
             getRegionForCountry,
         ],
     );
