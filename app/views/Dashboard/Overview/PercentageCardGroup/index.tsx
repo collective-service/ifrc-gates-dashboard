@@ -21,9 +21,9 @@ import { useQuery, gql } from '@apollo/client';
 import PercentageStats from '#components/PercentageStats';
 import UncertainityChart from '#components/UncertaintyChart';
 import {
-    uncertainData,
+    barChartData,
 } from '#utils/dummyData';
-import { getShortMonth } from '#utils/common';
+import { decimalToPercentage, getShortMonth } from '#utils/common';
 import {
     OutbreakQuery,
     OutbreakQueryVariables,
@@ -33,6 +33,7 @@ import {
     RegionalBreakdownQueryVariables,
     UncertaintyGlobalQuery,
     UncertaintyGlobalQueryVariables,
+    UncertaintyRegionQuery,
     UncertaintyRegionQueryVariables,
 } from '#generated/types';
 
@@ -121,12 +122,13 @@ interface PercentageCardGroupProps {
     filterValues?: FilterType | undefined;
     uncertaintyChartActive: boolean;
 }
-const UNCERTAINTY_GLOBAL = gql`
-    query UncertaintyGlobal(
+const UNCERTAINTY = gql`
+    query Uncertainty(
         $isTwelveMonth: Boolean,
         $indicatorId: String,
         $category: String,
         $indicatorMonth: Ordering,
+        $region: String,
         $offset: Int!,
         $limit: Int!,
     ) {
@@ -150,19 +152,6 @@ const UNCERTAINTY_GLOBAL = gql`
             indicatorName
             indicatorValueGlobal
         }
-    }
-
-`;
-
-const UNCERTAINTY_REGION = gql`
-    query UncertaintyRegion(
-        $indicatorId: String,
-        $isTwelveMonth: Boolean,
-        $region: String,
-        $indicatorMonth: Ordering,
-        $limit: Int!,
-        $offset: Int!,
-    ) {
         regionLevel(
             filters: {
                 indicatorId: $indicatorId,
@@ -184,6 +173,7 @@ const UNCERTAINTY_REGION = gql`
             indicatorValueRegional
         }
     }
+
 `;
 
 function PercentageCardGroup(props: PercentageCardGroupProps) {
@@ -243,30 +233,13 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
         filterValues?.region,
     ]);
 
-    const uncertaintyGlobalVariables = useMemo((): UncertaintyGlobalQueryVariables => ({
+    const uncertaintyVariables = useMemo((): UncertaintyGlobalQueryVariables => ({
         isTwelveMonth: true,
         indicatorId: filterValues?.indicator,
+        region: filterValues?.region,
         limit: 12,
         offset: 0,
         category: 'Global',
-        indicatorMonth: 'DESC',
-    }), [filterValues?.indicator]);
-
-    const {
-        data: uncertaintyGlobalResponse,
-    } = useQuery<UncertaintyGlobalQuery, UncertaintyGlobalQueryVariables>(
-        UNCERTAINTY_GLOBAL,
-        {
-            variables: uncertaintyGlobalVariables,
-        },
-    );
-
-    const uncertaintyRegionVariables = useMemo((): UncertaintyRegionQueryVariables => ({
-        isTwelveMonth: true,
-        indicatorId: filterValues?.indicator,
-        limit: 12,
-        offset: 0,
-        region: filterValues?.region,
         indicatorMonth: 'DESC',
     }), [
         filterValues?.indicator,
@@ -283,13 +256,57 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
     );
 
     const {
-        data: uncertaintyRegionResponse,
+        data: uncertaintyResponse,
     } = useQuery<UncertaintyGlobalQuery, UncertaintyGlobalQueryVariables>(
-        UNCERTAINTY_REGION,
+        UNCERTAINTY,
         {
-            variables: uncertaintyRegionVariables,
+            variables: uncertaintyVariables,
         },
     );
+
+    const uncertaintyGlobalChart = useMemo(() => (
+        uncertaintyResponse?.globalLevel.map((global) => {
+            const negativeRange = decimalToPercentage(
+                (global.indicatorValueGlobal && global.errorMargin)
+                && global.indicatorValueGlobal - global.errorMargin,
+            );
+            const positiveRange = decimalToPercentage(
+                (global.indicatorValueGlobal && global.errorMargin)
+                && global.indicatorValueGlobal + global.errorMargin,
+            );
+
+            return {
+                indicatorValue: decimalToPercentage(global.indicatorValueGlobal),
+                date: getShortMonth(global.indicatorMonth),
+                uncertainRange: [
+                    negativeRange ?? '',
+                    positiveRange ?? '',
+                ],
+            };
+        })
+    ), [uncertaintyResponse?.globalLevel]);
+
+    const uncertaintyRegionChart = useMemo(() => (
+        uncertaintyResponse?.regionLevel.map((region) => {
+            const negativeRange = decimalToPercentage(
+                (region.indicatorValueRegional && region.errorMargin)
+                && region.indicatorValueRegional - region.errorMargin,
+            );
+            const positiveRange = decimalToPercentage(
+                (region.indicatorValueRegional && region.errorMargin)
+                && region.indicatorValueRegional + region.errorMargin,
+            );
+
+            return {
+                indicatorValue: decimalToPercentage(region.indicatorValueRegional),
+                date: getShortMonth(region.indicatorMonth),
+                uncertainRange: [
+                    negativeRange ?? '',
+                    positiveRange ?? '',
+                ],
+            };
+        })
+    ), [uncertaintyResponse?.regionLevel]);
 
     const outbreakLineChart = useMemo(() => (
         outbreakResponse?.epiDataGlobal.map((outbreak) => (
@@ -328,7 +345,11 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
             {uncertaintyChartActive
                 ? (
                     <UncertainityChart
-                        uncertainData={uncertainData}
+                        uncertainData={
+                            filterValues?.region
+                                ? uncertaintyRegionChart
+                                : uncertaintyGlobalChart
+                        }
                     />
                 ) : (
                     <ContainerCard
