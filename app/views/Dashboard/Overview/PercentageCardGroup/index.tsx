@@ -10,6 +10,7 @@ import {
     Legend,
     ResponsiveContainer,
     LabelList,
+    Cell,
 } from 'recharts';
 import {
     ContainerCard,
@@ -20,7 +21,6 @@ import { useQuery, gql } from '@apollo/client';
 import PercentageStats from '#components/PercentageStats';
 import UncertainityChart from '#components/UncertaintyChart';
 import {
-    barChartData,
     uncertainData,
 } from '#utils/dummyData';
 import { getShortMonth } from '#utils/common';
@@ -29,6 +29,8 @@ import {
     OutbreakQueryVariables,
     TotalOutbreakCasesQuery,
     TotalOutbreakCasesQueryVariables,
+    RegionalBreakdownQuery,
+    RegionalBreakdownQueryVariables,
 } from '#generated/types';
 
 import styles from './styles.css';
@@ -42,20 +44,20 @@ interface PercentageCardGroupProps {
 
 const TOTAL_OUTBREAK_CASES = gql`
     query TotalOutbreakCases(
-        $contextIndicatorId: String,
-        $emergency: String,
-        $isGlobal: Boolean,
-        $mostRecent: Boolean,
-        $region: String
+    $contextIndicatorId: String,
+    $emergency: String,
+    $isGlobal: Boolean,
+    $mostRecent: Boolean,
+    $region: String
     ) {
         epiDataGlobal(
-            filters: {
-                contextIndicatorId: $contextIndicatorId,
-                emergency: $emergency,
-                isGlobal: $isGlobal,
-                mostRecent: $mostRecent,
-                region: $region
-            }
+        filters: {
+            contextIndicatorId: $contextIndicatorId,
+            emergency: $emergency,
+            isGlobal: $isGlobal,
+            mostRecent: $mostRecent,
+            region: $region
+        }
         ) {
             contextIndicatorValue
             emergency
@@ -66,25 +68,54 @@ const TOTAL_OUTBREAK_CASES = gql`
 
 const OUTBREAK = gql`
     query Outbreak(
-        $isTwelveMonth: Boolean,
-        $emergency: String,
-        $isGlobal: Boolean,
-        $contextIndicatorId: String,
-        $region: String,
+    $isTwelveMonth: Boolean,
+    $emergency: String,
+    $isGlobal: Boolean,
+    $contextIndicatorId: String,
+    $region: String,
     ) {
         epiDataGlobal(
-            filters: {
-                isTwelveMonth: $isTwelveMonth,
-                isGlobal: $isGlobal,
-                emergency: $emergency,
-                contextIndicatorId: $contextIndicatorId,
-                region: $region,
-            }
+        filters: {
+            isTwelveMonth: $isTwelveMonth,
+            isGlobal: $isGlobal,
+            emergency: $emergency,
+            contextIndicatorId: $contextIndicatorId,
+            region: $region,
+        }
         ) {
             id
             contextIndicatorValue
             contextDate
             emergency
+        }
+    }
+`;
+
+const REGIONAL_BREAKDOWN = gql`
+    query RegionalBreakdown(
+    $isTwelveMonth: Boolean,
+    $emergency: String,
+    $isGlobal: Boolean,
+    $contextIndicatorId: String,
+    $region: String,
+    $mostRecent: Boolean,
+    ) {
+        epiDataGlobal(
+        filters: {
+            isTwelveMonth: $isTwelveMonth,
+            isGlobal: $isGlobal,
+            emergency: $emergency,
+            contextIndicatorId: $contextIndicatorId,
+            region: $region,
+            mostRecent: $mostRecent,
+        }
+        ) {
+            id
+            contextIndicatorValue
+            mostRecent
+            emergency
+            contextDate
+            region
         }
     }
 `;
@@ -136,6 +167,25 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
         },
     );
 
+    const regionalBreakdownVariables = useMemo((): RegionalBreakdownQueryVariables => ({
+        contextIndicatorId: 'total_cases',
+        mostRecent: true,
+        emergency: filterValues?.outbreak,
+        region: filterValues?.region,
+    }), [
+        filterValues?.outbreak,
+        filterValues?.region,
+    ]);
+
+    const {
+        data: regionalBreakdownResponse,
+    } = useQuery<RegionalBreakdownQuery, RegionalBreakdownQueryVariables>(
+        REGIONAL_BREAKDOWN,
+        {
+            variables: regionalBreakdownVariables,
+        },
+    );
+
     const outbreakLineChart = useMemo(() => (
         outbreakResponse?.epiDataGlobal.map((outbreak) => (
             {
@@ -165,9 +215,6 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                 )}
                 statValue={totalCase?.contextIndicatorValue ?? 0}
             />
-            { /* FIXME: (for Priyesh) Either include data in Uncertainty Chart
-                or remove the component altogether
-               */}
             {uncertaintyChartActive
                 ? (
                     <UncertainityChart
@@ -226,11 +273,11 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                 contentClassName={styles.responsiveContent}
                 heading="Regional Breakdown"
                 headingSize="extraSmall"
-                headerDescription="Average indicator value weighted by country's populations (Apr 2022)"
+                headerDescription="Average indicator value weighted by region"
             >
                 <ResponsiveContainer className={styles.responsiveContainer}>
                     <BarChart
-                        data={barChartData}
+                        data={regionalBreakdownResponse?.epiDataGlobal}
                         barSize={18}
                     >
                         <Tooltip
@@ -241,12 +288,13 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                             cursor={false}
                         />
                         <XAxis
-                            dataKey="name"
+                            dataKey="region"
                             tickLine={false}
-                            fontSize="14"
+                            interval={0}
+                            fontSize={12}
                         >
                             <LabelList
-                                dataKey="name"
+                                dataKey="region"
                                 position="bottom"
                             />
                         </XAxis>
@@ -255,17 +303,22 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                             hide
                         />
                         <Bar
-                            dataKey="amt"
+                            dataKey="contextIndicatorValue"
                             fill="#8DD2B1"
                             radius={[10, 10, 0, 0]}
                         >
+                            {regionalBreakdownResponse?.epiDataGlobal?.map((entry) => (
+                                <Cell
+                                    key={`Cell -${entry.id}`}
+                                />
+                            ))}
                             <LabelList
-                                dataKey="range"
+                                dataKey="contextIndicatorValue"
                                 position="insideBottomLeft"
                                 fill="#8DD2B1"
                                 angle={-90}
                                 offset={-2.8}
-                                fontSize={22}
+                                fontSize={20}
                             />
                         </Bar>
                     </BarChart>

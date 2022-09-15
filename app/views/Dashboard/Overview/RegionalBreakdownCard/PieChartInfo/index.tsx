@@ -1,10 +1,12 @@
 import React from 'react';
 import { _cs, isDefined } from '@togglecorp/fujs';
+import { NumberOutput } from '@the-deep/deep-ui';
 import {
     ResponsiveContainer,
     Pie,
     PieChart,
     Cell,
+    Tooltip,
 } from 'recharts';
 
 import { FilterType } from '../../../Filters';
@@ -17,6 +19,12 @@ export type RegionalDataType = {
     fill: string;
     emergency: string;
     contextIndicatorValue: number | null | undefined;
+}
+
+interface LabelProps {
+    x: number;
+    y: number;
+    value: string;
 }
 
 interface PieChartInfoProps {
@@ -35,6 +43,22 @@ function PieChartInfo(props: PieChartInfoProps) {
     } = props;
 
     const isRegionSelected = isDefined(filterValues?.region);
+    const aggregatedValue = (labelProps: LabelProps) => {
+        const { x, y, value } = labelProps;
+
+        return (
+            <text
+                x={x}
+                y={y}
+                dy={-4}
+            >
+                <NumberOutput
+                    normal
+                    value={Number(value)}
+                />
+            </text>
+        );
+    };
 
     const selectedRegion = filterValues?.region?.toLowerCase() === region?.toLowerCase();
 
@@ -60,6 +84,7 @@ function PieChartInfo(props: PieChartInfoProps) {
                         <Pie
                             data={regionalData}
                             dataKey="contextIndicatorValue"
+                            nameKey="emergency"
                             labelLine={false}
                             cx={60}
                             cy={50}
@@ -72,6 +97,13 @@ function PieChartInfo(props: PieChartInfoProps) {
                                 />
                             ))}
                         </Pie>
+                        <Tooltip
+                            allowEscapeViewBox={{
+                                x: false,
+                                y: true,
+                            }}
+                            label={aggregatedValue}
+                        />
                     </PieChart>
                 </ResponsiveContainer>
             </div>
