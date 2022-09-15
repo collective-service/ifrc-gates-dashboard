@@ -81,6 +81,6 @@ export function decimalToPercentage(value: number | null | undefined) {
 export function getShortMonth(date: string) {
     return (
         new Date(date)
-            .toLocaleString('default', { month: 'short' })
+            .toLocaleString('default', { year: 'numeric', month: 'short' })
     );
 }
