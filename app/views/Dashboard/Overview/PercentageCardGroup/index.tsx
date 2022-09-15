@@ -19,10 +19,8 @@ import { _cs } from '@togglecorp/fujs';
 import { useQuery, gql } from '@apollo/client';
 
 import PercentageStats from '#components/PercentageStats';
-import UncertainityChart from '#components/UncertaintyChart';
-import {
-    barChartData,
-} from '#utils/dummyData';
+import UncertaintyChart from '#components/UncertaintyChart';
+
 import { decimalToPercentage, getShortMonth } from '#utils/common';
 import {
     OutbreakQuery,
@@ -31,10 +29,8 @@ import {
     TotalOutbreakCasesQueryVariables,
     RegionalBreakdownQuery,
     RegionalBreakdownQueryVariables,
-    UncertaintyGlobalQuery,
-    UncertaintyGlobalQueryVariables,
-    UncertaintyRegionQuery,
-    UncertaintyRegionQueryVariables,
+    UncertaintyQuery,
+    UncertaintyQueryVariables,
 } from '#generated/types';
 
 import styles from './styles.css';
@@ -44,21 +40,65 @@ const TOTAL_OUTBREAK_CASES = gql`
     query TotalOutbreakCases(
         $contextIndicatorId: String,
         $emergency: String,
+        $indicatorId: String,
+        $indicatorMonth: Ordering
         $isGlobal: Boolean,
+        $isTwelveMonth: Boolean,
+        $limit: Int!,
         $mostRecent: Boolean,
-        $region: String
+        $offset: Int!,
+        $region: String,
     ) {
         epiDataGlobal(
-        filters: {
-            contextIndicatorId: $contextIndicatorId,
-            emergency: $emergency,
-            isGlobal: $isGlobal,
-            mostRecent: $mostRecent,
-            region: $region
-        }
+            filters: {
+                contextIndicatorId: $contextIndicatorId,
+                emergency: $emergency,
+                isGlobal: $isGlobal,
+                mostRecent: $mostRecent,
+                region: $region
+            }
         ) {
             contextIndicatorValue
             emergency
+        }
+        regionLevel(
+            filters: {
+                indicatorId: $indicatorId,
+                emergency: $emergency,
+                isTwelveMonth: $isTwelveMonth,
+                region: $region,
+            },
+            pagination: {
+                limit: $limit,
+                offset: $offset,
+            },
+            order: {
+                indicatorMonth: $indicatorMonth,
+            }
+        ) {
+            id
+            region
+            indicatorValueRegional
+            indicatorMonth
+        }
+        globalLevel(
+            filters: {
+                emergency: $emergency,
+                indicatorId: $indicatorId,
+                isTwelveMonth: $isTwelveMonth,
+            },
+            pagination: {
+                limit: $limit,
+                offset: $limit,
+            },
+            order: {
+                indicatorMonth: $indicatorMonth,
+            }
+        ) {
+            id
+            indicatorId
+            indicatorValueGlobal
+            indicatorMonth
         }
     }
 `;
@@ -96,6 +136,8 @@ const REGIONAL_BREAKDOWN = gql`
         $contextIndicatorId: String,
         $region: String,
         $mostRecent: Boolean,
+        $indicatorId: String,
+        $isRegionalChart: Boolean,
     ) {
         epiDataGlobal(
         filters: {
@@ -114,6 +156,18 @@ const REGIONAL_BREAKDOWN = gql`
             contextDate
             region
         }
+        regionLevel(
+        filters: {
+            emergency: $emergency,
+            indicatorId: $indicatorId,
+            isRegionalChart: $isRegionalChart,
+        }
+        ) {
+            id
+            region
+            indicatorValueRegional
+            indicatorMonth
+        }
     }
 `;
 
@@ -124,27 +178,27 @@ interface PercentageCardGroupProps {
 }
 const UNCERTAINTY = gql`
     query Uncertainty(
-        $isTwelveMonth: Boolean,
-        $indicatorId: String,
-        $category: String,
-        $indicatorMonth: Ordering,
-        $region: String,
-        $offset: Int!,
-        $limit: Int!,
+    $isTwelveMonth: Boolean,
+    $indicatorId: String,
+    $category: String,
+    $indicatorMonth: Ordering,
+    $region: String,
+    $offset: Int!,
+    $limit: Int!,
     ) {
         globalLevel(
-            filters: {
-                isTwelveMonth: $isTwelveMonth,
-                indicatorId: $indicatorId,
-                category: $category,
-            },
-            order: {
-                indicatorMonth: $indicatorMonth,
-            },
-            pagination: {
-                limit: $limit,
-                offset: $offset,
-            },
+        filters: {
+            isTwelveMonth: $isTwelveMonth,
+            indicatorId: $indicatorId,
+            category: $category,
+        },
+        order: {
+            indicatorMonth: $indicatorMonth,
+        },
+        pagination: {
+            limit: $limit,
+            offset: $offset,
+        },
         ) {
             id
             errorMargin
@@ -153,18 +207,18 @@ const UNCERTAINTY = gql`
             indicatorValueGlobal
         }
         regionLevel(
-            filters: {
-                indicatorId: $indicatorId,
-                isTwelveMonth: $isTwelveMonth,
-                region: $region,
-            },
-            order: {
-                indicatorMonth: $indicatorMonth,
-            },
-            pagination: {
-                limit: $limit,
-                offset: $offset,
-            },
+        filters: {
+            indicatorId: $indicatorId,
+            isTwelveMonth: $isTwelveMonth,
+            region: $region,
+        },
+        order: {
+            indicatorMonth: $indicatorMonth,
+        },
+        pagination: {
+            limit: $limit,
+            offset: $offset,
+        },
         ) {
             id
             errorMargin
@@ -189,9 +243,15 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
         isGlobal: !filterValues?.region,
         emergency: filterValues?.outbreak,
         region: filterValues?.region,
+        indicatorMonth: 'DESC',
+        limit: 1,
+        offset: 0,
+        isTwelveMonth: true,
+        indicatorId: filterValues?.indicator,
     }), [
         filterValues?.outbreak,
         filterValues?.region,
+        filterValues?.indicator,
     ]);
 
     const {
@@ -228,12 +288,15 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
         mostRecent: true,
         emergency: filterValues?.outbreak,
         region: filterValues?.region,
+        isRegionalChart: true,
+        indicatorId: filterValues?.indicator,
     }), [
         filterValues?.outbreak,
         filterValues?.region,
+        filterValues?.indicator,
     ]);
 
-    const uncertaintyVariables = useMemo((): UncertaintyGlobalQueryVariables => ({
+    const uncertaintyVariables = useMemo((): UncertaintyQueryVariables => ({
         isTwelveMonth: true,
         indicatorId: filterValues?.indicator,
         region: filterValues?.region,
@@ -255,9 +318,20 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
         },
     );
 
+    const regionalBreakdown = useMemo(() => (
+        regionalBreakdownResponse?.regionLevel.map((region) => (
+            {
+                id: region.id,
+                contextIndicatorValue: decimalToPercentage(region.indicatorValueRegional),
+                indicatorMonth: region.indicatorMonth,
+                region: region.region,
+            }
+        ))
+    ), [regionalBreakdownResponse?.regionLevel]);
+
     const {
         data: uncertaintyResponse,
-    } = useQuery<UncertaintyGlobalQuery, UncertaintyGlobalQueryVariables>(
+    } = useQuery<UncertaintyQuery, UncertaintyQueryVariables>(
         UNCERTAINTY,
         {
             variables: uncertaintyVariables,
@@ -329,6 +403,30 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
         filterValues?.outbreak,
     ])
 
+    const regionTotalCase = totalOutbreakCasesResponse?.regionLevel
+        .find(
+            (region) => region.region === filterValues?.region,
+        );
+
+    const globalTotalCase = totalOutbreakCasesResponse?.globalLevel
+        .find(
+            (global) => global.indicatorId === filterValues?.indicator,
+        );
+
+    const value = () => {
+        if (filterValues?.indicator) {
+            return globalTotalCase?.indicatorValueGlobal;
+        }
+
+        if (filterValues?.region) {
+            return regionTotalCase?.indicatorValueRegional;
+        }
+
+        return totalCase?.contextIndicatorValue;
+    };
+
+    console.log(regionTotalCase?.indicatorValueRegional);
+
     return (
         <div className={_cs(className, styles.cardInfo)}>
             <PercentageStats
@@ -340,11 +438,11 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                         All Outbreak numbers:
                     </p>
                 )}
-                statValue={totalCase?.contextIndicatorValue ?? 0}
+                statValue={value()}
             />
             {uncertaintyChartActive
                 ? (
-                    <UncertainityChart
+                    <UncertaintyChart
                         uncertainData={
                             filterValues?.region
                                 ? uncertaintyRegionChart
@@ -408,7 +506,11 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
             >
                 <ResponsiveContainer className={styles.responsiveContainer}>
                     <BarChart
-                        data={regionalBreakdownResponse?.epiDataGlobal}
+                        data={
+                            (filterValues?.region || filterValues?.indicator)
+                                ? regionalBreakdown
+                                : regionalBreakdownResponse?.epiDataGlobal
+                        }
                         barSize={18}
                     >
                         <Tooltip

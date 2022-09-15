@@ -85,6 +85,9 @@ const COUNTRY_PROFILE = gql`
         $category: String!,
         $uncertaintyEmergency: String!,
         $isTwelveMonth: Boolean,
+        $contextDate: Ordering,
+        $limit: Int!,
+        $offset: Int!,
     ) {
         countryProfile(iso3: $iso3) {
             iso3
@@ -128,7 +131,15 @@ const COUNTRY_PROFILE = gql`
                 emergency: $emergency,
                 isTwelveMonth: $isTwelveMonth,
             }
+            order: {
+                contextDate: $contextDate,
+            }
+            pagination: {
+                limit: $limit,
+                offset: $offset,
+            }
         ) {
+            id
             iso3
             emergency
             contextIndicatorId
@@ -180,9 +191,12 @@ function Country(props: Props) {
         subvariable: filterValues?.subvariable ?? '',
         indicatorId: filterValues?.indicator,
         isTwelveMonth: true,
+        contextDate: 'DESC',
         // NOTE: Only Global response needed
         category: 'Global',
         uncertaintyEmergency: filterValues?.outbreak ?? '',
+        limit: 12,
+        offset: 0,
     }), [
         filterValues?.country,
         filterValues?.outbreak,

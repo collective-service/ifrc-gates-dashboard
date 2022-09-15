@@ -170,8 +170,9 @@ function Filters(props: Props) {
     } = useQuery<CountryListQuery, CountryListQueryVariables>(
         COUNTRY_LIST,
     );
-    const getRegionForCountry = (country: string | undefined) => (
-        countryList?.countries?.find((c) => c.iso3 === country)?.region);
+    const getRegionForCountry = useCallback((country: string | undefined) => (
+        countryList?.countries?.find((c) => c.iso3 === country)?.region
+    ), [countryList?.countries]);
 
     const handleInputChange = useCallback(
         (newValue: string | undefined, name: keyof FilterType) => {
