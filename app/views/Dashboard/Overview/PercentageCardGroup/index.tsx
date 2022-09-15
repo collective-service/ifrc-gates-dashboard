@@ -41,6 +41,7 @@ import {
     UncertaintyQueryVariables,
     UncertaintyGlobalQuery,
     UncertaintyGlobalQueryVariables,
+    UncertaintyRegionQuery,
     UncertaintyRegionQueryVariables,
 } from '#generated/types';
 
@@ -333,7 +334,7 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
     } = useQuery<RegionalBreakdownQuery, RegionalBreakdownQueryVariables>(
         REGIONAL_BREAKDOWN,
         {
-            variables: regionalBreakdownVariables,
+            variables: uncertaintyVariables,
         },
     );
 
