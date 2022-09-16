@@ -15,7 +15,7 @@ import {
 import {
     ContainerCard,
 } from '@the-deep/deep-ui';
-import { _cs } from '@togglecorp/fujs';
+import { isNotDefined, _cs } from '@togglecorp/fujs';
 import { useQuery, gql } from '@apollo/client';
 
 import PercentageStats from '#components/PercentageStats';
@@ -61,26 +61,6 @@ const TOTAL_OUTBREAK_CASES = gql`
             contextIndicatorValue
             emergency
         }
-        regionLevel(
-            filters: {
-                indicatorId: $indicatorId,
-                emergency: $emergency,
-                isTwelveMonth: $isTwelveMonth,
-                region: $region,
-            },
-            pagination: {
-                limit: $limit,
-                offset: $offset,
-            },
-            order: {
-                indicatorMonth: $indicatorMonth,
-            }
-        ) {
-            id
-            region
-            indicatorValueRegional
-            indicatorMonth
-        }
         globalLevel(
             filters: {
                 emergency: $emergency,
@@ -89,7 +69,7 @@ const TOTAL_OUTBREAK_CASES = gql`
             },
             pagination: {
                 limit: $limit,
-                offset: $limit,
+                offset: $offset,
             },
             order: {
                 indicatorMonth: $indicatorMonth,
@@ -105,10 +85,13 @@ const TOTAL_OUTBREAK_CASES = gql`
 
 const OUTBREAK = gql`
     query Outbreak(
-        $isTwelveMonth: Boolean,
+        $contextDate: Ordering,
+        $contextIndicatorId: String,
         $emergency: String,
         $isGlobal: Boolean,
-        $contextIndicatorId: String,
+        $isTwelveMonth: Boolean,
+        $limit: Int!,
+        $offset: Int!,
         $region: String,
     ) {
         epiDataGlobal(
@@ -118,6 +101,13 @@ const OUTBREAK = gql`
             emergency: $emergency,
             contextIndicatorId: $contextIndicatorId,
             region: $region,
+        }
+        order: {
+            contextDate: $contextDate,
+        }
+        pagination: {
+            limit: $limit,
+            offset: $offset,
         }
         ) {
             id
@@ -269,6 +259,9 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
         isGlobal: !filterValues?.region,
         emergency: filterValues?.outbreak,
         region: filterValues?.region,
+        limit: 12,
+        offset: 0,
+        contextDate: 'DESC',
     }), [
         filterValues?.outbreak,
         filterValues?.region,
@@ -349,6 +342,13 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                 && global.indicatorValueGlobal + global.errorMargin,
             );
 
+            if (isNotDefined(global.errorMargin)) {
+                return {
+                    indicatorValue: decimalToPercentage(global.indicatorValueGlobal),
+                    date: getShortMonth(global.indicatorMonth),
+                };
+            }
+
             return {
                 indicatorValue: decimalToPercentage(global.indicatorValueGlobal),
                 date: getShortMonth(global.indicatorMonth),
@@ -370,6 +370,13 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                 (region.indicatorValueRegional && region.errorMargin)
                 && region.indicatorValueRegional + region.errorMargin,
             );
+
+            if (isNotDefined(region.errorMargin)) {
+                return {
+                    indicatorValue: decimalToPercentage(region.indicatorValueRegional),
+                    date: getShortMonth(region.indicatorMonth),
+                };
+            }
 
             return {
                 indicatorValue: decimalToPercentage(region.indicatorValueRegional),
@@ -403,11 +410,6 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
         filterValues?.outbreak,
     ])
 
-    const regionTotalCase = totalOutbreakCasesResponse?.regionLevel
-        .find(
-            (region) => region.region === filterValues?.region,
-        );
-
     const globalTotalCase = totalOutbreakCasesResponse?.globalLevel
         .find(
             (global) => global.indicatorId === filterValues?.indicator,
@@ -417,15 +419,8 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
         if (filterValues?.indicator) {
             return globalTotalCase?.indicatorValueGlobal;
         }
-
-        if (filterValues?.region) {
-            return regionTotalCase?.indicatorValueRegional;
-        }
-
         return totalCase?.contextIndicatorValue;
     };
-
-    console.log(regionTotalCase?.indicatorValueRegional);
 
     return (
         <div className={_cs(className, styles.cardInfo)}>
@@ -466,6 +461,7 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                             >
                                 <XAxis
                                     dataKey="contextDate"
+                                    reversed
                                     axisLine={false}
                                     tickLine={false}
                                     padding={{ left: 20 }}
