@@ -12,7 +12,7 @@ export interface PercentageStatsProps {
 export const progressDataOne: ProgressBarRendererProps[] = [
     {
         barName: 'Cameroon',
-        id: '1',
+        id: 1,
         title: 'Vulnerable cases',
         color: 'var(--dui-color-progress-alt)',
         value: 130,
@@ -20,7 +20,7 @@ export const progressDataOne: ProgressBarRendererProps[] = [
     },
     {
         barName: 'Algeria',
-        id: '2',
+        id: 2,
         title: 'Vulnerable cases',
         color: 'var(--dui-color-progress-alt)',
         value: 50,
@@ -28,7 +28,7 @@ export const progressDataOne: ProgressBarRendererProps[] = [
     },
     {
         barName: 'Bulgaria',
-        id: '3',
+        id: 3,
         title: 'Vulnerable cases',
         color: 'var(--dui-color-progress-alt)',
         value: 99.5,
@@ -36,7 +36,7 @@ export const progressDataOne: ProgressBarRendererProps[] = [
     },
     {
         barName: 'Democratic Republic of Congo',
-        id: '4',
+        id: 4,
         title: 'Vulnerable cases',
         color: 'var(--dui-color-progress-alt)',
         value: 105,
@@ -44,45 +44,10 @@ export const progressDataOne: ProgressBarRendererProps[] = [
     },
     {
         barName: 'Belarus',
-        id: '5',
+        id: 5,
         title: 'Vulnerable cases',
         color: 'var(--dui-color-progress-alt)',
         value: 125,
-        totalValue: 200,
-    },
-];
-
-export const progressDataTwo: ProgressBarRendererProps[] = [
-    {
-        barName: 'Oman',
-        id: '13',
-        title: 'Vulnerable cases',
-        color: 'var(--dui-color-progress-alt)',
-        value: 160,
-        totalValue: 200,
-    },
-    {
-        barName: 'Malaysia',
-        id: '29',
-        title: 'Vulnerable cases',
-        color: 'var(--dui-color-progress-alt)',
-        value: 140,
-        totalValue: 200,
-    },
-    {
-        barName: 'Viet Nam',
-        id: '23',
-        title: 'Vulnerable cases',
-        color: 'var(--dui-color-progress-alt)',
-        value: 135,
-        totalValue: 200,
-    },
-    {
-        barName: 'Lao PDR',
-        id: '26',
-        title: 'Vulnerable cases',
-        color: 'var(--dui-color-progress-alt)',
-        value: 156,
         totalValue: 200,
     },
 ];
