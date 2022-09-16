@@ -167,6 +167,17 @@ const COUNTRY_PROFILE = gql`
             subvariable
             interpolated
         }
+        ContextualDataWithMultipleEmergency(
+            iso3: $iso3,
+        ) {
+            emergency
+            data {
+              contextIndicatorValue
+              contextDate
+              id
+              contextIndicatorId
+            }
+        }
     }
 `;
 interface Props {
@@ -357,20 +368,35 @@ function Country(props: Props) {
         );
     };
 
-    const outbreakLineChartData = useMemo(() => {
-        const outbreakGroupList = listToGroupList(
-            countryResponse?.contextualData,
-            (date) => date.contextDate ?? '',
+    const emergencyLineChart = useMemo(() => {
+        const emergencyMapList = countryResponse?.ContextualDataWithMultipleEmergency.map(
+            (emergency) => {
+                const emergencyGroupList = listToGroupList(
+                    emergency.data,
+                    (date) => date.contextDate ?? '',
+                );
+                return mapToList(
+                    emergencyGroupList,
+                    (group, key) => group.reduce(
+                        (acc, item) => ({
+                            ...acc,
+                            [emergency.emergency]: item.contextIndicatorValue,
+                            date: getShortMonth(item.contextDate),
+                        }), { date: key },
+                    ),
+                );
+            },
+        ).flat();
+
+        const emergencyGroupedList = listToGroupList(
+            emergencyMapList,
+            (month) => month.date,
         );
-        return mapToList(outbreakGroupList,
-            (group, key) => group.reduce(
-                (acc, item) => ({
-                    ...acc,
-                    [item.emergency]: item.contextIndicatorValue,
-                    date: getShortMonth(item.contextDate),
-                }), { date: key },
-            ));
-    }, [countryResponse?.contextualData]);
+
+        return Object.values(emergencyGroupedList ?? {}).map(
+            (d) => d.reduce((acc, item) => ({ ...acc, ...item }), {}),
+        );
+    }, [countryResponse?.ContextualDataWithMultipleEmergency]);
 
     const outbreaks = useMemo(() => (
         unique(
@@ -493,7 +519,7 @@ function Country(props: Props) {
                         >
                             <ResponsiveContainer className={styles.responsiveContainer}>
                                 <LineChart
-                                    data={outbreakLineChartData}
+                                    data={emergencyLineChart}
                                 >
                                     <XAxis
                                         dataKey="date"
