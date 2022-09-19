@@ -84,3 +84,11 @@ export function getShortMonth(date: string) {
             .toLocaleString('default', { month: 'short', year: '2-digit' })
     );
 }
+
+export function normalFormatter() {
+    return (
+        new Intl.NumberFormat(
+            'en', { notation: 'compact' },
+        )
+    );
+}

@@ -21,13 +21,19 @@ import {
 } from '@togglecorp/fujs';
 import { useQuery, gql } from '@apollo/client';
 
-import { RegionalQuery, RegionalQueryVariables, TotalQuery, TotalQueryVariables } from '#generated/types';
+import {
+    RegionalQuery,
+    RegionalQueryVariables,
+    TotalQuery,
+    TotalQueryVariables,
+} from '#generated/types';
+
+import { normalFormatter } from '#utils/common';
 
 import PieChartInfo, { RegionalDataType } from './PieChartInfo';
 import { FilterType } from '../../Filters';
 import styles from './styles.css';
 
-const COLORS = ['#C09A57', '#FFDD98', '#C7BCA9', '#ACA28E', '#CCB387'];
 const pieChartInfoKeySelector = (d: PieChartInfoRendererProps) => d.region;
 const regionalLabelKeySelector = (d: RegionalLabelRendererProps) => d.emergency;
 export interface PieChartInfoRendererProps {
@@ -186,6 +192,7 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
     const totalBarChart = totalCasesResponse?.epiDataGlobal.map((total) => (
         {
             ...total,
+            normalizedValue: normalFormatter().format(total.contextIndicatorValue ?? 0),
             fill: total.emergency === 'Monkeypox' ? '#ACA28E' : '#FFDD98',
         }
     ));
@@ -253,7 +260,7 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
                                 />
                             ))}
                             <LabelList
-                                dataKey="contextIndicatorValue"
+                                dataKey="normalizedValue"
                                 position="insideBottomLeft"
                                 angle={270}
                                 offset={-2.8}

@@ -21,7 +21,11 @@ import { useQuery, gql } from '@apollo/client';
 import PercentageStats from '#components/PercentageStats';
 import UncertaintyChart from '#components/UncertaintyChart';
 
-import { decimalToPercentage, getShortMonth } from '#utils/common';
+import {
+    decimalToPercentage,
+    getShortMonth,
+    normalFormatter,
+} from '#utils/common';
 import {
     OutbreakQuery,
     OutbreakQueryVariables,
@@ -57,6 +61,13 @@ const TOTAL_OUTBREAK_CASES = gql`
                 mostRecent: $mostRecent,
                 region: $region
             }
+            pagination: {
+                limit: $limit,
+                offset: $offset,
+            },
+            order: {
+                contextDate: $indicatorMonth,
+            }
         ) {
             contextIndicatorValue
             emergency
@@ -79,6 +90,7 @@ const TOTAL_OUTBREAK_CASES = gql`
             indicatorId
             indicatorValueGlobal
             indicatorMonth
+            emergency
         }
     }
 `;
@@ -322,6 +334,15 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
         ))
     ), [regionalBreakdownResponse?.regionLevel]);
 
+    const regionalBreakdownEpi = useMemo(() => (
+        regionalBreakdownResponse?.epiDataGlobal.map((region) => (
+            {
+                ...region,
+                normalizedValue: normalFormatter().format(region.contextIndicatorValue ?? 0),
+            }
+        ))
+    ), [regionalBreakdownResponse?.epiDataGlobal]);
+
     const {
         data: uncertaintyResponse,
     } = useQuery<UncertaintyQuery, UncertaintyQueryVariables>(
@@ -400,24 +421,27 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
         ))
     ), [outbreakResponse?.epiDataGlobal]);
 
-    const totalCase = useCallback(() => {
+    const totalCase = useMemo(() => (
         totalOutbreakCasesResponse?.epiDataGlobal
             .find(
                 (emergency) => emergency.emergency === filterValues?.outbreak,
-            );
-    }, [
+            )
+    ), [
         totalOutbreakCasesResponse?.epiDataGlobal,
         filterValues?.outbreak,
-    ])
+    ]);
 
-    const globalTotalCase = totalOutbreakCasesResponse?.globalLevel
-        .find(
-            (global) => global.indicatorId === filterValues?.indicator,
-        );
+    const globalTotalCase = useMemo(() => (
+        totalOutbreakCasesResponse?.globalLevel
+            .find(
+                (global) => global.indicatorId === filterValues?.indicator,
+            )
+    ), [totalOutbreakCasesResponse?.globalLevel]);
 
     const value = () => {
         if (filterValues?.indicator) {
-            return globalTotalCase?.indicatorValueGlobal;
+            // FIXME: Make precentageStat component more comfortable with string
+            return Number(decimalToPercentage(globalTotalCase?.indicatorValueGlobal));
         }
         return totalCase?.contextIndicatorValue;
     };
@@ -428,6 +452,7 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                 className={styles.globalStatCard}
                 heading={totalCase?.emergency}
                 headingSize="extraSmall"
+                suffix={filterValues?.indicator && '%'}
                 headerDescription={(
                     <p>
                         All Outbreak numbers:
@@ -505,7 +530,7 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                         data={
                             (filterValues?.region || filterValues?.indicator)
                                 ? regionalBreakdown
-                                : regionalBreakdownResponse?.epiDataGlobal
+                                : regionalBreakdownEpi
                         }
                         barSize={18}
                     >
@@ -542,7 +567,11 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                                 />
                             ))}
                             <LabelList
-                                dataKey="contextIndicatorValue"
+                                dataKey={
+                                    (filterValues?.region || filterValues?.indicator)
+                                        ? 'contextIndicatorValue'
+                                        : 'normalizedValue'
+                                }
                                 position="insideBottomLeft"
                                 fill="#8DD2B1"
                                 angle={-90}
