@@ -7,10 +7,12 @@ import {
     TabList,
     Tab,
     TabPanel,
-    Button,
+    DropdownMenu,
+    DropdownMenuItem,
 } from '@the-deep/deep-ui';
 import { gql } from '@apollo/client';
 
+import useSessionStorage from '#hooks/useSessionStorage';
 import Overview from './Overview';
 import Country from './Country';
 import CombinedIndicators from './CombinedIndicators';
@@ -31,24 +33,36 @@ export const COUNTRY_LIST = gql`
 `;
 
 function Dashboard() {
-    const [activeTab, setActiveTab] = useState<TabTypes | undefined>('overview');
+    const [activeTab, setActiveTab] = useSessionStorage<TabTypes | undefined>('activeTab', 'overview');
     const [filterValues, setFilterValues] = useState<FilterType | undefined>();
-
     const [
         advancedFilterValues,
         setAdvancedFilterValues,
     ] = useState<AdvancedOptionType | undefined>();
 
-    const handleExport = () => {
-        // eslint-disable-next-line no-console
-        console.log('Handled the export::>>');
-    };
-
     const handleActiveTabChange = (newActiveTab: TabTypes | undefined) => {
         setActiveTab(newActiveTab);
         if (newActiveTab === 'country') {
-            setFilterValues({ country: 'AFG' });
+            setFilterValues((oldFilterValues) => ({ ...oldFilterValues, country: 'AFG' }));
         }
+    };
+
+    const handleRawDataExportClick = () => {
+        // FIXME: Handle onClick
+        // eslint-disable-next-line no-console
+        console.log('Handle raw data click');
+    };
+
+    const handleSummarizedDataExportClick = () => {
+        // FIXME: Handle onClick
+        // eslint-disable-next-line no-console
+        console.log('Handle summarized data click');
+    };
+
+    const handleContextualCountryDataExportClick = () => {
+        // FIXME: Handle onClick
+        // eslint-disable-next-line no-console
+        console.log('Handle contextual country data click');
     };
 
     return (
@@ -59,15 +73,31 @@ function Dashboard() {
                 variant="secondary"
             >
                 <div className={styles.dashboardButtons}>
-                    <Button
+                    <DropdownMenu
                         className={styles.button}
+                        label="Export"
                         icons={<IoCloudDownloadOutline />}
-                        name={undefined}
                         variant="tertiary"
-                        onClick={handleExport}
                     >
-                        Export
-                    </Button>
+                        <DropdownMenuItem
+                            name={undefined}
+                            onClick={handleRawDataExportClick}
+                        >
+                            Export as CSV
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            name={undefined}
+                            onClick={handleSummarizedDataExportClick}
+                        >
+                            Export Summarized Data
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            name={undefined}
+                            onClick={handleContextualCountryDataExportClick}
+                        >
+                            Export Contextual Country Data
+                        </DropdownMenuItem>
+                    </DropdownMenu>
                     <TabList className={styles.dashboardTabList}>
                         <Tab
                             name="overview"
