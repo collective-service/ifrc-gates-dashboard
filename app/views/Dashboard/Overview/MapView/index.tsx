@@ -176,7 +176,10 @@ function Tooltip(props: TooltipProps) {
                 label={countryName}
                 value={(
                     <>
-                        <TextOutput description={indicatorValue} value="Highest Outbreak" />
+                        <TextOutput
+                            description="(Outbreak)"
+                            value={indicatorValue}
+                        />
                     </>
                 )}
             />
@@ -287,7 +290,6 @@ function MapView(props: MapViewProps) {
 
     const handlePointHover = React.useCallback(
         (feature: mapboxgl.MapboxGeoJSONFeature, lngLat: mapboxgl.LngLat) => {
-            console.log('Check country info::>>', feature);
             setClickedPointProperties({
                 feature: feature as unknown as ClickedPoint['feature'],
                 lngLat,

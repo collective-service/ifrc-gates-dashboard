@@ -1,26 +1,73 @@
-import React, { useCallback } from 'react';
-import { _cs } from '@togglecorp/fujs';
+import React, { useCallback, useMemo } from 'react';
+import {
+    _cs,
+    listToGroupList,
+    mapToList,
+    unique,
+} from '@togglecorp/fujs';
 import {
     Modal,
     Heading,
     Button,
 } from '@the-deep/deep-ui';
+import { useQuery, gql } from '@apollo/client';
 import {
     LineChart,
     Line,
     XAxis,
     YAxis,
     ResponsiveContainer,
+    Legend,
+    Tooltip,
 } from 'recharts';
 import { IoInformationCircleOutline } from 'react-icons/io5';
-
 import {
-    lineChartData,
-} from '#utils/dummyData';
+    getShortMonth,
+} from '#utils/common';
 import { FilterType } from '#views/Dashboard/Filters';
 import { TabTypes } from '#views/Dashboard';
+import {
+    CountryModalQuery,
+    CountryModalQueryVariables,
+} from '#generated/types';
 
 import styles from './styles.css';
+
+const COUNTRY_PROFILE = gql`
+    query CountryModal(
+        $iso3: String,
+        $contextIndicatorId: String!,
+        $emergency: String,
+        $isTwelveMonth: Boolean,
+    ) {
+        countryProfile(iso3: $iso3) {
+            iso3
+            countryName
+            totalCases
+        }
+        contextualData(
+            filters: {
+                iso3: $iso3,
+                contextIndicatorId:$contextIndicatorId,
+                emergency: $emergency,
+                isTwelveMonth: $isTwelveMonth,
+            }
+            pagination: {
+                limit: 12,
+                offset: 0
+            }
+            order: {
+                contextIndicatorValue: DESC,
+            }
+        ) {
+            iso3
+            emergency
+            contextIndicatorId
+            contextIndicatorValue
+            contextDate
+        }
+    }
+`;
 
 interface ModalProps {
     className?: string;
@@ -39,6 +86,23 @@ function MapModal(props: ModalProps) {
         countryData,
     } = props;
 
+    const countryVariables = useMemo((): CountryModalQueryVariables => ({
+        iso3: countryData?.properties?.iso3 ?? 'AFG',
+        contextIndicatorId: 'total_cases',
+        isTwelveMonth: true,
+    }), [],
+    );
+
+    const {
+        data: countryResponse,
+    } = useQuery<CountryModalQuery, CountryModalQueryVariables>(
+        COUNTRY_PROFILE,
+        {
+            variables: countryVariables,
+        },
+    );
+    console.log('Modal info::>>', countryResponse);
+
     const handleModalCountryName = useCallback(() => {
         const isoName = countryData?.properties?.iso3;
         setActiveTab('country');
@@ -48,6 +112,38 @@ function MapModal(props: ModalProps) {
         setActiveTab,
         setFilterValues,
     ]);
+
+    const outbreakLineChartData = useMemo(() => {
+        const outbreakGroupList = listToGroupList(
+            countryResponse?.contextualData,
+            (date) => date.contextDate ?? '',
+        );
+        return mapToList(outbreakGroupList,
+            (group, key) => group.reduce(
+                (acc, item) => ({
+                    ...acc,
+                    [item.emergency]: item.contextIndicatorValue,
+                    date: getShortMonth(item.contextDate),
+                }), { date: key },
+            ));
+    }, [countryResponse?.contextualData]);
+
+    const outbreaks = useMemo(() => (
+        unique(
+            countryResponse?.contextualData ?? [],
+            (d) => d.emergency,
+        ).map((item) => {
+            const colors: Record<string, string> = {
+                'COVID-19': '#FFDD98',
+                Monkeypox: '#ACA28E',
+            };
+
+            return ({
+                emergency: item.emergency,
+                fill: colors[item.emergency] ?? '#FFDD98',
+            });
+        })
+    ), [countryResponse?.contextualData]);
 
     return (
         <Modal
@@ -72,12 +168,12 @@ function MapModal(props: ModalProps) {
                         size="extraLarge"
                         className={styles.countryCaseData}
                     >
-                        132M
+                        {countryResponse?.countryProfile?.totalCases}
                     </Heading>
                     <Heading
                         className={styles.countrySurveyDate}
                     >
-                        Nov, 2022
+                        Nov, 2022 Fake
                     </Heading>
                 </div>
             )}
@@ -90,14 +186,14 @@ function MapModal(props: ModalProps) {
         >
             <ResponsiveContainer className={styles.responsiveContainer}>
                 <LineChart
-                    data={lineChartData}
+                    data={outbreakLineChartData}
                     margin={{
                         right: 10,
                         left: -20,
                     }}
                 >
                     <XAxis
-                        dataKey="name"
+                        dataKey="date"
                         tickLine={false}
                         padding={{ left: 20 }}
                     />
@@ -106,27 +202,22 @@ function MapModal(props: ModalProps) {
                         tickLine={false}
                         padding={{ top: 5 }}
                     />
-                    <Line
-                        type="monotone"
-                        dataKey="MonkeyPox"
-                        stroke="#C09A57"
-                        strokeWidth={2}
-                        dot={false}
+                    <Tooltip />
+                    <Legend
+                        iconType="rect"
+                        align="right"
+                        verticalAlign="bottom"
                     />
-                    <Line
-                        type="monotone"
-                        dataKey="Covid"
-                        stroke="#FFDD98"
-                        strokeWidth={2}
-                        dot={false}
-                    />
-                    <Line
-                        type="monotone"
-                        dataKey="Ebola"
-                        stroke="#C7BCA9"
-                        strokeWidth={2}
-                        dot={false}
-                    />
+                    {outbreaks.map((outbreak) => (
+                        <Line
+                            key={outbreak.emergency}
+                            dataKey={outbreak.emergency}
+                            type="monotone"
+                            stroke={outbreak.fill}
+                            strokeWidth={3}
+                            dot={false}
+                        />
+                    ))}
                 </LineChart>
             </ResponsiveContainer>
         </Modal>
