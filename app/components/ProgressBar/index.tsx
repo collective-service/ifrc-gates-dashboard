@@ -17,7 +17,7 @@ export interface Props {
     totalValue: number | undefined;
     icon?: React.ReactNode;
     region?: string;
-    showRegionalValue: boolean;
+    showRegionalValue?: boolean;
 }
 
 function ProgressBar(props: Props) {
@@ -35,7 +35,7 @@ function ProgressBar(props: Props) {
         totalValue,
         icon,
         region,
-        showRegionalValue,
+        showRegionalValue = false,
     } = props;
 
     const countryPercentage = useMemo(

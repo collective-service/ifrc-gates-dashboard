@@ -8,10 +8,6 @@ import {
 
 import ProgressBar from '#components/ProgressBar';
 
-import {
-    CombinedIndictorsRegionalQuery,
-} from '#generated/types';
-
 import { IndicatorDataType } from '..';
 
 import styles from './styles.css';
@@ -22,17 +18,14 @@ interface Props {
     indicatorKey: string;
     indicators: IndicatorDataType[];
     showRegionalValue: boolean;
-    indicatorsByRegion?: NonNullable<CombinedIndictorsRegionalQuery>['regionLevel'];
 }
 
 function TopicCard(props: Props) {
     const {
         indicatorKey,
         indicators,
-        indicatorsByRegion,
         showRegionalValue,
     } = props;
-    console.warn('i am here', indicatorsByRegion);
 
     const indicatorRendererParams = useCallback((_: string, data: IndicatorDataType) => ({
         className: styles.indicatorItem,
