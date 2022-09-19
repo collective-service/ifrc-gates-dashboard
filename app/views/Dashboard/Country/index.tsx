@@ -35,6 +35,7 @@ import ScoreCard from '#components/ScoreCard';
 import {
     decimalToPercentage,
     getShortMonth,
+    normalFormatter,
 } from '#utils/common';
 import {
     CountryQuery,
@@ -70,6 +71,7 @@ interface LabelProps {
 }
 
 const dateTickFormatter = (d: string) => getShortMonth(d);
+const normalizedTickFormatter = (d:number) => normalFormatter().format(d);
 const percentageKeySelector = (d: CountryWiseOutbreakCases) => d.key;
 const readinessKeySelector = (d: ScoreCardProps) => d.title;
 
@@ -531,6 +533,7 @@ function Country(props: Props) {
                                         axisLine={false}
                                         tickLine={false}
                                         padding={{ top: 30 }}
+                                        tickFormatter={normalizedTickFormatter}
                                     />
                                     <Tooltip />
                                     <Legend

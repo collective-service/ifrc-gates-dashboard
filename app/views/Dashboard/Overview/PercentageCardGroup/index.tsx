@@ -15,7 +15,11 @@ import {
 import {
     ContainerCard,
 } from '@the-deep/deep-ui';
-import { compareDate, isNotDefined, _cs } from '@togglecorp/fujs';
+import {
+    compareDate,
+    isNotDefined,
+    _cs,
+} from '@togglecorp/fujs';
 import { useQuery, gql } from '@apollo/client';
 
 import PercentageStats from '#components/PercentageStats';
@@ -39,6 +43,14 @@ import {
 
 import styles from './styles.css';
 import { FilterType } from '../../Filters';
+
+const normalizedTickFormatter = (d: number) => normalFormatter().format(d);
+
+interface PercentageCardGroupProps {
+    className?: string;
+    filterValues?: FilterType | undefined;
+    uncertaintyChartActive: boolean;
+}
 
 const TOTAL_OUTBREAK_CASES = gql`
     query TotalOutbreakCases(
@@ -495,6 +507,7 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                                     axisLine={false}
                                     tickLine={false}
                                     padding={{ top: 12 }}
+                                    tickFormatter={normalizedTickFormatter}
                                 />
                                 <Tooltip
                                     allowEscapeViewBox={{
