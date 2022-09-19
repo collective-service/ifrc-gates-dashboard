@@ -12,6 +12,7 @@ import {
     ContainerCard,
 } from '@the-deep/deep-ui';
 import { _cs } from '@togglecorp/fujs';
+import { getShortMonth } from '#utils/common';
 import styles from './styles.css';
 
 export interface UncertainData {
@@ -19,7 +20,7 @@ export interface UncertainData {
     date: string;
     uncertainRange?: string[];
 }
-
+const dateTickFormatter = (d: string) => getShortMonth(d);
 interface Props {
     className?: string;
     uncertainData: UncertainData[] | undefined;
@@ -51,6 +52,7 @@ function UncertaintyChart(props: Props) {
                             left: 30,
                             right: 30,
                         }}
+                        tickFormatter={dateTickFormatter}
                     />
                     <YAxis
                         label={{
