@@ -15,7 +15,7 @@ import {
 import {
     ContainerCard,
 } from '@the-deep/deep-ui';
-import { isNotDefined, _cs } from '@togglecorp/fujs';
+import { compareDate, isNotDefined, _cs } from '@togglecorp/fujs';
 import { useQuery, gql } from '@apollo/client';
 
 import PercentageStats from '#components/PercentageStats';
@@ -366,19 +366,19 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
             if (isNotDefined(global.errorMargin)) {
                 return {
                     indicatorValue: decimalToPercentage(global.indicatorValueGlobal),
-                    date: getShortMonth(global.indicatorMonth),
+                    date: global.indicatorMonth,
                 };
             }
 
             return {
                 indicatorValue: decimalToPercentage(global.indicatorValueGlobal),
-                date: getShortMonth(global.indicatorMonth),
+                date: global.indicatorMonth,
                 uncertainRange: [
                     negativeRange ?? '',
                     positiveRange ?? '',
                 ],
             };
-        })
+        }).sort((a, b) => compareDate(a.date, b.date))
     ), [uncertaintyResponse?.globalLevel]);
 
     const uncertaintyRegionChart = useMemo(() => (
@@ -395,19 +395,19 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
             if (isNotDefined(region.errorMargin)) {
                 return {
                     indicatorValue: decimalToPercentage(region.indicatorValueRegional),
-                    date: getShortMonth(region.indicatorMonth),
+                    date: region.indicatorMonth,
                 };
             }
 
             return {
                 indicatorValue: decimalToPercentage(region.indicatorValueRegional),
-                date: getShortMonth(region.indicatorMonth),
+                date: region.indicatorMonth,
                 uncertainRange: [
                     negativeRange ?? '',
                     positiveRange ?? '',
                 ],
             };
-        })
+        }).sort((a, b) => compareDate(a.date, b.date))
     ), [uncertaintyResponse?.regionLevel]);
 
     const outbreakLineChart = useMemo(() => (

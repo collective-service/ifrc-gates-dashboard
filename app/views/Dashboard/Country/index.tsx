@@ -69,6 +69,7 @@ interface LabelProps {
     value: string;
 }
 
+const dateTickFormatter = (d: string) => getShortMonth(d);
 const percentageKeySelector = (d: CountryWiseOutbreakCases) => d.key;
 const readinessKeySelector = (d: ScoreCardProps) => d.title;
 
@@ -309,7 +310,7 @@ function Country(props: Props) {
 
             if (country.interpolated) {
                 return {
-                    date: getShortMonth(country.indicatorMonth),
+                    date: country.indicatorMonth,
                     uncertainRange: [
                         negativeRange ?? '',
                         positiveRange ?? '',
@@ -318,7 +319,7 @@ function Country(props: Props) {
             }
             return {
                 indicatorValue: decimalToPercentage(country.indicatorValue),
-                date: getShortMonth(country.indicatorMonth),
+                date: country.indicatorMonth,
                 uncertainRange: [
                     negativeRange ?? '',
                     positiveRange ?? '',
@@ -381,10 +382,10 @@ function Country(props: Props) {
                         (acc, item) => ({
                             ...acc,
                             [emergency.emergency]: item.contextIndicatorValue,
-                            date: getShortMonth(item.contextDate),
+                            date: item.contextDate,
                         }), { date: key },
                     ),
-                );
+                ).sort((a, b) => compareDate(a.date, b.date));
             },
         ).flat();
 
@@ -524,7 +525,7 @@ function Country(props: Props) {
                                     <XAxis
                                         dataKey="date"
                                         tickLine={false}
-                                        reversed
+                                        tickFormatter={dateTickFormatter}
                                     />
                                     <YAxis
                                         axisLine={false}
