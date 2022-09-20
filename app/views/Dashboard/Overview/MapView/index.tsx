@@ -18,6 +18,10 @@ import Map, {
 } from '@togglecorp/re-map';
 
 import ProgressBar from '#components/ProgressBar';
+import MapLabel from '#components/MapLabel';
+import {
+    normalFormatter,
+} from '#utils/common';
 import {
     MapIndicatorValuesQuery,
     MapIndicatorValuesQueryVariables,
@@ -30,6 +34,8 @@ import { FilterType } from '#views/Dashboard/Filters';
 
 import MapModal from './MapModal';
 import styles from './styles.css';
+
+const normalizedForm = (d: number) => normalFormatter().format(d);
 
 const tooltipOptions: mapboxgl.PopupOptions = {
     closeButton: false,
@@ -107,6 +113,7 @@ interface GeoJsonProps {
     id: number;
     // eslint-disable-next-line camelcase
     idmc_short: string;
+    iso3: string;
 }
 
 interface ClickedPoint {
@@ -175,12 +182,10 @@ function Tooltip(props: TooltipProps) {
                 block
                 label={countryName}
                 value={(
-                    <>
-                        <TextOutput
-                            description="(Outbreak)"
-                            value={indicatorValue}
-                        />
-                    </>
+                    <TextOutput
+                        description="(Outbreak)"
+                        value={normalizedForm(indicatorValue ?? 0)}
+                    />
                 )}
             />
         </MapTooltip>
@@ -230,6 +235,15 @@ function MapView(props: MapViewProps) {
             variables: mapIndicatorVariables,
         },
     );
+
+    const indicatorValueForCountry = useMemo(() => {
+        const properties = clickedPointProperties?.feature?.properties;
+        const val = mapIndicatorValues
+            ?.countryEmergencyProfile
+            ?.find((item) => item.iso3 === properties?.iso3);
+
+        return val?.contextIndicatorValue;
+    }, [clickedPointProperties, mapIndicatorValues]);
 
     const highestLowestVariables = useMemo(() => ({
         contextIndicatorId: 'total_cases',
@@ -306,7 +320,6 @@ function MapView(props: MapViewProps) {
         [setClickedPointProperties],
     );
 
-    console.warn(clickedPointProperties);
     return (
         <div className={_cs(className, styles.mapViewWrapper)}>
             <ContainerCard className={styles.mapContainer}>
@@ -362,12 +375,15 @@ function MapView(props: MapViewProps) {
                             <Tooltip
                                 countryName={clickedPointProperties
                                     ?.feature?.properties?.idmc_short}
-                                indicatorValue={clickedPointProperties?.feature?.properties?.id}
+                                indicatorValue={indicatorValueForCountry ?? undefined}
                                 onHide={handlePointClose}
                                 lngLat={clickedPointProperties.lngLat}
                             />
                         )}
                 </Map>
+                {/* FIXME: Need to fix the label for map
+                    <MapLabel className={styles.mapLabelBox} />
+                */}
             </ContainerCard>
             <ContainerCard
                 className={styles.progressBarContainer}

@@ -22,3 +22,14 @@
         font-weight: var(--dui-font-weight-light);
     }
 }
+
+.perception-card {
+    display: flex;
+    justify-content: space-between;
+
+    .info-icon {
+        color: var(--color-text-title);
+        font-size: var(--dui-font-size-extra-large);
+    }
+
+}

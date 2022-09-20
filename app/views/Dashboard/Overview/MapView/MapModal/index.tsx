@@ -4,6 +4,7 @@ import {
     listToGroupList,
     mapToList,
     unique,
+    compareDate,
 } from '@togglecorp/fujs';
 import {
     Modal,
@@ -11,6 +12,7 @@ import {
     Button,
 } from '@the-deep/deep-ui';
 import { useQuery, gql } from '@apollo/client';
+import { BiLinkExternal } from 'react-icons/bi';
 import {
     LineChart,
     Line,
@@ -20,9 +22,12 @@ import {
     Legend,
     Tooltip,
 } from 'recharts';
-import { IoInformationCircleOutline } from 'react-icons/io5';
+import {
+    IoInformationCircle,
+} from 'react-icons/io5';
 import {
     getShortMonth,
+    normalFormatter,
 } from '#utils/common';
 import { FilterType } from '#views/Dashboard/Filters';
 import { TabTypes } from '#views/Dashboard';
@@ -33,11 +38,13 @@ import {
 
 import styles from './styles.css';
 
+const dateTickFormatter = (d: string) => getShortMonth(d);
+const normalizedTickFormatter = (d: number) => normalFormatter().format(d);
+
 const COUNTRY_PROFILE = gql`
     query CountryModal(
         $iso3: String,
         $contextIndicatorId: String!,
-        $emergency: String,
         $isTwelveMonth: Boolean,
     ) {
         countryProfile(iso3: $iso3) {
@@ -49,12 +56,7 @@ const COUNTRY_PROFILE = gql`
             filters: {
                 iso3: $iso3,
                 contextIndicatorId:$contextIndicatorId,
-                emergency: $emergency,
                 isTwelveMonth: $isTwelveMonth,
-            }
-            pagination: {
-                limit: 12,
-                offset: 0
             }
             order: {
                 contextIndicatorValue: DESC,
@@ -65,6 +67,17 @@ const COUNTRY_PROFILE = gql`
             contextIndicatorId
             contextIndicatorValue
             contextDate
+        }
+        ContextualDataWithMultipleEmergency(
+            iso3: $iso3,
+        ) {
+            emergency
+            data {
+              contextIndicatorValue
+              contextDate
+              id
+              contextIndicatorId
+            }
         }
     }
 `;
@@ -101,7 +114,6 @@ function MapModal(props: ModalProps) {
             variables: countryVariables,
         },
     );
-    console.log('Modal info::>>', countryResponse);
 
     const handleModalCountryName = useCallback(() => {
         const isoName = countryData?.properties?.iso3;
@@ -113,20 +125,35 @@ function MapModal(props: ModalProps) {
         setFilterValues,
     ]);
 
-    const outbreakLineChartData = useMemo(() => {
-        const outbreakGroupList = listToGroupList(
-            countryResponse?.contextualData,
-            (date) => date.contextDate ?? '',
+    const emergencyLineChart = useMemo(() => {
+        const emergencyMapList = countryResponse?.ContextualDataWithMultipleEmergency.map(
+            (emergency) => {
+                const emergencyGroupList = listToGroupList(
+                    emergency.data,
+                    (date) => date.contextDate ?? '',
+                );
+                return mapToList(
+                    emergencyGroupList,
+                    (group, key) => group.reduce(
+                        (acc, item) => ({
+                            ...acc,
+                            [emergency.emergency]: item.contextIndicatorValue,
+                            date: item.contextDate,
+                        }), { date: key },
+                    ),
+                ).sort((a, b) => compareDate(a.date, b.date));
+            },
+        ).flat();
+
+        const emergencyGroupedList = listToGroupList(
+            emergencyMapList,
+            (month) => month.date,
         );
-        return mapToList(outbreakGroupList,
-            (group, key) => group.reduce(
-                (acc, item) => ({
-                    ...acc,
-                    [item.emergency]: item.contextIndicatorValue,
-                    date: getShortMonth(item.contextDate),
-                }), { date: key },
-            ));
-    }, [countryResponse?.contextualData]);
+
+        return Object.values(emergencyGroupedList ?? {}).map(
+            (d) => d.reduce((acc, item) => ({ ...acc, ...item }), {}),
+        );
+    }, [countryResponse?.ContextualDataWithMultipleEmergency]);
 
     const outbreaks = useMemo(() => (
         unique(
@@ -168,7 +195,7 @@ function MapModal(props: ModalProps) {
                         size="extraLarge"
                         className={styles.countryCaseData}
                     >
-                        {countryResponse?.countryProfile?.totalCases}
+                        {normalizedTickFormatter(countryResponse?.countryProfile?.totalCases ?? 0)}
                     </Heading>
                     <Heading
                         className={styles.countrySurveyDate}
@@ -178,29 +205,44 @@ function MapModal(props: ModalProps) {
                 </div>
             )}
             footer={(
-                <text>
-                    <IoInformationCircleOutline />
-                    COVID-19 Vaccine Perceptions in | CountryName | 2021-02-01
-                </text>
+                <div className={styles.perceptionCard}>
+                    <div className={styles.infoIcon}>
+                        <IoInformationCircle />
+                    </div>
+                    &nbsp;
+                    <div>
+                        {`COVID-19 Vaccine Perceptions in ${countryResponse?.countryProfile.countryName}
+                    (${countryResponse?.countryProfile.countryName} CDC)`}
+                    </div>
+                    &nbsp;
+                    &nbsp;
+                    <a
+                        href="https://www.rcce-collective.net/data/data-tracker/"
+                        className={styles.infoIcon}
+                    >
+                        <BiLinkExternal />
+                    </a>
+                </div>
             )}
         >
             <ResponsiveContainer className={styles.responsiveContainer}>
                 <LineChart
-                    data={outbreakLineChartData}
+                    data={emergencyLineChart}
                     margin={{
                         right: 10,
-                        left: -20,
                     }}
                 >
                     <XAxis
                         dataKey="date"
                         tickLine={false}
-                        padding={{ left: 20 }}
+                        padding={{ left: 28 }}
+                        tickFormatter={dateTickFormatter}
                     />
                     <YAxis
                         axisLine={false}
                         tickLine={false}
                         padding={{ top: 5 }}
+                        tickFormatter={normalizedTickFormatter}
                     />
                     <Tooltip />
                     <Legend

@@ -3,9 +3,16 @@
     align-items: flex-start;
 
     .map-container {
+        position: relative;
         flex-grow: 1;
         padding-left: 0px;
         min-height: 42rem;
+
+        .map-label-box {
+            position: absolute;
+            bottom: 2.5rem;
+            left: 2rem;
+        }
     }
 
     .progress-bar-container {
