@@ -1,26 +1,32 @@
 import React from 'react';
 import { _cs, isDefined } from '@togglecorp/fujs';
+import { NumberOutput } from '@the-deep/deep-ui';
 import {
     ResponsiveContainer,
     Pie,
     PieChart,
     Cell,
+    Tooltip,
 } from 'recharts';
 
 import { FilterType } from '../../../Filters';
 import styles from './styles.css';
 
-const COLORS = ['#C09A57', '#FFDD98', '#C7BCA9', '#ACA28E', '#CCB387'];
-
 export type RegionalDataType = {
-    id: number;
-    status: string;
-    percentage: number;
+    fill: string;
+    emergency: string;
+    contextIndicatorValue: number | null | undefined;
+}
+
+interface LabelProps {
+    x: number;
+    y: number;
+    value: string;
 }
 
 interface PieChartInfoProps {
     className?: string;
-    country?: string;
+    region?: string;
     regionalData?: RegionalDataType[];
     filterValues?: FilterType | undefined;
 }
@@ -28,14 +34,30 @@ interface PieChartInfoProps {
 function PieChartInfo(props: PieChartInfoProps) {
     const {
         className,
-        country,
+        region,
         regionalData,
         filterValues,
     } = props;
 
     const isRegionSelected = isDefined(filterValues?.region);
+    const aggregatedValue = (labelProps: LabelProps) => {
+        const { x, y, value } = labelProps;
 
-    const selectedRegion = filterValues?.region?.toLowerCase() === country?.toLowerCase();
+        return (
+            <text
+                x={x}
+                y={y}
+                dy={-4}
+            >
+                <NumberOutput
+                    normal
+                    value={Number(value)}
+                />
+            </text>
+        );
+    };
+
+    const selectedRegion = filterValues?.region?.toLowerCase() === region?.toLowerCase();
 
     return (
         <div
@@ -46,7 +68,7 @@ function PieChartInfo(props: PieChartInfoProps) {
             style={{ opacity: (selectedRegion || !isRegionSelected) ? 1 : 0.2 }}
         >
             <div className={styles.pieChartHeader}>
-                {country}
+                {region}
             </div>
             <div className={styles.pieChartHolder}>
                 <ResponsiveContainer
@@ -58,7 +80,8 @@ function PieChartInfo(props: PieChartInfoProps) {
                     >
                         <Pie
                             data={regionalData}
-                            dataKey="percentage"
+                            dataKey="contextIndicatorValue"
+                            nameKey="emergency"
                             labelLine={false}
                             cx={60}
                             cy={50}
@@ -66,11 +89,18 @@ function PieChartInfo(props: PieChartInfoProps) {
                         >
                             {regionalData?.map((entry) => (
                                 <Cell
-                                    key={`Cell -${entry.id}`}
-                                    fill={COLORS[entry.id % COLORS.length]}
+                                    key={`Cell -${entry.emergency}`}
+                                    fill={entry.fill}
                                 />
                             ))}
                         </Pie>
+                        <Tooltip
+                            allowEscapeViewBox={{
+                                x: false,
+                                y: true,
+                            }}
+                            label={aggregatedValue}
+                        />
                     </PieChart>
                 </ResponsiveContainer>
             </div>

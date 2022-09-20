@@ -60,6 +60,7 @@ function Overview(props: Props) {
             {((onlyIndicatorSelected || onlyOutbreakSelected || moreThanTwoFilterSelected) && (
                 <PercentageCardGroup
                     uncertaintyChartActive={uncertaintyChartActive}
+                    filterValues={filterValues}
                 />
             ))}
             {((noFiltersSelected || onlyRegionSelected) && (

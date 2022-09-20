@@ -35,6 +35,7 @@ import ScoreCard from '#components/ScoreCard';
 import {
     decimalToPercentage,
     getShortMonth,
+    normalFormatter,
 } from '#utils/common';
 import {
     CountryQuery,
@@ -69,6 +70,8 @@ interface LabelProps {
     value: string;
 }
 
+const dateTickFormatter = (d: string) => getShortMonth(d);
+const normalizedTickFormatter = (d:number) => normalFormatter().format(d);
 const percentageKeySelector = (d: CountryWiseOutbreakCases) => d.key;
 const readinessKeySelector = (d: ScoreCardProps) => d.title;
 
@@ -84,6 +87,10 @@ const COUNTRY_PROFILE = gql`
         $indicatorId: String,
         $category: String!,
         $uncertaintyEmergency: String!,
+        $isTwelveMonth: Boolean,
+        $contextDate: Ordering,
+        $limit: Int!,
+        $offset: Int!,
     ) {
         countryProfile(iso3: $iso3) {
             iso3
@@ -125,8 +132,17 @@ const COUNTRY_PROFILE = gql`
                 iso3: $iso3,
                 contextIndicatorId:$contextIndicatorId,
                 emergency: $emergency,
+                isTwelveMonth: $isTwelveMonth,
+            }
+            order: {
+                contextDate: $contextDate,
+            }
+            pagination: {
+                limit: $limit,
+                offset: $offset,
             }
         ) {
+            id
             iso3
             emergency
             contextIndicatorId
@@ -154,6 +170,17 @@ const COUNTRY_PROFILE = gql`
             subvariable
             interpolated
         }
+        ContextualDataWithMultipleEmergency(
+            iso3: $iso3,
+        ) {
+            emergency
+            data {
+              contextIndicatorValue
+              contextDate
+              id
+              contextIndicatorId
+            }
+        }
     }
 `;
 interface Props {
@@ -177,9 +204,13 @@ function Country(props: Props) {
         uncertaintyIso3: filterValues?.country ?? 'AFG',
         subvariable: filterValues?.subvariable ?? '',
         indicatorId: filterValues?.indicator,
+        isTwelveMonth: true,
+        contextDate: 'DESC',
         // NOTE: Only Global response needed
         category: 'Global',
         uncertaintyEmergency: filterValues?.outbreak ?? '',
+        limit: 12,
+        offset: 0,
     }), [
         filterValues?.country,
         filterValues?.outbreak,
@@ -281,7 +312,7 @@ function Country(props: Props) {
 
             if (country.interpolated) {
                 return {
-                    date: getShortMonth(country.indicatorMonth),
+                    date: country.indicatorMonth,
                     uncertainRange: [
                         negativeRange ?? '',
                         positiveRange ?? '',
@@ -290,7 +321,7 @@ function Country(props: Props) {
             }
             return {
                 indicatorValue: decimalToPercentage(country.indicatorValue),
-                date: getShortMonth(country.indicatorMonth),
+                date: country.indicatorMonth,
                 uncertainRange: [
                     negativeRange ?? '',
                     positiveRange ?? '',
@@ -340,20 +371,35 @@ function Country(props: Props) {
         );
     };
 
-    const outbreakLineChartData = useMemo(() => {
-        const outbreakGroupList = listToGroupList(
-            countryResponse?.contextualData,
-            (date) => date.contextDate ?? '',
+    const emergencyLineChart = useMemo(() => {
+        const emergencyMapList = countryResponse?.ContextualDataWithMultipleEmergency.map(
+            (emergency) => {
+                const emergencyGroupList = listToGroupList(
+                    emergency.data,
+                    (date) => date.contextDate ?? '',
+                );
+                return mapToList(
+                    emergencyGroupList,
+                    (group, key) => group.reduce(
+                        (acc, item) => ({
+                            ...acc,
+                            [emergency.emergency]: item.contextIndicatorValue,
+                            date: item.contextDate,
+                        }), { date: key },
+                    ),
+                ).sort((a, b) => compareDate(a.date, b.date));
+            },
+        ).flat();
+
+        const emergencyGroupedList = listToGroupList(
+            emergencyMapList,
+            (month) => month.date,
         );
-        return mapToList(outbreakGroupList,
-            (group, key) => group.reduce(
-                (acc, item) => ({
-                    ...acc,
-                    [item.emergency]: item.contextIndicatorValue,
-                    date: getShortMonth(item.contextDate),
-                }), { date: key },
-            ));
-    }, [countryResponse?.contextualData]);
+
+        return Object.values(emergencyGroupedList ?? {}).map(
+            (d) => d.reduce((acc, item) => ({ ...acc, ...item }), {}),
+        );
+    }, [countryResponse?.ContextualDataWithMultipleEmergency]);
 
     const outbreaks = useMemo(() => (
         unique(
@@ -476,17 +522,18 @@ function Country(props: Props) {
                         >
                             <ResponsiveContainer className={styles.responsiveContainer}>
                                 <LineChart
-                                    data={outbreakLineChartData}
+                                    data={emergencyLineChart}
                                 >
                                     <XAxis
                                         dataKey="date"
                                         tickLine={false}
-                                        reversed
+                                        tickFormatter={dateTickFormatter}
                                     />
                                     <YAxis
                                         axisLine={false}
                                         tickLine={false}
                                         padding={{ top: 30 }}
+                                        tickFormatter={normalizedTickFormatter}
                                     />
                                     <Tooltip />
                                     <Legend
