@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
     BarChart,
     Bar,
@@ -448,15 +448,22 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
             .find(
                 (global) => global.indicatorId === filterValues?.indicator,
             )
-    ), [totalOutbreakCasesResponse?.globalLevel]);
+    ), [
+        totalOutbreakCasesResponse?.globalLevel,
+        filterValues?.indicator,
+    ]);
 
-    const value = () => {
+    const value = useMemo(() => {
         if (filterValues?.indicator) {
             // FIXME: Make precentageStat component more comfortable with string
             return Number(decimalToPercentage(globalTotalCase?.indicatorValueGlobal));
         }
         return totalCase?.contextIndicatorValue;
-    };
+    }, [
+        globalTotalCase?.indicatorValueGlobal,
+        filterValues?.indicator,
+        totalCase?.contextIndicatorValue,
+    ]);
 
     return (
         <div className={_cs(className, styles.cardInfo)}>
@@ -470,7 +477,7 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                         All Outbreak numbers:
                     </p>
                 )}
-                statValue={value()}
+                statValue={value}
             />
             {uncertaintyChartActive
                 ? (

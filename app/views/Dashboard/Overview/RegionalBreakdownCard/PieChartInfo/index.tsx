@@ -12,9 +12,6 @@ import {
 import { FilterType } from '../../../Filters';
 import styles from './styles.css';
 
-// TODO: TO remove after completion
-const COLORS = ['#C09A57', '#FFDD98', '#C7BCA9', '#ACA28E', '#CCB387'];
-
 export type RegionalDataType = {
     fill: string;
     emergency: string;
