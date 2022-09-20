@@ -23,8 +23,9 @@ import {
     SubvariablesQuery,
     SubvariablesQueryVariables,
 } from '#generated/types';
+import { getRegionForCountry } from '#utils/common';
 
-import { TabTypes } from '..';
+import { TabTypes, COUNTRY_LIST } from '..';
 import AdvancedFilters, { AdvancedOptionType } from '../AdvancedFilters';
 import styles from './styles.css';
 
@@ -55,16 +56,6 @@ const OUTBREAKS = gql`
             active
             outbreak
             __typename
-        }
-    }
-`;
-
-const COUNTRY_LIST = gql`
-    query CountryList{
-        countries {
-            iso3
-            countryName
-            region
         }
     }
 `;
@@ -159,10 +150,14 @@ function Filters(props: Props) {
     } = props;
 
     const handleClear = useCallback(() => {
-        onChange({
-            country: value?.country ?? 'AFG',
-        });
-    }, [onChange, value?.country]);
+        if (activeTab === 'country') {
+            onChange({
+                country: value?.country ?? 'AFG',
+            });
+        } else {
+            onChange({});
+        }
+    }, [onChange, value?.country, activeTab]);
 
     const {
         data: countryList,
@@ -170,10 +165,6 @@ function Filters(props: Props) {
     } = useQuery<CountryListQuery, CountryListQueryVariables>(
         COUNTRY_LIST,
     );
-    const getRegionForCountry = useCallback((country: string | undefined) => (
-        countryList?.countries?.find((c) => c.iso3 === country)?.region
-    ), [countryList?.countries]);
-
     const handleInputChange = useCallback(
         (newValue: string | undefined, name: keyof FilterType) => {
             if (onChange) {
@@ -182,13 +173,17 @@ function Filters(props: Props) {
                         ...oldValue,
                         [name]: newValue,
                         country: undefined,
+                        indicator: undefined,
                     }));
                 } else if (name === 'country') {
                     onChange((oldValue) => {
                         const newValueForRegion = {
                             ...oldValue,
                             [name]: newValue,
-                            region: getRegionForCountry(newValue) ?? undefined,
+                            region: getRegionForCountry(
+                                newValue,
+                                countryList?.countries ?? [],
+                            ) ?? undefined,
                         };
                         return newValueForRegion;
                     });
@@ -215,7 +210,7 @@ function Filters(props: Props) {
         },
         [
             onChange,
-            getRegionForCountry,
+            countryList?.countries,
         ],
     );
 
@@ -241,6 +236,7 @@ function Filters(props: Props) {
     } = useQuery<IndicatorsForCountryQuery, IndicatorsForCountryQueryVariables>(
         INDICATORS_FOR_COUNTRY,
         {
+            // skip: isNotDefined(value?.country),
             variables: indicatorListForCountryVariables,
         },
     );
@@ -261,6 +257,7 @@ function Filters(props: Props) {
     } = useQuery<IndicatorsQuery, IndicatorsQueryVariables>(
         INDICATORS,
         {
+            // skip: isDefined(value?.country) || isDefined(value?.region),
             variables: indicatorVariables,
         },
     );
@@ -281,6 +278,7 @@ function Filters(props: Props) {
     } = useQuery<SubvariablesQuery, SubvariablesQueryVariables>(
         SUBVARIABLES,
         {
+            // skip: isNotDefined(value?.indicator),
             variables: subvariablesVariables,
         },
     );
@@ -311,9 +309,12 @@ function Filters(props: Props) {
         .filter((r) => r !== '__null')
         .map((r) => ({ key: r, title: r }));
 
-    const isFilterEmpty = useMemo(() => (
-        doesObjectHaveNoData(value, [''])
-    ), [value]);
+    const isFilterEmpty = useMemo(() => {
+        if (activeTab === 'country') {
+            return doesObjectHaveNoData(value, [value?.country]);
+        }
+        return doesObjectHaveNoData(value, ['']);
+    }, [value, activeTab]);
 
     return (
         <div className={styles.filtersWrapper}>
@@ -330,7 +331,6 @@ function Filters(props: Props) {
                             onChange={handleInputChange}
                             disabled={countryListLoading}
                             variant="general"
-                            // TODO: Make this clearable in combined indicators tab
                             nonClearable
                         />
                     )}
@@ -372,8 +372,6 @@ function Filters(props: Props) {
                             grouped
                             groupKeySelector={(item) => item.region || 'Unnamed'}
                             groupLabelSelector={(item) => item.region || 'Unnamed'}
-                            // TODO: Make this clearable in combined indicators tab
-                            nonClearable
                         />
                     )}
                     {(activeTab === 'overview') && (
