@@ -2,7 +2,6 @@ import React, { useCallback, useMemo } from 'react';
 import { gql, useQuery } from '@apollo/client';
 import {
     listToGroupList,
-    isNotDefined,
     _cs,
     mapToList,
     isDefined,

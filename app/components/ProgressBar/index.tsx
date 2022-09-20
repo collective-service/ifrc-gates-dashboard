@@ -48,8 +48,11 @@ function ProgressBar(props: Props) {
             return (value / 1000000).toFixed(2);
         }
         return ((value / totalValue) * 100).toFixed(0);
-    }, [totalValue, value],
-    );
+    }, [
+        totalValue,
+        value,
+        isNumberValue,
+    ]);
 
     const subValuePercentage = useMemo(
         () => (

@@ -103,8 +103,8 @@ function MapModal(props: ModalProps) {
         iso3: countryData?.properties?.iso3 ?? 'AFG',
         contextIndicatorId: 'total_cases',
         isTwelveMonth: true,
-    }), [],
-    );
+    }
+    ), [countryData]);
 
     const {
         data: countryResponse,
