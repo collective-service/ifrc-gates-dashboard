@@ -10,7 +10,7 @@
     }
 
     .trends-card {
-        flex-basis: calc(35% - var(--dui-spacing-small));
+        flex-basis: calc(45% - var(--dui-spacing-small));
         border-radius: 0;
         /* By default, ContainerCard has border-radius */
         box-shadow: 0px 0px 10px var(--dui-card-box-shadow);

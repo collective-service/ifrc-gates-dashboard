@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
     BarChart,
     Bar,
@@ -36,19 +36,13 @@ import {
 import styles from './styles.css';
 import { FilterType } from '../../Filters';
 
-interface PercentageCardGroupProps {
-    className?: string;
-    filterValues?: FilterType | undefined;
-    uncertaintyChartActive: boolean;
-}
-
 const TOTAL_OUTBREAK_CASES = gql`
     query TotalOutbreakCases(
-    $contextIndicatorId: String,
-    $emergency: String,
-    $isGlobal: Boolean,
-    $mostRecent: Boolean,
-    $region: String
+        $contextIndicatorId: String,
+        $emergency: String,
+        $isGlobal: Boolean,
+        $mostRecent: Boolean,
+        $region: String
     ) {
         epiDataGlobal(
         filters: {
@@ -63,16 +57,15 @@ const TOTAL_OUTBREAK_CASES = gql`
             emergency
         }
     }
-
 `;
 
 const OUTBREAK = gql`
     query Outbreak(
-    $isTwelveMonth: Boolean,
-    $emergency: String,
-    $isGlobal: Boolean,
-    $contextIndicatorId: String,
-    $region: String,
+        $isTwelveMonth: Boolean,
+        $emergency: String,
+        $isGlobal: Boolean,
+        $contextIndicatorId: String,
+        $region: String,
     ) {
         epiDataGlobal(
         filters: {
@@ -93,12 +86,12 @@ const OUTBREAK = gql`
 
 const REGIONAL_BREAKDOWN = gql`
     query RegionalBreakdown(
-    $isTwelveMonth: Boolean,
-    $emergency: String,
-    $isGlobal: Boolean,
-    $contextIndicatorId: String,
-    $region: String,
-    $mostRecent: Boolean,
+        $isTwelveMonth: Boolean,
+        $emergency: String,
+        $isGlobal: Boolean,
+        $contextIndicatorId: String,
+        $region: String,
+        $mostRecent: Boolean,
     ) {
         epiDataGlobal(
         filters: {
@@ -119,6 +112,12 @@ const REGIONAL_BREAKDOWN = gql`
         }
     }
 `;
+
+interface PercentageCardGroupProps {
+    className?: string;
+    filterValues?: FilterType | undefined;
+    uncertaintyChartActive: boolean;
+}
 
 function PercentageCardGroup(props: PercentageCardGroupProps) {
     const {
@@ -197,10 +196,15 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
         ))
     ), [outbreakResponse?.epiDataGlobal]);
 
-    const totalCase = totalOutbreakCasesResponse?.epiDataGlobal
-        .find(
-            (emergency) => emergency.emergency === filterValues?.outbreak,
-        );
+    const totalCase = useCallback(() => {
+        totalOutbreakCasesResponse?.epiDataGlobal
+            .find(
+                (emergency) => emergency.emergency === filterValues?.outbreak,
+            );
+    }, [
+        totalOutbreakCasesResponse?.epiDataGlobal,
+        filterValues?.outbreak,
+    ])
 
     return (
         <div className={_cs(className, styles.cardInfo)}>
