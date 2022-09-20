@@ -210,7 +210,7 @@ function CombinedIndicators(props: Props) {
     } = useQuery<CombinedIndicatorsDataQuery, CombinedIndicatorsDataQueryVariables>(
         COMBINED_INDICATORS_DATA,
         {
-            skip: isNotDefined(filterValues?.country),
+            // skip: isNotDefined(filterValues?.country),
             variables: {
                 iso3: filterValues?.country,
                 emergency: filterValues?.outbreak,

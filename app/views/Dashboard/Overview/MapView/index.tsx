@@ -18,6 +18,10 @@ import Map, {
 } from '@togglecorp/re-map';
 
 import ProgressBar from '#components/ProgressBar';
+import MapLabel from '#components/MapLabel';
+import {
+    normalFormatter,
+} from '#utils/common';
 import {
     MapIndicatorValuesQuery,
     MapIndicatorValuesQueryVariables,
@@ -30,6 +34,8 @@ import { FilterType } from '#views/Dashboard/Filters';
 
 import MapModal from './MapModal';
 import styles from './styles.css';
+
+const normalizedForm = (d: number) => normalFormatter().format(d);
 
 const tooltipOptions: mapboxgl.PopupOptions = {
     closeButton: false,
@@ -178,7 +184,7 @@ function Tooltip(props: TooltipProps) {
                     <>
                         <TextOutput
                             description="(Outbreak)"
-                            value={indicatorValue}
+                            value={normalizedForm(indicatorValue ?? 0)}
                         />
                     </>
                 )}
@@ -306,7 +312,6 @@ function MapView(props: MapViewProps) {
         [setClickedPointProperties],
     );
 
-    console.warn(clickedPointProperties);
     return (
         <div className={_cs(className, styles.mapViewWrapper)}>
             <ContainerCard className={styles.mapContainer}>
@@ -368,6 +373,8 @@ function MapView(props: MapViewProps) {
                             />
                         )}
                 </Map>
+                {/* FIXME: Need to fix the label for map */}
+                <MapLabel className={styles.mapLabelBox} />
             </ContainerCard>
             <ContainerCard
                 className={styles.progressBarContainer}
