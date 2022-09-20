@@ -83,8 +83,8 @@ function PieChartInfo(props: PieChartInfoProps) {
                             dataKey="contextIndicatorValue"
                             nameKey="emergency"
                             labelLine={false}
-                            cx={60}
-                            cy={50}
+                            cx="50%"
+                            cy="50%"
                             outerRadius={40}
                         >
                             {regionalData?.map((entry) => (

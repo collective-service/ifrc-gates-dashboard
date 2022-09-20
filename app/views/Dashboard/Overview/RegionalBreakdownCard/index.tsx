@@ -67,7 +67,6 @@ const REGIONAL_BREAKDOWN = gql`
             id
         }
     }
-
 `;
 
 const TOTAL_CASES = gql`

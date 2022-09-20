@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { _cs } from '@togglecorp/fujs';
+import { _cs, isNotDefined } from '@togglecorp/fujs';
 
 import styles from './styles.css';
 
@@ -8,7 +8,7 @@ export interface Props {
     barHeight?: number;
     suffix?: string;
     barName: string | undefined;
-    id: string;
+    id: number;
     title: string | undefined;
     valueTitle?: string | undefined;
     color?: string;
@@ -18,6 +18,7 @@ export interface Props {
     icon?: React.ReactNode;
     region?: string;
     showRegionalValue?: boolean;
+    isNumberValue?: boolean;
 }
 
 function ProgressBar(props: Props) {
@@ -36,14 +37,22 @@ function ProgressBar(props: Props) {
         icon,
         region,
         showRegionalValue = false,
+        isNumberValue = false,
     } = props;
 
-    const countryPercentage = useMemo(
-        () => (
-            value && totalValue
-            && ((value / totalValue) * 100).toFixed(0)
-        ), [totalValue, value],
-    );
+    const countryPercentage = useMemo(() => {
+        if (isNotDefined(value) || isNotDefined(totalValue)) {
+            return undefined;
+        }
+        if (isNumberValue) {
+            return (value / 1000000).toFixed(2);
+        }
+        return ((value / totalValue) * 100).toFixed(0);
+    }, [
+        totalValue,
+        value,
+        isNumberValue,
+    ]);
 
     const subValuePercentage = useMemo(
         () => (

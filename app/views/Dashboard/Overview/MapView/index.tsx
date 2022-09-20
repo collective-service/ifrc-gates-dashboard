@@ -5,6 +5,7 @@ import {
     ContainerCard,
     ListView,
     useModalState,
+    TextOutput,
 } from '@the-deep/deep-ui';
 import { gql, useQuery } from '@apollo/client';
 import Map, {
@@ -13,41 +14,117 @@ import Map, {
     MapSource,
     MapLayer,
     MapState,
+    MapTooltip,
 } from '@togglecorp/re-map';
 
-import ProgressBar, { Props as ProgressBarProps } from '#components/ProgressBar';
+import ProgressBar from '#components/ProgressBar';
+import MapLabel from '#components/MapLabel';
+import {
+    normalFormatter,
+} from '#utils/common';
 import {
     MapIndicatorValuesQuery,
     MapIndicatorValuesQueryVariables,
+    HighestLowestValuesQuery,
+    HighestLowestValuesQueryVariables,
 } from '#generated/types';
 
-import {
-    progressDataOne,
-    progressDataTwo,
-} from '#utils/dummyData';
 import { TabTypes } from '#views/Dashboard';
 import { FilterType } from '#views/Dashboard/Filters';
 
 import MapModal from './MapModal';
 import styles from './styles.css';
 
-const progressBarKeySelector = (d: ProgressBarProps) => d.id;
+const normalizedForm = (d: number) => normalFormatter().format(d);
+
+const tooltipOptions: mapboxgl.PopupOptions = {
+    closeButton: false,
+    offset: 8,
+};
 
 const MAP_INDICATOR = gql`
     query MapIndicatorValues ($filters: CountryEmergencyProfileFilter) {
         countryEmergencyProfile(filters: $filters) {
             contextIndicatorValue
             iso3
-            id
+            countryId
         }
     }
 `;
+
+const HIGHEST_LOWEST_CASES = gql`
+    query HighestLowestValues(
+        $contextIndicatorId: String,
+        $region: String,
+    ) {
+        descCountryEmergencyProfile: countryEmergencyProfile(
+            filters: {
+                contextIndicatorId: $contextIndicatorId,
+                region: $region,
+            }
+            pagination: {
+                limit: 5,
+                offset: 0,
+            }
+            order: {
+                contextIndicatorValue: DESC,
+            }
+        ) {
+            countryName
+            countryId
+            contextIndicatorValue
+        }
+        ascCountryEmergencyProfile: countryEmergencyProfile(
+            filters: {
+                contextIndicatorId: $contextIndicatorId,
+                region: $region,
+            }
+            pagination: {
+                limit: 5,
+                offset: 0
+            }
+            order: {
+                contextIndicatorValue: ASC,
+            }
+        ) {
+            countryName
+            countryId
+            contextIndicatorValue
+        }
+    }
+`;
+
+type AscendingCountryProfileType = NonNullable<HighestLowestValuesQuery['ascCountryEmergencyProfile']>[number];
+type DescendingCountryProfileType = NonNullable<HighestLowestValuesQuery['descCountryEmergencyProfile']>[number];
+
+const progressBarKeySelector = (
+    d: AscendingCountryProfileType | DescendingCountryProfileType,
+) => d.countryId;
+
 interface MapViewProps {
     className?: string;
     isIndicatorSelected: boolean;
     setActiveTab: React.Dispatch<React.SetStateAction<TabTypes | undefined>>;
     filterValues?: FilterType | undefined;
     setFilterValues: React.Dispatch<React.SetStateAction<FilterType | undefined>>;
+}
+
+interface GeoJsonProps {
+    id: number;
+    // eslint-disable-next-line camelcase
+    idmc_short: string;
+}
+
+interface ClickedPoint {
+    feature: GeoJSON.Feature<GeoJSON.Point, GeoJsonProps>;
+    lngLat: mapboxgl.LngLatLike;
+}
+
+interface TooltipProps {
+    countryName: string | undefined;
+    indicatorValue: number | undefined;
+    onHide: () => void;
+    lngLat: mapboxgl.LngLatLike;
 }
 
 const lightStyle = 'mapbox://styles/mapbox/light-v10';
@@ -86,6 +163,36 @@ const countryLinePaint: mapboxgl.LinePaint = {
 
 const barHeight = 10;
 
+function Tooltip(props: TooltipProps) {
+    const {
+        countryName,
+        lngLat,
+        onHide,
+        indicatorValue,
+    } = props;
+
+    return (
+        <MapTooltip
+            coordinates={lngLat}
+            tooltipOptions={tooltipOptions}
+            onHide={onHide}
+        >
+            <TextOutput
+                block
+                label={countryName}
+                value={(
+                    <>
+                        <TextOutput
+                            description="(Outbreak)"
+                            value={normalizedForm(indicatorValue ?? 0)}
+                        />
+                    </>
+                )}
+            />
+        </MapTooltip>
+    );
+}
+
 function MapView(props: MapViewProps) {
     const {
         className,
@@ -101,6 +208,11 @@ function MapView(props: MapViewProps) {
         showMapModal,
         hideMapModal,
     ] = useModalState(false);
+
+    const [
+        clickedPointProperties,
+        setClickedPointProperties,
+    ] = React.useState<ClickedPoint | undefined>();
 
     const [
         countryData,
@@ -125,10 +237,32 @@ function MapView(props: MapViewProps) {
         },
     );
 
+    const highestLowestVariables = useMemo(() => ({
+        contextIndicatorId: 'total_cases',
+        region: filterValues?.region,
+    }), [filterValues]);
+
+    const {
+        data: highestLowestValues,
+    } = useQuery<HighestLowestValuesQuery, HighestLowestValuesQueryVariables>(
+        HIGHEST_LOWEST_CASES,
+        {
+            variables: highestLowestVariables,
+        },
+    );
+
+    /*
+    FIX ME: This might be required to find the highest value for indicatorValue
+    const indicatorValues = highestLowestValues?.descCountryEmergencyProfile?.map(
+        (highCases) => (highCases?.contextIndicatorValue));
+    const highestIndicatorValues = indicatorValues && Math.max(...indicatorValues.filter(
+        (x): x is number => x !== null && x !== undefined));
+    */
+
     const mapIndicatorState = useMemo(() => {
         const countryIndicator = mapIndicatorValues?.countryEmergencyProfile?.map(
             (indicatorValue) => ({
-                id: indicatorValue.id,
+                id: +indicatorValue.countryId,
                 value: indicatorValue.contextIndicatorValue ?? 0,
                 iso: indicatorValue.iso3,
             }),
@@ -147,16 +281,35 @@ function MapView(props: MapViewProps) {
     );
 
     const progressBarRendererParams = useCallback(
-        (_: string, data: ProgressBarProps) => ({
+        (_: string, data: AscendingCountryProfileType | DescendingCountryProfileType) => ({
             barHeight,
             suffix: isIndicatorSelected ? '%' : 'M',
-            barName: data.barName,
-            title: data.title,
-            id: data.id,
-            value: data.value,
-            totalValue: data.totalValue,
-            color: data.color,
+            barName: data.countryName,
+            title: data.countryName,
+            id: +data.countryId,
+            value: data.contextIndicatorValue ?? undefined,
+            totalValue: 0,
+            color: '#98A6B5',
+            isNumberValue: !isIndicatorSelected,
         }), [isIndicatorSelected],
+    );
+
+    const handlePointHover = React.useCallback(
+        (feature: mapboxgl.MapboxGeoJSONFeature, lngLat: mapboxgl.LngLat) => {
+            setClickedPointProperties({
+                feature: feature as unknown as ClickedPoint['feature'],
+                lngLat,
+            });
+            return true;
+        },
+        [setClickedPointProperties],
+    );
+
+    const handlePointClose = React.useCallback(
+        () => {
+            setClickedPointProperties(undefined);
+        },
+        [setClickedPointProperties],
     );
 
     return (
@@ -195,6 +348,7 @@ function MapView(props: MapViewProps) {
                                 paint: countryFillPaint,
                             }}
                             onClick={handleCountryClick}
+                            onMouseEnter={handlePointHover}
                         />
                         <MapLayer
                             layerKey="country-line"
@@ -208,19 +362,31 @@ function MapView(props: MapViewProps) {
                             attributes={mapIndicatorState}
                         />
                     </MapSource>
+                    {clickedPointProperties?.lngLat && clickedPointProperties?.feature?.id
+                        && (
+                            <Tooltip
+                                countryName={clickedPointProperties
+                                    ?.feature?.properties?.idmc_short}
+                                indicatorValue={clickedPointProperties?.feature?.properties?.id}
+                                onHide={handlePointClose}
+                                lngLat={clickedPointProperties.lngLat}
+                            />
+                        )}
                 </Map>
+                {/* FIXME: Need to fix the label for map */}
+                <MapLabel className={styles.mapLabelBox} />
             </ContainerCard>
             <ContainerCard
                 className={styles.progressBarContainer}
             >
-                <div className={styles.lowProgressBox}>
+                <div className={styles.highProgressBox}>
                     <Heading size="extraSmall" className={styles.progressListHeader}>
-                        Lowest cases
+                        Highest cases
                     </Heading>
                     <ListView
                         className={styles.progressList}
                         keySelector={progressBarKeySelector}
-                        data={progressDataOne}
+                        data={highestLowestValues?.descCountryEmergencyProfile}
                         renderer={ProgressBar}
                         rendererParams={progressBarRendererParams}
                         filtered={false}
@@ -231,14 +397,14 @@ function MapView(props: MapViewProps) {
                         borderBetweenItemClassName={styles.progressItemBorder}
                     />
                 </div>
-                <div className={styles.highProgressBox}>
+                <div className={styles.lowProgressBox}>
                     <Heading size="extraSmall" className={styles.progressListHeader}>
-                        Highest cases
+                        Lowest cases
                     </Heading>
                     <ListView
                         className={styles.progressList}
                         keySelector={progressBarKeySelector}
-                        data={progressDataTwo}
+                        data={highestLowestValues?.ascCountryEmergencyProfile}
                         renderer={ProgressBar}
                         rendererParams={progressBarRendererParams}
                         filtered={false}

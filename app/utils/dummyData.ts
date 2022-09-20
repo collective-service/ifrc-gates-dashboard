@@ -12,7 +12,7 @@ export interface PercentageStatsProps {
 export const progressDataOne: ProgressBarRendererProps[] = [
     {
         barName: 'Cameroon',
-        id: '1',
+        id: 1,
         title: 'Vulnerable cases',
         color: 'var(--dui-color-progress-alt)',
         value: 130,
@@ -20,7 +20,7 @@ export const progressDataOne: ProgressBarRendererProps[] = [
     },
     {
         barName: 'Algeria',
-        id: '2',
+        id: 2,
         title: 'Vulnerable cases',
         color: 'var(--dui-color-progress-alt)',
         value: 50,
@@ -28,7 +28,7 @@ export const progressDataOne: ProgressBarRendererProps[] = [
     },
     {
         barName: 'Bulgaria',
-        id: '3',
+        id: 3,
         title: 'Vulnerable cases',
         color: 'var(--dui-color-progress-alt)',
         value: 99.5,
@@ -36,7 +36,7 @@ export const progressDataOne: ProgressBarRendererProps[] = [
     },
     {
         barName: 'Democratic Republic of Congo',
-        id: '4',
+        id: 4,
         title: 'Vulnerable cases',
         color: 'var(--dui-color-progress-alt)',
         value: 105,
@@ -44,45 +44,10 @@ export const progressDataOne: ProgressBarRendererProps[] = [
     },
     {
         barName: 'Belarus',
-        id: '5',
+        id: 5,
         title: 'Vulnerable cases',
         color: 'var(--dui-color-progress-alt)',
         value: 125,
-        totalValue: 200,
-    },
-];
-
-export const progressDataTwo: ProgressBarRendererProps[] = [
-    {
-        barName: 'Oman',
-        id: '13',
-        title: 'Vulnerable cases',
-        color: 'var(--dui-color-progress-alt)',
-        value: 160,
-        totalValue: 200,
-    },
-    {
-        barName: 'Malaysia',
-        id: '29',
-        title: 'Vulnerable cases',
-        color: 'var(--dui-color-progress-alt)',
-        value: 140,
-        totalValue: 200,
-    },
-    {
-        barName: 'Viet Nam',
-        id: '23',
-        title: 'Vulnerable cases',
-        color: 'var(--dui-color-progress-alt)',
-        value: 135,
-        totalValue: 200,
-    },
-    {
-        barName: 'Lao PDR',
-        id: '26',
-        title: 'Vulnerable cases',
-        color: 'var(--dui-color-progress-alt)',
-        value: 156,
         totalValue: 200,
     },
 ];
@@ -484,90 +449,6 @@ export const uncertainData = [
             '25',
             '45',
         ],
-    },
-];
-
-export const sourcesProgressBarData: ProgressBarRendererProps[] = [
-    {
-        title: 'communication',
-        barName: 'Demand all',
-        id: '1',
-        totalValue: 100,
-        value: 76,
-        color: '#8DD2B1',
-        subValue: 30,
-    },
-    {
-        title: 'communication',
-        barName: 'Officials',
-        id: '2',
-        totalValue: 100,
-        value: 56,
-        color: '#8DD2B1',
-        subValue: 76,
-    },
-    {
-        title: 'communication',
-        barName: 'WHO',
-        id: '3',
-        totalValue: 100,
-        value: 56,
-        color: '#8DD2B1',
-        subValue: 26,
-    },
-    {
-        title: 'communication',
-        barName: 'Demand Evolution',
-        id: '4',
-        totalValue: 100,
-        value: 56,
-        color: '#8DD2B1',
-        subValue: 26,
-    },
-    {
-        title: 'communication',
-        barName: 'Newspapers',
-        id: '5',
-        totalValue: 100,
-        value: 56,
-        color: '#8DD2B1',
-        subValue: 26,
-    },
-    {
-        title: 'communication',
-        barName: 'Officials',
-        id: '6',
-        totalValue: 100,
-        value: 56,
-        color: '#8DD2B1',
-        subValue: 26,
-    },
-    {
-        title: 'communication',
-        barName: 'Demand prevention',
-        id: '7',
-        totalValue: 100,
-        value: 56,
-        color: '#8DD2B1',
-        subValue: 26,
-    },
-    {
-        title: 'communication',
-        barName: 'Radio',
-        id: '8',
-        totalValue: 100,
-        value: 56,
-        color: '#8DD2B1',
-        subValue: 26,
-    },
-    {
-        title: 'communication',
-        barName: 'Social media',
-        id: '9',
-        totalValue: 100,
-        value: 56,
-        color: '#8DD2B1',
-        subValue: 26,
     },
 ];
 

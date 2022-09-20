@@ -37,7 +37,7 @@ function TopicCard(props: Props) {
         value: data.indicatorValue ?? 0,
         subValue: data.indicatorValueRegional ?? 0,
         totalValue: 1,
-        id: `${data.indicatorId}-${data.subvariable}`,
+        id: +`${data.indicatorId}-${data.subvariable}`,
         icon: <IoInformationCircleOutline />,
         color: '#98a6b5',
         region: data.region ?? '',

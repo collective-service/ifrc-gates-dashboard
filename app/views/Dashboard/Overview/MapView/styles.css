@@ -3,9 +3,16 @@
     align-items: flex-start;
 
     .map-container {
+        position: relative;
         flex-grow: 1;
         padding-left: 0px;
-        min-height: 40rem;
+        min-height: 42rem;
+
+        .map-label-box {
+            position: absolute;
+            bottom: 2.5rem;
+            left: 2rem;
+        }
     }
 
     .progress-bar-container {
@@ -14,11 +21,11 @@
         flex-shrink: 0;
 
         .low-progress-box {
-            padding-top: none;
+            padding-top: var(--dui-spacing-large);
         }
 
         .high-progress-box {
-            padding-top: var(--dui-spacing-extra-large);
+            padding-top: none;
         }
 
         .progress-list-header {

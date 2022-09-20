@@ -192,47 +192,47 @@ interface PercentageCardGroupProps {
 }
 const UNCERTAINTY = gql`
     query Uncertainty(
-    $isTwelveMonth: Boolean,
-    $indicatorId: String,
-    $category: String,
-    $indicatorMonth: Ordering,
-    $region: String,
-    $offset: Int!,
-    $limit: Int!,
+        $isTwelveMonth: Boolean,
+        $indicatorId: String,
+        $category: String,
+        $indicatorMonth: Ordering,
+        $region: String,
+        $offset: Int!,
+        $limit: Int!,
     ) {
         globalLevel(
-        filters: {
-            isTwelveMonth: $isTwelveMonth,
-            indicatorId: $indicatorId,
-            category: $category,
-        },
-        order: {
-            indicatorMonth: $indicatorMonth,
-        },
-        pagination: {
-            limit: $limit,
-            offset: $offset,
-        },
-        ) {
-            id
-            errorMargin
-            indicatorMonth
-            indicatorName
-            indicatorValueGlobal
-        }
+            filters: {
+                isTwelveMonth: $isTwelveMonth,
+                indicatorId: $indicatorId,
+                category: $category,
+            },
+            order: {
+                indicatorMonth: $indicatorMonth,
+            },
+            pagination: {
+                limit: $limit,
+                offset: $offset,
+            },
+            ) {
+                id
+                errorMargin
+                indicatorMonth
+                indicatorName
+                indicatorValueGlobal
+            }
         regionLevel(
-        filters: {
-            indicatorId: $indicatorId,
-            isTwelveMonth: $isTwelveMonth,
-            region: $region,
-        },
-        order: {
-            indicatorMonth: $indicatorMonth,
-        },
-        pagination: {
-            limit: $limit,
-            offset: $offset,
-        },
+            filters: {
+                indicatorId: $indicatorId,
+                isTwelveMonth: $isTwelveMonth,
+                region: $region,
+            },
+            order: {
+                indicatorMonth: $indicatorMonth,
+            },
+            pagination: {
+                limit: $limit,
+                offset: $offset,
+            },
         ) {
             id
             errorMargin
@@ -241,7 +241,6 @@ const UNCERTAINTY = gql`
             indicatorValueRegional
         }
     }
-
 `;
 
 function PercentageCardGroup(props: PercentageCardGroupProps) {
