@@ -299,7 +299,6 @@ function MapView(props: MapViewProps) {
             suffix: isIndicatorSelected ? '%' : 'M',
             barName: data.countryName,
             title: data.countryName,
-            id: +data.countryId,
             value: data.contextIndicatorValue ?? undefined,
             totalValue: 0,
             color: '#98A6B5',

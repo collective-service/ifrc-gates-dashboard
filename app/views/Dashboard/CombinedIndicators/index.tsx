@@ -20,6 +20,7 @@ import {
     CombinedIndicatorsGlobalQuery,
     CombinedIndicatorsGlobalQueryVariables,
 } from '#generated/types';
+import { TabTypes } from '#views/Dashboard';
 
 import TopicCard from './TopicCard';
 import { AdvancedOptionType } from '../AdvancedFilters';
@@ -138,6 +139,9 @@ interface ThematicProps {
     thematicName: string;
     indicators: IndicatorDataType[];
     showRegionalValue: boolean;
+    filterValues: FilterType | undefined;
+    setFilterValues: React.Dispatch<React.SetStateAction<FilterType | undefined>>;
+    setActiveTab: React.Dispatch<React.SetStateAction<TabTypes | undefined>>;
 }
 
 function ThematicRenderer(props: ThematicProps) {
@@ -145,6 +149,9 @@ function ThematicRenderer(props: ThematicProps) {
         thematicName,
         indicators,
         showRegionalValue,
+        filterValues,
+        setFilterValues,
+        setActiveTab,
     } = props;
 
     const topicKeySelector = (d: SeparatedThematic) => d.key;
@@ -168,7 +175,15 @@ function ThematicRenderer(props: ThematicProps) {
         indicatorKey: key,
         indicators: data.items,
         showRegionalValue,
-    }), [showRegionalValue]);
+        filterValues,
+        setFilterValues,
+        setActiveTab,
+    }), [
+        showRegionalValue,
+        setActiveTab,
+        filterValues,
+        setFilterValues,
+    ]);
 
     return (
         <div
@@ -194,6 +209,8 @@ interface Props {
     className?: string;
     filterValues?: FilterType | undefined;
     advancedFilterValues?: AdvancedOptionType | undefined;
+    setFilterValues: React.Dispatch<React.SetStateAction<FilterType | undefined>>;
+    setActiveTab: React.Dispatch<React.SetStateAction<TabTypes | undefined>>;
 }
 
 function CombinedIndicators(props: Props) {
@@ -201,6 +218,8 @@ function CombinedIndicators(props: Props) {
         className,
         filterValues,
         advancedFilterValues,
+        setFilterValues,
+        setActiveTab,
     } = props;
 
     const {
@@ -305,8 +324,13 @@ function CombinedIndicators(props: Props) {
         thematicName: item.key,
         indicators: item.items,
         showRegionalValue: isDefined(filterValues?.country),
+        setFilterValues,
+        filterValues,
+        setActiveTab,
     }), [
-        filterValues?.country,
+        filterValues,
+        setFilterValues,
+        setActiveTab,
     ]);
     const topicKeySelector = (d: SeparatedThematic) => d.key;
     const loading = combinedIndicatorsLoading

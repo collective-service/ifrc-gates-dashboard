@@ -1,5 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { _cs, isNotDefined } from '@togglecorp/fujs';
+import { Button } from '@the-deep/deep-ui';
 
 import styles from './styles.css';
 
@@ -8,7 +9,6 @@ export interface Props {
     barHeight?: number;
     suffix?: string;
     barName: string | undefined;
-    id: number;
     title: string | undefined;
     valueTitle?: string | undefined;
     color?: string;
@@ -19,6 +19,9 @@ export interface Props {
     region?: string;
     showRegionalValue?: boolean;
     isNumberValue?: boolean;
+    indicatorId?: string;
+    subVariable?: string;
+    onTitleClick?: (indicatorId?: string, subVariable?: string) => void;
 }
 
 function ProgressBar(props: Props) {
@@ -27,7 +30,6 @@ function ProgressBar(props: Props) {
         barHeight = 8,
         suffix,
         barName,
-        id,
         title,
         valueTitle,
         color,
@@ -38,6 +40,9 @@ function ProgressBar(props: Props) {
         region,
         showRegionalValue = false,
         isNumberValue = false,
+        onTitleClick,
+        indicatorId,
+        subVariable,
     } = props;
 
     const countryPercentage = useMemo(() => {
@@ -54,6 +59,17 @@ function ProgressBar(props: Props) {
         isNumberValue,
     ]);
 
+    const handleTitleClick = useCallback(() => {
+        if (!onTitleClick) {
+            return;
+        }
+        onTitleClick(indicatorId, subVariable);
+    }, [
+        onTitleClick,
+        indicatorId,
+        subVariable,
+    ]);
+
     const subValuePercentage = useMemo(
         () => (
             subValue && totalValue
@@ -68,10 +84,19 @@ function ProgressBar(props: Props) {
     return (
         <div className={_cs(className, styles.progressInfo)}>
             <div className={styles.progressTitle}>
-                {barName}
-                <div
-                    title={title}
-                >
+                {indicatorId
+                    ? (
+                        <Button
+                            className={styles.titleButton}
+                            name={undefined}
+                            onClick={handleTitleClick}
+                            variant="transparent"
+                        >
+                            {barName}
+                        </Button>
+                    )
+                    : barName}
+                <div title={title}>
                     {icon}
                 </div>
             </div>
@@ -83,7 +108,7 @@ function ProgressBar(props: Props) {
                 >
                     <div
                         className={styles.progressBarStyle}
-                        key={id}
+                        key={undefined}
                         style={{
                             width: `${countryPercentage}%`,
                             backgroundColor: color ?? 'blue',

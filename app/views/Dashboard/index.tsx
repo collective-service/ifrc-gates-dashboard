@@ -198,6 +198,8 @@ function Dashboard() {
                         <CombinedIndicators
                             filterValues={filterValues}
                             advancedFilterValues={advancedFilterValues}
+                            setFilterValues={setFilterValues}
+                            setActiveTab={setActiveTab}
                         />
                     </TabPanel>
                 </div>
