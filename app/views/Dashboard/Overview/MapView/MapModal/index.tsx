@@ -68,7 +68,7 @@ const COUNTRY_PROFILE = gql`
             contextIndicatorValue
             contextDate
         }
-        ContextualDataWithMultipleEmergency(
+        contextualDataWithMultipleEmergency(
             iso3: $iso3,
         ) {
             emergency
@@ -126,7 +126,7 @@ function MapModal(props: ModalProps) {
     ]);
 
     const emergencyLineChart = useMemo(() => {
-        const emergencyMapList = countryResponse?.ContextualDataWithMultipleEmergency.map(
+        const emergencyMapList = countryResponse?.contextualDataWithMultipleEmergency.map(
             (emergency) => {
                 const emergencyGroupList = listToGroupList(
                     emergency.data,
@@ -153,7 +153,7 @@ function MapModal(props: ModalProps) {
         return Object.values(emergencyGroupedList ?? {}).map(
             (d) => d.reduce((acc, item) => ({ ...acc, ...item }), {}),
         );
-    }, [countryResponse?.ContextualDataWithMultipleEmergency]);
+    }, [countryResponse?.contextualDataWithMultipleEmergency]);
 
     const outbreaks = useMemo(() => (
         unique(

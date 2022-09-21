@@ -22,6 +22,7 @@ import MapLabel from '#components/MapLabel';
 import {
     normalFormatter,
 } from '#utils/common';
+import { RegionBounds } from '#utils/regionBounds';
 import {
     MapIndicatorValuesQuery,
     MapIndicatorValuesQueryVariables,
@@ -43,10 +44,18 @@ const tooltipOptions: mapboxgl.PopupOptions = {
 };
 
 const MAP_INDICATOR = gql`
-    query MapIndicatorValues ($filters: CountryEmergencyProfileFilter) {
-        countryEmergencyProfile(filters: $filters) {
-            contextIndicatorValue
+    query MapIndicatorValues (
+        $emergency: String,
+        $indicatorId: String,
+        $region: String,
+        ) {
+        overviewMap(
+            indicatorId: $indicatorId,
+            emergency: $emergency,
+            region: $region,
+            ) {
             iso3
+            indicatorValue
             countryId
         }
     }
@@ -133,7 +142,7 @@ const countryFillPaint: mapboxgl.FillPaint = {
     'fill-color': [
         'interpolate',
         ['linear'],
-        ['coalesce', ['feature-state', 'contextIndicatorValue'], 0],
+        ['coalesce', ['feature-state', 'indicatorValue'], 0],
         0,
         '#2F9F45',
         5000,
@@ -210,9 +219,14 @@ function MapView(props: MapViewProps) {
     ] = useModalState(false);
 
     const [
-        clickedPointProperties,
-        setClickedPointProperties,
+        mapClickProperties,
+        setMapClickProperties,
     ] = React.useState<ClickedPoint | undefined>();
+
+    const [
+        selectedCountryIndicator,
+        setSelectedCountryIndicator,
+    ] = React.useState<number | undefined>();
 
     const [
         countryData,
@@ -220,10 +234,9 @@ function MapView(props: MapViewProps) {
     ] = useState<mapboxgl.MapboxGeoJSONFeature | undefined>();
 
     const mapIndicatorVariables = useMemo((): MapIndicatorValuesQueryVariables => ({
-        filters: {
-            contextIndicatorId: 'total_cases',
-            emergency: filterValues?.outbreak,
-        },
+        indicatorId: '',
+        emergency: filterValues?.outbreak,
+        region: filterValues?.region,
     }), [
         filterValues,
     ]);
@@ -260,16 +273,16 @@ function MapView(props: MapViewProps) {
     */
 
     const mapIndicatorState = useMemo(() => {
-        const countryIndicator = mapIndicatorValues?.countryEmergencyProfile?.map(
+        const countryIndicator = mapIndicatorValues?.overviewMap?.map(
             (indicatorValue) => ({
                 id: +indicatorValue.countryId,
-                value: indicatorValue.contextIndicatorValue ?? 0,
+                value: indicatorValue.indicatorValue ?? 0,
                 iso: indicatorValue.iso3,
             }),
         )
             .filter((item) => item.value > 0);
         return countryIndicator ?? [];
-    }, [mapIndicatorValues?.countryEmergencyProfile]);
+    }, [mapIndicatorValues?.overviewMap]);
 
     const handleCountryClick = useCallback(
         (feature: mapboxgl.MapboxGeoJSONFeature) => {
@@ -296,21 +309,34 @@ function MapView(props: MapViewProps) {
 
     const handlePointHover = React.useCallback(
         (feature: mapboxgl.MapboxGeoJSONFeature, lngLat: mapboxgl.LngLat) => {
-            setClickedPointProperties({
+            const indicatorData = mapIndicatorValues?.overviewMap?.find(
+                (country) => country.iso3 === feature?.properties?.iso3,
+            );
+
+            setMapClickProperties({
                 feature: feature as unknown as ClickedPoint['feature'],
                 lngLat,
             });
+            setSelectedCountryIndicator(indicatorData?.indicatorValue ?? 0);
             return true;
         },
-        [setClickedPointProperties],
+        [setMapClickProperties, mapIndicatorValues],
     );
 
-    const handlePointClose = React.useCallback(
+    const handleHoverClose = React.useCallback(
         () => {
-            setClickedPointProperties(undefined);
+            setMapClickProperties(undefined);
+            setSelectedCountryIndicator(undefined);
         },
-        [setClickedPointProperties],
+        [setMapClickProperties],
     );
+
+    const selectedRegionBounds = useMemo(() => {
+        const regionData = RegionBounds?.find(
+            (region) => region.region === filterValues?.region,
+        );
+        return regionData?.bounding_box as [number, number, number, number];
+    }, [filterValues]);
 
     return (
         <div className={_cs(className, styles.mapViewWrapper)}>
@@ -329,7 +355,7 @@ function MapView(props: MapViewProps) {
                 >
                     <MapContainer className={styles.mapContainer} />
                     <MapBounds
-                        bounds={undefined}
+                        bounds={selectedRegionBounds ?? undefined}
                         padding={50}
                     />
                     <MapSource
@@ -358,18 +384,18 @@ function MapView(props: MapViewProps) {
                             }}
                         />
                         <MapState
-                            attributeKey="contextIndicatorValue"
+                            attributeKey="indicatorValue"
                             attributes={mapIndicatorState}
                         />
                     </MapSource>
-                    {clickedPointProperties?.lngLat && clickedPointProperties?.feature?.id
+                    {mapClickProperties?.lngLat && mapClickProperties?.feature?.id
                         && (
                             <Tooltip
-                                countryName={clickedPointProperties
+                                countryName={mapClickProperties
                                     ?.feature?.properties?.idmc_short}
-                                indicatorValue={clickedPointProperties?.feature?.properties?.id}
-                                onHide={handlePointClose}
-                                lngLat={clickedPointProperties.lngLat}
+                                indicatorValue={selectedCountryIndicator}
+                                onHide={handleHoverClose}
+                                lngLat={mapClickProperties.lngLat}
                             />
                         )}
                 </Map>
