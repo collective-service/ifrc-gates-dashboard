@@ -1,5 +1,9 @@
 import React, { useMemo } from 'react';
-import { compareString, _cs } from '@togglecorp/fujs';
+import {
+    compareString,
+    _cs,
+} from '@togglecorp/fujs';
+import { gql, useQuery } from '@apollo/client';
 import {
     TextInput,
     TableView,
@@ -15,19 +19,39 @@ import {
     IoIosSearch,
 } from 'react-icons/io';
 
-import { overviewTableData } from '#utils/dummyData';
+import {
+    TableValuesQuery,
+    TableValuesQueryVariables,
+} from '#generated/types';
+import { FilterType } from '#views/Dashboard/Filters';
 import styles from './styles.css';
 
-const tableKeySelector = (p: TableViewProps) => p.id;
+type TableViewProps = NonNullable<TableValuesQuery['overviewTable']>[number];
 
-export interface TableViewProps {
-    id: string;
-    country: string;
-    valueOne: string;
-    valueTwo: string;
-    month: string;
-    high?: boolean;
-}
+const tableKeySelector = (p: TableViewProps) => p.countryId;
+
+const TABLE_DATA = gql`
+    query TableValues (
+        $emergency: String,
+        $indicatorId: String,
+        $region: String,
+        ) {
+        overviewTable(
+            indicatorId: $indicatorId,
+            emergency: $emergency,
+            region: $region,
+            ) {
+                countryName
+                countryId
+                iso3
+                data {
+                    indicatorValue
+                    month
+                }
+        }
+    }
+`;
+
 interface CountryListHeaderCellProps {
     className: string;
 }
@@ -132,12 +156,35 @@ function createIndicatorColumn(
 }
 interface OverviewTableProps {
     className?: string;
+    filterValues?: FilterType | undefined;
+    setFilterValues: React.Dispatch<React.SetStateAction<FilterType | undefined>>;
 }
 
 function OverviewTable(props: OverviewTableProps) {
     const {
         className,
+        filterValues,
+        setFilterValues,
     } = props;
+
+    const tableVariables = useMemo((): TableValuesQueryVariables => ({
+        indicatorId: filterValues?.indicator,
+        emergency: filterValues?.outbreak,
+        region: filterValues?.region,
+    }), [
+        filterValues,
+    ]);
+
+    const {
+        data: tableValues,
+        loading: tableValuesLoading,
+    } = useQuery<TableValuesQuery, TableValuesQueryVariables>(
+        TABLE_DATA,
+        {
+            variables: tableVariables,
+        },
+    );
+    console.log('table values::>>', tableValues?.overviewTable);
 
     const columns = useMemo(
         () => {
@@ -152,7 +199,7 @@ function OverviewTable(props: OverviewTableProps) {
                 },
                 cellRenderer: countryListCell,
                 cellRendererParams: (_, datum) => ({
-                    title: datum.country,
+                    title: datum.countryName,
                 }),
                 columnWidth: 130,
             };
@@ -163,7 +210,7 @@ function OverviewTable(props: OverviewTableProps) {
                 createIndicatorColumn(
                     'jan',
                     'Jan',
-                    (item) => item.valueTwo,
+                    (item) => item?.data?.find((val) => new Date(val.month).getMonth() === 0)?.indicatorValue.toString() ?? '',
                     {
                         columnWidth: 30,
                     },
@@ -171,7 +218,7 @@ function OverviewTable(props: OverviewTableProps) {
                 createIndicatorColumn(
                     'feb',
                     'Feb',
-                    (item) => item.valueOne,
+                    (item) => item?.data?.find((val) => new Date(val.month).getMonth() === 1)?.indicatorValue.toString() ?? '',
                     {
                         columnWidth: 30,
                     },
@@ -179,7 +226,7 @@ function OverviewTable(props: OverviewTableProps) {
                 createIndicatorColumn(
                     'mar',
                     'Mar',
-                    (item) => item.valueOne,
+                    (item) => item?.data?.find((val) => new Date(val.month).getMonth() === 2)?.indicatorValue.toString() ?? '',
                     {
                         columnWidth: 30,
                     },
@@ -187,7 +234,7 @@ function OverviewTable(props: OverviewTableProps) {
                 createIndicatorColumn(
                     'apr',
                     'Apr',
-                    (item) => item.valueOne,
+                    (item) => item?.data?.find((val) => new Date(val.month).getMonth() === 3)?.indicatorValue.toString() ?? '',
                     {
                         columnWidth: 30,
                     },
@@ -195,7 +242,7 @@ function OverviewTable(props: OverviewTableProps) {
                 createIndicatorColumn(
                     'may',
                     'May',
-                    (item) => item.valueOne,
+                    (item) => item?.data?.find((val) => new Date(val.month).getMonth() === 4)?.indicatorValue.toString() ?? '',
                     {
                         columnWidth: 30,
                     },
@@ -203,7 +250,7 @@ function OverviewTable(props: OverviewTableProps) {
                 createIndicatorColumn(
                     'jun',
                     'Jun',
-                    (item) => item.valueOne,
+                    (item) => item?.data?.find((val) => new Date(val.month).getMonth() === 5)?.indicatorValue.toString() ?? '',
                     {
                         columnWidth: 30,
                     },
@@ -211,7 +258,7 @@ function OverviewTable(props: OverviewTableProps) {
                 createIndicatorColumn(
                     'jul',
                     'July',
-                    (item) => item.valueOne,
+                    (item) => item?.data?.find((val) => new Date(val.month).getMonth() === 6)?.indicatorValue.toString() ?? '',
                     {
                         columnWidth: 30,
                     },
@@ -219,7 +266,7 @@ function OverviewTable(props: OverviewTableProps) {
                 createIndicatorColumn(
                     'aug',
                     'Aug',
-                    (item) => item.valueOne,
+                    (item) => item?.data?.find((val) => new Date(val.month).getMonth() === 7)?.indicatorValue.toString() ?? '',
                     {
                         columnWidth: 30,
                     },
@@ -227,7 +274,7 @@ function OverviewTable(props: OverviewTableProps) {
                 createIndicatorColumn(
                     'sep',
                     'Sep',
-                    (item) => item.valueOne,
+                    (item) => item?.data?.find((val) => new Date(val.month).getMonth() === 8)?.indicatorValue.toString() ?? '',
                     {
                         columnWidth: 30,
                     },
@@ -235,7 +282,7 @@ function OverviewTable(props: OverviewTableProps) {
                 createIndicatorColumn(
                     'oct',
                     'Oct',
-                    (item) => item.valueOne,
+                    (item) => item?.data?.find((val) => new Date(val.month).getMonth() === 9)?.indicatorValue.toString() ?? '',
                     {
                         columnWidth: 30,
                     },
@@ -243,7 +290,7 @@ function OverviewTable(props: OverviewTableProps) {
                 createIndicatorColumn(
                     'nov',
                     'Nov',
-                    (item) => item.valueOne,
+                    (item) => item?.data?.find((val) => new Date(val.month).getMonth() === 10)?.indicatorValue.toString() ?? '',
                     {
                         columnWidth: 30,
                     },
@@ -251,7 +298,7 @@ function OverviewTable(props: OverviewTableProps) {
                 createIndicatorColumn(
                     'dec',
                     'Dec',
-                    (item) => item.valueOne,
+                    (item) => item?.data?.find((val) => new Date(val.month).getMonth() === 11)?.indicatorValue.toString() ?? '',
                     {
                         columnWidth: 30,
                     },
@@ -267,10 +314,11 @@ function OverviewTable(props: OverviewTableProps) {
             cellClassName={styles.eachTableCell}
             columns={columns}
             keySelector={tableKeySelector}
-            data={overviewTableData}
+            data={tableValues?.overviewTable}
             errored={false}
-            pending={false}
+            pending={tableValuesLoading}
             filtered={false}
+            pendingMessage="Loading..."
             emptyMessage="No projects to show."
         />
     );

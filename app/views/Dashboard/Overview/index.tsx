@@ -112,7 +112,9 @@ function Overview(props: Props) {
                         <TabPanel
                             name="tableMode"
                         >
-                            <OverviewTable />
+                            <OverviewTable
+                                filterValues={filterValues}
+                            />
                         </TabPanel>
                     </ContainerCard>
                 </Tabs>
