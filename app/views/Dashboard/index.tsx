@@ -99,7 +99,10 @@ function Dashboard() {
         },
     );
 
-    const narrativeStatement = useMemo(() => ((narrativeResponse?.naratives.length !== -1)
+    const narrativeStatement = useMemo(() => ((
+        narrativeResponse?.naratives?.length
+            && narrativeResponse?.naratives?.length > 0
+    )
         ? narrativeResponse?.naratives[0].narrative
         : 'This is Narrative'
     ), [
