@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Button } from '@the-deep/deep-ui';
 import {
     IoChevronUp,
@@ -16,6 +16,10 @@ function Narratives(props: Props) {
 
     const [isSeeMore, setIsSeeMore] = useState<boolean>(false);
 
+    const handleButtonClick = useCallback(() => {
+        setIsSeeMore((old: boolean) => !old);
+    }, [setIsSeeMore]);
+
     return (
         <div
             className={styles.narrativeWrapper}
@@ -25,13 +29,13 @@ function Narratives(props: Props) {
                 <Button
                     name={undefined}
                     variant="transparent"
-                    actions={(isSeeMore
-                        ? <IoChevronUp />
-                        : <IoChevronDown />
-                    )}
-                    onClick={() => setIsSeeMore((old: boolean) => !old)}
+                    onClick={handleButtonClick}
                 >
                     See More
+                    &nbsp;
+                    {isSeeMore
+                        ? <IoChevronUp />
+                        : <IoChevronDown /> }
                 </Button>
             </div>
             {isSeeMore && (
