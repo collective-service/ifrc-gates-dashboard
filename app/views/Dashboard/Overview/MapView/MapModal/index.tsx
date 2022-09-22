@@ -155,6 +155,8 @@ function MapModal(props: ModalProps) {
         );
     }, [countryResponse?.contextualDataWithMultipleEmergency]);
 
+    const latestDate: { date?: string } = emergencyLineChart[emergencyLineChart.length - 1];
+
     const outbreaks = useMemo(() => (
         unique(
             countryResponse?.contextualData ?? [],
@@ -200,7 +202,7 @@ function MapModal(props: ModalProps) {
                     <Heading
                         className={styles.countrySurveyDate}
                     >
-                        Nov, 2022 Fake
+                        {dateTickFormatter(latestDate?.date ?? '')}
                     </Heading>
                 </div>
             )}

@@ -26,6 +26,8 @@ import { RegionBounds } from '#utils/regionBounds';
 import {
     OverviewMapDataQuery,
     OverviewMapDataQueryVariables,
+    MostRecentValuesQuery,
+    MostRecentValuesQueryVariables,
 } from '#generated/types';
 
 import { TabTypes } from '#views/Dashboard';
@@ -96,9 +98,60 @@ const MAP_DATA = gql`
 type AscendingCountryProfileType = NonNullable<OverviewMapDataQuery['ascCountryEmergencyProfile']>[number];
 type DescendingCountryProfileType = NonNullable<OverviewMapDataQuery['descCountryEmergencyProfile']>[number];
 
+const MOST_RECENT_CASES = gql`
+    query MostRecentValues(
+        $emergency: String,
+        $region: String,
+    ) {
+        descMostRecentValues: dataCountryLevelMostRecent(
+            filters: {
+                emergency: $emergency,
+                region: $region,
+            }
+            pagination: {
+                limit: 5,
+                offset: 0,
+            }
+            order: {
+                indicatorValue: DESC,
+            }
+        ) {
+            id
+            countryName
+            iso3
+            indicatorValue
+        }
+        ascMostRecentValues: dataCountryLevelMostRecent(
+            filters: {
+                emergency: $emergency,
+                region: $region,
+            }
+            pagination: {
+                limit: 5,
+                offset: 0
+            }
+            order: {
+                indicatorValue: ASC,
+            }
+        ) {
+            id
+            countryName
+            iso3
+            indicatorValue
+        }
+    }
+`;
+
+type AscendingMostRecentIndicatorType = NonNullable<MostRecentValuesQuery['descMostRecentValues']>[number];
+type DescendingMostRecentIndicatorType = NonNullable<MostRecentValuesQuery['ascMostRecentValues']>[number];
+
 const progressBarKeySelector = (
     d: AscendingCountryProfileType | DescendingCountryProfileType,
 ) => d.countryId;
+
+const recentProgressBarKeySelector = (
+    d: AscendingMostRecentIndicatorType | DescendingMostRecentIndicatorType,
+) => d.id;
 
 interface MapViewProps {
     className?: string;
@@ -248,6 +301,20 @@ function MapView(props: MapViewProps) {
         (x): x is number => x !== null && x !== undefined));
     */
 
+    const mostRecentVariables = useMemo(() => ({
+        indicatorId: filterValues?.indicator,
+        region: filterValues?.region,
+    }), [filterValues]);
+
+    const {
+        data: mostRecentValues,
+    } = useQuery<MostRecentValuesQuery, MostRecentValuesQueryVariables>(
+        MOST_RECENT_CASES,
+        {
+            variables: mostRecentVariables,
+        },
+    );
+
     const mapIndicatorState = useMemo(() => {
         const countryIndicator = pulledData?.overviewMap?.map(
             (indicatorValue) => ({
@@ -276,6 +343,22 @@ function MapView(props: MapViewProps) {
             barName: data.countryName ?? undefined,
             title: data.countryName ?? undefined,
             value: data.contextIndicatorValue ?? undefined,
+            totalValue: 0,
+            color: '#98A6B5',
+            isNumberValue: !isIndicatorSelected,
+        }), [isIndicatorSelected],
+    );
+
+    const recentProgressBarRendererParams = useCallback(
+        (_: string,
+            data: AscendingMostRecentIndicatorType | DescendingMostRecentIndicatorType,
+        ) => ({
+            barHeight,
+            suffix: isIndicatorSelected ? '%' : 'M',
+            barName: data.countryName,
+            title: data.countryName,
+            id: +data.id,
+            value: data.indicatorValue ?? undefined,
             totalValue: 0,
             color: '#98A6B5',
             isNumberValue: !isIndicatorSelected,
@@ -312,6 +395,15 @@ function MapView(props: MapViewProps) {
         );
         return regionData?.bounding_box as [number, number, number, number];
     }, [filterValues]);
+
+    const highestValuesWithoutIndicator = pulledData?.descCountryEmergencyProfile;
+    const lowestValuesWithoutIndicator = pulledData?.ascCountryEmergencyProfile;
+
+    const recentHighValuesWithIndicator = mostRecentValues?.descMostRecentValues;
+    const recentLowValuesWithIndicator = mostRecentValues?.ascMostRecentValues;
+
+    console.log('WITH INDICATOR RECENT::>>', recentHighValuesWithIndicator, recentLowValuesWithIndicator);
+    console.log('WITHOUT INDICATOR::>>', highestValuesWithoutIndicator, lowestValuesWithoutIndicator);
 
     return (
         <div className={_cs(className, styles.mapViewWrapper)}>
@@ -392,7 +484,9 @@ function MapView(props: MapViewProps) {
                         keySelector={progressBarKeySelector}
                         data={pulledData?.descCountryEmergencyProfile}
                         renderer={ProgressBar}
-                        rendererParams={progressBarRendererParams}
+                        rendererParams={filterValues?.indicator
+                            ? recentProgressBarRendererParams
+                            : progressBarRendererParams}
                         filtered={false}
                         errored={false}
                         pending={false}
@@ -410,7 +504,9 @@ function MapView(props: MapViewProps) {
                         keySelector={progressBarKeySelector}
                         data={pulledData?.ascCountryEmergencyProfile}
                         renderer={ProgressBar}
-                        rendererParams={progressBarRendererParams}
+                        rendererParams={filterValues?.indicator
+                            ? recentProgressBarRendererParams
+                            : progressBarRendererParams}
                         filtered={false}
                         errored={false}
                         pending={false}
