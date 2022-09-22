@@ -7,6 +7,11 @@
         display: flex;
         align-items: center;
         gap: var(--dui-spacing-small);
+
+        .title-button {
+            padding: 0;
+            font-weight: var(--dui-font-weight-normal);
+        }
     }
 
     .progress-value-wrapper {
