@@ -15,6 +15,7 @@ import {
     YAxis,
     Tooltip,
     Legend,
+    LabelList,
     ResponsiveContainer,
     BarChart,
     Bar,
@@ -169,6 +170,7 @@ const COUNTRY_PROFILE = gql`
             indicatorId
             subvariable
             interpolated
+            emergency
         }
         contextualDataWithMultipleEmergency(
             iso3: $iso3,
@@ -312,20 +314,26 @@ function Country(props: Props) {
 
             if (country.interpolated) {
                 return {
+                    emergency: country.emergency,
                     date: country.indicatorMonth,
                     uncertainRange: [
                         negativeRange ?? '',
                         positiveRange ?? '',
                     ],
+                    minimumValue: negativeRange,
+                    maximumValue: positiveRange,
                 };
             }
             return {
+                emergency: country.emergency,
                 indicatorValue: decimalToPercentage(country.indicatorValue),
                 date: country.indicatorMonth,
                 uncertainRange: [
                     negativeRange ?? '',
                     positiveRange ?? '',
                 ],
+                minimumValue: negativeRange,
+                maximumValue: positiveRange,
             };
         })
     ), [countryResponse?.dataCountryLevel]);
@@ -346,6 +354,7 @@ function Country(props: Props) {
             {
                 category: age.category,
                 indicatorValue: decimalToPercentage(age.indicatorValue),
+                normalizedValue: normalFormatter().format(age.indicatorValue ?? 0),
             }
         )), [countryResponse?.disaggregation.ageDisaggregation]);
 
@@ -354,6 +363,7 @@ function Country(props: Props) {
             {
                 category: gender.category,
                 indicatorValue: decimalToPercentage(gender.indicatorValue),
+                normalizedValue: normalFormatter().format(gender.indicatorValue ?? 0),
             }
         )), [countryResponse?.disaggregation.genderDisaggregation]);
 
@@ -570,6 +580,7 @@ function Country(props: Props) {
                             <UncertaintyChart
                                 className={styles.indicatorsChart}
                                 uncertainData={(uncertaintyChart && uncertaintyChart) ?? []}
+                                emergencyFilterValue={filterValues.outbreak}
                             />
                             {(genderDisaggregation && genderDisaggregation.length > 0
                                 && ageDisaggregation && ageDisaggregation.length > 0
@@ -595,7 +606,16 @@ function Country(props: Props) {
                                                         fill="#8DD2B1"
                                                         label={disaggregationLabel}
                                                         barSize={50}
-                                                    />
+                                                        radius={[10, 10, 0, 0]}
+                                                    >
+                                                        <LabelList
+                                                            dataKey="normalizedValue"
+                                                            position="insideBottomLeft"
+                                                            angle={270}
+                                                            offset={-2.8}
+                                                            fontSize={22}
+                                                        />
+                                                    </Bar>
                                                     <XAxis
                                                         dataKey="category"
                                                         tickLine={false}
@@ -624,7 +644,16 @@ function Country(props: Props) {
                                                         fill="#8DD2B1"
                                                         label={disaggregationLabel}
                                                         barSize={50}
-                                                    />
+                                                        radius={[10, 10, 0, 0]}
+                                                    >
+                                                        <LabelList
+                                                            dataKey="normalizedValue"
+                                                            position="insideBottomLeft"
+                                                            angle={270}
+                                                            offset={-2.8}
+                                                            fontSize={22}
+                                                        />
+                                                    </Bar>
                                                     <XAxis
                                                         dataKey="category"
                                                         tickLine={false}
