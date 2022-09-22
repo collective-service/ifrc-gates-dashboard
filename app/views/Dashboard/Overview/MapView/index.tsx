@@ -28,6 +28,8 @@ import {
     MostRecentValuesQueryVariables,
     OverviewMapDataQuery,
     OverviewMapDataQueryVariables,
+    MostRecentValuesQuery,
+    MostRecentValuesQueryVariables,
 } from '#generated/types';
 
 import { TabTypes } from '#views/Dashboard';
@@ -373,6 +375,22 @@ function MapView(props: MapViewProps) {
         }), [],
     );
 
+    const recentProgressBarRendererParams = useCallback(
+        (_: string,
+            data: AscendingMostRecentIndicatorType | DescendingMostRecentIndicatorType,
+        ) => ({
+            barHeight,
+            suffix: isIndicatorSelected ? '%' : 'M',
+            barName: data.countryName,
+            title: data.countryName,
+            id: +data.id,
+            value: data.indicatorValue ?? undefined,
+            totalValue: 0,
+            color: '#98A6B5',
+            isNumberValue: !isIndicatorSelected,
+        }), [isIndicatorSelected],
+    );
+
     const handlePointHover = React.useCallback(
         (feature: mapboxgl.MapboxGeoJSONFeature, lngLat: mapboxgl.LngLat) => {
             const indicatorData = overviewMapData?.overviewMap?.find(
@@ -406,6 +424,15 @@ function MapView(props: MapViewProps) {
         return regionData?.bounding_box as [number, number, number, number];
     }, [filterValues]);
      */
+
+    const highestValuesWithoutIndicator = pulledData?.descCountryEmergencyProfile;
+    const lowestValuesWithoutIndicator = pulledData?.ascCountryEmergencyProfile;
+
+    const recentHighValuesWithIndicator = mostRecentValues?.descMostRecentValues;
+    const recentLowValuesWithIndicator = mostRecentValues?.ascMostRecentValues;
+
+    console.log('WITH INDICATOR RECENT::>>', recentHighValuesWithIndicator, recentLowValuesWithIndicator);
+    console.log('WITHOUT INDICATOR::>>', highestValuesWithoutIndicator, lowestValuesWithoutIndicator);
 
     return (
         <div className={_cs(className, styles.mapViewWrapper)}>
