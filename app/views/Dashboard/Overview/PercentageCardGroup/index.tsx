@@ -216,6 +216,7 @@ const UNCERTAINTY = gql`
             ) {
                 id
                 errorMargin
+                emergency
                 indicatorMonth
                 indicatorName
                 indicatorValueGlobal
@@ -236,6 +237,7 @@ const UNCERTAINTY = gql`
         ) {
             id
             errorMargin
+            emergency
             indicatorMonth
             indicatorName
             indicatorValueRegional
@@ -376,18 +378,24 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
 
             if (isNotDefined(global.errorMargin)) {
                 return {
+                    emergency: global.emergency,
                     indicatorValue: decimalToPercentage(global.indicatorValueGlobal),
                     date: global.indicatorMonth,
+                    minimumValue: negativeRange,
+                    maximumValue: positiveRange,
                 };
             }
 
             return {
+                emergency: global.emergency,
                 indicatorValue: decimalToPercentage(global.indicatorValueGlobal),
                 date: global.indicatorMonth,
                 uncertainRange: [
                     negativeRange ?? '',
                     positiveRange ?? '',
                 ],
+                minimumValue: negativeRange,
+                maximumValue: positiveRange,
             };
         }).sort((a, b) => compareDate(a.date, b.date))
     ), [uncertaintyResponse?.globalLevel]);
@@ -405,18 +413,24 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
 
             if (isNotDefined(region.errorMargin)) {
                 return {
+                    emergency: region.emergency,
                     indicatorValue: decimalToPercentage(region.indicatorValueRegional),
                     date: region.indicatorMonth,
+                    minimumValue: negativeRange,
+                    maximumValue: positiveRange,
                 };
             }
 
             return {
+                emergency: region.emergency,
                 indicatorValue: decimalToPercentage(region.indicatorValueRegional),
                 date: region.indicatorMonth,
                 uncertainRange: [
                     negativeRange ?? '',
                     positiveRange ?? '',
                 ],
+                minimumValue: negativeRange,
+                maximumValue: positiveRange,
             };
         }).sort((a, b) => compareDate(a.date, b.date))
     ), [uncertaintyResponse?.regionLevel]);
@@ -486,6 +500,7 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                                 ? uncertaintyRegionChart
                                 : uncertaintyGlobalChart
                         }
+                        emergencyFilterValue={filterValues?.outbreak}
                     />
                 ) : (
                     <ContainerCard

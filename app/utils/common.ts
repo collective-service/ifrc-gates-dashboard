@@ -97,6 +97,14 @@ export function normalFormatter() {
     );
 }
 
+export function normalCommaFormatter() {
+    return (
+        new Intl.NumberFormat(
+            'en',
+        )
+    );
+}
+
 export function getRegionForCountry(country: string | undefined, list: CountryListType[]) {
     return list?.find((c) => c.iso3 === country)?.region;
 }

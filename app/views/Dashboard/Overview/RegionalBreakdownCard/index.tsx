@@ -28,7 +28,10 @@ import {
     TotalQueryVariables,
 } from '#generated/types';
 
-import { normalFormatter } from '#utils/common';
+import {
+    normalFormatter,
+    normalCommaFormatter,
+} from '#utils/common';
 
 import PieChartInfo, { RegionalDataType } from './PieChartInfo';
 import { FilterType } from '../../Filters';
@@ -46,6 +49,27 @@ export interface RegionalLabelRendererProps {
 }
 
 type EpiDataGlobal = NonNullable<RegionalQuery>['epiDataGlobal'][number];
+
+interface CustomProps {
+    active?: false;
+    payload?: {
+        value?: number;
+    }[];
+    label?: string;
+}
+
+function CustomTooltip(customProps: CustomProps) {
+    const { active, payload, label } = customProps;
+
+    if (active && payload && payload.length > 0) {
+        return (
+            <div>
+                <p>{`${label} : ${normalCommaFormatter().format(payload[0]?.value ?? 0)}`}</p>
+            </div>
+        );
+    }
+    return null;
+}
 
 const REGIONAL_BREAKDOWN = gql`
     query Regional(
@@ -191,6 +215,7 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
     const totalBarChart = totalCasesResponse?.epiDataGlobal.map((total) => (
         {
             ...total,
+            indicatorValue: Number(normalCommaFormatter().format(total.contextIndicatorValue ?? 0)),
             normalizedValue: normalFormatter().format(total.contextIndicatorValue ?? 0),
             fill: total.emergency === 'Monkeypox' ? '#ACA28E' : '#FFDD98',
         }
@@ -226,11 +251,8 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
                         barSize={18}
                     >
                         <Tooltip
+                            content={(<CustomTooltip />)}
                             isAnimationActive={false}
-                            allowEscapeViewBox={{
-                                x: false,
-                                y: false,
-                            }}
                             cursor={false}
                         />
                         <XAxis
@@ -249,6 +271,7 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
                         />
                         <Bar
                             dataKey="contextIndicatorValue"
+                            name="Number of Cases"
                             isAnimationActive={false}
                             radius={[10, 10, 0, 0]}
                         >

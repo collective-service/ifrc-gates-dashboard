@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
     ComposedChart,
     Area,
@@ -19,18 +19,48 @@ export interface UncertainData {
     indicatorValue?: string | null;
     date: string;
     uncertainRange?: string[];
+    minimumValue?: string,
+    maximumValue?: string,
 }
 const dateTickFormatter = (d: string) => getShortMonth(d);
 interface Props {
     className?: string;
     uncertainData: UncertainData[] | undefined;
+    emergencyFilterValue?: string;
 }
 
 function UncertaintyChart(props: Props) {
     const {
         className,
         uncertainData,
+        emergencyFilterValue,
     } = props;
+
+    const minDomain = useMemo(() => {
+        const minimum = uncertainData?.map((min) => (
+            Number(min.minimumValue)
+        ));
+        const dataMin = minimum?.filter((value) => (
+            !Number.isNaN(value)
+        ));
+
+        return (dataMin && dataMin?.length > 0)
+            ? Math.min(...(dataMin || []))
+            : 0;
+    }, [uncertainData]);
+
+    const maxDomain = useMemo(() => {
+        const maximum = uncertainData?.map((max) => (
+            Number(max.maximumValue)
+        ));
+        const dataMax = maximum?.filter((value) => (
+            !Number.isNaN(value)
+        ));
+
+        return (dataMax && dataMax?.length > 0)
+            ? Math.max(...(dataMax || []))
+            : 100;
+    }, [uncertainData]);
 
     return (
         <ContainerCard
@@ -55,21 +85,17 @@ function UncertaintyChart(props: Props) {
                         tickFormatter={dateTickFormatter}
                     />
                     <YAxis
-                        label={{
-                            value: 'Country Trend on (%)',
-                            angle: -90,
-                            position: 'insideBottomLeft',
-                            offset: 16,
-                        }}
-                        domain={[0, 100]}
+                        domain={[minDomain, maxDomain]}
                     />
                     <Area
                         dataKey="uncertainRange"
+                        name="Uncertainty Range"
                         stroke="#8DD2B1"
                         fill="#8DD2B1"
                     />
                     <Line
                         dataKey="indicatorValue"
+                        name={emergencyFilterValue}
                         stroke="#2F9C67"
                         strokeWidth={2}
                         dot={{
