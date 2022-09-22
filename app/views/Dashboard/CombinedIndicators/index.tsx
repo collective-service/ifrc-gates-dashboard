@@ -333,9 +333,23 @@ function CombinedIndicators(props: Props) {
         setActiveTab,
     ]);
     const topicKeySelector = (d: SeparatedThematic) => d.key;
-    const loading = combinedIndicatorsLoading
-        && regionalCombinedIndicatorsLoading
-        && globalCombinedIndicatorsLoading;
+
+    const loading = useMemo(() => {
+        if (isDefined(filterValues?.country)) {
+            return combinedIndicatorsLoading;
+        }
+
+        if (isDefined(filterValues?.region)) {
+            return regionalCombinedIndicatorsLoading;
+        }
+
+        return globalCombinedIndicatorsLoading;
+    }, [
+        filterValues,
+        combinedIndicatorsLoading,
+        regionalCombinedIndicatorsLoading,
+        globalCombinedIndicatorsLoading,
+    ]);
 
     return (
         <div className={_cs(className, styles.combinedIndicatorWrapper)}>

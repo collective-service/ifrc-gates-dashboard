@@ -1,10 +1,11 @@
 .advanced-filters {
     display: flex;
     align-items: flex-end;
+    flex-wrap: wrap;
     border: 1px solid var(--dui-color-separator);
     border-radius: var(--dui-border-radius-card);
     background-color: var(--dui-color-background);
-    padding: var(--dui-spacing-medium);
+    padding: var(--dui-spacing-large);
     gap: var(--dui-spacing-large);
 
     .filter{
@@ -12,13 +13,21 @@
     }
 
     .keywords {
-        flex-grow: 1;
-        border-radius: 5px;
+        border-radius: 2rem;
+        min-width: 18rem;
 
         :global {
             .react-select__control {
                 /* TODO: Fix this after the design is finalized for this input */
                 border-radius: 2rem;
+                border-color: var(--dui-color-separator);
+                min-height: 36px;
+            }
+            .css-tlfecz-indicatorContainer {
+                padding: 6px;
+            }
+            .react-select__input-container {
+                margin: 0;
             }
         }
     }

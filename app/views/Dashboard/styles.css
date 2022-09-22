@@ -4,7 +4,6 @@
     flex-grow: 1;
     background-color: var(--color-background);
     padding: 0 var(--dui-spacing-ultra-large);
-    overflow-y: auto;
     gap: var(--dui-spacing-medium);
 
     .dashboard-buttons {

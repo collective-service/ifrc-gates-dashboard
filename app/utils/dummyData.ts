@@ -1,5 +1,3 @@
-import { Props as ProgressBarRendererProps } from '#components/ProgressBar';
-
 type Bounds = [number, number, number, number];
 
 export interface PercentageStatsProps {
@@ -8,49 +6,6 @@ export interface PercentageStatsProps {
     statValue: number;
     suffix: string;
 }
-
-export const progressDataOne: ProgressBarRendererProps[] = [
-    {
-        barName: 'Cameroon',
-        id: '1',
-        title: 'Vulnerable cases',
-        color: 'var(--dui-color-progress-alt)',
-        value: 130,
-        totalValue: 200,
-    },
-    {
-        barName: 'Algeria',
-        id: '2',
-        title: 'Vulnerable cases',
-        color: 'var(--dui-color-progress-alt)',
-        value: 50,
-        totalValue: 200,
-    },
-    {
-        barName: 'Bulgaria',
-        id: '3',
-        title: 'Vulnerable cases',
-        color: 'var(--dui-color-progress-alt)',
-        value: 99.5,
-        totalValue: 200,
-    },
-    {
-        barName: 'Democratic Republic of Congo',
-        id: '4',
-        title: 'Vulnerable cases',
-        color: 'var(--dui-color-progress-alt)',
-        value: 105,
-        totalValue: 200,
-    },
-    {
-        barName: 'Belarus',
-        id: '5',
-        title: 'Vulnerable cases',
-        color: 'var(--dui-color-progress-alt)',
-        value: 125,
-        totalValue: 200,
-    },
-];
 
 export const boundsData: Bounds = [80.088425, 26.397898, 88.174804, 30.422717];
 

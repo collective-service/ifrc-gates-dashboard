@@ -4,16 +4,18 @@
     gap: var(--dui-spacing-medium);
 
     .filters {
-        display: flex;
+        display: inline-flex;
+        flex-wrap: wrap;
         gap: var(--dui-spacing-medium);
 
-        .left {
-            display: flex;
-            flex-grow: 1;
-            gap: var(--dui-spacing-medium);
-        }
-        .clear-button{
+        .clear-button {
+            justify-self: flex-end;
             flex-shrink: 0;
+        }
+
+        .indicator-select-input {
+            flex-grow: 1;
+            max-width: 40rem;
         }
     }
 }
