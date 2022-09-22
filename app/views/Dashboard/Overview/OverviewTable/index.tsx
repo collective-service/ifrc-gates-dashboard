@@ -19,6 +19,7 @@ import {
     IoIosSearch,
 } from 'react-icons/io';
 
+import { decimalToPercentage } from '#utils/common';
 import {
     TableValuesQuery,
     TableValuesQueryVariables,
@@ -75,7 +76,7 @@ function countryListHeaderCell(props: CountryListHeaderCellProps) {
     );
 }
 interface CountryListCellProps {
-    title: string;
+    title: string | null | undefined;
 }
 
 function countryListCell(props: CountryListCellProps) {
@@ -92,7 +93,7 @@ function countryListCell(props: CountryListCellProps) {
 
 function MyCell<T>(props: TableCellProps<T>) {
     const { className, value } = props;
-    const highValueIndicator = value && +(value) > 40;
+    const highValueIndicator = value && +(value) > 60;
 
     return (
         <div className={_cs(className, highValueIndicator && styles.highIndicator)}>
@@ -154,17 +155,15 @@ function createIndicatorColumn(
     };
     return item;
 }
-interface OverviewTableProps {
+interface Props {
     className?: string;
     filterValues?: FilterType | undefined;
-    setFilterValues: React.Dispatch<React.SetStateAction<FilterType | undefined>>;
 }
 
-function OverviewTable(props: OverviewTableProps) {
+function OverviewTable(props: Props) {
     const {
         className,
         filterValues,
-        setFilterValues,
     } = props;
 
     const tableVariables = useMemo((): TableValuesQueryVariables => ({
@@ -184,7 +183,6 @@ function OverviewTable(props: OverviewTableProps) {
             variables: tableVariables,
         },
     );
-    console.log('table values::>>', tableValues?.overviewTable);
 
     const columns = useMemo(
         () => {
@@ -195,7 +193,7 @@ function OverviewTable(props: OverviewTableProps) {
                 headerCellRenderer: countryListHeaderCell,
                 headerCellRendererClassName: styles.countryListHeaderCell,
                 headerCellRendererParams: {
-                    sortable: false,
+                    sortable: true,
                 },
                 cellRenderer: countryListCell,
                 cellRendererParams: (_, datum) => ({
@@ -209,8 +207,8 @@ function OverviewTable(props: OverviewTableProps) {
                 // TODO: FIX COLOR INDICATORS FOR TABLE
                 createIndicatorColumn(
                     'jan',
-                    'Jan',
-                    (item) => item?.data?.find((val) => new Date(val.month).getMonth() === 0)?.indicatorValue.toString() ?? '',
+                    'Jan 22',
+                    (item) => decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 0)?.indicatorValue) ?? '',
                     {
                         columnWidth: 30,
                     },
@@ -218,7 +216,7 @@ function OverviewTable(props: OverviewTableProps) {
                 createIndicatorColumn(
                     'feb',
                     'Feb',
-                    (item) => item?.data?.find((val) => new Date(val.month).getMonth() === 1)?.indicatorValue.toString() ?? '',
+                    (item) => decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 1)?.indicatorValue) ?? '',
                     {
                         columnWidth: 30,
                     },
@@ -226,7 +224,7 @@ function OverviewTable(props: OverviewTableProps) {
                 createIndicatorColumn(
                     'mar',
                     'Mar',
-                    (item) => item?.data?.find((val) => new Date(val.month).getMonth() === 2)?.indicatorValue.toString() ?? '',
+                    (item) => decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 2)?.indicatorValue) ?? '',
                     {
                         columnWidth: 30,
                     },
@@ -234,7 +232,7 @@ function OverviewTable(props: OverviewTableProps) {
                 createIndicatorColumn(
                     'apr',
                     'Apr',
-                    (item) => item?.data?.find((val) => new Date(val.month).getMonth() === 3)?.indicatorValue.toString() ?? '',
+                    (item) => decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 3)?.indicatorValue) ?? '',
                     {
                         columnWidth: 30,
                     },
@@ -242,7 +240,7 @@ function OverviewTable(props: OverviewTableProps) {
                 createIndicatorColumn(
                     'may',
                     'May',
-                    (item) => item?.data?.find((val) => new Date(val.month).getMonth() === 4)?.indicatorValue.toString() ?? '',
+                    (item) => decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 4)?.indicatorValue) ?? '',
                     {
                         columnWidth: 30,
                     },
@@ -250,7 +248,7 @@ function OverviewTable(props: OverviewTableProps) {
                 createIndicatorColumn(
                     'jun',
                     'Jun',
-                    (item) => item?.data?.find((val) => new Date(val.month).getMonth() === 5)?.indicatorValue.toString() ?? '',
+                    (item) => decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 5)?.indicatorValue) ?? '',
                     {
                         columnWidth: 30,
                     },
@@ -258,7 +256,7 @@ function OverviewTable(props: OverviewTableProps) {
                 createIndicatorColumn(
                     'jul',
                     'July',
-                    (item) => item?.data?.find((val) => new Date(val.month).getMonth() === 6)?.indicatorValue.toString() ?? '',
+                    (item) => decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 6)?.indicatorValue) ?? '',
                     {
                         columnWidth: 30,
                     },
@@ -266,7 +264,7 @@ function OverviewTable(props: OverviewTableProps) {
                 createIndicatorColumn(
                     'aug',
                     'Aug',
-                    (item) => item?.data?.find((val) => new Date(val.month).getMonth() === 7)?.indicatorValue.toString() ?? '',
+                    (item) => decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 7)?.indicatorValue) ?? '',
                     {
                         columnWidth: 30,
                     },
@@ -274,7 +272,7 @@ function OverviewTable(props: OverviewTableProps) {
                 createIndicatorColumn(
                     'sep',
                     'Sep',
-                    (item) => item?.data?.find((val) => new Date(val.month).getMonth() === 8)?.indicatorValue.toString() ?? '',
+                    (item) => decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 8)?.indicatorValue) ?? '',
                     {
                         columnWidth: 30,
                     },
@@ -282,7 +280,7 @@ function OverviewTable(props: OverviewTableProps) {
                 createIndicatorColumn(
                     'oct',
                     'Oct',
-                    (item) => item?.data?.find((val) => new Date(val.month).getMonth() === 9)?.indicatorValue.toString() ?? '',
+                    (item) => decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 9)?.indicatorValue) ?? '',
                     {
                         columnWidth: 30,
                     },
@@ -290,7 +288,7 @@ function OverviewTable(props: OverviewTableProps) {
                 createIndicatorColumn(
                     'nov',
                     'Nov',
-                    (item) => item?.data?.find((val) => new Date(val.month).getMonth() === 10)?.indicatorValue.toString() ?? '',
+                    (item) => decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 10)?.indicatorValue) ?? '',
                     {
                         columnWidth: 30,
                     },
@@ -298,7 +296,7 @@ function OverviewTable(props: OverviewTableProps) {
                 createIndicatorColumn(
                     'dec',
                     'Dec',
-                    (item) => item?.data?.find((val) => new Date(val.month).getMonth() === 11)?.indicatorValue.toString() ?? '',
+                    (item) => decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 11)?.indicatorValue) ?? '',
                     {
                         columnWidth: 30,
                     },
