@@ -17,7 +17,11 @@ import Narratives from '#components/Narratives';
 import {
     NarrativeQuery,
     NarrativeQueryVariables,
+    CountryListQuery,
+    CountryListQueryVariables,
 } from '#generated/types';
+import { getRegionForCountry } from '#utils/common';
+
 import Overview from './Overview';
 import Country from './Country';
 import CombinedIndicators from './CombinedIndicators';
@@ -59,10 +63,31 @@ function Dashboard() {
         setAdvancedFilterValues,
     ] = useState<AdvancedOptionType | undefined>();
 
+    const {
+        data: countryList,
+        loading: countryListLoading,
+    } = useQuery<CountryListQuery, CountryListQueryVariables>(
+        COUNTRY_LIST,
+    );
+
     const handleActiveTabChange = (newActiveTab: TabTypes | undefined) => {
         setActiveTab(newActiveTab);
         if (newActiveTab === 'country') {
-            setFilterValues((oldFilterValues) => ({ ...oldFilterValues, country: 'AFG' }));
+            setFilterValues((oldFilterValues) => {
+                if (oldFilterValues?.country) {
+                    return oldFilterValues;
+                }
+
+                const newValueForRegion = {
+                    ...oldFilterValues,
+                    country: 'AFG',
+                    region: getRegionForCountry(
+                        'AFG',
+                        countryList?.countries ?? [],
+                    ) ?? undefined,
+                };
+                return newValueForRegion;
+            });
         }
     };
 
@@ -178,6 +203,8 @@ function Dashboard() {
                     onChange={setFilterValues}
                     advancedFilterValues={advancedFilterValues}
                     setAdvancedFilterValues={setAdvancedFilterValues}
+                    countries={countryList?.countries}
+                    countriesLoading={countryListLoading}
                 />
                 <div className={styles.content}>
                     <TabPanel name="overview">

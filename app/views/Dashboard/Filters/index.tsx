@@ -4,6 +4,7 @@ import { IoClose } from 'react-icons/io5';
 import {
     listToGroupList,
     doesObjectHaveNoData,
+    compareString,
 } from '@togglecorp/fujs';
 import { gql, useQuery } from '@apollo/client';
 import {
@@ -12,8 +13,6 @@ import {
 } from '@the-deep/deep-ui';
 
 import {
-    CountryListQuery,
-    CountryListQueryVariables,
     OutbreaksQuery,
     OutbreaksQueryVariables,
     IndicatorsQuery,
@@ -22,10 +21,11 @@ import {
     IndicatorsForCountryQueryVariables,
     SubvariablesQuery,
     SubvariablesQueryVariables,
+    CountryListQuery,
 } from '#generated/types';
 import { getRegionForCountry } from '#utils/common';
 
-import { TabTypes, COUNTRY_LIST } from '..';
+import { TabTypes } from '..';
 import AdvancedFilters, { AdvancedOptionType } from '../AdvancedFilters';
 import styles from './styles.css';
 
@@ -138,14 +138,18 @@ interface Props {
     activeTab?: TabTypes;
     advancedFilterValues: AdvancedOptionType | undefined;
     setAdvancedFilterValues: React.Dispatch<React.SetStateAction<AdvancedOptionType | undefined>>;
+    countries?: NonNullable<CountryListQuery['countries']>;
+    countriesLoading?: boolean;
 }
 
 function Filters(props: Props) {
     const {
         activeTab,
         onChange,
+        countriesLoading,
         value,
         advancedFilterValues,
+        countries: countriesFromProps,
         setAdvancedFilterValues,
     } = props;
 
@@ -159,12 +163,6 @@ function Filters(props: Props) {
         }
     }, [onChange, value?.country, activeTab]);
 
-    const {
-        data: countryList,
-        loading: countryListLoading,
-    } = useQuery<CountryListQuery, CountryListQueryVariables>(
-        COUNTRY_LIST,
-    );
     const handleInputChange = useCallback(
         (newValue: string | undefined, name: keyof FilterType) => {
             if (onChange) {
@@ -180,10 +178,12 @@ function Filters(props: Props) {
                         const newValueForRegion = {
                             ...oldValue,
                             [name]: newValue,
-                            region: getRegionForCountry(
-                                newValue,
-                                countryList?.countries ?? [],
-                            ) ?? undefined,
+                            region: newValue ? (
+                                getRegionForCountry(
+                                    newValue,
+                                    countriesFromProps ?? [],
+                                ) ?? undefined
+                            ) : oldValue?.region,
                         };
                         return newValueForRegion;
                     });
@@ -210,7 +210,7 @@ function Filters(props: Props) {
         },
         [
             onChange,
-            countryList?.countries,
+            countriesFromProps,
         ],
     );
 
@@ -280,6 +280,14 @@ function Filters(props: Props) {
         {
             // skip: isNotDefined(value?.indicator),
             variables: subvariablesVariables,
+            onCompleted: (response) => {
+                if (response?.filterOptions?.subvariables?.[0]) {
+                    onChange((oldValue) => ({
+                        ...oldValue,
+                        subvariable: response?.filterOptions?.subvariables?.[0],
+                    }));
+                }
+            },
         },
     );
 
@@ -290,7 +298,7 @@ function Filters(props: Props) {
         }))
     ), [subvariableList]);
 
-    const countriesWithNull = countryList?.countries ?? [];
+    const countriesWithNull = countriesFromProps ?? [];
     const countries = countriesWithNull.filter((country) => !doesObjectHaveAnyEmptyValue(country));
 
     const outbreaks = emergencies?.outBreaks?.map((e) => ({
@@ -299,7 +307,7 @@ function Filters(props: Props) {
     }));
 
     const regionGroupedCountryList = listToGroupList(
-        countryList?.countries,
+        countriesFromProps,
         (country) => country.region ?? '__null',
     );
 
@@ -307,7 +315,8 @@ function Filters(props: Props) {
 
     const regionList = regionListUnsafe
         .filter((r) => r !== '__null')
-        .map((r) => ({ key: r, title: r }));
+        .map((r) => ({ key: r, title: r }))
+        .sort((a, b) => compareString(a.key, b.key));
 
     const isFilterEmpty = useMemo(() => {
         if (activeTab === 'country') {
@@ -319,101 +328,101 @@ function Filters(props: Props) {
     return (
         <div className={styles.filtersWrapper}>
             <div className={styles.filters}>
-                <div className={styles.left}>
-                    {(activeTab === 'country') && (
-                        <SelectInput
-                            name="country"
-                            options={countries}
-                            placeholder="Country"
-                            keySelector={countriesKeySelector}
-                            labelSelector={countriesLabelSelector}
-                            value={value?.country}
-                            onChange={handleInputChange}
-                            disabled={countryListLoading}
-                            variant="general"
-                            nonClearable
-                        />
-                    )}
+                {(activeTab === 'country') && (
                     <SelectInput
-                        name="outbreak"
-                        options={outbreaks}
-                        placeholder="Outbreak"
-                        keySelector={outbreakKeySelector}
-                        labelSelector={outbreakLabelSelector}
-                        value={value?.outbreak}
+                        name="country"
+                        options={countries}
+                        placeholder="Country"
+                        keySelector={countriesKeySelector}
+                        labelSelector={countriesLabelSelector}
+                        value={value?.country}
+                        onChange={handleInputChange}
+                        disabled={countriesLoading}
+                        variant="general"
+                        nonClearable
+                    />
+                )}
+                <SelectInput
+                    name="outbreak"
+                    options={outbreaks}
+                    placeholder="Outbreak"
+                    keySelector={outbreakKeySelector}
+                    labelSelector={outbreakLabelSelector}
+                    value={value?.outbreak}
+                    onChange={handleInputChange}
+                    variant="general"
+                    disabled={emergenciesLoading}
+                />
+                {(activeTab !== 'country') && (
+                    <SelectInput
+                        name="region"
+                        options={regionList}
+                        placeholder="Region"
+                        keySelector={regionsKeySelector}
+                        labelSelector={regionsLabelSelector}
+                        value={value?.region}
                         onChange={handleInputChange}
                         variant="general"
-                        disabled={emergenciesLoading}
+                        disabled={countriesLoading}
                     />
-                    {(activeTab !== 'country') && (
-                        <SelectInput
-                            name="region"
-                            options={regionList}
-                            placeholder="Region"
-                            keySelector={regionsKeySelector}
-                            labelSelector={regionsLabelSelector}
-                            value={value?.region}
-                            onChange={handleInputChange}
-                            variant="general"
-                            disabled={countryListLoading}
-                        />
-                    )}
-                    {(activeTab === 'combinedIndicators') && (
-                        <SelectInput
-                            name="country"
-                            options={countries}
-                            placeholder="Country"
-                            keySelector={countriesKeySelector}
-                            labelSelector={countriesLabelSelector}
-                            value={value?.country}
-                            onChange={handleInputChange}
-                            disabled={countryListLoading}
-                            variant="general"
-                            grouped
-                            groupKeySelector={(item) => item.region || 'Unnamed'}
-                            groupLabelSelector={(item) => item.region || 'Unnamed'}
-                        />
-                    )}
-                    {(activeTab === 'overview') && (
-                        <SelectInput
-                            name="indicator"
-                            options={globalIndicators}
-                            placeholder="Indicator"
-                            keySelector={globalIndicatorKeySelector}
-                            labelSelector={globalIndicatorLabelSelector}
-                            value={value?.indicator}
-                            onChange={handleInputChange}
-                            variant="general"
-                            disabled={globalIndicatorsLoading}
-                        />
-                    )}
-                    {(activeTab === 'country') && (
-                        <SelectInput
-                            name="indicator"
-                            options={indicators}
-                            placeholder="Indicator"
-                            keySelector={indicatorKeySelector}
-                            labelSelector={indicatorLabelSelector}
-                            value={value?.indicator}
-                            onChange={handleInputChange}
-                            variant="general"
-                            disabled={indicatorsLoading}
-                        />
-                    )}
-                    {(activeTab === 'country' && value?.indicator) && (
-                        <SelectInput
-                            name="subvariable"
-                            options={subvariables}
-                            placeholder="Sub-indicator"
-                            keySelector={subvariableKeySelector}
-                            labelSelector={subvariableLabelSelector}
-                            value={value?.subvariable}
-                            onChange={handleInputChange}
-                            variant="general"
-                            disabled={subvariablesLoading}
-                        />
-                    )}
-                </div>
+                )}
+                {(activeTab === 'combinedIndicators') && (
+                    <SelectInput
+                        name="country"
+                        options={countries}
+                        placeholder="Country"
+                        keySelector={countriesKeySelector}
+                        labelSelector={countriesLabelSelector}
+                        value={value?.country}
+                        onChange={handleInputChange}
+                        disabled={countriesLoading}
+                        variant="general"
+                        grouped
+                        groupKeySelector={(item) => item.region || 'Unnamed'}
+                        groupLabelSelector={(item) => item.region || 'Unnamed'}
+                    />
+                )}
+                {(activeTab === 'overview') && (
+                    <SelectInput
+                        className={styles.indicatorSelectInput}
+                        name="indicator"
+                        options={globalIndicators}
+                        placeholder="Indicator"
+                        keySelector={globalIndicatorKeySelector}
+                        labelSelector={globalIndicatorLabelSelector}
+                        value={value?.indicator}
+                        onChange={handleInputChange}
+                        variant="general"
+                        disabled={globalIndicatorsLoading}
+                    />
+                )}
+                {(activeTab === 'country') && (
+                    <SelectInput
+                        className={styles.indicatorSelectInput}
+                        name="indicator"
+                        options={indicators}
+                        placeholder="Indicator"
+                        keySelector={indicatorKeySelector}
+                        labelSelector={indicatorLabelSelector}
+                        value={value?.indicator}
+                        onChange={handleInputChange}
+                        variant="general"
+                        disabled={indicatorsLoading}
+                    />
+                )}
+                {(activeTab === 'country' && value?.indicator) && (
+                    <SelectInput
+                        name="subvariable"
+                        options={subvariables}
+                        placeholder="Sub-indicator"
+                        keySelector={subvariableKeySelector}
+                        labelSelector={subvariableLabelSelector}
+                        value={value?.subvariable}
+                        onChange={handleInputChange}
+                        variant="general"
+                        disabled={subvariablesLoading}
+                    />
+                )}
                 <Button
                     name={undefined}
                     variant="transparent"
