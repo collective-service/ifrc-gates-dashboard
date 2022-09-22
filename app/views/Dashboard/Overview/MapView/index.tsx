@@ -54,9 +54,9 @@ const MAP_INDICATOR = gql`
             emergency: $emergency,
             region: $region,
             ) {
-            iso3
-            indicatorValue
-            countryId
+                iso3
+                indicatorValue
+                countryId
         }
     }
 `;
@@ -144,13 +144,13 @@ const countryFillPaint: mapboxgl.FillPaint = {
         ['linear'],
         ['coalesce', ['feature-state', 'indicatorValue'], 0],
         0,
-        '#2F9F45',
+        '#CB3809',
         5000,
         '#EED322',
         750000,
-        '#E6B71E',
+        '#D07149',
         1000000,
-        '#2F9C67',
+        '#E18700',
         2500000,
         '#2F3345',
         5000000,
@@ -160,7 +160,7 @@ const countryFillPaint: mapboxgl.FillPaint = {
         60000000,
         '#2F9C67',
         91331830,
-        '#723122',
+        '#268504',
     ],
     'fill-opacity': 0.5,
 };
@@ -234,7 +234,14 @@ function MapView(props: MapViewProps) {
     ] = useState<mapboxgl.MapboxGeoJSONFeature | undefined>();
 
     const mapIndicatorVariables = useMemo((): MapIndicatorValuesQueryVariables => ({
-        indicatorId: '',
+        emergency: filterValues?.outbreak,
+        region: filterValues?.region,
+    }), [
+        filterValues,
+    ]);
+
+    const mapIndicatorVariablesWithID = useMemo((): MapIndicatorValuesQueryVariables => ({
+        indicatorId: filterValues?.indicator,
         emergency: filterValues?.outbreak,
         region: filterValues?.region,
     }), [
@@ -246,12 +253,13 @@ function MapView(props: MapViewProps) {
     } = useQuery<MapIndicatorValuesQuery, MapIndicatorValuesQueryVariables>(
         MAP_INDICATOR,
         {
-            variables: mapIndicatorVariables,
+            variables: filterValues?.indicator
+                ? mapIndicatorVariablesWithID : mapIndicatorVariables,
         },
     );
 
     const highestLowestVariables = useMemo(() => ({
-        contextIndicatorId: 'total_cases',
+        contextIndicatorId: filterValues?.indicator,
         region: filterValues?.region,
     }), [filterValues]);
 

@@ -1,5 +1,9 @@
 import React, { useMemo } from 'react';
-import { compareString, _cs } from '@togglecorp/fujs';
+import {
+    compareString,
+    _cs,
+} from '@togglecorp/fujs';
+import { gql, useQuery } from '@apollo/client';
 import {
     TextInput,
     TableView,
@@ -15,19 +19,40 @@ import {
     IoIosSearch,
 } from 'react-icons/io';
 
-import { overviewTableData } from '#utils/dummyData';
+import { decimalToPercentage } from '#utils/common';
+import {
+    TableValuesQuery,
+    TableValuesQueryVariables,
+} from '#generated/types';
+import { FilterType } from '#views/Dashboard/Filters';
 import styles from './styles.css';
 
-const tableKeySelector = (p: TableViewProps) => p.id;
+type TableViewProps = NonNullable<TableValuesQuery['overviewTable']>[number];
 
-export interface TableViewProps {
-    id: string;
-    country: string;
-    valueOne: string;
-    valueTwo: string;
-    month: string;
-    high?: boolean;
-}
+const tableKeySelector = (p: TableViewProps) => p.countryId;
+
+const TABLE_DATA = gql`
+    query TableValues (
+        $emergency: String,
+        $indicatorId: String,
+        $region: String,
+        ) {
+        overviewTable(
+            indicatorId: $indicatorId,
+            emergency: $emergency,
+            region: $region,
+            ) {
+                countryName
+                countryId
+                iso3
+                data {
+                    indicatorValue
+                    month
+                }
+        }
+    }
+`;
+
 interface CountryListHeaderCellProps {
     className: string;
 }
@@ -51,7 +76,7 @@ function countryListHeaderCell(props: CountryListHeaderCellProps) {
     );
 }
 interface CountryListCellProps {
-    title: string;
+    title: string | null | undefined;
 }
 
 function countryListCell(props: CountryListCellProps) {
@@ -68,7 +93,7 @@ function countryListCell(props: CountryListCellProps) {
 
 function MyCell<T>(props: TableCellProps<T>) {
     const { className, value } = props;
-    const highValueIndicator = value && +(value) > 40;
+    const highValueIndicator = value && +(value) > 60;
 
     return (
         <div className={_cs(className, highValueIndicator && styles.highIndicator)}>
@@ -130,14 +155,34 @@ function createIndicatorColumn(
     };
     return item;
 }
-interface OverviewTableProps {
+interface Props {
     className?: string;
+    filterValues?: FilterType | undefined;
 }
 
-function OverviewTable(props: OverviewTableProps) {
+function OverviewTable(props: Props) {
     const {
         className,
+        filterValues,
     } = props;
+
+    const tableVariables = useMemo((): TableValuesQueryVariables => ({
+        indicatorId: filterValues?.indicator,
+        emergency: filterValues?.outbreak,
+        region: filterValues?.region,
+    }), [
+        filterValues,
+    ]);
+
+    const {
+        data: tableValues,
+        loading: tableValuesLoading,
+    } = useQuery<TableValuesQuery, TableValuesQueryVariables>(
+        TABLE_DATA,
+        {
+            variables: tableVariables,
+        },
+    );
 
     const columns = useMemo(
         () => {
@@ -148,11 +193,11 @@ function OverviewTable(props: OverviewTableProps) {
                 headerCellRenderer: countryListHeaderCell,
                 headerCellRendererClassName: styles.countryListHeaderCell,
                 headerCellRendererParams: {
-                    sortable: false,
+                    sortable: true,
                 },
                 cellRenderer: countryListCell,
                 cellRendererParams: (_, datum) => ({
-                    title: datum.country,
+                    title: datum.countryName,
                 }),
                 columnWidth: 130,
             };
@@ -162,8 +207,8 @@ function OverviewTable(props: OverviewTableProps) {
                 // TODO: FIX COLOR INDICATORS FOR TABLE
                 createIndicatorColumn(
                     'jan',
-                    'Jan',
-                    (item) => item.valueTwo,
+                    'Jan 22',
+                    (item) => decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 0)?.indicatorValue) ?? '',
                     {
                         columnWidth: 30,
                     },
@@ -171,7 +216,7 @@ function OverviewTable(props: OverviewTableProps) {
                 createIndicatorColumn(
                     'feb',
                     'Feb',
-                    (item) => item.valueOne,
+                    (item) => decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 1)?.indicatorValue) ?? '',
                     {
                         columnWidth: 30,
                     },
@@ -179,7 +224,7 @@ function OverviewTable(props: OverviewTableProps) {
                 createIndicatorColumn(
                     'mar',
                     'Mar',
-                    (item) => item.valueOne,
+                    (item) => decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 2)?.indicatorValue) ?? '',
                     {
                         columnWidth: 30,
                     },
@@ -187,7 +232,7 @@ function OverviewTable(props: OverviewTableProps) {
                 createIndicatorColumn(
                     'apr',
                     'Apr',
-                    (item) => item.valueOne,
+                    (item) => decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 3)?.indicatorValue) ?? '',
                     {
                         columnWidth: 30,
                     },
@@ -195,7 +240,7 @@ function OverviewTable(props: OverviewTableProps) {
                 createIndicatorColumn(
                     'may',
                     'May',
-                    (item) => item.valueOne,
+                    (item) => decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 4)?.indicatorValue) ?? '',
                     {
                         columnWidth: 30,
                     },
@@ -203,7 +248,7 @@ function OverviewTable(props: OverviewTableProps) {
                 createIndicatorColumn(
                     'jun',
                     'Jun',
-                    (item) => item.valueOne,
+                    (item) => decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 5)?.indicatorValue) ?? '',
                     {
                         columnWidth: 30,
                     },
@@ -211,7 +256,7 @@ function OverviewTable(props: OverviewTableProps) {
                 createIndicatorColumn(
                     'jul',
                     'July',
-                    (item) => item.valueOne,
+                    (item) => decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 6)?.indicatorValue) ?? '',
                     {
                         columnWidth: 30,
                     },
@@ -219,7 +264,7 @@ function OverviewTable(props: OverviewTableProps) {
                 createIndicatorColumn(
                     'aug',
                     'Aug',
-                    (item) => item.valueOne,
+                    (item) => decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 7)?.indicatorValue) ?? '',
                     {
                         columnWidth: 30,
                     },
@@ -227,7 +272,7 @@ function OverviewTable(props: OverviewTableProps) {
                 createIndicatorColumn(
                     'sep',
                     'Sep',
-                    (item) => item.valueOne,
+                    (item) => decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 8)?.indicatorValue) ?? '',
                     {
                         columnWidth: 30,
                     },
@@ -235,7 +280,7 @@ function OverviewTable(props: OverviewTableProps) {
                 createIndicatorColumn(
                     'oct',
                     'Oct',
-                    (item) => item.valueOne,
+                    (item) => decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 9)?.indicatorValue) ?? '',
                     {
                         columnWidth: 30,
                     },
@@ -243,7 +288,7 @@ function OverviewTable(props: OverviewTableProps) {
                 createIndicatorColumn(
                     'nov',
                     'Nov',
-                    (item) => item.valueOne,
+                    (item) => decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 10)?.indicatorValue) ?? '',
                     {
                         columnWidth: 30,
                     },
@@ -251,7 +296,7 @@ function OverviewTable(props: OverviewTableProps) {
                 createIndicatorColumn(
                     'dec',
                     'Dec',
-                    (item) => item.valueOne,
+                    (item) => decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 11)?.indicatorValue) ?? '',
                     {
                         columnWidth: 30,
                     },
@@ -267,10 +312,11 @@ function OverviewTable(props: OverviewTableProps) {
             cellClassName={styles.eachTableCell}
             columns={columns}
             keySelector={tableKeySelector}
-            data={overviewTableData}
+            data={tableValues?.overviewTable}
             errored={false}
-            pending={false}
+            pending={tableValuesLoading}
             filtered={false}
+            pendingMessage="Loading..."
             emptyMessage="No projects to show."
         />
     );
