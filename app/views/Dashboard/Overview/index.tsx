@@ -77,8 +77,10 @@ function Overview(props: Props) {
                     <ContainerCard
                         spacing="none"
                         heading={currentTab === 'mapMode' ? 'Overview map' : 'Overview Table'}
-                        headingSize="medium"
+                        headingSize="small"
                         headingContainerClassName={styles.mapHeaderContainer}
+                        headingDescription={currentTab === 'mapMode'
+                        && 'Total number of cases by country'}
                         headerActionsContainerClassName={styles.mapActionTabs}
                         headerActions={(
                             <TabList className={styles.dashboardTabList}>
@@ -87,7 +89,7 @@ function Overview(props: Props) {
                                     className={styles.defaultTabMode}
                                     activeClassName={styles.activeTab}
                                 >
-                                    Map overview
+                                    Map
                                 </Tab>
                                 <Tab
                                     name="tableMode"

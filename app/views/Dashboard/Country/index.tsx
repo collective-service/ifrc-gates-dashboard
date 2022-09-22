@@ -15,7 +15,6 @@ import {
     YAxis,
     Tooltip,
     Legend,
-    LabelList,
     ResponsiveContainer,
     BarChart,
     Bar,
@@ -527,6 +526,7 @@ function Country(props: Props) {
                         <ContainerCard
                             className={styles.countryTrend}
                             heading="Outbreaks overview over the last 12 months"
+                            headingDescription={`Number of cases for ${outbreaks.map((o) => o.emergency).join(', ')}`}
                             headingSize="extraSmall"
                             contentClassName={styles.responsiveContent}
                         >
@@ -581,6 +581,8 @@ function Country(props: Props) {
                                 className={styles.indicatorsChart}
                                 uncertainData={(uncertaintyChart && uncertaintyChart) ?? []}
                                 emergencyFilterValue={filterValues.outbreak}
+                                heading="Indicator overview over the last 12 months"
+                                headingDescription={`Trend chart for ${filterValues?.indicator}`}
                             />
                             {(genderDisaggregation && genderDisaggregation.length > 0
                                 && ageDisaggregation && ageDisaggregation.length > 0
@@ -607,15 +609,7 @@ function Country(props: Props) {
                                                         label={disaggregationLabel}
                                                         barSize={50}
                                                         radius={[10, 10, 0, 0]}
-                                                    >
-                                                        <LabelList
-                                                            dataKey="normalizedValue"
-                                                            position="insideBottomLeft"
-                                                            angle={270}
-                                                            offset={-2.8}
-                                                            fontSize={22}
-                                                        />
-                                                    </Bar>
+                                                    />
                                                     <XAxis
                                                         dataKey="category"
                                                         tickLine={false}
@@ -645,15 +639,7 @@ function Country(props: Props) {
                                                         label={disaggregationLabel}
                                                         barSize={50}
                                                         radius={[10, 10, 0, 0]}
-                                                    >
-                                                        <LabelList
-                                                            dataKey="normalizedValue"
-                                                            position="insideBottomLeft"
-                                                            angle={270}
-                                                            offset={-2.8}
-                                                            fontSize={22}
-                                                        />
-                                                    </Bar>
+                                                    />
                                                     <XAxis
                                                         dataKey="category"
                                                         tickLine={false}

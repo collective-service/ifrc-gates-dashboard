@@ -243,7 +243,7 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
                 contentClassName={styles.responsiveContent}
                 heading="Total number of cases"
                 headingSize="extraSmall"
-                headerDescription="Loreum epsum epsum 2020"
+                headerDescription="Total number of cases by outbreak"
             >
                 <ResponsiveContainer className={styles.responsiveContainer}>
                     <BarChart
@@ -297,7 +297,7 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
                 contentClassName={styles.responsiveContent}
                 heading="Regional Breakdown"
                 headingSize="extraSmall"
-                headerDescription="Loreum Ipsum epsum san-diego"
+                headerDescription="Repartition of cases by region"
             >
                 <ListView
                     className={styles.pieChartCollection}

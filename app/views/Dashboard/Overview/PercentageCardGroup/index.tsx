@@ -109,7 +109,7 @@ const TOTAL_OUTBREAK_CASES = gql`
 `;
 
 const OUTBREAK = gql`
-    query Outbreak(
+   query Outbreak(
         $contextDate: Ordering,
         $contextIndicatorId: String,
         $emergency: String,
@@ -510,6 +510,8 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                                 : uncertaintyGlobalChart
                         }
                         emergencyFilterValue={filterValues?.outbreak}
+                        heading="Indicator overview over the last 12 months"
+                        headingDescription={`Trend chart for ${filterValues?.indicator}`}
                     />
                 ) : (
                     <ContainerCard
@@ -517,7 +519,7 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                         heading="Outbreak over last 12 months"
                         headingSize="extraSmall"
                         contentClassName={styles.responsiveContent}
-                        headerDescription="Average indicator value weighted by country's populations"
+                        headerDescription={`Number of cases for ${filterValues?.outbreak}`}
                     >
                         <ResponsiveContainer className={styles.responsiveContainer}>
                             <LineChart
@@ -566,7 +568,9 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                 contentClassName={styles.responsiveContent}
                 heading="Regional Breakdown"
                 headingSize="extraSmall"
-                headerDescription="Average indicator value weighted by region"
+                headerDescription={filterValues?.indicator
+                    ? `Number of cases for ${filterValues.indicator}`
+                    : `Number of cases for ${filterValues?.outbreak}`}
             >
                 <ResponsiveContainer className={styles.responsiveContainer}>
                     <BarChart

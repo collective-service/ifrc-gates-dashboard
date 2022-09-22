@@ -233,13 +233,6 @@ function MapView(props: MapViewProps) {
         setCountryData,
     ] = useState<mapboxgl.MapboxGeoJSONFeature | undefined>();
 
-    const mapIndicatorVariables = useMemo((): MapIndicatorValuesQueryVariables => ({
-        emergency: filterValues?.outbreak,
-        region: filterValues?.region,
-    }), [
-        filterValues,
-    ]);
-
     const mapIndicatorVariablesWithID = useMemo((): MapIndicatorValuesQueryVariables => ({
         indicatorId: filterValues?.indicator,
         emergency: filterValues?.outbreak,
@@ -253,8 +246,7 @@ function MapView(props: MapViewProps) {
     } = useQuery<MapIndicatorValuesQuery, MapIndicatorValuesQueryVariables>(
         MAP_INDICATOR,
         {
-            variables: filterValues?.indicator
-                ? mapIndicatorVariablesWithID : mapIndicatorVariables,
+            variables: mapIndicatorVariablesWithID,
         },
     );
 
@@ -305,8 +297,8 @@ function MapView(props: MapViewProps) {
         (_: string, data: AscendingCountryProfileType | DescendingCountryProfileType) => ({
             barHeight,
             suffix: isIndicatorSelected ? '%' : 'M',
-            barName: data.countryName,
-            title: data.countryName,
+            barName: data.countryName ?? undefined,
+            title: data.countryName ?? undefined,
             value: data.contextIndicatorValue ?? undefined,
             totalValue: 0,
             color: '#98A6B5',
