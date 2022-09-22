@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
     IoCloudDownloadOutline,
 } from 'react-icons/io5';
@@ -10,9 +10,14 @@ import {
     DropdownMenu,
     DropdownMenuItem,
 } from '@the-deep/deep-ui';
-import { gql } from '@apollo/client';
+import { gql, useQuery } from '@apollo/client';
 
 import useSessionStorage from '#hooks/useSessionStorage';
+import Narratives from '#components/Narratives';
+import {
+    NarrativeQuery,
+    NarrativeQueryVariables,
+} from '#generated/types';
 import Overview from './Overview';
 import Country from './Country';
 import CombinedIndicators from './CombinedIndicators';
@@ -28,6 +33,26 @@ export const COUNTRY_LIST = gql`
             iso3
             countryName
             region
+        }
+    }
+`;
+
+const NARRATIVES = gql`
+    query Narrative(
+        $indicatorId: String,
+        $iso3: String,
+        $topic: String,
+        $thematic: String,
+    ) {
+        naratives (
+            filters: {
+                indicatorId: $indicatorId,
+                iso3: $iso3,
+                topic: $topic,
+                thematic: $thematic,
+            }
+        ) {
+            narrative
         }
     }
 `;
@@ -64,6 +89,34 @@ function Dashboard() {
         // eslint-disable-next-line no-console
         console.log('Handle contextual country data click');
     };
+
+    const narrativeVariables = useMemo((): NarrativeQueryVariables => ({
+        indicatorId: filterValues?.indicator,
+        iso3: filterValues?.country,
+        topic: advancedFilterValues?.topic,
+        thematic: advancedFilterValues?.thematic,
+    }), [
+        filterValues?.indicator,
+        filterValues?.country,
+        advancedFilterValues?.thematic,
+        advancedFilterValues?.topic,
+    ]);
+
+    const {
+        data: narrativeResponse,
+    } = useQuery<NarrativeQuery, NarrativeQueryVariables>(
+        NARRATIVES,
+        {
+            variables: narrativeVariables,
+        },
+    );
+
+    const narrativeStatement = useMemo(() => ((narrativeResponse?.naratives.length !== -1)
+        ? narrativeResponse?.naratives[0].narrative
+        : 'This is Narrative'
+    ), [
+        narrativeResponse?.naratives,
+    ]);
 
     return (
         <div className={styles.dashboardNavigation}>
@@ -122,6 +175,12 @@ function Dashboard() {
                         </Tab>
                     </TabList>
                 </div>
+                {/* TODO: 1 object will be fetched */}
+                {activeTab !== 'overview' && (
+                    <Narratives
+                        narrative={narrativeStatement ?? 'No Narratives found'}
+                    />
+                )}
                 <Filters
                     activeTab={activeTab}
                     value={filterValues}

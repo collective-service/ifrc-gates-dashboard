@@ -1,0 +1,9 @@
+.narrative-wrapper {
+    display: flex;
+    flex-direction: column;
+
+    .narrative-details {
+        display: flex;
+        align-items: baseline;
+    }
+}
