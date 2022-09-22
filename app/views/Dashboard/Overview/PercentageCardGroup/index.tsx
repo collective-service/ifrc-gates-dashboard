@@ -41,8 +41,9 @@ import {
     UncertaintyQueryVariables,
 } from '#generated/types';
 
-import styles from './styles.css';
 import { FilterType } from '../../Filters';
+
+import styles from './styles.css';
 
 const normalizedTickFormatter = (d: number) => normalFormatter().format(d);
 
@@ -347,7 +348,7 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
         ))
     ), [regionalBreakdownResponse?.regionLevel]);
 
-    const regionalBreakdownEpi = useMemo(() => (
+    const filterGlobalRegionalBreakdownEpi = useMemo(() => (
         regionalBreakdownResponse?.epiDataGlobal.map((region) => (
             {
                 ...region,
@@ -355,6 +356,10 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
             }
         ))
     ), [regionalBreakdownResponse?.epiDataGlobal]);
+
+    const regionalBreakdownEpi = useMemo(() => (
+        filterGlobalRegionalBreakdownEpi?.filter((item) => item.region !== 'Global')
+    ), [filterGlobalRegionalBreakdownEpi]);
 
     const {
         data: uncertaintyResponse,
@@ -477,6 +482,10 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
         filterValues?.indicator,
         totalCase?.contextIndicatorValue,
     ]);
+
+    const customLabel = (val: number | string | undefined) => (
+        `${val} %`
+    );
 
     return (
         <div className={_cs(className, styles.cardInfo)}>
@@ -610,7 +619,8 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                                 fill="#8DD2B1"
                                 angle={-90}
                                 offset={-2.8}
-                                fontSize={20}
+                                fontSize={14}
+                                formatter={customLabel}
                             />
                         </Bar>
                     </BarChart>

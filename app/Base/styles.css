@@ -80,6 +80,8 @@
 
     --dui-width-calendar-date: 2.4rem;
 
+    --dui-select-input-width-large: 580px;
+
     /* COLOR PALETTE */
     --dui-color-primary: rgb(65, 131, 196);
     --dui-color-accent: rgb(65, 131, 196);
