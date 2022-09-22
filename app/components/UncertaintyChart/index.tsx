@@ -27,6 +27,8 @@ interface Props {
     className?: string;
     uncertainData: UncertainData[] | undefined;
     emergencyFilterValue?: string;
+    headingDescription?: React.ReactNode;
+    heading?: React.ReactNode;
 }
 
 function UncertaintyChart(props: Props) {
@@ -34,6 +36,8 @@ function UncertaintyChart(props: Props) {
         className,
         uncertainData,
         emergencyFilterValue,
+        headingDescription,
+        heading,
     } = props;
 
     const minDomain = useMemo(() => {
@@ -66,9 +70,9 @@ function UncertaintyChart(props: Props) {
         <ContainerCard
             className={_cs(className, styles.areaChart)}
             contentClassName={styles.responsiveContent}
-            heading="Uncertainty cases"
+            heading={heading}
             headingSize="extraSmall"
-            headerDescription="Loreum epsum epsum 2022"
+            headerDescription={headingDescription}
         >
             <ResponsiveContainer
                 className={styles.responsiveContainer}
