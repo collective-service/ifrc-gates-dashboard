@@ -39,17 +39,11 @@ export const COUNTRY_LIST = gql`
 
 const NARRATIVES = gql`
     query Narrative(
-        $indicatorId: String,
         $iso3: String,
-        $topic: String,
-        $thematic: String,
     ) {
         naratives (
             filters: {
-                indicatorId: $indicatorId,
                 iso3: $iso3,
-                topic: $topic,
-                thematic: $thematic,
             }
         ) {
             narrative
@@ -91,15 +85,9 @@ function Dashboard() {
     };
 
     const narrativeVariables = useMemo((): NarrativeQueryVariables => ({
-        indicatorId: filterValues?.indicator,
         iso3: filterValues?.country,
-        topic: advancedFilterValues?.topic,
-        thematic: advancedFilterValues?.thematic,
     }), [
-        filterValues?.indicator,
         filterValues?.country,
-        advancedFilterValues?.thematic,
-        advancedFilterValues?.topic,
     ]);
 
     const {
