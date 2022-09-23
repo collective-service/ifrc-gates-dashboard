@@ -17,6 +17,7 @@ import {
 } from '@the-deep/deep-ui';
 import {
     compareDate,
+    isDefined,
     isNotDefined,
     _cs,
 } from '@togglecorp/fujs';
@@ -350,9 +351,13 @@ function PercentageCardGroup(props: Props) {
                 contextIndicatorValue: decimalToPercentage(region.indicatorValueRegional),
                 indicatorMonth: region.indicatorMonth,
                 region: region.region,
+                fill: region.region !== filterValues?.region ? 0.2 : 1,
             }
         ))
-    ), [regionalBreakdownResponse?.regionLevel]);
+    ), [
+        regionalBreakdownResponse?.regionLevel,
+        filterValues?.region,
+    ]);
 
     const regionalBreakdownEpi = useMemo(() => (
         regionalBreakdownResponse?.epiDataGlobal.map((region) => (
@@ -600,12 +605,23 @@ function PercentageCardGroup(props: Props) {
                             dataKey="contextIndicatorValue"
                             fill="#8DD2B1"
                             radius={[10, 10, 0, 0]}
+
                         >
-                            {regionalBreakdownResponse?.epiDataGlobal?.map((entry) => (
-                                <Cell
-                                    key={`Cell -${entry.id}`}
-                                />
-                            ))}
+                            {(isDefined(filterValues?.region))
+                                ? regionalBreakdown?.map((entry) => (
+                                    <Cell
+                                        key={`Cell -${entry.id}`}
+                                        fill="#8DD2B1"
+                                        opacity={entry.fill}
+                                    />
+                                ))
+                                : regionalBreakdownEpi?.map((entry) => (
+                                    <Cell
+                                        key={`Cell -${entry.id}`}
+                                        fill="#8DD2B1"
+                                        opacity={1}
+                                    />
+                                ))}
                             <LabelList
                                 dataKey={
                                     (filterValues?.region || filterValues?.indicator)
