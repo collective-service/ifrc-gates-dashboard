@@ -21,6 +21,8 @@ interface Props {
     filterValues?: FilterType | undefined;
     setActiveTab: React.Dispatch<React.SetStateAction<TabTypes | undefined>>;
     setFilterValues: React.Dispatch<React.SetStateAction<FilterType | undefined>>;
+    selectedIndicatorName: string | undefined;
+    selectedOutbreakName: string | undefined;
 }
 
 function Overview(props: Props) {
@@ -29,6 +31,8 @@ function Overview(props: Props) {
         filterValues,
         setActiveTab,
         setFilterValues,
+        selectedIndicatorName,
+        selectedOutbreakName,
     } = props;
 
     // TODO: Rename this to better suit the behavior
@@ -61,6 +65,8 @@ function Overview(props: Props) {
                 <PercentageCardGroup
                     uncertaintyChartActive={uncertaintyChartActive}
                     filterValues={filterValues}
+                    selectedIndicatorName={selectedIndicatorName}
+                    selectedOutbreakName={selectedOutbreakName}
                 />
             ))}
             {((noFiltersSelected || onlyRegionSelected) && (

@@ -265,9 +265,18 @@ function Dashboard() {
             && narrativeResponse?.naratives?.length > 0
     )
         ? narrativeResponse?.naratives[0].narrative
-        : 'This is Narrative'
+        : 'This is narrative'
     ), [
         narrativeResponse?.naratives,
+    ]);
+
+    const selectedIndicatorName = useMemo(() => (
+        globalIndicatorList?.filterOptions?.overviewIndicators
+            ?.find((indicator) => indicator.indicatorId === filterValues?.indicator)
+            ?.indicatorDescription
+    ), [
+        globalIndicatorList,
+        filterValues?.indicator,
     ]);
 
     return (
@@ -356,16 +365,17 @@ function Dashboard() {
                             filterValues={filterValues}
                             setActiveTab={setActiveTab}
                             setFilterValues={setFilterValues}
+                            selectedIndicatorName={selectedIndicatorName ?? undefined}
+                            selectedOutbreakName={filterValues?.outbreak}
                         />
                     </TabPanel>
                     <TabPanel name="country">
                         <Country
                             filterValues={filterValues}
+                            selectedIndicatorName={selectedIndicatorName ?? undefined}
                         />
                     </TabPanel>
-                    <TabPanel
-                        name="combinedIndicators"
-                    >
+                    <TabPanel name="combinedIndicators">
                         <CombinedIndicators
                             filterValues={filterValues}
                             advancedFilterValues={advancedFilterValues}

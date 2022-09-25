@@ -247,6 +247,8 @@ interface Props {
     className?: string;
     filterValues?: FilterType | undefined;
     uncertaintyChartActive: boolean;
+    selectedIndicatorName: string | undefined;
+    selectedOutbreakName: string | undefined;
 }
 
 function PercentageCardGroup(props: Props) {
@@ -254,6 +256,8 @@ function PercentageCardGroup(props: Props) {
         className,
         uncertaintyChartActive,
         filterValues,
+        selectedIndicatorName,
+        selectedOutbreakName,
     } = props;
 
     const totalOutbreakCasesVariables = useMemo((): TotalOutbreakCasesQueryVariables => ({
@@ -370,19 +374,19 @@ function PercentageCardGroup(props: Props) {
 
     const uncertaintyGlobalChart = useMemo(() => (
         uncertaintyResponse?.globalLevel.map((global) => {
-            const negativeRange = decimalToPercentage(
+            const negativeRange = String(decimalToPercentage(
                 (global.indicatorValueGlobal && global.errorMargin)
                 && global.indicatorValueGlobal - global.errorMargin,
-            );
-            const positiveRange = decimalToPercentage(
+            ));
+            const positiveRange = String(decimalToPercentage(
                 (global.indicatorValueGlobal && global.errorMargin)
                 && global.indicatorValueGlobal + global.errorMargin,
-            );
+            ));
 
             if (isNotDefined(global.errorMargin)) {
                 return {
                     emergency: global.emergency,
-                    indicatorValue: decimalToPercentage(global.indicatorValueGlobal),
+                    indicatorValue: String(decimalToPercentage(global.indicatorValueGlobal)),
                     date: global.indicatorMonth,
                     minimumValue: negativeRange,
                     maximumValue: positiveRange,
@@ -391,7 +395,7 @@ function PercentageCardGroup(props: Props) {
 
             return {
                 emergency: global.emergency,
-                indicatorValue: decimalToPercentage(global.indicatorValueGlobal),
+                indicatorValue: String(decimalToPercentage(global.indicatorValueGlobal)),
                 date: global.indicatorMonth,
                 uncertainRange: [
                     negativeRange ?? '',
@@ -405,19 +409,19 @@ function PercentageCardGroup(props: Props) {
 
     const uncertaintyRegionChart = useMemo(() => (
         uncertaintyResponse?.regionLevel.map((region) => {
-            const negativeRange = decimalToPercentage(
+            const negativeRange = String(decimalToPercentage(
                 (region.indicatorValueRegional && region.errorMargin)
                 && region.indicatorValueRegional - region.errorMargin,
-            );
-            const positiveRange = decimalToPercentage(
+            ));
+            const positiveRange = String(decimalToPercentage(
                 (region.indicatorValueRegional && region.errorMargin)
                 && region.indicatorValueRegional + region.errorMargin,
-            );
+            ));
 
             if (isNotDefined(region.errorMargin)) {
                 return {
                     emergency: region.emergency,
-                    indicatorValue: decimalToPercentage(region.indicatorValueRegional),
+                    indicatorValue: String(decimalToPercentage(region.indicatorValueRegional)),
                     date: region.indicatorMonth,
                     minimumValue: negativeRange,
                     maximumValue: positiveRange,
@@ -426,7 +430,7 @@ function PercentageCardGroup(props: Props) {
 
             return {
                 emergency: region.emergency,
-                indicatorValue: decimalToPercentage(region.indicatorValueRegional),
+                indicatorValue: String(decimalToPercentage(region.indicatorValueRegional)),
                 date: region.indicatorMonth,
                 uncertainRange: [
                     negativeRange ?? '',
@@ -505,7 +509,7 @@ function PercentageCardGroup(props: Props) {
                         }
                         emergencyFilterValue={filterValues?.outbreak}
                         heading="Indicator overview over the last 12 months"
-                        headingDescription={`Trend chart for ${filterValues?.indicator}`}
+                        headingDescription={`Trend chart for ${selectedIndicatorName ?? filterValues?.indicator}`}
                     />
                 ) : (
                     <ContainerCard
@@ -563,8 +567,8 @@ function PercentageCardGroup(props: Props) {
                 heading="Regional Breakdown"
                 headingSize="extraSmall"
                 headerDescription={filterValues?.indicator
-                    ? `Number of cases for ${filterValues.indicator}`
-                    : `Number of cases for ${filterValues?.outbreak}`}
+                    ? `Number of cases for ${selectedIndicatorName ?? filterValues.indicator}`
+                    : `Number of cases for ${selectedOutbreakName ?? filterValues?.outbreak}`}
             >
                 <ResponsiveContainer className={styles.responsiveContainer}>
                     {/* FIXME: Separate this out into 2 barcharts */}
