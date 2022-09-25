@@ -55,7 +55,9 @@ const COMBINED_INDICATORS_DATA = gql`
             indicatorValueRegional
             type
             thematic
+            thematicDescription
             topic
+            topicDescription
             subvariable
             indicatorId
         }
@@ -91,7 +93,9 @@ const COMBINED_INDICATORS_REGIONAL = gql`
             indicatorValueRegional
             type
             thematic
+            thematicDescription
             topic
+            topicDescription
             subvariable
         }
     }
@@ -124,7 +128,9 @@ const COMBINED_INDICATORS_GLOBAL = gql`
             region
             type
             thematic
+            thematicDescription
             topic
+            topicDescription
             subvariable
         }
     }
@@ -192,9 +198,9 @@ function ThematicRenderer(props: ThematicProps) {
             <ContainerCard
                 className={styles.thematicHeader}
                 heading={thematicName}
-            >
-                The description of the thematic goes here.
-            </ContainerCard>
+                headerDescription={indicators[0]?.thematicDescription}
+                headingSize="large"
+            />
             <List
                 data={topicSeparatedIndicators}
                 keySelector={topicKeySelector}

@@ -47,12 +47,6 @@ import styles from './styles.css';
 
 const normalizedTickFormatter = (d: number) => normalFormatter().format(d);
 
-interface PercentageCardGroupProps {
-    className?: string;
-    filterValues?: FilterType | undefined;
-    uncertaintyChartActive: boolean;
-}
-
 const TOTAL_OUTBREAK_CASES = gql`
     query TotalOutbreakCases(
         $contextIndicatorId: String,
@@ -101,6 +95,7 @@ const TOTAL_OUTBREAK_CASES = gql`
         ) {
             id
             indicatorId
+            indicatorName
             indicatorValueGlobal
             indicatorMonth
             emergency
@@ -182,15 +177,12 @@ const REGIONAL_BREAKDOWN = gql`
             region
             indicatorValueRegional
             indicatorMonth
+            indicatorId
+            indicatorName
         }
     }
 `;
 
-interface PercentageCardGroupProps {
-    className?: string;
-    filterValues?: FilterType | undefined;
-    uncertaintyChartActive: boolean;
-}
 const UNCERTAINTY = gql`
     query Uncertainty(
         $isTwelveMonth: Boolean,
@@ -219,6 +211,7 @@ const UNCERTAINTY = gql`
                 errorMargin
                 emergency
                 indicatorMonth
+                indicatorId
                 indicatorName
                 indicatorValueGlobal
             }
@@ -240,13 +233,20 @@ const UNCERTAINTY = gql`
             errorMargin
             emergency
             indicatorMonth
+            indicatorId
             indicatorName
             indicatorValueRegional
         }
     }
 `;
 
-function PercentageCardGroup(props: PercentageCardGroupProps) {
+interface Props {
+    className?: string;
+    filterValues?: FilterType | undefined;
+    uncertaintyChartActive: boolean;
+}
+
+function PercentageCardGroup(props: Props) {
     const {
         className,
         uncertaintyChartActive,
@@ -278,7 +278,6 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
             variables: totalOutbreakCasesVariables,
         },
     );
-
     const outbreakVariables = useMemo((): OutbreakQueryVariables => ({
         contextIndicatorId: 'total_cases',
         isTwelveMonth: true,
