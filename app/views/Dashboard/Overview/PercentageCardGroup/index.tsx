@@ -47,6 +47,9 @@ import styles from './styles.css';
 
 const normalizedTickFormatter = (d: number) => normalFormatter().format(d);
 
+// FIXME: Add suffix as required
+const customLabel = (val: number | string | undefined) => val;
+
 const TOTAL_OUTBREAK_CASES = gql`
     query TotalOutbreakCases(
         $contextIndicatorId: String,
@@ -347,18 +350,14 @@ function PercentageCardGroup(props: Props) {
         ))
     ), [regionalBreakdownResponse?.regionLevel]);
 
-    const filterGlobalRegionalBreakdownEpi = useMemo(() => (
+    const regionalBreakdownEpi = useMemo(() => (
         regionalBreakdownResponse?.epiDataGlobal.map((region) => (
             {
                 ...region,
                 normalizedValue: normalFormatter().format(region.contextIndicatorValue ?? 0),
             }
-        ))
+        )).filter((item) => item.region !== 'Global')
     ), [regionalBreakdownResponse?.epiDataGlobal]);
-
-    const regionalBreakdownEpi = useMemo(() => (
-        filterGlobalRegionalBreakdownEpi?.filter((item) => item.region !== 'Global')
-    ), [filterGlobalRegionalBreakdownEpi]);
 
     const {
         data: uncertaintyResponse,
@@ -482,10 +481,6 @@ function PercentageCardGroup(props: Props) {
         totalCase?.contextIndicatorValue,
     ]);
 
-    const customLabel = (val: number | string | undefined) => (
-        `${val} %`
-    );
-
     return (
         <div className={_cs(className, styles.cardInfo)}>
             <PercentageStats
@@ -572,6 +567,7 @@ function PercentageCardGroup(props: Props) {
                     : `Number of cases for ${filterValues?.outbreak}`}
             >
                 <ResponsiveContainer className={styles.responsiveContainer}>
+                    {/* FIXME: Separate this out into 2 barcharts */}
                     <BarChart
                         data={
                             (filterValues?.region || filterValues?.indicator)
@@ -590,16 +586,10 @@ function PercentageCardGroup(props: Props) {
                         <XAxis
                             dataKey="region"
                             tickLine={false}
-                            interval={0}
                             fontSize={12}
-                        >
-                            <LabelList
-                                dataKey="region"
-                                position="bottom"
-                            />
-                        </XAxis>
+                        />
                         <YAxis
-                            padding={{ bottom: 12 }}
+                            padding={{ bottom: 0 }}
                             hide
                         />
                         <Bar
@@ -618,10 +608,10 @@ function PercentageCardGroup(props: Props) {
                                         ? 'contextIndicatorValue'
                                         : 'normalizedValue'
                                 }
+                                angle={270}
+                                offset={-2.8}
                                 position="insideBottomLeft"
                                 fill="#8DD2B1"
-                                angle={-90}
-                                offset={-2.8}
                                 fontSize={14}
                                 formatter={customLabel}
                             />

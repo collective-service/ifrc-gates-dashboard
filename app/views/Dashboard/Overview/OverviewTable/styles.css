@@ -3,6 +3,16 @@
 
     .each-table-cell {
         border-right: 1px solid var(--dui-color-line-separator);
+        padding: 0;
+
+        .cell {
+            padding: var(--dui-spacing-small);
+            text-align: center;
+
+            &.high-indicator {
+                color: blue;
+            }
+        }
     }
 
     .header-row-style {
@@ -20,9 +30,3 @@
     font-weight: bold;
 }
 
-.high-indicator {
-    border-radius: 10px;
-    background-color: #eaeaea;
-    text-align: center;
-    color: blue;
-}

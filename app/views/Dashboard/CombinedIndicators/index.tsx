@@ -199,7 +199,6 @@ function ThematicRenderer(props: ThematicProps) {
                 className={styles.thematicHeader}
                 heading={thematicName}
                 headerDescription={indicators[0]?.thematicDescription}
-                headingSize="large"
             />
             <List
                 data={topicSeparatedIndicators}

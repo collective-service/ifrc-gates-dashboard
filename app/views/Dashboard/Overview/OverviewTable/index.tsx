@@ -96,9 +96,14 @@ function MyCell<T>(props: TableCellProps<T>) {
     const highValueIndicator = value && +(value) > 60;
 
     return (
-        <div className={_cs(className, highValueIndicator && styles.highIndicator)}>
-            <TableCell value={value} />
-        </div>
+        <TableCell
+            className={_cs(
+                className,
+                styles.cell,
+                highValueIndicator && styles.highIndicator,
+            )}
+            value={value}
+        />
     );
 }
 
@@ -207,7 +212,7 @@ function OverviewTable(props: Props) {
                 // TODO: FIX COLOR INDICATORS FOR TABLE
                 createIndicatorColumn(
                     'jan',
-                    'Jan 22',
+                    'Jan',
                     (item) => decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 0)?.indicatorValue) ?? '',
                     {
                         columnWidth: 30,
