@@ -6,7 +6,6 @@ import {
     doesObjectHaveNoData,
     compareString,
 } from '@togglecorp/fujs';
-import { gql, useQuery } from '@apollo/client';
 import {
     SelectInput,
     Button,
@@ -14,14 +13,10 @@ import {
 
 import {
     OutbreaksQuery,
-    OutbreaksQueryVariables,
     IndicatorsQuery,
-    IndicatorsQueryVariables,
     IndicatorsForCountryQuery,
-    IndicatorsForCountryQueryVariables,
-    SubvariablesQuery,
-    SubvariablesQueryVariables,
     CountryListQuery,
+    SubvariablesQuery,
 } from '#generated/types';
 import { getRegionForCountry } from '#utils/common';
 
@@ -50,72 +45,17 @@ function doesObjectHaveAnyEmptyValue<T extends Record<string, unknown>>(obj: T) 
     return valueList.some((val) => val === null);
 }
 
-const OUTBREAKS = gql`
-    query Outbreaks {
-        outBreaks {
-            active
-            outbreak
-            __typename
-        }
-    }
-`;
-
 type Country = NonNullable<CountryListQuery['countries']>[number];
 const countriesKeySelector = (d: Country) => d.iso3;
 const countriesLabelSelector = (d: Country) => d.countryName ?? '';
-
-const INDICATORS_FOR_COUNTRY = gql`
-    query IndicatorsForCountry (
-        $iso3: String!,
-        $outbreak: String
-    ) {
-        filterOptions {
-            countryIndicators(
-                iso3: $iso3,
-                outbreak: $outbreak,
-            ) {
-                indicatorDescription
-                indicatorId
-            }
-        }
-    }
-`;
 
 type Indicator = NonNullable<NonNullable<IndicatorsForCountryQuery['filterOptions']>['countryIndicators']>[number];
 const indicatorKeySelector = (d: Indicator) => d.indicatorId ?? '';
 const indicatorLabelSelector = (d: Indicator) => d.indicatorDescription ?? '';
 
-const INDICATORS = gql`
-    query Indicators(
-        $outbreak: String,
-        $region: String,
-    ) {
-        filterOptions {
-            overviewIndicators(
-                outBreak: $outbreak,
-                region: $region
-            ) {
-                indicatorId
-                indicatorDescription
-            }
-        }
-    }
-`;
-
 type GlobalIndicator = NonNullable<NonNullable<IndicatorsQuery['filterOptions']>['overviewIndicators']>[number];
 const globalIndicatorKeySelector = (d: GlobalIndicator) => d.indicatorId ?? '';
 const globalIndicatorLabelSelector = (d: GlobalIndicator) => d.indicatorDescription ?? '';
-
-const SUBVARIABLES = gql`
-    query Subvariables(
-        $iso3: String!,
-        $indicatorId:String
-    ) {
-        filterOptions {
-            subvariables(iso3: $iso3, indicatorId: $indicatorId)
-        }
-    }
-`;
 
 interface Subvariable {
     key: string;
@@ -140,6 +80,14 @@ interface Props {
     setAdvancedFilterValues: React.Dispatch<React.SetStateAction<AdvancedOptionType | undefined>>;
     countries?: NonNullable<CountryListQuery['countries']>;
     countriesLoading?: boolean;
+    emergencies: OutbreaksQuery | undefined;
+    indicatorList: IndicatorsForCountryQuery | undefined;
+    globalIndicatorList: IndicatorsQuery | undefined;
+    subvariableList: SubvariablesQuery | undefined;
+    emergenciesLoading: boolean | undefined;
+    subvariablesLoading: boolean | undefined;
+    globalIndicatorsLoading: boolean | undefined;
+    indicatorsLoading: boolean | undefined;
 }
 
 function Filters(props: Props) {
@@ -151,6 +99,14 @@ function Filters(props: Props) {
         advancedFilterValues,
         countries: countriesFromProps,
         setAdvancedFilterValues,
+        emergencies,
+        indicatorList,
+        globalIndicatorList,
+        subvariableList,
+        emergenciesLoading,
+        subvariablesLoading,
+        globalIndicatorsLoading,
+        indicatorsLoading,
     } = props;
 
     const handleClear = useCallback(() => {
@@ -214,82 +170,8 @@ function Filters(props: Props) {
         ],
     );
 
-    const {
-        data: emergencies,
-        loading: emergenciesLoading,
-    } = useQuery<OutbreaksQuery, OutbreaksQueryVariables>(
-        OUTBREAKS,
-    );
-
-    const indicatorListForCountryVariables = useMemo(() => ({
-        // FIXME: Take the default country from an index
-        iso3: value?.country ?? 'AFG',
-        outbreak: value?.outbreak,
-    }), [
-        value?.country,
-        value?.outbreak,
-    ]);
-
-    const {
-        data: indicatorList,
-        loading: indicatorsLoading,
-    } = useQuery<IndicatorsForCountryQuery, IndicatorsForCountryQueryVariables>(
-        INDICATORS_FOR_COUNTRY,
-        {
-            // skip: isNotDefined(value?.country),
-            variables: indicatorListForCountryVariables,
-        },
-    );
-
     const indicators = indicatorList?.filterOptions?.countryIndicators;
-
-    const indicatorVariables = useMemo(() => ({
-        outbreak: value?.outbreak,
-        region: value?.region,
-    }), [
-        value?.outbreak,
-        value?.region,
-    ]);
-
-    const {
-        data: globalIndicatorList,
-        loading: globalIndicatorsLoading,
-    } = useQuery<IndicatorsQuery, IndicatorsQueryVariables>(
-        INDICATORS,
-        {
-            // skip: isDefined(value?.country) || isDefined(value?.region),
-            variables: indicatorVariables,
-        },
-    );
-
     const globalIndicators = globalIndicatorList?.filterOptions?.overviewIndicators;
-
-    const subvariablesVariables = useMemo(() => ({
-        iso3: value?.country ?? 'AFG',
-        indicatorId: value?.indicator ?? undefined,
-    }), [
-        value?.country,
-        value?.indicator,
-    ]);
-
-    const {
-        data: subvariableList,
-        loading: subvariablesLoading,
-    } = useQuery<SubvariablesQuery, SubvariablesQueryVariables>(
-        SUBVARIABLES,
-        {
-            // skip: isNotDefined(value?.indicator),
-            variables: subvariablesVariables,
-            onCompleted: (response) => {
-                if (response?.filterOptions?.subvariables?.[0]) {
-                    onChange((oldValue) => ({
-                        ...oldValue,
-                        subvariable: response?.filterOptions?.subvariables?.[0],
-                    }));
-                }
-            },
-        },
-    );
 
     const subvariables = useMemo(() => (
         subvariableList?.filterOptions?.subvariables.map((sub) => ({
