@@ -47,11 +47,8 @@ import styles from './styles.css';
 
 const normalizedTickFormatter = (d: number) => normalFormatter().format(d);
 
-interface PercentageCardGroupProps {
-    className?: string;
-    filterValues?: FilterType | undefined;
-    uncertaintyChartActive: boolean;
-}
+// FIXME: Add suffix as required
+const customLabel = (val: number | string | undefined) => val;
 
 const TOTAL_OUTBREAK_CASES = gql`
     query TotalOutbreakCases(
@@ -101,6 +98,7 @@ const TOTAL_OUTBREAK_CASES = gql`
         ) {
             id
             indicatorId
+            indicatorName
             indicatorValueGlobal
             indicatorMonth
             emergency
@@ -182,15 +180,12 @@ const REGIONAL_BREAKDOWN = gql`
             region
             indicatorValueRegional
             indicatorMonth
+            indicatorId
+            indicatorName
         }
     }
 `;
 
-interface PercentageCardGroupProps {
-    className?: string;
-    filterValues?: FilterType | undefined;
-    uncertaintyChartActive: boolean;
-}
 const UNCERTAINTY = gql`
     query Uncertainty(
         $isTwelveMonth: Boolean,
@@ -219,6 +214,7 @@ const UNCERTAINTY = gql`
                 errorMargin
                 emergency
                 indicatorMonth
+                indicatorId
                 indicatorName
                 indicatorValueGlobal
             }
@@ -240,17 +236,28 @@ const UNCERTAINTY = gql`
             errorMargin
             emergency
             indicatorMonth
+            indicatorId
             indicatorName
             indicatorValueRegional
         }
     }
 `;
 
-function PercentageCardGroup(props: PercentageCardGroupProps) {
+interface Props {
+    className?: string;
+    filterValues?: FilterType | undefined;
+    uncertaintyChartActive: boolean;
+    selectedIndicatorName: string | undefined;
+    selectedOutbreakName: string | undefined;
+}
+
+function PercentageCardGroup(props: Props) {
     const {
         className,
         uncertaintyChartActive,
         filterValues,
+        selectedIndicatorName,
+        selectedOutbreakName,
     } = props;
 
     const totalOutbreakCasesVariables = useMemo((): TotalOutbreakCasesQueryVariables => ({
@@ -278,7 +285,6 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
             variables: totalOutbreakCasesVariables,
         },
     );
-
     const outbreakVariables = useMemo((): OutbreakQueryVariables => ({
         contextIndicatorId: 'total_cases',
         isTwelveMonth: true,
@@ -348,18 +354,14 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
         ))
     ), [regionalBreakdownResponse?.regionLevel]);
 
-    const filterGlobalRegionalBreakdownEpi = useMemo(() => (
+    const regionalBreakdownEpi = useMemo(() => (
         regionalBreakdownResponse?.epiDataGlobal.map((region) => (
             {
                 ...region,
                 normalizedValue: normalFormatter().format(region.contextIndicatorValue ?? 0),
             }
-        ))
+        )).filter((item) => item.region !== 'Global')
     ), [regionalBreakdownResponse?.epiDataGlobal]);
-
-    const regionalBreakdownEpi = useMemo(() => (
-        filterGlobalRegionalBreakdownEpi?.filter((item) => item.region !== 'Global')
-    ), [filterGlobalRegionalBreakdownEpi]);
 
     const {
         data: uncertaintyResponse,
@@ -372,19 +374,19 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
 
     const uncertaintyGlobalChart = useMemo(() => (
         uncertaintyResponse?.globalLevel.map((global) => {
-            const negativeRange = decimalToPercentage(
+            const negativeRange = String(decimalToPercentage(
                 (global.indicatorValueGlobal && global.errorMargin)
                 && global.indicatorValueGlobal - global.errorMargin,
-            );
-            const positiveRange = decimalToPercentage(
+            ));
+            const positiveRange = String(decimalToPercentage(
                 (global.indicatorValueGlobal && global.errorMargin)
                 && global.indicatorValueGlobal + global.errorMargin,
-            );
+            ));
 
             if (isNotDefined(global.errorMargin)) {
                 return {
                     emergency: global.emergency,
-                    indicatorValue: decimalToPercentage(global.indicatorValueGlobal),
+                    indicatorValue: String(decimalToPercentage(global.indicatorValueGlobal)),
                     date: global.indicatorMonth,
                     minimumValue: negativeRange,
                     maximumValue: positiveRange,
@@ -393,7 +395,7 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
 
             return {
                 emergency: global.emergency,
-                indicatorValue: decimalToPercentage(global.indicatorValueGlobal),
+                indicatorValue: String(decimalToPercentage(global.indicatorValueGlobal)),
                 date: global.indicatorMonth,
                 uncertainRange: [
                     negativeRange ?? '',
@@ -407,19 +409,19 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
 
     const uncertaintyRegionChart = useMemo(() => (
         uncertaintyResponse?.regionLevel.map((region) => {
-            const negativeRange = decimalToPercentage(
+            const negativeRange = String(decimalToPercentage(
                 (region.indicatorValueRegional && region.errorMargin)
                 && region.indicatorValueRegional - region.errorMargin,
-            );
-            const positiveRange = decimalToPercentage(
+            ));
+            const positiveRange = String(decimalToPercentage(
                 (region.indicatorValueRegional && region.errorMargin)
                 && region.indicatorValueRegional + region.errorMargin,
-            );
+            ));
 
             if (isNotDefined(region.errorMargin)) {
                 return {
                     emergency: region.emergency,
-                    indicatorValue: decimalToPercentage(region.indicatorValueRegional),
+                    indicatorValue: String(decimalToPercentage(region.indicatorValueRegional)),
                     date: region.indicatorMonth,
                     minimumValue: negativeRange,
                     maximumValue: positiveRange,
@@ -428,7 +430,7 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
 
             return {
                 emergency: region.emergency,
-                indicatorValue: decimalToPercentage(region.indicatorValueRegional),
+                indicatorValue: String(decimalToPercentage(region.indicatorValueRegional)),
                 date: region.indicatorMonth,
                 uncertainRange: [
                     negativeRange ?? '',
@@ -483,10 +485,6 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
         totalCase?.contextIndicatorValue,
     ]);
 
-    const customLabel = (val: number | string | undefined) => (
-        `${val} %`
-    );
-
     return (
         <div className={_cs(className, styles.cardInfo)}>
             <PercentageStats
@@ -511,7 +509,7 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                         }
                         emergencyFilterValue={filterValues?.outbreak}
                         heading="Indicator overview over the last 12 months"
-                        headingDescription={`Trend chart for ${filterValues?.indicator}`}
+                        headingDescription={`Trend chart for ${selectedIndicatorName ?? filterValues?.indicator}`}
                     />
                 ) : (
                     <ContainerCard
@@ -569,10 +567,11 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                 heading="Regional Breakdown"
                 headingSize="extraSmall"
                 headerDescription={filterValues?.indicator
-                    ? `Number of cases for ${filterValues.indicator}`
-                    : `Number of cases for ${filterValues?.outbreak}`}
+                    ? `Number of cases for ${selectedIndicatorName ?? filterValues.indicator}`
+                    : `Number of cases for ${selectedOutbreakName ?? filterValues?.outbreak}`}
             >
                 <ResponsiveContainer className={styles.responsiveContainer}>
+                    {/* FIXME: Separate this out into 2 barcharts */}
                     <BarChart
                         data={
                             (filterValues?.region || filterValues?.indicator)
@@ -591,16 +590,10 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                         <XAxis
                             dataKey="region"
                             tickLine={false}
-                            interval={0}
                             fontSize={12}
-                        >
-                            <LabelList
-                                dataKey="region"
-                                position="bottom"
-                            />
-                        </XAxis>
+                        />
                         <YAxis
-                            padding={{ bottom: 12 }}
+                            padding={{ bottom: 0 }}
                             hide
                         />
                         <Bar
@@ -619,10 +612,10 @@ function PercentageCardGroup(props: PercentageCardGroupProps) {
                                         ? 'contextIndicatorValue'
                                         : 'normalizedValue'
                                 }
+                                angle={270}
+                                offset={-2.8}
                                 position="insideBottomLeft"
                                 fill="#8DD2B1"
-                                angle={-90}
-                                offset={-2.8}
                                 fontSize={14}
                                 formatter={customLabel}
                             />

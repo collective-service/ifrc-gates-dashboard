@@ -10,6 +10,7 @@
 
         .title-button {
             padding: 0;
+            text-align: center;
             font-weight: var(--dui-font-weight-normal);
         }
     }

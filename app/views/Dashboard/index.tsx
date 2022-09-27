@@ -19,6 +19,14 @@ import {
     NarrativeQueryVariables,
     CountryListQuery,
     CountryListQueryVariables,
+    OutbreaksQuery,
+    IndicatorsQuery,
+    IndicatorsForCountryQuery,
+    IndicatorsForCountryQueryVariables,
+    SubvariablesQuery,
+    SubvariablesQueryVariables,
+    IndicatorsQueryVariables,
+    OutbreaksQueryVariables,
 } from '#generated/types';
 import { getRegionForCountry } from '#utils/common';
 
@@ -55,6 +63,61 @@ const NARRATIVES = gql`
     }
 `;
 
+const INDICATORS_FOR_COUNTRY = gql`
+    query IndicatorsForCountry (
+        $iso3: String!,
+        $outbreak: String
+    ) {
+        filterOptions {
+            countryIndicators(
+                iso3: $iso3,
+                outbreak: $outbreak,
+            ) {
+                indicatorDescription
+                indicatorId
+            }
+        }
+    }
+`;
+
+const OUTBREAKS = gql`
+    query Outbreaks {
+        outBreaks {
+            active
+            outbreak
+            __typename
+        }
+    }
+`;
+
+const INDICATORS = gql`
+    query Indicators(
+        $outbreak: String,
+        $region: String,
+    ) {
+        filterOptions {
+            overviewIndicators(
+                outBreak: $outbreak,
+                region: $region
+            ) {
+                indicatorId
+                indicatorDescription
+            }
+        }
+    }
+`;
+
+const SUBVARIABLES = gql`
+    query Subvariables(
+        $iso3: String!,
+        $indicatorId:String
+    ) {
+        filterOptions {
+            subvariables(iso3: $iso3, indicatorId: $indicatorId)
+        }
+    }
+`;
+
 function Dashboard() {
     const [activeTab, setActiveTab] = useSessionStorage<TabTypes | undefined>('activeTab', 'overview');
     const [filterValues, setFilterValues] = useState<FilterType | undefined>();
@@ -68,6 +131,79 @@ function Dashboard() {
         loading: countryListLoading,
     } = useQuery<CountryListQuery, CountryListQueryVariables>(
         COUNTRY_LIST,
+    );
+
+    const {
+        data: emergencies,
+        loading: emergenciesLoading,
+    } = useQuery<OutbreaksQuery, OutbreaksQueryVariables>(
+        OUTBREAKS,
+    );
+
+    const indicatorListForCountryVariables = useMemo(() => ({
+        // FIXME: Take the default country from an index
+        iso3: filterValues?.country ?? 'AFG',
+        outbreak: filterValues?.outbreak,
+    }), [
+        filterValues?.country,
+        filterValues?.outbreak,
+    ]);
+
+    const {
+        data: indicatorList,
+        loading: indicatorsLoading,
+    } = useQuery<IndicatorsForCountryQuery, IndicatorsForCountryQueryVariables>(
+        INDICATORS_FOR_COUNTRY,
+        {
+            // skip: isNotDefined(value?.country),
+            variables: indicatorListForCountryVariables,
+        },
+    );
+
+    const indicatorVariables = useMemo(() => ({
+        outbreak: filterValues?.outbreak,
+        region: filterValues?.region,
+    }), [
+        filterValues?.outbreak,
+        filterValues?.region,
+    ]);
+
+    const {
+        data: globalIndicatorList,
+        loading: globalIndicatorsLoading,
+    } = useQuery<IndicatorsQuery, IndicatorsQueryVariables>(
+        INDICATORS,
+        {
+            // skip: isDefined(value?.country) || isDefined(value?.region),
+            variables: indicatorVariables,
+        },
+    );
+
+    const subvariablesVariables = useMemo(() => ({
+        iso3: filterValues?.country ?? 'AFG',
+        indicatorId: filterValues?.indicator ?? undefined,
+    }), [
+        filterValues?.country,
+        filterValues?.indicator,
+    ]);
+
+    const {
+        data: subvariableList,
+        loading: subvariablesLoading,
+    } = useQuery<SubvariablesQuery, SubvariablesQueryVariables>(
+        SUBVARIABLES,
+        {
+            // skip: isNotDefined(value?.indicator),
+            variables: subvariablesVariables,
+            onCompleted: (response) => {
+                if (response?.filterOptions?.subvariables?.[0]) {
+                    setFilterValues((oldValue) => ({
+                        ...oldValue,
+                        subvariable: response?.filterOptions?.subvariables?.[0],
+                    }));
+                }
+            },
+        },
     );
 
     const handleActiveTabChange = (newActiveTab: TabTypes | undefined) => {
@@ -129,9 +265,18 @@ function Dashboard() {
             && narrativeResponse?.naratives?.length > 0
     )
         ? narrativeResponse?.naratives[0].narrative
-        : 'This is Narrative'
+        : 'This is narrative'
     ), [
         narrativeResponse?.naratives,
+    ]);
+
+    const selectedIndicatorName = useMemo(() => (
+        globalIndicatorList?.filterOptions?.overviewIndicators
+            ?.find((indicator) => indicator.indicatorId === filterValues?.indicator)
+            ?.indicatorDescription
+    ), [
+        globalIndicatorList,
+        filterValues?.indicator,
     ]);
 
     return (
@@ -205,6 +350,14 @@ function Dashboard() {
                     setAdvancedFilterValues={setAdvancedFilterValues}
                     countries={countryList?.countries}
                     countriesLoading={countryListLoading}
+                    emergencies={emergencies}
+                    subvariableList={subvariableList}
+                    globalIndicatorList={globalIndicatorList}
+                    indicatorList={indicatorList}
+                    emergenciesLoading={emergenciesLoading}
+                    subvariablesLoading={subvariablesLoading}
+                    globalIndicatorsLoading={globalIndicatorsLoading}
+                    indicatorsLoading={indicatorsLoading}
                 />
                 <div className={styles.content}>
                     <TabPanel name="overview">
@@ -212,16 +365,17 @@ function Dashboard() {
                             filterValues={filterValues}
                             setActiveTab={setActiveTab}
                             setFilterValues={setFilterValues}
+                            selectedIndicatorName={selectedIndicatorName ?? undefined}
+                            selectedOutbreakName={filterValues?.outbreak}
                         />
                     </TabPanel>
                     <TabPanel name="country">
                         <Country
                             filterValues={filterValues}
+                            selectedIndicatorName={selectedIndicatorName ?? undefined}
                         />
                     </TabPanel>
-                    <TabPanel
-                        name="combinedIndicators"
-                    >
+                    <TabPanel name="combinedIndicators">
                         <CombinedIndicators
                             filterValues={filterValues}
                             advancedFilterValues={advancedFilterValues}

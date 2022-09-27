@@ -5,25 +5,29 @@ import styles from './styles.css';
 
 export interface Props {
     className?: string | undefined;
-    barHeight?: number;
+    minValue?: number;
+    maxValue?: number;
+    isPercent?: boolean;
 }
 
 function MapLabel(props: Props) {
     const {
         className,
-        barHeight = 10,
+        minValue,
+        maxValue,
+        isPercent,
     } = props;
 
-    const valueTooltip = '0';
-
     return (
-        <div className={_cs(className, styles.progressInfo)}>
-            <div className={styles.progressValueWrapper}>
-                <div
-                    className={styles.progressBarWrapper}
-                    style={{ height: `${barHeight}px` }}
-                    title={valueTooltip as string}
-                />
+        <div className={_cs(className, styles.mapLabel)}>
+            <div className={styles.bar} />
+            <div className={styles.labelContainer}>
+                <div className={styles.valueContainer}>
+                    {isPercent ? '0%' : minValue}
+                </div>
+                <div className={styles.valueContainer}>
+                    {isPercent ? '100%' : maxValue}
+                </div>
             </div>
         </div>
     );

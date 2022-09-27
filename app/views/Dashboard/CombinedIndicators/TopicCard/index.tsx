@@ -94,6 +94,7 @@ function TopicCard(props: Props) {
             contentClassName={styles.topicContainer}
             heading={indicatorKey}
             headingSize="small"
+            headerDescription={indicators[0]?.topicDescription}
             spacing="loose"
         >
             <List

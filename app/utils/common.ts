@@ -78,7 +78,7 @@ export function removeNull<T>(
 
 export function decimalToPercentage(value: number | null | undefined) {
     return (
-        value ? (value * 100).toFixed(2) : undefined
+        value ? Math.round((value * 10000) / 100) : undefined
     );
 }
 

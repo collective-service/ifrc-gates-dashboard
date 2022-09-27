@@ -144,23 +144,23 @@ const countryFillPaint: mapboxgl.FillPaint = {
         ['linear'],
         ['coalesce', ['feature-state', 'indicatorValue'], 0],
         0,
-        '#CB3809',
+        '#d73027',
         5000,
-        '#EED322',
+        '#f46d43',
         750000,
-        '#D07149',
+        '#fdae61',
         1000000,
-        '#E18700',
+        '#fee08b',
         2500000,
-        '#2F3345',
+        '#ffffbf',
         5000000,
-        '#2F9C67',
+        '#d9ef8b',
         7500000,
-        '#2F9C67',
+        '#a6d96a',
         60000000,
-        '#2F9C67',
+        '#66bd63',
         91331830,
-        '#268504',
+        '#1a9850',
     ],
     'fill-opacity': 0.5,
 };
@@ -398,8 +398,11 @@ function MapView(props: MapViewProps) {
                             />
                         )}
                 </Map>
-                {/* FIXME: Need to fix the label for map */}
-                <MapLabel className={styles.mapLabelBox} />
+                {/* FIXME: Need to send max value */}
+                <MapLabel
+                    className={styles.mapLabelBox}
+                    isPercent
+                />
             </ContainerCard>
             <ContainerCard
                 className={styles.progressBarContainer}

@@ -187,12 +187,14 @@ const COUNTRY_PROFILE = gql`
 interface Props {
     className?: string;
     filterValues?: FilterType | undefined;
+    selectedIndicatorName: string | undefined;
 }
 
 function Country(props: Props) {
     const {
         filterValues,
         className,
+        selectedIndicatorName,
     } = props;
 
     const countryVariables = useMemo((): CountryQueryVariables => ({
@@ -300,16 +302,17 @@ function Country(props: Props) {
         countryResponse?.countryProfile.newDeaths,
     ]);
 
+    // FIXME: Do not cast for decimal to percentage
     const uncertaintyChart: UncertainData[] | undefined = useMemo(() => (
         countryResponse?.dataCountryLevel.map((country) => {
-            const negativeRange = decimalToPercentage(
+            const negativeRange = String(decimalToPercentage(
                 (country?.indicatorValue && country?.errorMargin)
                 && country?.indicatorValue - country?.errorMargin,
-            );
-            const positiveRange = decimalToPercentage(
+            ));
+            const positiveRange = String(decimalToPercentage(
                 (country?.indicatorValue && country?.errorMargin)
                 && country?.indicatorValue + country?.errorMargin,
-            );
+            ));
 
             if (country.interpolated) {
                 return {
@@ -325,7 +328,7 @@ function Country(props: Props) {
             }
             return {
                 emergency: country.emergency,
-                indicatorValue: decimalToPercentage(country.indicatorValue),
+                indicatorValue: String(decimalToPercentage(country.indicatorValue)),
                 date: country.indicatorMonth,
                 uncertainRange: [
                     negativeRange ?? '',
@@ -582,7 +585,7 @@ function Country(props: Props) {
                                 uncertainData={(uncertaintyChart && uncertaintyChart) ?? []}
                                 emergencyFilterValue={filterValues.outbreak}
                                 heading="Indicator overview over the last 12 months"
-                                headingDescription={`Trend chart for ${filterValues?.indicator}`}
+                                headingDescription={`Trend chart for ${selectedIndicatorName ?? filterValues?.indicator}`}
                             />
                             {(genderDisaggregation && genderDisaggregation.length > 0
                                 && ageDisaggregation && ageDisaggregation.length > 0
