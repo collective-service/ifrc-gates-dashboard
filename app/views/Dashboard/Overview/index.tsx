@@ -111,7 +111,6 @@ function Overview(props: Props) {
                             name="mapMode"
                         >
                             <MapView
-                                isIndicatorSelected={isIndicatorSelected}
                                 filterValues={filterValues}
                                 setActiveTab={setActiveTab}
                                 setFilterValues={setFilterValues}

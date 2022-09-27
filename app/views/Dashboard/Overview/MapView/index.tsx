@@ -120,6 +120,7 @@ const MOST_RECENT_CASES = gql`
             countryName
             iso3
             indicatorValue
+            populationSize
         }
         ascMostRecentValues: dataCountryLevelMostRecent(
             filters: {
@@ -138,6 +139,7 @@ const MOST_RECENT_CASES = gql`
             countryName
             iso3
             indicatorValue
+            populationSize
         }
     }
 `;
@@ -155,7 +157,6 @@ const recentProgressBarKeySelector = (
 
 interface MapViewProps {
     className?: string;
-    isIndicatorSelected: boolean;
     setActiveTab: React.Dispatch<React.SetStateAction<TabTypes | undefined>>;
     filterValues?: FilterType | undefined;
     setFilterValues: React.Dispatch<React.SetStateAction<FilterType | undefined>>;
@@ -248,7 +249,6 @@ function Tooltip(props: TooltipProps) {
 function MapView(props: MapViewProps) {
     const {
         className,
-        isIndicatorSelected,
         setActiveTab,
         filterValues,
         setFilterValues,
@@ -339,14 +339,16 @@ function MapView(props: MapViewProps) {
     const progressBarRendererParams = useCallback(
         (_: string, data: AscendingCountryProfileType | DescendingCountryProfileType) => ({
             barHeight,
-            suffix: isIndicatorSelected ? '%' : 'M',
-            barName: data.countryName ?? undefined,
+            suffix: 'M',
+            barName: data.countryName,
             title: data.countryName ?? undefined,
-            value: data.contextIndicatorValue ?? undefined,
-            totalValue: 0,
+            valueTitle: data.countryName ?? undefined,
+            value: data.contextIndicatorValue,
+            // FIXME: Use country population instead of highest indicator value
+            totalValue: 100000000,
             color: '#98A6B5',
-            isNumberValue: !isIndicatorSelected,
-        }), [isIndicatorSelected],
+            isNumberValue: false,
+        }), [],
     );
 
     const recentProgressBarRendererParams = useCallback(
@@ -354,15 +356,15 @@ function MapView(props: MapViewProps) {
             data: AscendingMostRecentIndicatorType | DescendingMostRecentIndicatorType,
         ) => ({
             barHeight,
-            suffix: isIndicatorSelected ? '%' : 'M',
-            barName: data.countryName,
-            title: data.countryName,
-            id: +data.id,
-            value: data.indicatorValue ?? undefined,
-            totalValue: 0,
+            suffix: '%',
+            barName: data.countryName ?? undefined,
+            title: data.countryName ?? undefined,
+            valueTitle: data.countryName ?? undefined,
+            value: data.indicatorValue,
+            totalValue: data.populationSize,
             color: '#98A6B5',
-            isNumberValue: !isIndicatorSelected,
-        }), [isIndicatorSelected],
+            isNumberValue: false,
+        }), [],
     );
 
     const handlePointHover = React.useCallback(
@@ -396,14 +398,8 @@ function MapView(props: MapViewProps) {
         return regionData?.bounding_box as [number, number, number, number];
     }, [filterValues]);
 
-    const highestValuesWithoutIndicator = pulledData?.descCountryEmergencyProfile;
-    const lowestValuesWithoutIndicator = pulledData?.ascCountryEmergencyProfile;
-
     const recentHighValuesWithIndicator = mostRecentValues?.descMostRecentValues;
     const recentLowValuesWithIndicator = mostRecentValues?.ascMostRecentValues;
-
-    console.log('WITH INDICATOR RECENT::>>', recentHighValuesWithIndicator, recentLowValuesWithIndicator);
-    console.log('WITHOUT INDICATOR::>>', highestValuesWithoutIndicator, lowestValuesWithoutIndicator);
 
     return (
         <div className={_cs(className, styles.mapViewWrapper)}>
@@ -475,46 +471,85 @@ function MapView(props: MapViewProps) {
             <ContainerCard
                 className={styles.progressBarContainer}
             >
-                <div className={styles.highProgressBox}>
-                    <Heading size="extraSmall" className={styles.progressListHeader}>
-                        Highest cases
-                    </Heading>
-                    <ListView
-                        className={styles.progressList}
-                        keySelector={progressBarKeySelector}
-                        data={pulledData?.descCountryEmergencyProfile}
-                        renderer={ProgressBar}
-                        rendererParams={filterValues?.indicator
-                            ? recentProgressBarRendererParams
-                            : progressBarRendererParams}
-                        filtered={false}
-                        errored={false}
-                        pending={false}
-                        borderBetweenItem
-                        borderBetweenItemWidth="medium"
-                        borderBetweenItemClassName={styles.progressItemBorder}
-                    />
-                </div>
-                <div className={styles.lowProgressBox}>
-                    <Heading size="extraSmall" className={styles.progressListHeader}>
-                        Lowest cases
-                    </Heading>
-                    <ListView
-                        className={styles.progressList}
-                        keySelector={progressBarKeySelector}
-                        data={pulledData?.ascCountryEmergencyProfile}
-                        renderer={ProgressBar}
-                        rendererParams={filterValues?.indicator
-                            ? recentProgressBarRendererParams
-                            : progressBarRendererParams}
-                        filtered={false}
-                        errored={false}
-                        pending={false}
-                        borderBetweenItem
-                        borderBetweenItemWidth="medium"
-                        borderBetweenItemClassName={styles.progressItemBorder}
-                    />
-                </div>
+                {filterValues?.indicator ? (
+                    <>
+                        <div className={styles.highProgressBox}>
+                            <Heading size="extraSmall" className={styles.progressListHeader}>
+                                Highest cases
+                            </Heading>
+                            <ListView
+                                className={styles.progressList}
+                                keySelector={recentProgressBarKeySelector}
+                                data={recentHighValuesWithIndicator}
+                                renderer={ProgressBar}
+                                rendererParams={recentProgressBarRendererParams}
+                                filtered={false}
+                                errored={false}
+                                pending={false}
+                                borderBetweenItem
+                                borderBetweenItemWidth="medium"
+                                borderBetweenItemClassName={styles.progressItemBorder}
+                            />
+                        </div>
+                        <div className={styles.lowProgressBox}>
+                            <Heading size="extraSmall" className={styles.progressListHeader}>
+                                Lowest cases
+                            </Heading>
+                            <ListView
+                                className={styles.progressList}
+                                keySelector={recentProgressBarKeySelector}
+                                data={recentLowValuesWithIndicator}
+                                renderer={ProgressBar}
+                                rendererParams={progressBarRendererParams}
+                                filtered={false}
+                                errored={false}
+                                pending={false}
+                                borderBetweenItem
+                                borderBetweenItemWidth="medium"
+                                borderBetweenItemClassName={styles.progressItemBorder}
+                            />
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        <div className={styles.highProgressBox}>
+                            <Heading size="extraSmall" className={styles.progressListHeader}>
+                                Highest cases
+                            </Heading>
+                            <ListView
+                                className={styles.progressList}
+                                keySelector={progressBarKeySelector}
+                                data={pulledData?.descCountryEmergencyProfile}
+                                renderer={ProgressBar}
+                                rendererParams={progressBarRendererParams}
+                                filtered={false}
+                                errored={false}
+                                pending={false}
+                                borderBetweenItem
+                                borderBetweenItemWidth="medium"
+                                borderBetweenItemClassName={styles.progressItemBorder}
+                            />
+                        </div>
+                        <div className={styles.lowProgressBox}>
+                            <Heading size="extraSmall" className={styles.progressListHeader}>
+                                Lowest cases
+                            </Heading>
+                            <ListView
+                                className={styles.progressList}
+                                keySelector={progressBarKeySelector}
+                                data={pulledData?.ascCountryEmergencyProfile}
+                                renderer={ProgressBar}
+                                rendererParams={progressBarRendererParams}
+                                filtered={false}
+                                errored={false}
+                                pending={false}
+                                borderBetweenItem
+                                borderBetweenItemWidth="medium"
+                                borderBetweenItemClassName={styles.progressItemBorder}
+                            />
+                        </div>
+                    </>
+                )}
                 {mapModalShown && (
                     <MapModal
                         onModalClose={hideMapModal}

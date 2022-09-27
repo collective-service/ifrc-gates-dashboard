@@ -1,8 +1,13 @@
 import React, { useMemo, useCallback } from 'react';
 import { _cs, isNotDefined } from '@togglecorp/fujs';
 import { Button } from '@the-deep/deep-ui';
+import {
+    normalFormatter,
+} from '#utils/common';
 
 import styles from './styles.css';
+
+const normalizedForm = (d: number) => normalFormatter().format(d);
 
 export interface Props {
     className?: string | undefined;
@@ -12,9 +17,9 @@ export interface Props {
     title: string | undefined;
     valueTitle?: string | undefined;
     color?: string;
-    value: number | undefined;
+    value: number | null | undefined;
     subValue?: number;
-    totalValue: number | undefined;
+    totalValue: number | null | undefined;
     icon?: React.ReactNode;
     region?: string;
     showRegionalValue?: boolean;
@@ -50,9 +55,9 @@ function ProgressBar(props: Props) {
             return undefined;
         }
         if (isNumberValue) {
-            return (value / 1000000).toFixed(2);
+            return (Math.round(value * 10000)) / 100;
         }
-        return ((value / totalValue) * 100).toFixed(0);
+        return (Math.round((value / totalValue) * 10000) / 100);
     }, [
         totalValue,
         value,
@@ -78,8 +83,8 @@ function ProgressBar(props: Props) {
     );
 
     const valueTooltip = useMemo(() => (
-        (value && totalValue) && (`${valueTitle}: ${value ?? '0'}` ?? undefined)
-    ), [totalValue, value, valueTitle]);
+        (`${valueTitle}: ${((value && normalizedForm(value)) ?? '0')}` ?? undefined)
+    ), [value, valueTitle]);
 
     return (
         <div className={_cs(className, styles.progressInfo)}>
