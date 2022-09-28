@@ -10,6 +10,7 @@ import {
     DropdownMenu,
     DropdownMenuItem,
 } from '@the-deep/deep-ui';
+import { isDefined } from '@togglecorp/fujs';
 import { gql, useQuery } from '@apollo/client';
 
 import useSessionStorage from '#hooks/useSessionStorage';
@@ -17,16 +18,13 @@ import Narratives from '#components/Narratives';
 import {
     NarrativeQuery,
     NarrativeQueryVariables,
-    CountryListQuery,
-    CountryListQueryVariables,
-    OutbreaksQuery,
+    CountriesAndOutbreaksQuery,
     IndicatorsQuery,
     IndicatorsForCountryQuery,
     IndicatorsForCountryQueryVariables,
     SubvariablesQuery,
     SubvariablesQueryVariables,
     IndicatorsQueryVariables,
-    OutbreaksQueryVariables,
 } from '#generated/types';
 import { getRegionForCountry } from '#utils/common';
 
@@ -39,12 +37,16 @@ import styles from './styles.css';
 
 export type TabTypes = 'country' | 'overview' | 'combinedIndicators';
 
-export const COUNTRY_LIST = gql`
-    query CountryList{
+export const COUNTRIES_AND_OUTBREAKS = gql`
+    query CountriesAndOutbreaks {
         countries {
             iso3
             countryName
             region
+        }
+        outBreaks {
+            active
+            outbreak
         }
     }
 `;
@@ -73,19 +75,9 @@ const INDICATORS_FOR_COUNTRY = gql`
                 iso3: $iso3,
                 outbreak: $outbreak,
             ) {
-                indicatorDescription
                 indicatorId
+                indicatorDescription
             }
-        }
-    }
-`;
-
-const OUTBREAKS = gql`
-    query Outbreaks {
-        outBreaks {
-            active
-            outbreak
-            __typename
         }
     }
 `;
@@ -119,33 +111,38 @@ const SUBVARIABLES = gql`
 `;
 
 function Dashboard() {
-    const [activeTab, setActiveTab] = useSessionStorage<TabTypes | undefined>('activeTab', 'overview');
-    const [filterValues, setFilterValues] = useState<FilterType | undefined>();
+    const [
+        activeTab,
+        setActiveTab,
+    ] = useSessionStorage<TabTypes | undefined>('activeTab', 'overview');
+    const [
+        filterValues,
+        setFilterValues,
+    ] = useState<FilterType | undefined>();
     const [
         advancedFilterValues,
         setAdvancedFilterValues,
     ] = useState<AdvancedOptionType | undefined>();
 
     const {
-        data: countryList,
-        loading: countryListLoading,
-    } = useQuery<CountryListQuery, CountryListQueryVariables>(
-        COUNTRY_LIST,
+        data: countriesAndOutbreaks,
+        loading: countriesAndOutbreaksLoading,
+    } = useQuery<CountriesAndOutbreaksQuery>(
+        COUNTRIES_AND_OUTBREAKS,
     );
 
-    const {
-        data: emergencies,
-        loading: emergenciesLoading,
-    } = useQuery<OutbreaksQuery, OutbreaksQueryVariables>(
-        OUTBREAKS,
-    );
+    const filterValueCountry = filterValues?.country;
 
-    const indicatorListForCountryVariables = useMemo(() => ({
-        // FIXME: Take the default country from an index
-        iso3: filterValues?.country ?? 'AFG',
-        outbreak: filterValues?.outbreak,
-    }), [
-        filterValues?.country,
+    const indicatorListForCountryVariables = useMemo(() => {
+        if (isDefined(filterValueCountry)) {
+            return {
+                iso3: filterValueCountry,
+                outbreak: filterValues?.outbreak,
+            };
+        }
+        return undefined;
+    }, [
+        filterValueCountry,
         filterValues?.outbreak,
     ]);
 
@@ -155,15 +152,20 @@ function Dashboard() {
     } = useQuery<IndicatorsForCountryQuery, IndicatorsForCountryQueryVariables>(
         INDICATORS_FOR_COUNTRY,
         {
-            // skip: isNotDefined(value?.country),
+            skip: !indicatorListForCountryVariables,
             variables: indicatorListForCountryVariables,
         },
     );
 
-    const indicatorVariables = useMemo(() => ({
-        outbreak: filterValues?.outbreak,
-        region: filterValues?.region,
-    }), [
+    const indicatorVariables = useMemo(() => {
+        if (isDefined(filterValues?.region)) {
+            return {
+                outbreak: filterValues?.outbreak,
+                region: filterValues?.region,
+            };
+        }
+        return undefined;
+    }, [
         filterValues?.outbreak,
         filterValues?.region,
     ]);
@@ -174,16 +176,21 @@ function Dashboard() {
     } = useQuery<IndicatorsQuery, IndicatorsQueryVariables>(
         INDICATORS,
         {
-            // skip: isDefined(value?.country) || isDefined(value?.region),
+            skip: !indicatorVariables,
             variables: indicatorVariables,
         },
     );
 
-    const subvariablesVariables = useMemo(() => ({
-        iso3: filterValues?.country ?? 'AFG',
-        indicatorId: filterValues?.indicator ?? undefined,
-    }), [
-        filterValues?.country,
+    const subvariablesVariables = useMemo(() => {
+        if (isDefined(filterValues?.indicator) && isDefined(filterValueCountry)) {
+            return {
+                iso3: filterValueCountry,
+                indicatorId: filterValues?.indicator,
+            };
+        }
+        return undefined;
+    }, [
+        filterValueCountry,
         filterValues?.indicator,
     ]);
 
@@ -193,7 +200,7 @@ function Dashboard() {
     } = useQuery<SubvariablesQuery, SubvariablesQueryVariables>(
         SUBVARIABLES,
         {
-            // skip: isNotDefined(value?.indicator),
+            skip: !subvariablesVariables,
             variables: subvariablesVariables,
             onCompleted: (response) => {
                 if (response?.filterOptions?.subvariables?.[0]) {
@@ -219,7 +226,7 @@ function Dashboard() {
                     country: 'AFG',
                     region: getRegionForCountry(
                         'AFG',
-                        countryList?.countries ?? [],
+                        countriesAndOutbreaks?.countries ?? [],
                     ) ?? undefined,
                 };
                 return newValueForRegion;
@@ -348,13 +355,13 @@ function Dashboard() {
                     onChange={setFilterValues}
                     advancedFilterValues={advancedFilterValues}
                     setAdvancedFilterValues={setAdvancedFilterValues}
-                    countries={countryList?.countries}
-                    countriesLoading={countryListLoading}
-                    emergencies={emergencies}
+                    countries={countriesAndOutbreaks?.countries}
+                    emergencies={countriesAndOutbreaks?.outBreaks}
                     subvariableList={subvariableList}
                     globalIndicatorList={globalIndicatorList}
                     indicatorList={indicatorList}
-                    emergenciesLoading={emergenciesLoading}
+                    emergenciesLoading={countriesAndOutbreaksLoading}
+                    countriesLoading={countriesAndOutbreaksLoading}
                     subvariablesLoading={subvariablesLoading}
                     globalIndicatorsLoading={globalIndicatorsLoading}
                     indicatorsLoading={indicatorsLoading}

@@ -22,10 +22,10 @@ function MapLabel(props: Props) {
         <div className={_cs(className, styles.mapLabel)}>
             <div className={styles.bar} />
             <div className={styles.labelContainer}>
-                <div className={styles.valueContainer}>
+                <div>
                     {isPercent ? '0%' : minValue}
                 </div>
-                <div className={styles.valueContainer}>
+                <div>
                     {isPercent ? '100%' : maxValue}
                 </div>
             </div>

@@ -5,9 +5,9 @@ import {
     isDefined,
 } from '@togglecorp/fujs';
 
-import { CountryListQuery } from '#generated/types';
+import { CountriesAndOutbreaksQuery } from '#generated/types';
 
-type CountryListType = NonNullable<CountryListQuery['countries']>[number];
+type CountryListType = NonNullable<CountriesAndOutbreaksQuery['countries']>[number];
 
 const standaloneMode = (window as { standaloneMode?: boolean }).standaloneMode ?? false;
 
