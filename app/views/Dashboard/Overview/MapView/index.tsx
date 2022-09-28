@@ -22,12 +22,12 @@ import MapLabel from '#components/MapLabel';
 import {
     normalFormatter,
 } from '#utils/common';
-import { RegionBounds } from '#utils/regionBounds';
+// import { RegionBounds } from '#utils/regionBounds';
 import {
-    OverviewMapDataQuery,
-    OverviewMapDataQueryVariables,
     MostRecentValuesQuery,
     MostRecentValuesQueryVariables,
+    OverviewMapDataQuery,
+    OverviewMapDataQueryVariables,
 } from '#generated/types';
 
 import { TabTypes } from '#views/Dashboard';
@@ -285,7 +285,7 @@ function MapView(props: MapViewProps) {
     ]);
 
     const {
-        data: pulledData,
+        data: overviewMapData,
     } = useQuery<OverviewMapDataQuery, OverviewMapDataQueryVariables>(
         MAP_DATA,
         {
@@ -316,7 +316,7 @@ function MapView(props: MapViewProps) {
     );
 
     const mapIndicatorState = useMemo(() => {
-        const countryIndicator = pulledData?.overviewMap?.map(
+        const countryIndicator = overviewMapData?.overviewMap?.map(
             (indicatorValue) => ({
                 id: +indicatorValue.countryId,
                 value: indicatorValue.indicatorValue ?? 0,
@@ -325,7 +325,7 @@ function MapView(props: MapViewProps) {
         )
             .filter((item) => item.value > 0);
         return countryIndicator ?? [];
-    }, [pulledData?.overviewMap]);
+    }, [overviewMapData?.overviewMap]);
 
     const handleCountryClick = useCallback(
         (feature: mapboxgl.MapboxGeoJSONFeature) => {
@@ -335,6 +335,12 @@ function MapView(props: MapViewProps) {
         },
         [showMapModal],
     );
+
+    const highestValuesWithoutIndicator = overviewMapData?.descCountryEmergencyProfile;
+    const lowestValuesWithoutIndicator = overviewMapData?.ascCountryEmergencyProfile;
+
+    const recentHighValuesWithIndicator = mostRecentValues?.descMostRecentValues;
+    const recentLowValuesWithIndicator = mostRecentValues?.ascMostRecentValues;
 
     const progressBarRendererParams = useCallback(
         (_: string, data: AscendingCountryProfileType | DescendingCountryProfileType) => ({
@@ -369,7 +375,7 @@ function MapView(props: MapViewProps) {
 
     const handlePointHover = React.useCallback(
         (feature: mapboxgl.MapboxGeoJSONFeature, lngLat: mapboxgl.LngLat) => {
-            const indicatorData = pulledData?.overviewMap?.find(
+            const indicatorData = overviewMapData?.overviewMap?.find(
                 (country) => country.iso3 === feature?.properties?.iso3,
             );
 
@@ -380,7 +386,7 @@ function MapView(props: MapViewProps) {
             setSelectedCountryIndicator(indicatorData?.indicatorValue ?? 0);
             return true;
         },
-        [setMapClickProperties, pulledData],
+        [setMapClickProperties, overviewMapData],
     );
 
     const handleHoverClose = React.useCallback(
@@ -392,15 +398,14 @@ function MapView(props: MapViewProps) {
     );
 
     // FIXME: this will be used when we get the data for bounds
+    /*
     const selectedRegionBounds = useMemo(() => {
         const regionData = RegionBounds?.find(
             (region) => region.region === filterValues?.region,
         );
         return regionData?.bounding_box as [number, number, number, number];
     }, [filterValues]);
-
-    const recentHighValuesWithIndicator = mostRecentValues?.descMostRecentValues;
-    const recentLowValuesWithIndicator = mostRecentValues?.ascMostRecentValues;
+     */
 
     return (
         <div className={_cs(className, styles.mapViewWrapper)}>
@@ -501,7 +506,7 @@ function MapView(props: MapViewProps) {
                                 keySelector={recentProgressBarKeySelector}
                                 data={recentLowValuesWithIndicator}
                                 renderer={ProgressBar}
-                                rendererParams={progressBarRendererParams}
+                                rendererParams={recentProgressBarRendererParams}
                                 filtered={false}
                                 errored={false}
                                 pending={false}
@@ -520,7 +525,7 @@ function MapView(props: MapViewProps) {
                             <ListView
                                 className={styles.progressList}
                                 keySelector={progressBarKeySelector}
-                                data={pulledData?.descCountryEmergencyProfile}
+                                data={overviewMapData?.descCountryEmergencyProfile}
                                 renderer={ProgressBar}
                                 rendererParams={progressBarRendererParams}
                                 filtered={false}
@@ -538,7 +543,7 @@ function MapView(props: MapViewProps) {
                             <ListView
                                 className={styles.progressList}
                                 keySelector={progressBarKeySelector}
-                                data={pulledData?.ascCountryEmergencyProfile}
+                                data={overviewMapData?.ascCountryEmergencyProfile}
                                 renderer={ProgressBar}
                                 rendererParams={progressBarRendererParams}
                                 filtered={false}
