@@ -5,6 +5,7 @@ import {
     _cs,
     mapToList,
     isDefined,
+    isNotDefined,
 } from '@togglecorp/fujs';
 import {
     ContainerCard,
@@ -233,7 +234,7 @@ function CombinedIndicators(props: Props) {
     } = useQuery<CombinedIndicatorsDataQuery, CombinedIndicatorsDataQueryVariables>(
         COMBINED_INDICATORS_DATA,
         {
-            // skip: isNotDefined(filterValues?.country),
+            skip: isNotDefined(filterValues?.country),
             variables: {
                 iso3: filterValues?.country,
                 emergency: filterValues?.outbreak,
@@ -251,7 +252,7 @@ function CombinedIndicators(props: Props) {
     } = useQuery<CombinedIndicatorsRegionalQuery, CombinedIndicatorsRegionalQueryVariables>(
         COMBINED_INDICATORS_REGIONAL,
         {
-            // skip: isDefined(filterValues?.country) || isNotDefined(filterValues?.region),
+            skip: isDefined(filterValues?.country) || isNotDefined(filterValues?.region),
             variables: {
                 isCombinedIndicators: true,
                 emergency: filterValues?.outbreak,
@@ -269,7 +270,7 @@ function CombinedIndicators(props: Props) {
     } = useQuery<CombinedIndicatorsGlobalQuery, CombinedIndicatorsGlobalQueryVariables>(
         COMBINED_INDICATORS_GLOBAL,
         {
-            // skip: isDefined(filterValues?.country) || isDefined(filterValues?.region),
+            skip: isDefined(filterValues?.country) || isDefined(filterValues?.region),
             variables: {
                 isCombinedIndicators: true,
                 emergency: filterValues?.outbreak,

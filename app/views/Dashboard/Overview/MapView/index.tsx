@@ -24,10 +24,8 @@ import {
 } from '#utils/common';
 import { RegionBounds } from '#utils/regionBounds';
 import {
-    MapIndicatorValuesQuery,
-    MapIndicatorValuesQueryVariables,
-    HighestLowestValuesQuery,
-    HighestLowestValuesQueryVariables,
+    OverviewMapDataQuery,
+    OverviewMapDataQueryVariables,
 } from '#generated/types';
 
 import { TabTypes } from '#views/Dashboard';
@@ -43,32 +41,15 @@ const tooltipOptions: mapboxgl.PopupOptions = {
     offset: 8,
 };
 
-const MAP_INDICATOR = gql`
-    query MapIndicatorValues (
+const MAP_DATA = gql`
+    query OverviewMapData (
         $emergency: String,
         $indicatorId: String,
-        $region: String,
-        ) {
-        overviewMap(
-            indicatorId: $indicatorId,
-            emergency: $emergency,
-            region: $region,
-            ) {
-                iso3
-                indicatorValue
-                countryId
-        }
-    }
-`;
-
-const HIGHEST_LOWEST_CASES = gql`
-    query HighestLowestValues(
-        $contextIndicatorId: String,
         $region: String,
     ) {
         descCountryEmergencyProfile: countryEmergencyProfile(
             filters: {
-                contextIndicatorId: $contextIndicatorId,
+                contextIndicatorId: $indicatorId,
                 region: $region,
             }
             pagination: {
@@ -85,7 +66,7 @@ const HIGHEST_LOWEST_CASES = gql`
         }
         ascCountryEmergencyProfile: countryEmergencyProfile(
             filters: {
-                contextIndicatorId: $contextIndicatorId,
+                contextIndicatorId: $indicatorId,
                 region: $region,
             }
             pagination: {
@@ -100,11 +81,20 @@ const HIGHEST_LOWEST_CASES = gql`
             countryId
             contextIndicatorValue
         }
+        overviewMap(
+            indicatorId: $indicatorId,
+            emergency: $emergency,
+            region: $region,
+        ) {
+            iso3
+            indicatorValue
+            countryId
+        }
     }
 `;
 
-type AscendingCountryProfileType = NonNullable<HighestLowestValuesQuery['ascCountryEmergencyProfile']>[number];
-type DescendingCountryProfileType = NonNullable<HighestLowestValuesQuery['descCountryEmergencyProfile']>[number];
+type AscendingCountryProfileType = NonNullable<OverviewMapDataQuery['ascCountryEmergencyProfile']>[number];
+type DescendingCountryProfileType = NonNullable<OverviewMapDataQuery['descCountryEmergencyProfile']>[number];
 
 const progressBarKeySelector = (
     d: AscendingCountryProfileType | DescendingCountryProfileType,
@@ -233,7 +223,7 @@ function MapView(props: MapViewProps) {
         setCountryData,
     ] = useState<mapboxgl.MapboxGeoJSONFeature | undefined>();
 
-    const mapIndicatorVariablesWithID = useMemo((): MapIndicatorValuesQueryVariables => ({
+    const variables = useMemo((): OverviewMapDataQueryVariables => ({
         indicatorId: filterValues?.indicator,
         emergency: filterValues?.outbreak,
         region: filterValues?.region,
@@ -242,25 +232,11 @@ function MapView(props: MapViewProps) {
     ]);
 
     const {
-        data: mapIndicatorValues,
-    } = useQuery<MapIndicatorValuesQuery, MapIndicatorValuesQueryVariables>(
-        MAP_INDICATOR,
+        data: pulledData,
+    } = useQuery<OverviewMapDataQuery, OverviewMapDataQueryVariables>(
+        MAP_DATA,
         {
-            variables: mapIndicatorVariablesWithID,
-        },
-    );
-
-    const highestLowestVariables = useMemo(() => ({
-        contextIndicatorId: filterValues?.indicator,
-        region: filterValues?.region,
-    }), [filterValues]);
-
-    const {
-        data: highestLowestValues,
-    } = useQuery<HighestLowestValuesQuery, HighestLowestValuesQueryVariables>(
-        HIGHEST_LOWEST_CASES,
-        {
-            variables: highestLowestVariables,
+            variables,
         },
     );
 
@@ -273,7 +249,7 @@ function MapView(props: MapViewProps) {
     */
 
     const mapIndicatorState = useMemo(() => {
-        const countryIndicator = mapIndicatorValues?.overviewMap?.map(
+        const countryIndicator = pulledData?.overviewMap?.map(
             (indicatorValue) => ({
                 id: +indicatorValue.countryId,
                 value: indicatorValue.indicatorValue ?? 0,
@@ -282,7 +258,7 @@ function MapView(props: MapViewProps) {
         )
             .filter((item) => item.value > 0);
         return countryIndicator ?? [];
-    }, [mapIndicatorValues?.overviewMap]);
+    }, [pulledData?.overviewMap]);
 
     const handleCountryClick = useCallback(
         (feature: mapboxgl.MapboxGeoJSONFeature) => {
@@ -308,7 +284,7 @@ function MapView(props: MapViewProps) {
 
     const handlePointHover = React.useCallback(
         (feature: mapboxgl.MapboxGeoJSONFeature, lngLat: mapboxgl.LngLat) => {
-            const indicatorData = mapIndicatorValues?.overviewMap?.find(
+            const indicatorData = pulledData?.overviewMap?.find(
                 (country) => country.iso3 === feature?.properties?.iso3,
             );
 
@@ -319,7 +295,7 @@ function MapView(props: MapViewProps) {
             setSelectedCountryIndicator(indicatorData?.indicatorValue ?? 0);
             return true;
         },
-        [setMapClickProperties, mapIndicatorValues],
+        [setMapClickProperties, pulledData],
     );
 
     const handleHoverClose = React.useCallback(
@@ -414,7 +390,7 @@ function MapView(props: MapViewProps) {
                     <ListView
                         className={styles.progressList}
                         keySelector={progressBarKeySelector}
-                        data={highestLowestValues?.descCountryEmergencyProfile}
+                        data={pulledData?.descCountryEmergencyProfile}
                         renderer={ProgressBar}
                         rendererParams={progressBarRendererParams}
                         filtered={false}
@@ -432,7 +408,7 @@ function MapView(props: MapViewProps) {
                     <ListView
                         className={styles.progressList}
                         keySelector={progressBarKeySelector}
-                        data={highestLowestValues?.ascCountryEmergencyProfile}
+                        data={pulledData?.ascCountryEmergencyProfile}
                         renderer={ProgressBar}
                         rendererParams={progressBarRendererParams}
                         filtered={false}
