@@ -301,25 +301,34 @@ function Country(props: Props) {
         countryResponse?.countryProfile.newDeaths,
     ]);
 
-    // FIXME: Do not cast for decimal to percentage
     const uncertaintyChart: UncertainData[] | undefined = useMemo(() => (
         countryResponse?.dataCountryLevel.map((country) => {
-            const negativeRange = String(decimalToPercentage(
+            const negativeRange = decimalToPercentage(
                 (country?.indicatorValue && country?.errorMargin)
                 && country?.indicatorValue - country?.errorMargin,
-            ));
-            const positiveRange = String(decimalToPercentage(
+            );
+            const positiveRange = decimalToPercentage(
                 (country?.indicatorValue && country?.errorMargin)
                 && country?.indicatorValue + country?.errorMargin,
-            ));
+            );
+
+            if (isNotDefined(country.errorMargin)) {
+                return {
+                    emergency: country.emergency,
+                    indicatorValue: decimalToPercentage(country.indicatorValue),
+                    date: country.indicatorMonth,
+                    minimumValue: negativeRange,
+                    maximumValue: positiveRange,
+                };
+            }
 
             if (country.interpolated) {
                 return {
                     emergency: country.emergency,
                     date: country.indicatorMonth,
                     uncertainRange: [
-                        negativeRange ?? '',
-                        positiveRange ?? '',
+                        negativeRange ?? 0,
+                        positiveRange ?? 0,
                     ],
                     minimumValue: negativeRange,
                     maximumValue: positiveRange,
@@ -327,11 +336,11 @@ function Country(props: Props) {
             }
             return {
                 emergency: country.emergency,
-                indicatorValue: String(decimalToPercentage(country.indicatorValue)),
+                indicatorValue: decimalToPercentage(country.indicatorValue),
                 date: country.indicatorMonth,
                 uncertainRange: [
-                    negativeRange ?? '',
-                    positiveRange ?? '',
+                    negativeRange ?? 0,
+                    positiveRange ?? 0,
                 ],
                 minimumValue: negativeRange,
                 maximumValue: positiveRange,
@@ -573,9 +582,9 @@ function Country(props: Props) {
                                 className={styles.percentageCard}
                                 indicatorDescription={StatusUncertainty?.indicatorDescription}
                                 headingSize="extraSmall"
-                                statValue={Number(decimalToPercentage(
+                                statValue={decimalToPercentage(
                                     StatusUncertainty?.indicatorValue,
-                                ))}
+                                )}
                                 suffix="%"
                                 icon={null}
                             />

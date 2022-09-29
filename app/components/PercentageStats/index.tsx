@@ -46,7 +46,7 @@ function PercentageStats(props: Props) {
             heading={(
                 <>
                     {indicatorDescription}
-                    {(!indicatorDescription && !heading) && 'Total number of cases'}
+                    {(!indicatorDescription && !heading) && 'Total Percentage'}
                     {heading && (
                         <>
                             {`Total number of ${heading} cases`}
