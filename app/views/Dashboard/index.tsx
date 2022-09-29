@@ -176,7 +176,6 @@ function Dashboard() {
     } = useQuery<IndicatorsQuery, IndicatorsQueryVariables>(
         INDICATORS,
         {
-            skip: !indicatorVariables,
             variables: indicatorVariables,
         },
     );
