@@ -31,14 +31,8 @@ import {
     normalFormatter,
 } from '#utils/common';
 import {
-    OutbreakQuery,
-    OutbreakQueryVariables,
-    TotalOutbreakCasesQuery,
-    TotalOutbreakCasesQueryVariables,
-    RegionalBreakdownQuery,
-    RegionalBreakdownQueryVariables,
-    UncertaintyQuery,
-    UncertaintyQueryVariables,
+    AliasQuery,
+    AliasQueryVariables,
 } from '#generated/types';
 
 import { FilterType } from '../../Filters';
@@ -47,53 +41,48 @@ import styles from './styles.css';
 
 const normalizedTickFormatter = (d: number) => normalFormatter().format(d);
 
-// FIXME: Add suffix as required
-const customLabel = (val: number | string | undefined) => val;
+const customLabel = (val: number | string | undefined) => (
+    `${val}%`
+);
 
-const TOTAL_OUTBREAK_CASES = gql`
-    query TotalOutbreakCases(
-        $contextIndicatorId: String,
+const ALIAS = gql`
+    query Alias(
         $emergency: String,
         $indicatorId: String,
-        $indicatorMonth: Ordering
         $isGlobal: Boolean,
-        $isTwelveMonth: Boolean,
-        $limit: Int!,
-        $mostRecent: Boolean,
-        $offset: Int!,
         $region: String,
     ) {
-        epiDataGlobal(
+        totalCases: epiDataGlobal (
             filters: {
-                contextIndicatorId: $contextIndicatorId,
+                contextIndicatorId: "total_cases",
                 emergency: $emergency,
                 isGlobal: $isGlobal,
-                mostRecent: $mostRecent,
+                mostRecent: true
                 region: $region
             }
             pagination: {
-                limit: $limit,
-                offset: $offset,
-            },
+                limit: 1,
+                offset: 0
+            }
             order: {
-                contextDate: $indicatorMonth,
+                contextDate: DESC
             }
         ) {
             contextIndicatorValue
             emergency
         }
-        globalLevel(
+        totalCasesGlobal: globalLevel (
             filters: {
                 emergency: $emergency,
                 indicatorId: $indicatorId,
-                isTwelveMonth: $isTwelveMonth,
-            },
+                isTwelveMonth: true
+            }
             pagination: {
-                limit: $limit,
-                offset: $offset,
-            },
+                limit: 1,
+                offset: 0
+            }
             order: {
-                indicatorMonth: $indicatorMonth,
+                indicatorMonth: DESC
             }
         ) {
             id
@@ -103,78 +92,55 @@ const TOTAL_OUTBREAK_CASES = gql`
             indicatorMonth
             emergency
         }
-    }
-`;
-
-const OUTBREAK = gql`
-   query Outbreak(
-        $contextDate: Ordering,
-        $contextIndicatorId: String,
-        $emergency: String,
-        $isGlobal: Boolean,
-        $isTwelveMonth: Boolean,
-        $limit: Int!,
-        $offset: Int!,
-        $region: String,
-    ) {
-        epiDataGlobal(
-        filters: {
-            isTwelveMonth: $isTwelveMonth,
-            isGlobal: $isGlobal,
-            emergency: $emergency,
-            contextIndicatorId: $contextIndicatorId,
-            region: $region,
-        }
-        order: {
-            contextDate: $contextDate,
-        }
-        pagination: {
-            limit: $limit,
-            offset: $offset,
-        }
+        outbreak: epiDataGlobal (
+            filters: {
+                isTwelveMonth: true,
+                isGlobal: $isGlobal,
+                emergency: $emergency,
+                contextIndicatorId: "total_cases",
+                region: $region,
+            }
+            order: {
+                contextDate: DESC,
+            }
+            pagination: {
+                limit:12,
+                offset:0,
+            }
         ) {
             id
             contextIndicatorValue
             contextDate
             emergency
         }
-    }
-`;
-
-const REGIONAL_BREAKDOWN = gql`
-    query RegionalBreakdown(
-        $isTwelveMonth: Boolean,
-        $emergency: String,
-        $isGlobal: Boolean,
-        $contextIndicatorId: String,
-        $region: String,
-        $mostRecent: Boolean,
-        $indicatorId: String,
-        $isRegionalChart: Boolean,
-    ) {
-        epiDataGlobal(
-        filters: {
-            isTwelveMonth: $isTwelveMonth,
-            isGlobal: $isGlobal,
-            emergency: $emergency,
-            contextIndicatorId: $contextIndicatorId,
-            region: $region,
-            mostRecent: $mostRecent,
-        }
+        regionalBreakdownGlobal: epiDataGlobal (
+            filters: {
+                isTwelveMonth: true
+                emergency: $emergency,
+                contextIndicatorId: "total_cases"
+                mostRecent: true
+                isRegionalChart: true
+            }
+            order: {
+                contextDate: DESC
+            }
         ) {
             id
             contextIndicatorValue
-            mostRecent
             emergency
             contextDate
             region
+            format
         }
-        regionLevel(
-        filters: {
-            emergency: $emergency,
-            indicatorId: $indicatorId,
-            isRegionalChart: $isRegionalChart,
-        }
+        regionalBreakdownRegion: regionLevel (
+            filters: {
+                emergency: $emergency,
+                indicatorId: $indicatorId,
+                isRegionalChart: true,
+            }
+            order: {
+                indicatorMonth: DESC
+            }
         ) {
             id
             region
@@ -182,55 +148,44 @@ const REGIONAL_BREAKDOWN = gql`
             indicatorMonth
             indicatorId
             indicatorName
+            format
         }
-    }
-`;
-
-const UNCERTAINTY = gql`
-    query Uncertainty(
-        $isTwelveMonth: Boolean,
-        $indicatorId: String,
-        $category: String,
-        $indicatorMonth: Ordering,
-        $region: String,
-        $offset: Int!,
-        $limit: Int!,
-    ) {
-        globalLevel(
+        uncertaintyGlobal: globalLevel (
             filters: {
-                isTwelveMonth: $isTwelveMonth,
+                isTwelveMonth: true,
                 indicatorId: $indicatorId,
-                category: $category,
-            },
-            order: {
-                indicatorMonth: $indicatorMonth,
-            },
-            pagination: {
-                limit: $limit,
-                offset: $offset,
-            },
-            ) {
-                id
-                errorMargin
-                emergency
-                indicatorMonth
-                indicatorId
-                indicatorName
-                indicatorValueGlobal
+                category: "Global",
             }
-        regionLevel(
+            order: {
+                indicatorMonth: DESC
+            }
+            pagination: {
+                limit: 12,
+                offset: 0
+            }
+        ) {
+            id
+            errorMargin
+            emergency
+            indicatorMonth
+            indicatorId
+            indicatorName
+            indicatorValueGlobal
+        }
+        uncertaintyRegion: regionLevel (
             filters: {
                 indicatorId: $indicatorId,
-                isTwelveMonth: $isTwelveMonth,
+                isTwelveMonth: true,
                 region: $region,
-            },
+                category: "Global"
+            }
             order: {
-                indicatorMonth: $indicatorMonth,
-            },
+                indicatorMonth: DESC
+            }
             pagination: {
-                limit: $limit,
-                offset: $offset,
-            },
+                limit: 12,
+                offset: 0
+            }
         ) {
             id
             errorMargin
@@ -260,91 +215,28 @@ function PercentageCardGroup(props: Props) {
         selectedOutbreakName,
     } = props;
 
-    const totalOutbreakCasesVariables = useMemo((): TotalOutbreakCasesQueryVariables => ({
-        contextIndicatorId: 'total_cases',
-        mostRecent: true,
+    const aliasVariables = useMemo((): AliasQueryVariables => ({
+        emergency: filterValues?.outbreak,
+        indicatorId: filterValues?.indicator,
+        region: filterValues?.region,
         isGlobal: !filterValues?.region,
-        emergency: filterValues?.outbreak,
-        region: filterValues?.region,
-        indicatorMonth: 'DESC',
-        limit: 1,
-        offset: 0,
-        isTwelveMonth: true,
-        indicatorId: filterValues?.indicator,
     }), [
-        filterValues?.outbreak,
-        filterValues?.region,
         filterValues?.indicator,
-    ]);
-
-    const {
-        data: totalOutbreakCasesResponse,
-    } = useQuery<TotalOutbreakCasesQuery, TotalOutbreakCasesQueryVariables>(
-        TOTAL_OUTBREAK_CASES,
-        {
-            variables: totalOutbreakCasesVariables,
-        },
-    );
-    const outbreakVariables = useMemo((): OutbreakQueryVariables => ({
-        contextIndicatorId: 'total_cases',
-        isTwelveMonth: true,
-        isGlobal: !filterValues?.region,
-        emergency: filterValues?.outbreak,
-        region: filterValues?.region,
-        limit: 12,
-        offset: 0,
-        contextDate: 'DESC',
-    }), [
         filterValues?.outbreak,
         filterValues?.region,
     ]);
 
     const {
-        data: outbreakResponse,
-    } = useQuery<OutbreakQuery, OutbreakQueryVariables>(
-        OUTBREAK,
+        data: aliasResponse,
+    } = useQuery<AliasQuery, AliasQueryVariables>(
+        ALIAS,
         {
-            variables: outbreakVariables,
+            variables: aliasVariables,
         },
     );
 
-    const regionalBreakdownVariables = useMemo((): RegionalBreakdownQueryVariables => ({
-        contextIndicatorId: 'total_cases',
-        mostRecent: true,
-        emergency: filterValues?.outbreak,
-        region: filterValues?.region,
-        isRegionalChart: true,
-        indicatorId: filterValues?.indicator,
-    }), [
-        filterValues?.outbreak,
-        filterValues?.region,
-        filterValues?.indicator,
-    ]);
-
-    const uncertaintyVariables = useMemo((): UncertaintyQueryVariables => ({
-        isTwelveMonth: true,
-        indicatorId: filterValues?.indicator,
-        region: filterValues?.region,
-        limit: 12,
-        offset: 0,
-        category: 'Global',
-        indicatorMonth: 'DESC',
-    }), [
-        filterValues?.indicator,
-        filterValues?.region,
-    ]);
-
-    const {
-        data: regionalBreakdownResponse,
-    } = useQuery<RegionalBreakdownQuery, RegionalBreakdownQueryVariables>(
-        REGIONAL_BREAKDOWN,
-        {
-            variables: regionalBreakdownVariables,
-        },
-    );
-
-    const regionalBreakdown = useMemo(() => (
-        regionalBreakdownResponse?.regionLevel.map((region) => (
+    const regionalBreakdownRegion = useMemo(() => (
+        aliasResponse?.regionalBreakdownRegion.map((region) => (
             {
                 id: region.id,
                 contextIndicatorValue: decimalToPercentage(region.indicatorValueRegional),
@@ -352,41 +244,32 @@ function PercentageCardGroup(props: Props) {
                 region: region.region,
             }
         ))
-    ), [regionalBreakdownResponse?.regionLevel]);
+    ), [aliasResponse?.regionalBreakdownRegion]);
 
-    const regionalBreakdownEpi = useMemo(() => (
-        regionalBreakdownResponse?.epiDataGlobal.map((region) => (
+    const regionalBreakdownGlobal = useMemo(() => (
+        aliasResponse?.regionalBreakdownGlobal.map((region) => (
             {
                 ...region,
                 normalizedValue: normalFormatter().format(region.contextIndicatorValue ?? 0),
             }
         )).filter((item) => item.region !== 'Global')
-    ), [regionalBreakdownResponse?.epiDataGlobal]);
-
-    const {
-        data: uncertaintyResponse,
-    } = useQuery<UncertaintyQuery, UncertaintyQueryVariables>(
-        UNCERTAINTY,
-        {
-            variables: uncertaintyVariables,
-        },
-    );
+    ), [aliasResponse?.regionalBreakdownGlobal]);
 
     const uncertaintyGlobalChart = useMemo(() => (
-        uncertaintyResponse?.globalLevel.map((global) => {
-            const negativeRange = String(decimalToPercentage(
+        aliasResponse?.uncertaintyGlobal.map((global) => {
+            const negativeRange = decimalToPercentage(
                 (global.indicatorValueGlobal && global.errorMargin)
                 && global.indicatorValueGlobal - global.errorMargin,
-            ));
-            const positiveRange = String(decimalToPercentage(
+            );
+            const positiveRange = decimalToPercentage(
                 (global.indicatorValueGlobal && global.errorMargin)
                 && global.indicatorValueGlobal + global.errorMargin,
-            ));
+            );
 
             if (isNotDefined(global.errorMargin)) {
                 return {
                     emergency: global.emergency,
-                    indicatorValue: String(decimalToPercentage(global.indicatorValueGlobal)),
+                    indicatorValue: decimalToPercentage(global.indicatorValueGlobal),
                     date: global.indicatorMonth,
                     minimumValue: negativeRange,
                     maximumValue: positiveRange,
@@ -395,33 +278,33 @@ function PercentageCardGroup(props: Props) {
 
             return {
                 emergency: global.emergency,
-                indicatorValue: String(decimalToPercentage(global.indicatorValueGlobal)),
+                indicatorValue: decimalToPercentage(global.indicatorValueGlobal),
                 date: global.indicatorMonth,
                 uncertainRange: [
-                    negativeRange ?? '',
-                    positiveRange ?? '',
+                    negativeRange ?? 0,
+                    positiveRange ?? 0,
                 ],
                 minimumValue: negativeRange,
                 maximumValue: positiveRange,
             };
         }).sort((a, b) => compareDate(a.date, b.date))
-    ), [uncertaintyResponse?.globalLevel]);
+    ), [aliasResponse?.uncertaintyGlobal]);
 
     const uncertaintyRegionChart = useMemo(() => (
-        uncertaintyResponse?.regionLevel.map((region) => {
-            const negativeRange = String(decimalToPercentage(
+        aliasResponse?.uncertaintyRegion.map((region) => {
+            const negativeRange = decimalToPercentage(
                 (region.indicatorValueRegional && region.errorMargin)
                 && region.indicatorValueRegional - region.errorMargin,
-            ));
-            const positiveRange = String(decimalToPercentage(
+            );
+            const positiveRange = decimalToPercentage(
                 (region.indicatorValueRegional && region.errorMargin)
                 && region.indicatorValueRegional + region.errorMargin,
-            ));
+            );
 
             if (isNotDefined(region.errorMargin)) {
                 return {
                     emergency: region.emergency,
-                    indicatorValue: String(decimalToPercentage(region.indicatorValueRegional)),
+                    indicatorValue: decimalToPercentage(region.indicatorValueRegional),
                     date: region.indicatorMonth,
                     minimumValue: negativeRange,
                     maximumValue: positiveRange,
@@ -430,20 +313,20 @@ function PercentageCardGroup(props: Props) {
 
             return {
                 emergency: region.emergency,
-                indicatorValue: String(decimalToPercentage(region.indicatorValueRegional)),
+                indicatorValue: decimalToPercentage(region.indicatorValueRegional),
                 date: region.indicatorMonth,
                 uncertainRange: [
-                    negativeRange ?? '',
-                    positiveRange ?? '',
+                    negativeRange ?? 0,
+                    positiveRange ?? 0,
                 ],
                 minimumValue: negativeRange,
                 maximumValue: positiveRange,
             };
         }).sort((a, b) => compareDate(a.date, b.date))
-    ), [uncertaintyResponse?.regionLevel]);
+    ), [aliasResponse?.uncertaintyRegion]);
 
     const outbreakLineChart = useMemo(() => (
-        outbreakResponse?.epiDataGlobal.map((outbreak) => (
+        aliasResponse?.outbreak.map((outbreak) => (
             {
                 id: outbreak.id,
                 emergency: outbreak.emergency,
@@ -451,32 +334,31 @@ function PercentageCardGroup(props: Props) {
                 [outbreak.emergency]: outbreak.contextIndicatorValue,
             }
         ))
-    ), [outbreakResponse?.epiDataGlobal]);
+    ), [aliasResponse?.outbreak]);
 
     const totalCase = useMemo(() => (
-        totalOutbreakCasesResponse?.epiDataGlobal
+        aliasResponse?.totalCases
             .find(
                 (emergency) => emergency.emergency === filterValues?.outbreak,
             )
     ), [
-        totalOutbreakCasesResponse?.epiDataGlobal,
+        aliasResponse?.totalCases,
         filterValues?.outbreak,
     ]);
 
     const globalTotalCase = useMemo(() => (
-        totalOutbreakCasesResponse?.globalLevel
+        aliasResponse?.totalCasesGlobal
             .find(
                 (global) => global.indicatorId === filterValues?.indicator,
             )
     ), [
-        totalOutbreakCasesResponse?.globalLevel,
+        aliasResponse?.totalCasesGlobal,
         filterValues?.indicator,
     ]);
 
-    const value = useMemo(() => {
+    const totalCaseValue = useMemo(() => {
         if (filterValues?.indicator) {
-            // FIXME: Make precentageStat component more comfortable with string
-            return Number(decimalToPercentage(globalTotalCase?.indicatorValueGlobal));
+            return decimalToPercentage(globalTotalCase?.indicatorValueGlobal);
         }
         return totalCase?.contextIndicatorValue;
     }, [
@@ -489,15 +371,15 @@ function PercentageCardGroup(props: Props) {
         <div className={_cs(className, styles.cardInfo)}>
             <PercentageStats
                 className={styles.globalStatCard}
-                heading={totalCase?.emergency}
+                heading={!filterValues?.indicator && totalCase?.emergency}
                 headingSize="extraSmall"
                 suffix={filterValues?.indicator && '%'}
-                headerDescription={(
+                headerDescription={!filterValues?.indicator && (
                     <p>
                         All Outbreak numbers:
                     </p>
                 )}
-                statValue={value}
+                statValue={totalCaseValue}
             />
             {uncertaintyChartActive
                 ? (
@@ -571,56 +453,93 @@ function PercentageCardGroup(props: Props) {
                     : `Number of cases for ${selectedOutbreakName ?? filterValues?.outbreak}`}
             >
                 <ResponsiveContainer className={styles.responsiveContainer}>
-                    {/* FIXME: Separate this out into 2 barcharts */}
-                    <BarChart
-                        data={
-                            (filterValues?.region || filterValues?.indicator)
-                                ? regionalBreakdown
-                                : regionalBreakdownEpi
-                        }
-                        barSize={18}
-                    >
-                        <Tooltip
-                            allowEscapeViewBox={{
-                                x: true,
-                                y: true,
-                            }}
-                            cursor={false}
-                        />
-                        <XAxis
-                            dataKey="region"
-                            tickLine={false}
-                            fontSize={12}
-                        />
-                        <YAxis
-                            padding={{ bottom: 0 }}
-                            hide
-                        />
-                        <Bar
-                            dataKey="contextIndicatorValue"
-                            fill="#8DD2B1"
-                            radius={[10, 10, 0, 0]}
-                        >
-                            {regionalBreakdownResponse?.epiDataGlobal?.map((entry) => (
-                                <Cell
-                                    key={`Cell -${entry.id}`}
+                    {(filterValues?.indicator)
+                        ? (
+                            <BarChart
+                                data={regionalBreakdownRegion}
+                                barSize={18}
+                            >
+                                <Tooltip
+                                    allowEscapeViewBox={{
+                                        x: true,
+                                        y: true,
+                                    }}
+                                    cursor={false}
                                 />
-                            ))}
-                            <LabelList
-                                dataKey={
-                                    (filterValues?.region || filterValues?.indicator)
-                                        ? 'contextIndicatorValue'
-                                        : 'normalizedValue'
-                                }
-                                angle={270}
-                                offset={-2.8}
-                                position="insideBottomLeft"
-                                fill="#8DD2B1"
-                                fontSize={14}
-                                formatter={customLabel}
-                            />
-                        </Bar>
-                    </BarChart>
+                                <XAxis
+                                    dataKey="region"
+                                    tickLine={false}
+                                    fontSize={12}
+                                />
+                                <YAxis
+                                    padding={{ bottom: 0 }}
+                                    hide
+                                />
+                                <Bar
+                                    dataKey="contextIndicatorValue"
+                                    fill="#8DD2B1"
+                                    radius={[10, 10, 0, 0]}
+                                >
+                                    {regionalBreakdownRegion?.map((entry) => (
+                                        <Cell
+                                            key={`Cell -${entry.id}`}
+                                        />
+                                    ))}
+                                    <LabelList
+                                        dataKey="contextIndicatorValue"
+                                        position="insideBottomLeft"
+                                        fill="#8DD2B1"
+                                        fontSize={16}
+                                        angle={270}
+                                        dx={-15}
+                                        dy={-3}
+                                        formatter={customLabel}
+                                    />
+                                </Bar>
+                            </BarChart>
+                        ) : (
+                            <BarChart
+                                data={regionalBreakdownGlobal}
+                                barSize={18}
+                            >
+                                <Tooltip
+                                    allowEscapeViewBox={{
+                                        x: true,
+                                        y: true,
+                                    }}
+                                    cursor={false}
+                                />
+                                <XAxis
+                                    dataKey="region"
+                                    tickLine={false}
+                                    fontSize={12}
+                                />
+                                <YAxis
+                                    padding={{ bottom: 0 }}
+                                    hide
+                                />
+                                <Bar
+                                    dataKey="contextIndicatorValue"
+                                    fill="#8DD2B1"
+                                    radius={[10, 10, 0, 0]}
+                                >
+                                    {regionalBreakdownGlobal?.map((entry) => (
+                                        <Cell
+                                            key={`Cell -${entry.id}`}
+                                        />
+                                    ))}
+                                    <LabelList
+                                        dataKey="normalizedValue"
+                                        position="insideBottomLeft"
+                                        fill="#8DD2B1"
+                                        fontSize={16}
+                                        angle={270}
+                                        dx={-15}
+                                        dy={-3}
+                                    />
+                                </Bar>
+                            </BarChart>
+                        )}
                 </ResponsiveContainer>
             </ContainerCard>
         </div>

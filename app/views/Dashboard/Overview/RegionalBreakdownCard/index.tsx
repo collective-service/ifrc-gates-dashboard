@@ -22,10 +22,8 @@ import {
 import { useQuery, gql } from '@apollo/client';
 
 import {
-    RegionalQuery,
-    RegionalQueryVariables,
-    TotalQuery,
-    TotalQueryVariables,
+    RegionalAndTotalQuery,
+    RegionalAndTotalQueryVariables,
 } from '#generated/types';
 
 import {
@@ -48,7 +46,7 @@ export interface RegionalLabelRendererProps {
     fill: string;
 }
 
-type EpiDataGlobal = NonNullable<RegionalQuery>['epiDataGlobal'][number];
+type EpiDataGlobal = NonNullable<RegionalAndTotalQuery>['total'][number];
 
 interface CustomProps {
     active?: false;
@@ -71,18 +69,18 @@ function CustomTooltip(customProps: CustomProps) {
     return null;
 }
 
-const REGIONAL_BREAKDOWN = gql`
-    query Regional(
-        $mostRecent: Boolean,
+const REGIONAL_BREAKDOWN_TOTAL = gql`
+    query RegionalAndTotal(
+        $region: String,
         $isGlobal: Boolean,
-        $contextIndicatorId: String,
     ) {
-        epiDataGlobal(
-            filters: {
-                mostRecent: $mostRecent,
-                isGlobal: $isGlobal,
-                contextIndicatorId: $contextIndicatorId,
-            }
+        total: epiDataGlobal(
+        filters: {
+            mostRecent: true,
+            region: $region,
+            contextIndicatorId: "total_cases",
+            isGlobal: $isGlobal,
+        }
         ) {
             region
             contextIndicatorValue
@@ -90,23 +88,12 @@ const REGIONAL_BREAKDOWN = gql`
             emergency
             id
         }
-    }
-`;
-
-const TOTAL_CASES = gql`
-    query Total(
-        $mostRecent: Boolean,
-        $region: String,
-        $isGlobal: Boolean,
-        $contextIndicatorId: String,
-    ) {
-        epiDataGlobal(
-            filters: {
-                mostRecent: $mostRecent,
-                region: $region,
-                contextIndicatorId: $contextIndicatorId,
-                isGlobal: $isGlobal
-            }
+        regional: epiDataGlobal(
+        filters: {
+            mostRecent: true,
+            isGlobal: false,
+            contextIndicatorId: "total_cases"
+        }
         ) {
             region
             contextIndicatorValue
@@ -153,40 +140,23 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
         filterValues,
     } = props;
 
-    const regionalVariables = useMemo((): RegionalQueryVariables => ({
-        mostRecent: true,
-        isGlobal: false,
-        contextIndicatorId: 'total_cases',
-    }), []);
-
-    const {
-        data: regionalResponse,
-    } = useQuery<RegionalQuery, RegionalQueryVariables>(
-        REGIONAL_BREAKDOWN,
-        {
-            variables: regionalVariables,
-        },
-    );
-
-    const TotalCasesVariable = useMemo((): TotalQueryVariables => ({
-        mostRecent: true,
-        contextIndicatorId: 'total_cases',
+    const regionalTotalVariable = useMemo((): RegionalAndTotalQueryVariables => ({
         region: filterValues?.region,
         isGlobal: !filterValues?.region,
     }), [filterValues?.region]);
 
     const {
-        data: totalCasesResponse,
-    } = useQuery<TotalQuery, TotalQueryVariables>(
-        TOTAL_CASES,
+        data: regionalTotalResponse,
+    } = useQuery<RegionalAndTotalQuery, RegionalAndTotalQueryVariables>(
+        REGIONAL_BREAKDOWN_TOTAL,
         {
-            variables: TotalCasesVariable,
+            variables: regionalTotalVariable,
         },
     );
 
     const regionalPieChart = useMemo(() => {
         const groupedMap = listToGroupList(
-            regionalResponse?.epiDataGlobal,
+            regionalTotalResponse?.regional,
             (region) => region.region,
             (item) => ({
                 emergency: item.emergency,
@@ -202,17 +172,17 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
                 regionalData: item,
             }),
         );
-    }, [regionalResponse?.epiDataGlobal]);
+    }, [regionalTotalResponse?.regional]);
 
     const regionalLabel = unique(
-        regionalResponse?.epiDataGlobal ?? [],
+        regionalTotalResponse?.regional ?? [],
         (item: EpiDataGlobal) => item.emergency,
     ).map((entry) => ({
         emergency: entry.emergency,
         fill: entry.emergency === 'Monkeypox' ? '#ACA28E' : '#FFDD98',
     }));
 
-    const totalBarChart = totalCasesResponse?.epiDataGlobal.map((total) => (
+    const totalBarChart = regionalTotalResponse?.total.map((total) => (
         {
             ...total,
             indicatorValue: Number(normalCommaFormatter().format(total.contextIndicatorValue ?? 0)),
