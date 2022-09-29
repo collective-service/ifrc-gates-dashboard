@@ -391,6 +391,7 @@ function MapView(props: MapViewProps) {
         [setMapClickProperties],
     );
 
+    // FIXME: this will be used when we get the data for bounds
     const selectedRegionBounds = useMemo(() => {
         const regionData = RegionBounds?.find(
             (region) => region.region === filterValues?.region,
@@ -418,7 +419,7 @@ function MapView(props: MapViewProps) {
                 >
                     <MapContainer className={styles.mapContainer} />
                     <MapBounds
-                        bounds={selectedRegionBounds ?? undefined}
+                        bounds={undefined}
                         padding={50}
                     />
                     <MapSource
