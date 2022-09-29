@@ -12,11 +12,10 @@ import {
 } from '@the-deep/deep-ui';
 
 import {
-    OutbreaksQuery,
     IndicatorsQuery,
     IndicatorsForCountryQuery,
-    CountryListQuery,
     SubvariablesQuery,
+    CountriesAndOutbreaksQuery,
 } from '#generated/types';
 import { getRegionForCountry } from '#utils/common';
 
@@ -45,7 +44,7 @@ function doesObjectHaveAnyEmptyValue<T extends Record<string, unknown>>(obj: T) 
     return valueList.some((val) => val === null);
 }
 
-type Country = NonNullable<CountryListQuery['countries']>[number];
+type Country = NonNullable<CountriesAndOutbreaksQuery['countries']>[number];
 const countriesKeySelector = (d: Country) => d.iso3;
 const countriesLabelSelector = (d: Country) => d.countryName ?? '';
 
@@ -78,9 +77,9 @@ interface Props {
     activeTab?: TabTypes;
     advancedFilterValues: AdvancedOptionType | undefined;
     setAdvancedFilterValues: React.Dispatch<React.SetStateAction<AdvancedOptionType | undefined>>;
-    countries?: NonNullable<CountryListQuery['countries']>;
+    countries?: NonNullable<CountriesAndOutbreaksQuery['countries']>;
     countriesLoading?: boolean;
-    emergencies: OutbreaksQuery | undefined;
+    emergencies: NonNullable<CountriesAndOutbreaksQuery['outBreaks']>| undefined;
     indicatorList: IndicatorsForCountryQuery | undefined;
     globalIndicatorList: IndicatorsQuery | undefined;
     subvariableList: SubvariablesQuery | undefined;
@@ -183,7 +182,7 @@ function Filters(props: Props) {
     const countriesWithNull = countriesFromProps ?? [];
     const countries = countriesWithNull.filter((country) => !doesObjectHaveAnyEmptyValue(country));
 
-    const outbreaks = emergencies?.outBreaks?.map((e) => ({
+    const outbreaks = emergencies?.map((e) => ({
         key: e.outbreak,
         label: e.outbreak,
     }));
