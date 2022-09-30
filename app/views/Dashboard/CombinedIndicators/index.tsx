@@ -62,6 +62,7 @@ const COMBINED_INDICATORS_DATA = gql`
             topicDescription
             subvariable
             indicatorId
+            format
         }
     }
 `;
@@ -100,6 +101,7 @@ const COMBINED_INDICATORS_REGIONAL = gql`
             topic
             topicDescription
             subvariable
+            format
         }
     }
 `;
@@ -136,6 +138,7 @@ const COMBINED_INDICATORS_GLOBAL = gql`
             topic
             topicDescription
             subvariable
+            format
         }
     }
 `;
