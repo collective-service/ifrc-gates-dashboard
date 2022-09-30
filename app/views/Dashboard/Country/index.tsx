@@ -350,8 +350,6 @@ function Country(props: Props) {
         return cases;
     }, [
         countryResponse?.contextualData,
-        countryResponse?.countryProfile.newCasesPerMillion,
-        countryResponse?.countryProfile.newDeaths,
         countryResponse?.newCasesPerMillion,
         countryResponse?.newDeaths,
     ]);
