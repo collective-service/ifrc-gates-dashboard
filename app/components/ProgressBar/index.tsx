@@ -56,9 +56,9 @@ function ProgressBar(props: Props) {
             return undefined;
         }
         if (isPercentageValue) {
-            return decimalToPercentage(value);
+            return decimalToPercentage(value) ?? 0;
         }
-        return (Math.round((value / totalValue) * 10000) / 100);
+        return (Math.round((value / totalValue) * 10000) / 100) ?? 0;
     }, [
         totalValue,
         value,

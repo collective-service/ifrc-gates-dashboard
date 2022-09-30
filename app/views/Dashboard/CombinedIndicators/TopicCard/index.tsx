@@ -80,6 +80,7 @@ function TopicCard(props: Props) {
         color: '#98a6b5',
         region: data.region ?? '',
         showRegionalValue,
+        isPercentageValue: data.format === 'percent',
         onTitleClick: handleIndicatorClick,
     }), [
         showRegionalValue,

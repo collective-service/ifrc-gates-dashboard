@@ -124,6 +124,7 @@ const MOST_RECENT_CASES = gql`
             iso3
             indicatorValue
             populationSize
+            format
         }
         ascMostRecentValues: dataCountryLevelMostRecent(
             filters: {
@@ -144,6 +145,7 @@ const MOST_RECENT_CASES = gql`
             iso3
             indicatorValue
             populationSize
+            format
         }
     }
 `;
@@ -368,7 +370,7 @@ function MapView(props: MapViewProps) {
             value: data.indicatorValue,
             totalValue: 1,
             color: '#98A6B5',
-            isPercentageValue: true,
+            isPercentageValue: data.format === 'percent',
         }), [],
     );
 
