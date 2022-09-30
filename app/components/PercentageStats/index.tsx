@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
     ContainerCard,
     NumberOutput,
@@ -39,6 +39,16 @@ function PercentageStats(props: Props) {
         newCasesPerMillion,
     } = props;
 
+    const formattedHeading = useMemo(() => (
+        <div className={styles.outbreakCard}>
+            Total number of
+            <span className={styles.outbreakCardTitle}>
+                {` ${heading} `}
+            </span>
+            cases
+        </div>
+    ), [heading]);
+
     return (
         <ContainerCard
             className={_cs(className, styles.percentageStatsCard)}
@@ -49,7 +59,7 @@ function PercentageStats(props: Props) {
                     {(!indicatorDescription && !heading) && 'Total Percentage'}
                     {heading && (
                         <>
-                            {`Total number of ${heading} cases`}
+                            {formattedHeading}
                             <Tooltip>
                                 <div>
                                     {`Deaths: ${newDeaths}`}

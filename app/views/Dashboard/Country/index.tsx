@@ -847,7 +847,7 @@ function Country(props: Props) {
                                 <>
                                     {(countryResponse?.countryProfile.medicalStaff)?.toFixed(2)}
                                     {isDefined(
-                                        countryResponse?.countryProfile.medicalStaffRegion
+                                        countryResponse?.countryProfile.medicalStaffRegion,
                                     ) && (
                                         <TextOutput
                                             labelContainerClassName={styles.regionalText}
