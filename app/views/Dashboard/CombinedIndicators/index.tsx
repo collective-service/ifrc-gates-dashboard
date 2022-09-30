@@ -45,6 +45,7 @@ const COMBINED_INDICATORS_DATA = gql`
                 thematic: $thematic,
                 topic: $topic,
                 keywords: $keywords,
+                category: "Global",
             }
         ) {
             emergency
@@ -83,7 +84,8 @@ const COMBINED_INDICATORS_REGIONAL = gql`
                 type: $type,
                 thematic: $thematic,
                 topic: $topic,
-                isCombinedIndicators: $isCombinedIndicators
+                isCombinedIndicators: $isCombinedIndicators,
+                category: "Global"
             }
         ) {
             emergency
@@ -118,7 +120,8 @@ const COMBINED_INDICATORS_GLOBAL = gql`
                 type: $type,
                 thematic: $thematic,
                 topic: $topic,
-                isCombinedIndicators: $isCombinedIndicators
+                isCombinedIndicators: $isCombinedIndicators,
+                category: "Global",
             }
         ) {
             emergency

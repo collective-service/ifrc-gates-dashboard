@@ -16,11 +16,12 @@ import { getShortMonth } from '#utils/common';
 import styles from './styles.css';
 
 export interface UncertainData {
-    indicatorValue?: string | null;
+    emergency?: string;
+    indicatorValue?: number | null;
     date: string;
-    uncertainRange?: string[];
-    minimumValue?: string,
-    maximumValue?: string,
+    uncertainRange?: number[];
+    minimumValue?: number,
+    maximumValue?: number,
 }
 const dateTickFormatter = (d: string) => getShortMonth(d);
 interface Props {

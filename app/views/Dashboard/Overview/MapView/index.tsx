@@ -65,6 +65,7 @@ const MAP_DATA = gql`
             countryName
             countryId
             contextIndicatorValue
+            populationSize
         }
         ascCountryEmergencyProfile: countryEmergencyProfile(
             filters: {
@@ -82,6 +83,7 @@ const MAP_DATA = gql`
             countryName
             countryId
             contextIndicatorValue
+            populationSize
         }
         overviewMap(
             indicatorId: $indicatorId,
@@ -105,6 +107,7 @@ const MOST_RECENT_CASES = gql`
     ) {
         descMostRecentValues: dataCountryLevelMostRecent(
             filters: {
+                category: "Global"
                 emergency: $emergency,
                 region: $region,
             }
@@ -124,6 +127,7 @@ const MOST_RECENT_CASES = gql`
         }
         ascMostRecentValues: dataCountryLevelMostRecent(
             filters: {
+                category: "Global"
                 emergency: $emergency,
                 region: $region,
             }
@@ -336,9 +340,6 @@ function MapView(props: MapViewProps) {
         [showMapModal],
     );
 
-    const highestValuesWithoutIndicator = overviewMapData?.descCountryEmergencyProfile;
-    const lowestValuesWithoutIndicator = overviewMapData?.ascCountryEmergencyProfile;
-
     const recentHighValuesWithIndicator = mostRecentValues?.descMostRecentValues;
     const recentLowValuesWithIndicator = mostRecentValues?.ascMostRecentValues;
 
@@ -350,10 +351,9 @@ function MapView(props: MapViewProps) {
             title: data.countryName ?? undefined,
             valueTitle: data.countryName ?? undefined,
             value: data.contextIndicatorValue,
-            // FIXME: Use country population instead of highest indicator value
-            totalValue: 100000000,
+            totalValue: data.populationSize,
             color: '#98A6B5',
-            isNumberValue: false,
+            isPercentageValue: false,
         }), [],
     );
 
@@ -366,9 +366,9 @@ function MapView(props: MapViewProps) {
             title: data.countryName ?? undefined,
             valueTitle: data.countryName ?? undefined,
             value: data.indicatorValue,
-            totalValue: data.populationSize,
+            totalValue: 1,
             color: '#98A6B5',
-            isNumberValue: false,
+            isPercentageValue: true,
         }), [],
     );
 
