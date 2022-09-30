@@ -1,12 +1,13 @@
 import React from 'react';
 import { _cs } from '@togglecorp/fujs';
+
 import styles from './styles.css';
 
 interface Props {
     className?: string;
     title: string;
     value?: number;
-    indicator?: 'red' | 'yellow' | 'orange' | 'green' | undefined;
+    indicator?: 'red' | 'yellow' | 'orange' | 'green';
 }
 
 function ScoreCard(props: Props) {

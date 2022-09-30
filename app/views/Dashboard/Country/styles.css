@@ -114,8 +114,10 @@
             .country-avatar {
                 img {
                     border-radius: var(--dui-border-radius-avatar);
+                    background: var(--color-background);
                     width: 64px;
                     height: 64px;
+                    text-align: center;
                 }
             }
 
@@ -124,7 +126,9 @@
             }
 
             .country-heading {
-                align-items: end;
+                display: flex;
+                justify-content: flex-end;
+                width: 100%;
             }
 
             .country-details {
