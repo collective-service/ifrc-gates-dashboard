@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
     compareString,
     _cs,
@@ -16,10 +16,14 @@ import {
     TableFilterType,
 } from '@the-deep/deep-ui';
 import {
-    IoIosSearch,
-} from 'react-icons/io';
+    IoSearch,
+} from 'react-icons/io5';
 
-import { decimalToPercentage } from '#utils/common';
+import {
+    decimalToPercentage,
+    rankedSearchOnList,
+    normalCommaFormatter,
+} from '#utils/common';
 import {
     TableValuesQuery,
     TableValuesQueryVariables,
@@ -36,7 +40,7 @@ const TABLE_DATA = gql`
         $emergency: String,
         $indicatorId: String,
         $region: String,
-        ) {
+    ) {
         overviewTable(
             indicatorId: $indicatorId,
             emergency: $emergency,
@@ -55,20 +59,25 @@ const TABLE_DATA = gql`
 
 interface CountryListHeaderCellProps {
     className: string;
+    searchText?: string;
+    setSearchText?: React.Dispatch<React.SetStateAction<string | undefined>>;
+    handleSearchChange?: () => void;
 }
 
 function countryListHeaderCell(props: CountryListHeaderCellProps) {
     const {
         className,
+        setSearchText,
+        searchText,
     } = props;
 
     return (
         <div className={_cs(styles.countryListHeaderCell, className)}>
             <TextInput
-                icons={<IoIosSearch />}
+                icons={<IoSearch />}
                 name="countryName"
-                value={undefined}
-                onChange={undefined}
+                value={searchText}
+                onChange={setSearchText}
                 placeholder="Search"
                 variant="general"
             />
@@ -160,6 +169,7 @@ function createIndicatorColumn(
     };
     return item;
 }
+
 interface Props {
     className?: string;
     filterValues?: FilterType | undefined;
@@ -189,6 +199,19 @@ function OverviewTable(props: Props) {
         },
     );
 
+    const [searchText, setSearchText] = useState<string | undefined>('');
+
+    const filteredData = useMemo(() => (
+        rankedSearchOnList(
+            tableValues?.overviewTable ?? [],
+            searchText,
+            (item) => item.countryName,
+        )
+    ), [
+        tableValues,
+        searchText,
+    ]);
+
     const columns = useMemo(
         () => {
             // eslint-disable-next-line max-len
@@ -198,7 +221,8 @@ function OverviewTable(props: Props) {
                 headerCellRenderer: countryListHeaderCell,
                 headerCellRendererClassName: styles.countryListHeaderCell,
                 headerCellRendererParams: {
-                    sortable: true,
+                    searchText,
+                    setSearchText,
                 },
                 cellRenderer: countryListCell,
                 cellRendererParams: (_, datum) => ({
@@ -213,7 +237,19 @@ function OverviewTable(props: Props) {
                 createIndicatorColumn(
                     'jan',
                     'Jan',
-                    (item) => String(decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 0)?.indicatorValue)) ?? '',
+                    (item) => {
+                        const displayValue = item?.data?.find(
+                            (val) => new Date(val.month).getMonth() === 0,
+                        )?.indicatorValue;
+
+                        if (!displayValue) {
+                            return '-';
+                        }
+                        const displayValueWithSuffix = filterValues?.indicator
+                            ? `${decimalToPercentage(displayValue)}%`
+                            : `${normalCommaFormatter().format(displayValue)}`;
+                        return displayValueWithSuffix;
+                    },
                     {
                         columnWidth: 30,
                     },
@@ -221,7 +257,19 @@ function OverviewTable(props: Props) {
                 createIndicatorColumn(
                     'feb',
                     'Feb',
-                    (item) => String(decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 1)?.indicatorValue)) ?? '',
+                    (item) => {
+                        const displayValue = item?.data?.find(
+                            (val) => new Date(val.month).getMonth() === 1,
+                        )?.indicatorValue;
+
+                        if (!displayValue) {
+                            return '-';
+                        }
+                        const displayValueWithSuffix = filterValues?.indicator
+                            ? `${decimalToPercentage(displayValue)}%`
+                            : `${normalCommaFormatter().format(displayValue)}`;
+                        return displayValueWithSuffix;
+                    },
                     {
                         columnWidth: 30,
                     },
@@ -229,7 +277,19 @@ function OverviewTable(props: Props) {
                 createIndicatorColumn(
                     'mar',
                     'Mar',
-                    (item) => String(decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 2)?.indicatorValue)) ?? '',
+                    (item) => {
+                        const displayValue = item?.data?.find(
+                            (val) => new Date(val.month).getMonth() === 2,
+                        )?.indicatorValue;
+
+                        if (!displayValue) {
+                            return '-';
+                        }
+                        const displayValueWithSuffix = filterValues?.indicator
+                            ? `${decimalToPercentage(displayValue)}%`
+                            : `${normalCommaFormatter().format(displayValue)}`;
+                        return displayValueWithSuffix;
+                    },
                     {
                         columnWidth: 30,
                     },
@@ -237,7 +297,19 @@ function OverviewTable(props: Props) {
                 createIndicatorColumn(
                     'apr',
                     'Apr',
-                    (item) => String(decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 3)?.indicatorValue)) ?? '',
+                    (item) => {
+                        const displayValue = item?.data?.find(
+                            (val) => new Date(val.month).getMonth() === 3,
+                        )?.indicatorValue;
+
+                        if (!displayValue) {
+                            return '-';
+                        }
+                        const displayValueWithSuffix = filterValues?.indicator
+                            ? `${decimalToPercentage(displayValue)}%`
+                            : `${normalCommaFormatter().format(displayValue)}`;
+                        return displayValueWithSuffix;
+                    },
                     {
                         columnWidth: 30,
                     },
@@ -245,7 +317,19 @@ function OverviewTable(props: Props) {
                 createIndicatorColumn(
                     'may',
                     'May',
-                    (item) => String(decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 4)?.indicatorValue)) ?? '',
+                    (item) => {
+                        const displayValue = item?.data?.find(
+                            (val) => new Date(val.month).getMonth() === 4,
+                        )?.indicatorValue;
+
+                        if (!displayValue) {
+                            return '-';
+                        }
+                        const displayValueWithSuffix = filterValues?.indicator
+                            ? `${decimalToPercentage(displayValue)}%`
+                            : `${normalCommaFormatter().format(displayValue)}`;
+                        return displayValueWithSuffix;
+                    },
                     {
                         columnWidth: 30,
                     },
@@ -253,7 +337,19 @@ function OverviewTable(props: Props) {
                 createIndicatorColumn(
                     'jun',
                     'Jun',
-                    (item) => String(decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 5)?.indicatorValue)) ?? '',
+                    (item) => {
+                        const displayValue = item?.data?.find(
+                            (val) => new Date(val.month).getMonth() === 5,
+                        )?.indicatorValue;
+
+                        if (!displayValue) {
+                            return '-';
+                        }
+                        const displayValueWithSuffix = filterValues?.indicator
+                            ? `${decimalToPercentage(displayValue)}%`
+                            : `${normalCommaFormatter().format(displayValue)}`;
+                        return displayValueWithSuffix;
+                    },
                     {
                         columnWidth: 30,
                     },
@@ -261,7 +357,19 @@ function OverviewTable(props: Props) {
                 createIndicatorColumn(
                     'jul',
                     'July',
-                    (item) => String(decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 6)?.indicatorValue)) ?? '',
+                    (item) => {
+                        const displayValue = item?.data?.find(
+                            (val) => new Date(val.month).getMonth() === 6,
+                        )?.indicatorValue;
+
+                        if (!displayValue) {
+                            return '-';
+                        }
+                        const displayValueWithSuffix = filterValues?.indicator
+                            ? `${decimalToPercentage(displayValue)}%`
+                            : `${normalCommaFormatter().format(displayValue)}`;
+                        return displayValueWithSuffix;
+                    },
                     {
                         columnWidth: 30,
                     },
@@ -269,7 +377,19 @@ function OverviewTable(props: Props) {
                 createIndicatorColumn(
                     'aug',
                     'Aug',
-                    (item) => String(decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 7)?.indicatorValue)) ?? '',
+                    (item) => {
+                        const displayValue = item?.data?.find(
+                            (val) => new Date(val.month).getMonth() === 7,
+                        )?.indicatorValue;
+
+                        if (!displayValue) {
+                            return '-';
+                        }
+                        const displayValueWithSuffix = filterValues?.indicator
+                            ? `${decimalToPercentage(displayValue)}%`
+                            : `${normalCommaFormatter().format(displayValue)}`;
+                        return displayValueWithSuffix;
+                    },
                     {
                         columnWidth: 30,
                     },
@@ -277,7 +397,19 @@ function OverviewTable(props: Props) {
                 createIndicatorColumn(
                     'sep',
                     'Sep',
-                    (item) => String(decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 8)?.indicatorValue)) ?? '',
+                    (item) => {
+                        const displayValue = item?.data?.find(
+                            (val) => new Date(val.month).getMonth() === 8,
+                        )?.indicatorValue;
+
+                        if (!displayValue) {
+                            return '-';
+                        }
+                        const displayValueWithSuffix = filterValues?.indicator
+                            ? `${decimalToPercentage(displayValue)}%`
+                            : `${normalCommaFormatter().format(displayValue)}`;
+                        return displayValueWithSuffix;
+                    },
                     {
                         columnWidth: 30,
                     },
@@ -285,7 +417,19 @@ function OverviewTable(props: Props) {
                 createIndicatorColumn(
                     'oct',
                     'Oct',
-                    (item) => String(decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 9)?.indicatorValue)) ?? '',
+                    (item) => {
+                        const displayValue = item?.data?.find(
+                            (val) => new Date(val.month).getMonth() === 9,
+                        )?.indicatorValue;
+
+                        if (!displayValue) {
+                            return '-';
+                        }
+                        const displayValueWithSuffix = filterValues?.indicator
+                            ? `${decimalToPercentage(displayValue)}%`
+                            : `${normalCommaFormatter().format(displayValue)}`;
+                        return displayValueWithSuffix;
+                    },
                     {
                         columnWidth: 30,
                     },
@@ -293,7 +437,19 @@ function OverviewTable(props: Props) {
                 createIndicatorColumn(
                     'nov',
                     'Nov',
-                    (item) => String(decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 10)?.indicatorValue)) ?? '',
+                    (item) => {
+                        const displayValue = item?.data?.find(
+                            (val) => new Date(val.month).getMonth() === 10,
+                        )?.indicatorValue;
+
+                        if (!displayValue) {
+                            return '-';
+                        }
+                        const displayValueWithSuffix = filterValues?.indicator
+                            ? `${decimalToPercentage(displayValue)}%`
+                            : `${normalCommaFormatter().format(displayValue)}`;
+                        return displayValueWithSuffix;
+                    },
                     {
                         columnWidth: 30,
                     },
@@ -301,13 +457,28 @@ function OverviewTable(props: Props) {
                 createIndicatorColumn(
                     'dec',
                     'Dec',
-                    (item) => String(decimalToPercentage(item?.data?.find((val) => new Date(val.month).getMonth() === 11)?.indicatorValue)) ?? '',
+                    (item) => {
+                        const displayValue = item?.data?.find(
+                            (val) => new Date(val.month).getMonth() === 11,
+                        )?.indicatorValue;
+
+                        if (!displayValue) {
+                            return '-';
+                        }
+                        const displayValueWithSuffix = filterValues?.indicator
+                            ? `${decimalToPercentage(displayValue)}%`
+                            : `${normalCommaFormatter().format(displayValue)}`;
+                        return displayValueWithSuffix;
+                    },
                     {
                         columnWidth: 30,
                     },
                 ),
             ];
-        }, [],
+        }, [
+            filterValues?.indicator,
+            searchText,
+        ],
     );
 
     return (
@@ -317,7 +488,7 @@ function OverviewTable(props: Props) {
             cellClassName={styles.eachTableCell}
             columns={columns}
             keySelector={tableKeySelector}
-            data={tableValues?.overviewTable}
+            data={filteredData}
             errored={false}
             pending={tableValuesLoading}
             filtered={false}
@@ -326,4 +497,5 @@ function OverviewTable(props: Props) {
         />
     );
 }
+
 export default OverviewTable;

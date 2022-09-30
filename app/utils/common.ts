@@ -3,6 +3,9 @@ import {
     isObject,
     isList,
     isDefined,
+    compareStringSearch,
+    caseInsensitiveSubmatch,
+    isFalsyString,
 } from '@togglecorp/fujs';
 
 import { CountriesAndOutbreaksQuery } from '#generated/types';
@@ -107,4 +110,22 @@ export function normalCommaFormatter() {
 
 export function getRegionForCountry(country: string | undefined, list: CountryListType[]) {
     return list?.find((c) => c.iso3 === country)?.region;
+}
+
+export function rankedSearchOnList<T>(
+    list: T[],
+    searchString: string | undefined,
+    labelSelector: (item: T) => string,
+) {
+    if (isFalsyString(searchString)) {
+        return list;
+    }
+
+    return list
+        .filter((option) => caseInsensitiveSubmatch(labelSelector(option), searchString))
+        .sort((a, b) => compareStringSearch(
+            labelSelector(a),
+            labelSelector(b),
+            searchString,
+        ));
 }

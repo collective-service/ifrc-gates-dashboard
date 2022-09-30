@@ -258,7 +258,10 @@ function PercentageCardGroup(props: Props) {
                 fill: (region.region !== filterValues?.region) ? 0.2 : 1,
             }
         )).filter((item) => item.region !== 'Global')
-    ), [overviewStatsResponse?.regionalBreakdownGlobal]);
+    ), [
+        overviewStatsResponse?.regionalBreakdownGlobal,
+        filterValues?.region,
+    ]);
 
     const uncertaintyGlobalChart = useMemo(() => (
         overviewStatsResponse?.uncertaintyGlobal.map((global) => {
