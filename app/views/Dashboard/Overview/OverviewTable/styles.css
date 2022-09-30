@@ -7,7 +7,7 @@
 
         .cell {
             padding: var(--dui-spacing-small);
-            text-align: center;
+            text-align: left;
 
             &.high-indicator {
                 color: blue;
