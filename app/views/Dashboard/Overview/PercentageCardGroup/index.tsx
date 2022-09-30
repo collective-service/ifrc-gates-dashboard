@@ -255,6 +255,7 @@ function PercentageCardGroup(props: Props) {
             {
                 ...region,
                 normalizedValue: normalFormatter().format(region.contextIndicatorValue ?? 0),
+                fill: (region.region !== filterValues?.region) ? 0.2 : 1,
             }
         )).filter((item) => item.region !== 'Global')
     ), [overviewStatsResponse?.regionalBreakdownGlobal]);
@@ -533,7 +534,7 @@ function PercentageCardGroup(props: Props) {
                                         <Cell
                                             fill="#8DD2B1"
                                             key={`Cell -${entry.id}`}
-                                            opacity={1}
+                                            opacity={entry.fill}
                                         />
                                     ))}
                                     <LabelList
