@@ -180,6 +180,44 @@ const COUNTRY_PROFILE = gql`
               contextIndicatorId
             }
         }
+        newDeaths: countryEmergencyProfile(
+            filters: {
+                contextIndicatorId: "new_deaths",
+                iso3: $iso3,
+            }
+            pagination: {
+                limit: 5
+                offset: 0
+            }
+            order: {
+                contextDate: DESC
+            }
+        ) {
+            id
+            contextIndicatorValue
+            contextDate
+            emergency
+            format
+        }
+        newCasesPerMillion: countryEmergencyProfile(
+            filters: {
+                contextIndicatorId: "new_cases_per_million",
+                iso3: $iso3,
+            }
+            pagination: {
+                limit: 5
+                offset: 0
+            }
+            order: {
+                contextDate: DESC
+            }
+        ) {
+            id
+            contextIndicatorValue
+            contextDate
+            emergency
+            format
+        }
     }
 `;
 interface Props {
@@ -284,20 +322,38 @@ function Country(props: Props) {
             return items[0];
         };
 
-        return (
-            Object.entries(casesGroupList).map(([emergency, emergencyItems]) => (
-                {
-                    ...getLatestDateItems(emergencyItems),
-                    key: emergency,
-                    newDeaths: countryResponse?.countryProfile.newDeaths,
-                    newCasesPerMillion: countryResponse?.countryProfile.newCasesPerMillion,
-                }
-            ))
+        const casesGroupArray = mapToList(
+            casesGroupList,
+            (items, key) => ({
+                key,
+                items,
+            }),
         );
+
+        const cases = casesGroupArray?.map((item) => {
+            const newDeaths = countryResponse?.newDeaths.find(
+                (deaths) => deaths.emergency === item.key,
+            );
+            const newCasesPerMillion = countryResponse?.newCasesPerMillion.find(
+                (million) => million.emergency === item.key,
+            );
+
+            const valueToReturn = {
+                ...getLatestDateItems(item.items),
+                key: item.key,
+                newDeaths: newDeaths?.contextIndicatorValue,
+                newCasesPerMillion: newCasesPerMillion?.contextIndicatorValue,
+            };
+
+            return valueToReturn;
+        });
+        return cases;
     }, [
         countryResponse?.contextualData,
         countryResponse?.countryProfile.newCasesPerMillion,
         countryResponse?.countryProfile.newDeaths,
+        countryResponse?.newCasesPerMillion,
+        countryResponse?.newDeaths,
     ]);
 
     const uncertaintyChart: UncertainData[] | undefined = useMemo(() => (
