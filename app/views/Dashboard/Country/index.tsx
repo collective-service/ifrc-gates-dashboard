@@ -229,7 +229,6 @@ function Country(props: Props) {
             variables: countryVariables,
         },
     );
-
     const internetAccess = useMemo(() => (
         decimalToPercentage(countryResponse?.countryProfile.internetAccess)
     ), [countryResponse?.countryProfile.internetAccess]);
@@ -671,8 +670,10 @@ function Country(props: Props) {
                     headerIcons={(
                         // FIX ME: COUNTRY AVATAR
                         <img
-                            src={`https://rcce-dashboard.s3.eu-west-3.amazonaws.com/flags/${filterValues?.country}.png`}
-                            alt="country-avatar"
+                            src={`https://rcce-dashboard.s3.eu-west-3.amazonaws.com/flags/${countryResponse?.countryProfile?.iso3}.png`}
+                            alt={isDefined(countryResponse?.countryProfile.countryName)
+                                ? countryResponse?.countryProfile.countryName
+                                : 'country-avatar'}
                         />
                     )}
                     headingSize="small"
