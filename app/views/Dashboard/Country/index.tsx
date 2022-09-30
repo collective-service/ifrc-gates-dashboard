@@ -43,14 +43,14 @@ import {
     CountryQueryVariables,
 } from '#generated/types';
 
-import styles from './styles.css';
 import { FilterType } from '../Filters';
+
+import styles from './styles.css';
 
 interface ScoreCardProps {
     title: string;
     value?: number;
-    metricType: 'positive' | 'negative';
-    indicator?: 'red' | 'yellow' | 'orange' | 'green' | undefined;
+    indicator?: 'red' | 'yellow' | 'orange' | 'green';
 }
 interface EmergencyItems {
     iso3: string;
@@ -66,7 +66,7 @@ interface CountryWiseOutbreakCases extends EmergencyItems {
 }
 
 const dateTickFormatter = (d: string) => getShortMonth(d);
-const normalizedTickFormatter = (d:number) => normalFormatter().format(d);
+const normalizedTickFormatter = (d: number) => normalFormatter().format(d);
 const percentageKeySelector = (d: CountryWiseOutbreakCases) => d.key;
 const readinessKeySelector = (d: ScoreCardProps) => d.title;
 const customLabel = (val: number | string | undefined) => (
@@ -481,48 +481,34 @@ function Country(props: Props) {
         {
             title: 'Readiness',
             value: countryResponse?.countryProfile.readiness ?? undefined,
-            metricType: 'positive',
         },
         {
             title: 'Vulnerability',
             value: countryResponse?.countryProfile.vulnerability ?? undefined,
-            metricType: 'negative',
         },
         {
             title: 'Risk',
             value: countryResponse?.countryProfile.risk ?? undefined,
-            metricType: 'negative',
         },
         {
             title: 'Response',
             value: countryResponse?.countryProfile.response ?? undefined,
-            metricType: 'positive',
         },
     ];
 
     const isScoreCardValueEmpty = scoreCardData.every((score) => isNotDefined(score.value));
 
     const metricTypeForColor = useCallback((data: ScoreCardProps) => {
-        if (isNotDefined(data) || isNotDefined(data.metricType) || isNotDefined(data.value)) {
+        if (isNotDefined(data) || isNotDefined(data.value)) {
             return undefined;
         }
-
-        if (
-            (data.metricType === 'positive' && data.value > 75)
-            || (data.metricType === 'negative' && data.value <= 25)
-        ) {
+        if (data.value > 75) {
             return 'green' as const;
         }
-        if (
-            (data.metricType === 'positive' && data.value <= 75 && data.value > 50)
-            || (data.metricType === 'negative' && data.value > 25 && data.value <= 50)
-        ) {
+        if ((data.value <= 75) && (data.value > 50)) {
             return 'yellow' as const;
         }
-        if (
-            (data.metricType === 'positive' && data.value <= 50 && data.value > 25)
-            || (data.metricType === 'negative' && data.value > 50 && data.value <= 75)
-        ) {
+        if ((data.value <= 50) && (data.value > 25)) {
             return 'orange' as const;
         }
         return 'red' as const;
@@ -645,8 +631,7 @@ function Country(props: Props) {
                                         headerDescription="Lorem ipsum explaining the topic"
                                         headingSize="extraSmall"
                                     >
-                                        {genderDisaggregation
-                                        && genderDisaggregation.length > 0 && (
+                                        {(genderDisaggregation?.length ?? 0) > 0 && (
                                             <div className={styles.genderDisaggregation}>
                                                 <div>Gender Disaggregation</div>
                                                 <ResponsiveContainer
@@ -700,7 +685,7 @@ function Country(props: Props) {
                                         headerDescription="Lorem ipsum explaining the topic"
                                         headingSize="extraSmall"
                                     >
-                                        {ageDisaggregation && ageDisaggregation.length > 0 && (
+                                        {(ageDisaggregation?.length ?? 0) > 0 && (
                                             <div className={styles.ageDisaggregation}>
                                                 <div>Age Disaggregation</div>
                                                 <ResponsiveContainer
@@ -760,12 +745,11 @@ function Country(props: Props) {
                     headerIconsContainerClassName={styles.countryAvatar}
                     headingClassName={styles.countryHeading}
                     headerIcons={(
-                        // FIX ME: COUNTRY AVATAR
                         <img
                             src={`https://rcce-dashboard.s3.eu-west-3.amazonaws.com/flags/${countryResponse?.countryProfile?.iso3}.png`}
                             alt={isDefined(countryResponse?.countryProfile.countryName)
                                 ? countryResponse?.countryProfile.countryName
-                                : 'country-avatar'}
+                                : undefined}
                         />
                     )}
                     headingSize="small"
