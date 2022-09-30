@@ -18,6 +18,7 @@ import {
 import {
     compareDate,
     isNotDefined,
+    isDefined,
     _cs,
 } from '@togglecorp/fujs';
 import { useQuery, gql } from '@apollo/client';
@@ -242,7 +243,8 @@ function PercentageCardGroup(props: Props) {
                 contextIndicatorValue: decimalToPercentage(region.indicatorValueRegional),
                 indicatorMonth: region.indicatorMonth,
                 region: region.region,
-                fill: (region.region !== filterValues?.region) ? 0.2 : 1,
+                fill: isDefined(filterValues?.region)
+                && (region.region !== filterValues?.region) ? 0.2 : 1,
             }
         ))
     ), [
@@ -255,7 +257,8 @@ function PercentageCardGroup(props: Props) {
             {
                 ...region,
                 normalizedValue: normalFormatter().format(region.contextIndicatorValue ?? 0),
-                fill: (region.region !== filterValues?.region) ? 0.2 : 1,
+                fill: isDefined(filterValues?.region)
+                && (region.region !== filterValues?.region) ? 0.2 : 1,
             }
         )).filter((item) => item.region !== 'Global')
     ), [
@@ -296,7 +299,10 @@ function PercentageCardGroup(props: Props) {
                 maximumValue: positiveRange,
             };
         }).sort((a, b) => compareDate(a.date, b.date))
-    ), [overviewStatsResponse?.uncertaintyGlobal]);
+    ), [
+        overviewStatsResponse?.uncertaintyGlobal,
+        filterValues?.region,
+    ]);
 
     const uncertaintyRegionChart = useMemo(() => (
         overviewStatsResponse?.uncertaintyRegion.map((region) => {
