@@ -359,8 +359,7 @@ function MapView(props: MapViewProps) {
 
     const recentProgressBarRendererParams = useCallback(
         (_: string,
-            data: AscendingMostRecentIndicatorType | DescendingMostRecentIndicatorType,
-        ) => ({
+            data: AscendingMostRecentIndicatorType | DescendingMostRecentIndicatorType) => ({
             barHeight,
             suffix: '%',
             barName: data.countryName ?? undefined,
