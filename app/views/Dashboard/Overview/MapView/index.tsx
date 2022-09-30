@@ -22,8 +22,10 @@ import MapLabel from '#components/MapLabel';
 import {
     normalFormatter,
 } from '#utils/common';
-import { RegionBounds } from '#utils/regionBounds';
+// import { RegionBounds } from '#utils/regionBounds';
 import {
+    MostRecentValuesQuery,
+    MostRecentValuesQueryVariables,
     OverviewMapDataQuery,
     OverviewMapDataQueryVariables,
 } from '#generated/types';
@@ -96,13 +98,65 @@ const MAP_DATA = gql`
 type AscendingCountryProfileType = NonNullable<OverviewMapDataQuery['ascCountryEmergencyProfile']>[number];
 type DescendingCountryProfileType = NonNullable<OverviewMapDataQuery['descCountryEmergencyProfile']>[number];
 
+const MOST_RECENT_CASES = gql`
+    query MostRecentValues(
+        $emergency: String,
+        $region: String,
+    ) {
+        descMostRecentValues: dataCountryLevelMostRecent(
+            filters: {
+                emergency: $emergency,
+                region: $region,
+            }
+            pagination: {
+                limit: 5,
+                offset: 0,
+            }
+            order: {
+                indicatorValue: DESC,
+            }
+        ) {
+            id
+            countryName
+            iso3
+            indicatorValue
+            populationSize
+        }
+        ascMostRecentValues: dataCountryLevelMostRecent(
+            filters: {
+                emergency: $emergency,
+                region: $region,
+            }
+            pagination: {
+                limit: 5,
+                offset: 0
+            }
+            order: {
+                indicatorValue: ASC,
+            }
+        ) {
+            id
+            countryName
+            iso3
+            indicatorValue
+            populationSize
+        }
+    }
+`;
+
+type AscendingMostRecentIndicatorType = NonNullable<MostRecentValuesQuery['descMostRecentValues']>[number];
+type DescendingMostRecentIndicatorType = NonNullable<MostRecentValuesQuery['ascMostRecentValues']>[number];
+
 const progressBarKeySelector = (
     d: AscendingCountryProfileType | DescendingCountryProfileType,
 ) => d.countryId;
 
+const recentProgressBarKeySelector = (
+    d: AscendingMostRecentIndicatorType | DescendingMostRecentIndicatorType,
+) => d.id;
+
 interface MapViewProps {
     className?: string;
-    isIndicatorSelected: boolean;
     setActiveTab: React.Dispatch<React.SetStateAction<TabTypes | undefined>>;
     filterValues?: FilterType | undefined;
     setFilterValues: React.Dispatch<React.SetStateAction<FilterType | undefined>>;
@@ -195,7 +249,6 @@ function Tooltip(props: TooltipProps) {
 function MapView(props: MapViewProps) {
     const {
         className,
-        isIndicatorSelected,
         setActiveTab,
         filterValues,
         setFilterValues,
@@ -232,7 +285,7 @@ function MapView(props: MapViewProps) {
     ]);
 
     const {
-        data: pulledData,
+        data: overviewMapData,
     } = useQuery<OverviewMapDataQuery, OverviewMapDataQueryVariables>(
         MAP_DATA,
         {
@@ -248,8 +301,22 @@ function MapView(props: MapViewProps) {
         (x): x is number => x !== null && x !== undefined));
     */
 
+    const mostRecentVariables = useMemo(() => ({
+        indicatorId: filterValues?.indicator,
+        region: filterValues?.region,
+    }), [filterValues]);
+
+    const {
+        data: mostRecentValues,
+    } = useQuery<MostRecentValuesQuery, MostRecentValuesQueryVariables>(
+        MOST_RECENT_CASES,
+        {
+            variables: mostRecentVariables,
+        },
+    );
+
     const mapIndicatorState = useMemo(() => {
-        const countryIndicator = pulledData?.overviewMap?.map(
+        const countryIndicator = overviewMapData?.overviewMap?.map(
             (indicatorValue) => ({
                 id: +indicatorValue.countryId,
                 value: indicatorValue.indicatorValue ?? 0,
@@ -258,7 +325,7 @@ function MapView(props: MapViewProps) {
         )
             .filter((item) => item.value > 0);
         return countryIndicator ?? [];
-    }, [pulledData?.overviewMap]);
+    }, [overviewMapData?.overviewMap]);
 
     const handleCountryClick = useCallback(
         (feature: mapboxgl.MapboxGeoJSONFeature) => {
@@ -269,22 +336,45 @@ function MapView(props: MapViewProps) {
         [showMapModal],
     );
 
+    const highestValuesWithoutIndicator = overviewMapData?.descCountryEmergencyProfile;
+    const lowestValuesWithoutIndicator = overviewMapData?.ascCountryEmergencyProfile;
+
+    const recentHighValuesWithIndicator = mostRecentValues?.descMostRecentValues;
+    const recentLowValuesWithIndicator = mostRecentValues?.ascMostRecentValues;
+
     const progressBarRendererParams = useCallback(
         (_: string, data: AscendingCountryProfileType | DescendingCountryProfileType) => ({
             barHeight,
-            suffix: isIndicatorSelected ? '%' : 'M',
+            suffix: 'M',
+            barName: data.countryName,
+            title: data.countryName ?? undefined,
+            valueTitle: data.countryName ?? undefined,
+            value: data.contextIndicatorValue,
+            // FIXME: Use country population instead of highest indicator value
+            totalValue: 100000000,
+            color: '#98A6B5',
+            isNumberValue: false,
+        }), [],
+    );
+
+    const recentProgressBarRendererParams = useCallback(
+        (_: string,
+            data: AscendingMostRecentIndicatorType | DescendingMostRecentIndicatorType) => ({
+            barHeight,
+            suffix: '%',
             barName: data.countryName ?? undefined,
             title: data.countryName ?? undefined,
-            value: data.contextIndicatorValue ?? undefined,
-            totalValue: 0,
+            valueTitle: data.countryName ?? undefined,
+            value: data.indicatorValue,
+            totalValue: data.populationSize,
             color: '#98A6B5',
-            isNumberValue: !isIndicatorSelected,
-        }), [isIndicatorSelected],
+            isNumberValue: false,
+        }), [],
     );
 
     const handlePointHover = React.useCallback(
         (feature: mapboxgl.MapboxGeoJSONFeature, lngLat: mapboxgl.LngLat) => {
-            const indicatorData = pulledData?.overviewMap?.find(
+            const indicatorData = overviewMapData?.overviewMap?.find(
                 (country) => country.iso3 === feature?.properties?.iso3,
             );
 
@@ -295,7 +385,7 @@ function MapView(props: MapViewProps) {
             setSelectedCountryIndicator(indicatorData?.indicatorValue ?? 0);
             return true;
         },
-        [setMapClickProperties, pulledData],
+        [setMapClickProperties, overviewMapData],
     );
 
     const handleHoverClose = React.useCallback(
@@ -306,12 +396,15 @@ function MapView(props: MapViewProps) {
         [setMapClickProperties],
     );
 
+    // FIXME: this will be used when we get the data for bounds
+    /*
     const selectedRegionBounds = useMemo(() => {
         const regionData = RegionBounds?.find(
             (region) => region.region === filterValues?.region,
         );
         return regionData?.bounding_box as [number, number, number, number];
     }, [filterValues]);
+     */
 
     return (
         <div className={_cs(className, styles.mapViewWrapper)}>
@@ -330,7 +423,7 @@ function MapView(props: MapViewProps) {
                 >
                     <MapContainer className={styles.mapContainer} />
                     <MapBounds
-                        bounds={selectedRegionBounds ?? undefined}
+                        bounds={undefined}
                         padding={50}
                     />
                     <MapSource
@@ -383,42 +476,85 @@ function MapView(props: MapViewProps) {
             <ContainerCard
                 className={styles.progressBarContainer}
             >
-                <div className={styles.highProgressBox}>
-                    <Heading size="extraSmall" className={styles.progressListHeader}>
-                        Highest cases
-                    </Heading>
-                    <ListView
-                        className={styles.progressList}
-                        keySelector={progressBarKeySelector}
-                        data={pulledData?.descCountryEmergencyProfile}
-                        renderer={ProgressBar}
-                        rendererParams={progressBarRendererParams}
-                        filtered={false}
-                        errored={false}
-                        pending={false}
-                        borderBetweenItem
-                        borderBetweenItemWidth="medium"
-                        borderBetweenItemClassName={styles.progressItemBorder}
-                    />
-                </div>
-                <div className={styles.lowProgressBox}>
-                    <Heading size="extraSmall" className={styles.progressListHeader}>
-                        Lowest cases
-                    </Heading>
-                    <ListView
-                        className={styles.progressList}
-                        keySelector={progressBarKeySelector}
-                        data={pulledData?.ascCountryEmergencyProfile}
-                        renderer={ProgressBar}
-                        rendererParams={progressBarRendererParams}
-                        filtered={false}
-                        errored={false}
-                        pending={false}
-                        borderBetweenItem
-                        borderBetweenItemWidth="medium"
-                        borderBetweenItemClassName={styles.progressItemBorder}
-                    />
-                </div>
+                {filterValues?.indicator ? (
+                    <>
+                        <div className={styles.highProgressBox}>
+                            <Heading size="extraSmall" className={styles.progressListHeader}>
+                                Highest cases
+                            </Heading>
+                            <ListView
+                                className={styles.progressList}
+                                keySelector={recentProgressBarKeySelector}
+                                data={recentHighValuesWithIndicator}
+                                renderer={ProgressBar}
+                                rendererParams={recentProgressBarRendererParams}
+                                filtered={false}
+                                errored={false}
+                                pending={false}
+                                borderBetweenItem
+                                borderBetweenItemWidth="medium"
+                                borderBetweenItemClassName={styles.progressItemBorder}
+                            />
+                        </div>
+                        <div className={styles.lowProgressBox}>
+                            <Heading size="extraSmall" className={styles.progressListHeader}>
+                                Lowest cases
+                            </Heading>
+                            <ListView
+                                className={styles.progressList}
+                                keySelector={recentProgressBarKeySelector}
+                                data={recentLowValuesWithIndicator}
+                                renderer={ProgressBar}
+                                rendererParams={recentProgressBarRendererParams}
+                                filtered={false}
+                                errored={false}
+                                pending={false}
+                                borderBetweenItem
+                                borderBetweenItemWidth="medium"
+                                borderBetweenItemClassName={styles.progressItemBorder}
+                            />
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        <div className={styles.highProgressBox}>
+                            <Heading size="extraSmall" className={styles.progressListHeader}>
+                                Highest cases
+                            </Heading>
+                            <ListView
+                                className={styles.progressList}
+                                keySelector={progressBarKeySelector}
+                                data={overviewMapData?.descCountryEmergencyProfile}
+                                renderer={ProgressBar}
+                                rendererParams={progressBarRendererParams}
+                                filtered={false}
+                                errored={false}
+                                pending={false}
+                                borderBetweenItem
+                                borderBetweenItemWidth="medium"
+                                borderBetweenItemClassName={styles.progressItemBorder}
+                            />
+                        </div>
+                        <div className={styles.lowProgressBox}>
+                            <Heading size="extraSmall" className={styles.progressListHeader}>
+                                Lowest cases
+                            </Heading>
+                            <ListView
+                                className={styles.progressList}
+                                keySelector={progressBarKeySelector}
+                                data={overviewMapData?.ascCountryEmergencyProfile}
+                                renderer={ProgressBar}
+                                rendererParams={progressBarRendererParams}
+                                filtered={false}
+                                errored={false}
+                                pending={false}
+                                borderBetweenItem
+                                borderBetweenItemWidth="medium"
+                                borderBetweenItemClassName={styles.progressItemBorder}
+                            />
+                        </div>
+                    </>
+                )}
                 {mapModalShown && (
                     <MapModal
                         onModalClose={hideMapModal}

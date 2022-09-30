@@ -27,6 +27,6 @@
 }
 
 .search-column-cell {
+    padding: var(--dui-spacing-medium);
     font-weight: bold;
 }
-
