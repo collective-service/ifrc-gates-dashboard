@@ -46,6 +46,7 @@ const COUNTRY_PROFILE = gql`
         $iso3: String,
         $contextIndicatorId: String!,
         $isTwelveMonth: Boolean,
+        $emergency: String,
     ) {
         countryProfile(iso3: $iso3) {
             iso3
@@ -56,12 +57,18 @@ const COUNTRY_PROFILE = gql`
             filters: {
                 iso3: $iso3,
                 contextIndicatorId:$contextIndicatorId,
+                emergency: $emergency,
                 isTwelveMonth: $isTwelveMonth,
             }
             order: {
-                contextIndicatorValue: DESC,
+                contextDate: DESC,
+            }
+            pagination: {
+                limit: 12,
+                offset: 0,
             }
         ) {
+            id
             iso3
             emergency
             contextIndicatorId
@@ -88,6 +95,7 @@ interface ModalProps {
     setActiveTab: React.Dispatch<React.SetStateAction<TabTypes | undefined>>;
     setFilterValues: React.Dispatch<React.SetStateAction<FilterType | undefined>>;
     countryData: mapboxgl.MapboxGeoJSONFeature | undefined;
+    filterValues: FilterType | undefined;
 }
 
 function MapModal(props: ModalProps) {
@@ -97,14 +105,19 @@ function MapModal(props: ModalProps) {
         setActiveTab,
         setFilterValues,
         countryData,
+        filterValues,
     } = props;
 
     const countryVariables = useMemo((): CountryModalQueryVariables => ({
         iso3: countryData?.properties?.iso3 ?? 'AFG',
         contextIndicatorId: 'total_cases',
         isTwelveMonth: true,
+        emergency: filterValues?.outbreak,
     }
-    ), [countryData]);
+    ), [
+        countryData,
+        filterValues?.outbreak,
+    ]);
 
     const {
         data: countryResponse,

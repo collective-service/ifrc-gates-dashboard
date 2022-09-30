@@ -1,46 +1,27 @@
-import React, { useState, useCallback } from 'react';
-import { Button } from '@the-deep/deep-ui';
-import {
-    IoChevronUp,
-    IoChevronDown,
-} from 'react-icons/io5';
+import React from 'react';
+import HTMLOutput from '#components/HTMLOutput';
 
 import styles from './styles.css';
 
 interface Props {
-    narrative: string;
+    narrative: string | undefined;
 }
 
 function Narratives(props: Props) {
     const { narrative } = props;
 
-    const [isSeeMore, setIsSeeMore] = useState<boolean>(false);
-
-    const handleButtonClick = useCallback(() => {
-        setIsSeeMore((old: boolean) => !old);
-    }, [setIsSeeMore]);
+    if (!narrative) {
+        return null;
+    }
 
     return (
-        <div
-            className={styles.narrativeWrapper}
-        >
+        <div className={styles.narrativeWrapper}>
             <div className={styles.narrativeDetails}>
-                Data Collection Info
-                <Button
-                    name={undefined}
-                    variant="transparent"
-                    onClick={handleButtonClick}
-                >
-                    See More
-                    &nbsp;
-                    {isSeeMore
-                        ? <IoChevronUp />
-                        : <IoChevronDown /> }
-                </Button>
+                Data Collection info
             </div>
-            {isSeeMore && (
-                narrative
-            )}
+            <HTMLOutput
+                value={narrative}
+            />
         </div>
     );
 }

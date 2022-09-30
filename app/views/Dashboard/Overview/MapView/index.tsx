@@ -563,6 +563,7 @@ function MapView(props: MapViewProps) {
                         setActiveTab={setActiveTab}
                         setFilterValues={setFilterValues}
                         countryData={countryData}
+                        filterValues={filterValues}
                     />
                 )}
             </ContainerCard>
