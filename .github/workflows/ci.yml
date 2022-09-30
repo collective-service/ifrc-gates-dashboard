@@ -4,7 +4,7 @@ on:
   pull_request:
   push:
     branches:
-      - release
+      - deploy/terraform
 
 jobs:
   build_test:
@@ -58,13 +58,13 @@ jobs:
       - name: 🤞 Run Build 🧪
         env:
             DOCKER_IMAGE: ${{ steps.prep.outputs.tagged_image }}
-            REACT_APP_GRAPHQL_ENDPOINT: # FIXME: add value
+            REACT_APP_GRAPHQL_ENDPOINT: ${{ secrets.REACT_APP_GRAPHQL_ENDPOINT }}
             REACT_APP_ENVIRONMENT: prod
             REACT_APP_SENTRY_DSN:  ${{ secrets.REACT_APP_SENTRY_DSN }}
             REACT_APP_MAPBOX_STYLE: mapbox://styles/togglecorp/cl50rwy0a002d14mo6w9zprio
             REACT_APP_MAPBOX_ACCESS_TOKEN: pk.eyJ1IjoidG9nZ2xlY29ycCIsImEiOiJjazk5ZXMza2YxZmQ1M2dvNWxneTEycnQwIn0.K3u-ns63rFzM7CzrnOBm2w
             # Not required for now.
-            GRAPHQL_CODEGEN_ENDPOINT:
+            GRAPHQL_CODEGEN_ENDPOINT: ${{ secrets.GRAPHQL_CODEGEN_ENDPOINT }}
             REACT_APP_GA_TRACKING_ID:
         run: |
           env > .env
@@ -85,9 +85,59 @@ jobs:
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
+  build_terraform:
+    name: Terraform actions
+    runs-on: ubuntu-latest
+    needs: build_test
+    defaults:
+      run:
+        working-directory: "./terraform"
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.1.2
+          terraform_wrapper: false
+
+      - name: Terraform init
+        id: init
+        run: terraform init -upgrade
+
+      - name: Terraform validate
+        id: validate
+        run: terraform validate
+
+      - name: Terraform plan
+        id: plan
+        run: terraform plan  -no-color
+
+      - name: Terraform apply
+        id: apply
+        run: terraform apply -auto-approve -no-color
+
+      - name: Get Terraform outputs
+        id: op-bucket-name
+        run: echo "::set-output name=bucket_name::$(terraform output s3_bucket_name)"
+
+      - name: Get Terraform outputs
+        id: op-distid
+        run: echo "::set-output name=distid::$(terraform output -raw website_cdn_id)"
+    outputs:
+      s3-bucket-name: ${{ steps.op-bucket-name.outputs.bucket_name }}
+      dist-id: ${{ steps.op-distid.outputs.distid }}
+
   deploy:
     name: Deploy to AWS (S3 + Cloudfront)
-    needs: build_test
+    needs: build_terraform
     runs-on: ubuntu-latest
     environment:
       name: Release
@@ -107,7 +157,7 @@ jobs:
         with:
           args: --acl public-read --follow-symlinks --delete
         env:
-          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          AWS_S3_BUCKET: ${{ needs.build_terraform.outputs.s3-bucket-name }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION:  ${{ secrets.AWS_REGION }}
@@ -117,7 +167,7 @@ jobs:
       - name: Cloudfront Invalidate
         uses: chetan/invalidate-cloudfront-action@master
         env:
-          DISTRIBUTION: ${{ secrets.AWS_DISTRIBUTION }}
+          DISTRIBUTION: ${{ needs.build_terraform.outputs.dist-id }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION:  ${{ secrets.AWS_REGION }}
