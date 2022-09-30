@@ -266,12 +266,8 @@ function Dashboard() {
         },
     );
 
-    const narrativeStatement = useMemo(() => ((
-        narrativeResponse?.naratives?.length
-            && narrativeResponse?.naratives?.length > 0
-    )
-        ? narrativeResponse?.naratives[0].narrative
-        : 'This is narrative'
+    const narrativeStatement = useMemo(() => (
+        narrativeResponse?.naratives[0]?.narrative
     ), [
         narrativeResponse?.naratives,
     ]);
@@ -345,7 +341,7 @@ function Dashboard() {
                 {/* TODO: 1 object will be fetched */}
                 {activeTab !== 'overview' && (
                     <Narratives
-                        narrative={narrativeStatement ?? 'No Narratives found'}
+                        narrative={narrativeStatement}
                     />
                 )}
                 <Filters

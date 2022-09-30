@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import sanitizeHtml from 'sanitize-html';
-import { _cs } from '@togglecorp/fujs';
+import { _cs, isNotDefined } from '@togglecorp/fujs';
 
 import styles from './styles.css';
 
@@ -51,7 +51,7 @@ function useSanitizedHtml(rawHtml: string | null | undefined, hideHeading?: bool
     );
 
     const sanitizedHtml = useMemo(() => {
-        if (!rawHtml) {
+        if (isNotDefined(rawHtml)) {
             return undefined;
         }
         return sanitizeHtml(
