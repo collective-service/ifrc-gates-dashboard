@@ -50,7 +50,7 @@ import styles from './styles.css';
 interface ScoreCardProps {
     title: string;
     value?: number;
-    indicator?: 'red' | 'yellow' | 'orange' | 'green' | undefined;
+    indicator?: 'red' | 'yellow' | 'orange' | 'green';
 }
 interface EmergencyItems {
     iso3: string;

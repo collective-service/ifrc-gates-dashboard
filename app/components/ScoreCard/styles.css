@@ -3,6 +3,7 @@
     align-items: center;
     flex-direction: column;
     flex-grow: 1;
+    justify-content: space-between;
     border: var(--width-separator-thin) solid transparent;
     border-radius: var(--dui-border-radius-card);
     box-shadow: 0px 0px 10px var(--dui-card-box-shadow);
@@ -15,9 +16,8 @@
     }
 
     .readiness-value {
-        font-size: var(--dui-font-size-mega-large);
+        font-size: var(--dui-font-size-super-large);
         font-weight: var(--dui-font-weight-bold);
-
     }
 
 }
