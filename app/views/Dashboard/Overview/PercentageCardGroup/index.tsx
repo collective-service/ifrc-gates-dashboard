@@ -31,8 +31,8 @@ import {
     normalFormatter,
 } from '#utils/common';
 import {
-    AliasQuery,
-    AliasQueryVariables,
+    OverviewStatsQuery,
+    OverviewStatsQueryVariables,
 } from '#generated/types';
 
 import { FilterType } from '../../Filters';
@@ -45,8 +45,8 @@ const customLabel = (val: number | string | undefined) => (
     `${val}%`
 );
 
-const ALIAS = gql`
-    query Alias(
+const OVERVIEW_STATS = gql`
+    query OverviewStats(
         $emergency: String,
         $indicatorId: String,
         $isGlobal: Boolean,
@@ -215,7 +215,7 @@ function PercentageCardGroup(props: Props) {
         selectedOutbreakName,
     } = props;
 
-    const aliasVariables = useMemo((): AliasQueryVariables => ({
+    const overviewStatsVariables = useMemo((): OverviewStatsQueryVariables => ({
         emergency: filterValues?.outbreak,
         indicatorId: filterValues?.indicator,
         region: filterValues?.region,
@@ -227,37 +227,40 @@ function PercentageCardGroup(props: Props) {
     ]);
 
     const {
-        data: aliasResponse,
-    } = useQuery<AliasQuery, AliasQueryVariables>(
-        ALIAS,
+        data: overviewStatsResponse,
+    } = useQuery<OverviewStatsQuery, OverviewStatsQueryVariables>(
+        OVERVIEW_STATS,
         {
-            variables: aliasVariables,
+            variables: overviewStatsVariables,
         },
     );
 
     const regionalBreakdownRegion = useMemo(() => (
-        aliasResponse?.regionalBreakdownRegion.map((region) => (
+        overviewStatsResponse?.regionalBreakdownRegion.map((region) => (
             {
                 id: region.id,
                 contextIndicatorValue: decimalToPercentage(region.indicatorValueRegional),
                 indicatorMonth: region.indicatorMonth,
                 region: region.region,
-                fill: region.region !== filterValues?.region ? 0.2 : 1,
+                fill: (region.region !== filterValues?.region) ? 0.2 : 1,
             }
         ))
-    ), [aliasResponse?.regionalBreakdownRegion]);
+    ), [
+        overviewStatsResponse?.regionalBreakdownRegion,
+        filterValues?.region,
+    ]);
 
     const regionalBreakdownGlobal = useMemo(() => (
-        aliasResponse?.regionalBreakdownGlobal.map((region) => (
+        overviewStatsResponse?.regionalBreakdownGlobal.map((region) => (
             {
                 ...region,
                 normalizedValue: normalFormatter().format(region.contextIndicatorValue ?? 0),
             }
         )).filter((item) => item.region !== 'Global')
-    ), [aliasResponse?.regionalBreakdownGlobal]);
+    ), [overviewStatsResponse?.regionalBreakdownGlobal]);
 
     const uncertaintyGlobalChart = useMemo(() => (
-        aliasResponse?.uncertaintyGlobal.map((global) => {
+        overviewStatsResponse?.uncertaintyGlobal.map((global) => {
             const negativeRange = decimalToPercentage(
                 (global.indicatorValueGlobal && global.errorMargin)
                 && global.indicatorValueGlobal - global.errorMargin,
@@ -289,10 +292,10 @@ function PercentageCardGroup(props: Props) {
                 maximumValue: positiveRange,
             };
         }).sort((a, b) => compareDate(a.date, b.date))
-    ), [aliasResponse?.uncertaintyGlobal]);
+    ), [overviewStatsResponse?.uncertaintyGlobal]);
 
     const uncertaintyRegionChart = useMemo(() => (
-        aliasResponse?.uncertaintyRegion.map((region) => {
+        overviewStatsResponse?.uncertaintyRegion.map((region) => {
             const negativeRange = decimalToPercentage(
                 (region.indicatorValueRegional && region.errorMargin)
                 && region.indicatorValueRegional - region.errorMargin,
@@ -324,10 +327,10 @@ function PercentageCardGroup(props: Props) {
                 maximumValue: positiveRange,
             };
         }).sort((a, b) => compareDate(a.date, b.date))
-    ), [aliasResponse?.uncertaintyRegion]);
+    ), [overviewStatsResponse?.uncertaintyRegion]);
 
     const outbreakLineChart = useMemo(() => (
-        aliasResponse?.outbreak.map((outbreak) => (
+        overviewStatsResponse?.outbreak.map((outbreak) => (
             {
                 id: outbreak.id,
                 emergency: outbreak.emergency,
@@ -335,25 +338,25 @@ function PercentageCardGroup(props: Props) {
                 [outbreak.emergency]: outbreak.contextIndicatorValue,
             }
         ))
-    ), [aliasResponse?.outbreak]);
+    ), [overviewStatsResponse?.outbreak]);
 
     const totalCase = useMemo(() => (
-        aliasResponse?.totalCases
+        overviewStatsResponse?.totalCases
             .find(
                 (emergency) => emergency.emergency === filterValues?.outbreak,
             )
     ), [
-        aliasResponse?.totalCases,
+        overviewStatsResponse?.totalCases,
         filterValues?.outbreak,
     ]);
 
     const globalTotalCase = useMemo(() => (
-        aliasResponse?.totalCasesGlobal
+        overviewStatsResponse?.totalCasesGlobal
             .find(
                 (global) => global.indicatorId === filterValues?.indicator,
             )
     ), [
-        aliasResponse?.totalCasesGlobal,
+        overviewStatsResponse?.totalCasesGlobal,
         filterValues?.indicator,
     ]);
 
@@ -480,12 +483,13 @@ function PercentageCardGroup(props: Props) {
                                 />
                                 <Bar
                                     dataKey="contextIndicatorValue"
-                                    fill="#8DD2B1"
                                     radius={[10, 10, 0, 0]}
                                 >
                                     {regionalBreakdownRegion?.map((entry) => (
                                         <Cell
                                             key={`Cell -${entry.id}`}
+                                            fill="#8DD2B1"
+                                            opacity={entry.fill}
                                         />
                                     ))}
                                     <LabelList
@@ -523,12 +527,13 @@ function PercentageCardGroup(props: Props) {
                                 />
                                 <Bar
                                     dataKey="contextIndicatorValue"
-                                    fill="#8DD2B1"
                                     radius={[10, 10, 0, 0]}
                                 >
                                     {regionalBreakdownGlobal?.map((entry) => (
                                         <Cell
+                                            fill="#8DD2B1"
                                             key={`Cell -${entry.id}`}
+                                            opacity={1}
                                         />
                                     ))}
                                     <LabelList

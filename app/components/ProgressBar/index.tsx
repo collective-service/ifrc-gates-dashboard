@@ -3,6 +3,7 @@ import { _cs, isNotDefined } from '@togglecorp/fujs';
 import { Button } from '@the-deep/deep-ui';
 import {
     normalFormatter,
+    decimalToPercentage,
 } from '#utils/common';
 
 import styles from './styles.css';
@@ -23,7 +24,7 @@ export interface Props {
     icon?: React.ReactNode;
     region?: string;
     showRegionalValue?: boolean;
-    isNumberValue?: boolean;
+    isPercentageValue?: boolean;
     indicatorId?: string;
     subVariable?: string;
     onTitleClick?: (indicatorId?: string, subVariable?: string) => void;
@@ -44,7 +45,7 @@ function ProgressBar(props: Props) {
         icon,
         region,
         showRegionalValue = false,
-        isNumberValue = false,
+        isPercentageValue = false,
         onTitleClick,
         indicatorId,
         subVariable,
@@ -54,14 +55,14 @@ function ProgressBar(props: Props) {
         if (isNotDefined(value) || isNotDefined(totalValue)) {
             return undefined;
         }
-        if (isNumberValue) {
-            return (Math.round(value * 10000)) / 100;
+        if (isPercentageValue) {
+            return decimalToPercentage(value);
         }
         return (Math.round((value / totalValue) * 10000) / 100);
     }, [
         totalValue,
         value,
-        isNumberValue,
+        isPercentageValue,
     ]);
 
     const handleTitleClick = useCallback(() => {
@@ -124,8 +125,8 @@ function ProgressBar(props: Props) {
                     className={styles.progressValue}
                     title={valueTooltip as string}
                 >
-                    {countryPercentage}
-                    {suffix}
+                    {isPercentageValue ? countryPercentage : normalizedForm(value ?? 0)}
+                    {isPercentageValue && suffix}
                 </div>
             </div>
             {showRegionalValue && subValuePercentage && (
