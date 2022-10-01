@@ -1,6 +1,10 @@
-import React, { useMemo, useState } from 'react';
+import React,
+{
+    useMemo,
+    useState,
+} from 'react';
 import {
-    IoCloudDownloadOutline, IoDownloadOutline,
+    IoDownloadOutline,
 } from 'react-icons/io5';
 import {
     Tabs,
@@ -9,7 +13,6 @@ import {
     TabPanel,
     DropdownMenu,
     DropdownMenuItem,
-    Button,
 } from '@the-deep/deep-ui';
 import { isDefined } from '@togglecorp/fujs';
 import { gql, useQuery } from '@apollo/client';
