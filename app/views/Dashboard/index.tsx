@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import {
-    IoCloudDownloadOutline,
+    IoCloudDownloadOutline, IoDownloadOutline,
 } from 'react-icons/io5';
 import {
     Tabs,
@@ -9,6 +9,7 @@ import {
     TabPanel,
     DropdownMenu,
     DropdownMenuItem,
+    Button,
 } from '@the-deep/deep-ui';
 import { isDefined } from '@togglecorp/fujs';
 import { gql, useQuery } from '@apollo/client';
@@ -292,8 +293,9 @@ function Dashboard() {
                     <DropdownMenu
                         className={styles.button}
                         label="Export"
-                        icons={<IoCloudDownloadOutline />}
                         variant="tertiary"
+                        icons={<IoDownloadOutline />}
+                        hideDropdownIcon
                     >
                         <DropdownMenuItem
                             name={undefined}

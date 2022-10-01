@@ -116,6 +116,10 @@
     --color-text-title: #2F9C67;
     --color-progress-bar: #FF800B;
 
+
+    /* NOTE: primary not found according to UX */
+    --color-text-primary-dark-blue: #08284B;
+
     /* FIXME:  update Appropriate color */
     --color-indicator-high: #66EEAE;
     --color-indicator-medium-high: #FFFDC6;
