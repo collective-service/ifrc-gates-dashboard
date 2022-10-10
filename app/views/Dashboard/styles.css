@@ -17,8 +17,8 @@
 
     .button {
         border-radius: var(--dui-border-radius-tag);
-        border-color: var(--color-text-primary-dark-blue);
-        color: var(--color-text-primary-dark-blue);
+        border-color: var(--dui-tab-background-color);
+        color: var(--dui-tab-background-color);
         font-size: var(--dui-font-size-large);
         font-weight: normal;
     }
@@ -27,17 +27,17 @@
         display: flex;
         flex-wrap: wrap;
         justify-content: flex-end;
-        border: var(--width-separator-thin) solid var(--color-text-primary-dark-blue);
+        border: var(--width-separator-thin) solid var(--dui-tab-background-color);
         border-radius: var(--dui-border-radius-progress-bar);
 
         .default-tab-mode {
             padding: var(--dui-spacing-small) var(--dui-spacing-large);
-            color: var(--color-text-primary-dark-blue);
+            color: var(--dui-tab-background-color);
             font-weight: normal;
 
             &:nth-child(1),
             &:nth-child(2) {
-                border-right: var(--width-separator-thin) solid var(--color-text-primary-dark-blue);
+                border-right: var(--width-separator-thin) solid var(--dui-tab-background-color);
             }
         }
 
