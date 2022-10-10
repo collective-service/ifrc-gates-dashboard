@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
     BarChart,
     Bar,
@@ -13,7 +13,7 @@ import {
     Cell,
 } from 'recharts';
 import {
-    ContainerCard,
+    ContainerCard, Element,
 } from '@the-deep/deep-ui';
 import {
     compareDate,
@@ -21,6 +21,7 @@ import {
     isDefined,
     _cs,
 } from '@togglecorp/fujs';
+import { IoSquare } from 'react-icons/io5';
 import { useQuery, gql } from '@apollo/client';
 
 import PercentageStats from '#components/PercentageStats';
@@ -39,6 +40,14 @@ import {
 import { FilterType } from '../../Filters';
 
 import styles from './styles.css';
+
+interface LegendProps {
+    payload?: {
+        value: string;
+        type?: string;
+        id?: string
+    }[]
+}
 
 const normalizedTickFormatter = (d: number) => normalFormatter().format(d);
 
@@ -387,6 +396,27 @@ function PercentageCardGroup(props: Props) {
         totalCase?.contextIndicatorValue,
     ]);
 
+    const renderLegend = useCallback((legendProps: LegendProps) => {
+        const { payload } = legendProps;
+        return (
+            <>
+                {payload?.map((entry) => (
+                    <Element
+                        key={`item-${entry.id}`}
+                        actions={(
+                            <>
+                                <IoSquare color="#ACA28E" />
+                                <span className={styles.outbreakLegendTitleName}>
+                                    {entry.value}
+                                </span>
+                            </>
+                        )}
+                    />
+                ))}
+            </>
+        );
+    }, []);
+
     return (
         <div className={_cs(className, styles.cardInfo)}>
             <PercentageStats
@@ -448,14 +478,11 @@ function PercentageCardGroup(props: Props) {
                                         y: true,
                                     }}
                                 />
-                                <Legend
-                                    iconType="square"
-                                    align="right"
-                                />
+                                <Legend content={renderLegend} />
                                 <Line
                                     type="monotone"
                                     dataKey={filterValues?.outbreak}
-                                    stroke="#4bda8a"
+                                    stroke="#ACA28E"
                                     strokeWidth={2}
                                     dot={false}
                                 />
