@@ -79,7 +79,7 @@ interface Props {
     setAdvancedFilterValues: React.Dispatch<React.SetStateAction<AdvancedOptionType | undefined>>;
     countries?: NonNullable<CountriesAndOutbreaksQuery['countries']>;
     countriesLoading?: boolean;
-    emergencies: NonNullable<CountriesAndOutbreaksQuery['outBreaks']>| undefined;
+    emergencies: NonNullable<CountriesAndOutbreaksQuery['outBreaks']> | undefined;
     indicatorList: IndicatorsForCountryQuery | undefined;
     globalIndicatorList: IndicatorsQuery | undefined;
     subvariableList: SubvariablesQuery | undefined;

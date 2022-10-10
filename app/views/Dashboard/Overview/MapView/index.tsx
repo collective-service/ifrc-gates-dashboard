@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { _cs } from '@togglecorp/fujs';
+import { _cs, doesObjectHaveNoData } from '@togglecorp/fujs';
 import {
     Heading,
     ContainerCard,
@@ -22,7 +22,7 @@ import MapLabel from '#components/MapLabel';
 import {
     normalFormatter,
 } from '#utils/common';
-// import { RegionBounds } from '#utils/regionBounds';
+import { regionBounds } from '#utils/regionBounds';
 import {
     MostRecentValuesQuery,
     MostRecentValuesQueryVariables,
@@ -97,19 +97,18 @@ const MAP_DATA = gql`
     }
 `;
 
-type AscendingCountryProfileType = NonNullable<OverviewMapDataQuery['ascCountryEmergencyProfile']>[number];
-type DescendingCountryProfileType = NonNullable<OverviewMapDataQuery['descCountryEmergencyProfile']>[number];
-
 const MOST_RECENT_CASES = gql`
     query MostRecentValues(
         $emergency: String,
         $region: String,
+        $indicatorId: String,
     ) {
         descMostRecentValues: dataCountryLevelMostRecent(
             filters: {
                 category: "Global"
                 emergency: $emergency,
                 region: $region,
+                indicatorId: $indicatorId,
             }
             pagination: {
                 limit: 5,
@@ -131,6 +130,7 @@ const MOST_RECENT_CASES = gql`
                 category: "Global"
                 emergency: $emergency,
                 region: $region,
+                indicatorId: $indicatorId,
             }
             pagination: {
                 limit: 5,
@@ -149,6 +149,8 @@ const MOST_RECENT_CASES = gql`
         }
     }
 `;
+type AscendingCountryProfileType = NonNullable<OverviewMapDataQuery['ascCountryEmergencyProfile']>[number];
+type DescendingCountryProfileType = NonNullable<OverviewMapDataQuery['descCountryEmergencyProfile']>[number];
 
 type AscendingMostRecentIndicatorType = NonNullable<MostRecentValuesQuery['descMostRecentValues']>[number];
 type DescendingMostRecentIndicatorType = NonNullable<MostRecentValuesQuery['ascMostRecentValues']>[number];
@@ -360,8 +362,10 @@ function MapView(props: MapViewProps) {
     );
 
     const recentProgressBarRendererParams = useCallback(
-        (_: string,
-            data: AscendingMostRecentIndicatorType | DescendingMostRecentIndicatorType) => ({
+        (
+            _: string,
+            data: AscendingMostRecentIndicatorType | DescendingMostRecentIndicatorType,
+        ) => ({
             barHeight,
             suffix: '%',
             barName: data.countryName ?? undefined,
@@ -371,7 +375,8 @@ function MapView(props: MapViewProps) {
             totalValue: 1,
             color: '#98A6B5',
             isPercentageValue: data.format === 'percent',
-        }), [],
+        }),
+        [],
     );
 
     const handlePointHover = React.useCallback(
@@ -398,15 +403,17 @@ function MapView(props: MapViewProps) {
         [setMapClickProperties],
     );
 
-    // FIXME: this will be used when we get the data for bounds
-    /*
     const selectedRegionBounds = useMemo(() => {
-        const regionData = RegionBounds?.find(
+        if (doesObjectHaveNoData(filterValues)) {
+            return undefined;
+        }
+        const regionData = regionBounds?.find(
             (region) => region.region === filterValues?.region,
         );
         return regionData?.bounding_box as [number, number, number, number];
-    }, [filterValues]);
-     */
+    }, [
+        filterValues,
+    ]);
 
     return (
         <div className={_cs(className, styles.mapViewWrapper)}>
@@ -425,7 +432,7 @@ function MapView(props: MapViewProps) {
                 >
                     <MapContainer className={styles.mapContainer} />
                     <MapBounds
-                        bounds={undefined}
+                        bounds={selectedRegionBounds}
                         padding={50}
                     />
                     <MapSource
