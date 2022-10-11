@@ -1,5 +1,9 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { _cs, doesObjectHaveNoData } from '@togglecorp/fujs';
+import {
+    _cs,
+    doesObjectHaveNoData,
+    isDefined,
+} from '@togglecorp/fujs';
 import {
     Heading,
     ContainerCard,
@@ -26,8 +30,10 @@ import { regionBounds } from '#utils/regionBounds';
 import {
     MostRecentValuesQuery,
     MostRecentValuesQueryVariables,
-    OverviewMapDataQuery,
-    OverviewMapDataQueryVariables,
+    MapDataQuery,
+    MapDataQueryVariables,
+    HighestLowestCasesQuery,
+    HighestLowestCasesQueryVariables,
 } from '#generated/types';
 
 import { TabTypes } from '#views/Dashboard';
@@ -44,15 +50,33 @@ const tooltipOptions: mapboxgl.PopupOptions = {
 };
 
 const MAP_DATA = gql`
-    query OverviewMapData (
+    query MapData(
         $emergency: String,
         $indicatorId: String,
         $region: String,
     ) {
+        overviewMap(
+            indicatorId: $indicatorId,
+            emergency: $emergency,
+            region: $region,
+        ) {
+            iso3
+            indicatorValue
+            countryId
+        }
+    }
+`;
+
+const HIGHEST_LOWEST_CASES = gql`
+    query HighestLowestCases(
+        $emergency: String,
+        $region: String,
+    ) {
         descCountryEmergencyProfile: countryEmergencyProfile(
             filters: {
-                contextIndicatorId: $indicatorId,
+                contextIndicatorId: "total_cases",
                 region: $region,
+                emergency: $emergency,
             }
             pagination: {
                 limit: 5,
@@ -69,8 +93,9 @@ const MAP_DATA = gql`
         }
         ascCountryEmergencyProfile: countryEmergencyProfile(
             filters: {
-                contextIndicatorId: $indicatorId,
+                contextIndicatorId: "total_cases",
                 region: $region,
+                emergency: $emergency,
             }
             pagination: {
                 limit: 5,
@@ -84,15 +109,6 @@ const MAP_DATA = gql`
             countryId
             contextIndicatorValue
             populationSize
-        }
-        overviewMap(
-            indicatorId: $indicatorId,
-            emergency: $emergency,
-            region: $region,
-        ) {
-            iso3
-            indicatorValue
-            countryId
         }
     }
 `;
@@ -149,8 +165,8 @@ const MOST_RECENT_CASES = gql`
         }
     }
 `;
-type AscendingCountryProfileType = NonNullable<OverviewMapDataQuery['ascCountryEmergencyProfile']>[number];
-type DescendingCountryProfileType = NonNullable<OverviewMapDataQuery['descCountryEmergencyProfile']>[number];
+type AscendingCountryProfileType = NonNullable<HighestLowestCasesQuery['ascCountryEmergencyProfile']>[number];
+type DescendingCountryProfileType = NonNullable<HighestLowestCasesQuery['descCountryEmergencyProfile']>[number];
 
 type AscendingMostRecentIndicatorType = NonNullable<MostRecentValuesQuery['descMostRecentValues']>[number];
 type DescendingMostRecentIndicatorType = NonNullable<MostRecentValuesQuery['ascMostRecentValues']>[number];
@@ -284,7 +300,7 @@ function MapView(props: MapViewProps) {
         setCountryData,
     ] = useState<mapboxgl.MapboxGeoJSONFeature | undefined>();
 
-    const variables = useMemo((): OverviewMapDataQueryVariables => ({
+    const mapVariables = useMemo((): MapDataQueryVariables => ({
         indicatorId: filterValues?.indicator,
         emergency: filterValues?.outbreak,
         region: filterValues?.region,
@@ -294,10 +310,28 @@ function MapView(props: MapViewProps) {
 
     const {
         data: overviewMapData,
-    } = useQuery<OverviewMapDataQuery, OverviewMapDataQueryVariables>(
+    } = useQuery<MapDataQuery, MapDataQueryVariables>(
         MAP_DATA,
         {
-            variables,
+            variables: mapVariables,
+        },
+    );
+
+    const highestLowestCasesVariables = useMemo((): HighestLowestCasesQueryVariables => ({
+        // indicatorId: filterValues?.indicator,
+        emergency: filterValues?.outbreak,
+        region: filterValues?.region,
+    }), [
+        filterValues,
+    ]);
+    const {
+        data: highestLowestCasesData,
+        loading: highestLowestCasesLoading,
+    } = useQuery<HighestLowestCasesQuery, HighestLowestCasesQueryVariables>(
+        HIGHEST_LOWEST_CASES,
+        {
+            skip: isDefined(filterValues?.indicator),
+            variables: highestLowestCasesVariables,
         },
     );
 
@@ -311,14 +345,17 @@ function MapView(props: MapViewProps) {
 
     const mostRecentVariables = useMemo(() => ({
         indicatorId: filterValues?.indicator,
+        emergency: filterValues?.outbreak,
         region: filterValues?.region,
     }), [filterValues]);
 
     const {
         data: mostRecentValues,
+        loading: mostRecentValuesLoading,
     } = useQuery<MostRecentValuesQuery, MostRecentValuesQueryVariables>(
         MOST_RECENT_CASES,
         {
+            skip: !isDefined(filterValues?.indicator),
             variables: mostRecentVariables,
         },
     );
@@ -499,7 +536,7 @@ function MapView(props: MapViewProps) {
                                 rendererParams={recentProgressBarRendererParams}
                                 filtered={false}
                                 errored={false}
-                                pending={false}
+                                pending={mostRecentValuesLoading}
                                 borderBetweenItem
                                 borderBetweenItemWidth="medium"
                                 borderBetweenItemClassName={styles.progressItemBorder}
@@ -517,7 +554,7 @@ function MapView(props: MapViewProps) {
                                 rendererParams={recentProgressBarRendererParams}
                                 filtered={false}
                                 errored={false}
-                                pending={false}
+                                pending={mostRecentValuesLoading}
                                 borderBetweenItem
                                 borderBetweenItemWidth="medium"
                                 borderBetweenItemClassName={styles.progressItemBorder}
@@ -533,12 +570,12 @@ function MapView(props: MapViewProps) {
                             <ListView
                                 className={styles.progressList}
                                 keySelector={progressBarKeySelector}
-                                data={overviewMapData?.descCountryEmergencyProfile}
+                                data={highestLowestCasesData?.descCountryEmergencyProfile}
                                 renderer={ProgressBar}
                                 rendererParams={progressBarRendererParams}
                                 filtered={false}
                                 errored={false}
-                                pending={false}
+                                pending={highestLowestCasesLoading}
                                 borderBetweenItem
                                 borderBetweenItemWidth="medium"
                                 borderBetweenItemClassName={styles.progressItemBorder}
@@ -551,12 +588,12 @@ function MapView(props: MapViewProps) {
                             <ListView
                                 className={styles.progressList}
                                 keySelector={progressBarKeySelector}
-                                data={overviewMapData?.ascCountryEmergencyProfile}
+                                data={highestLowestCasesData?.ascCountryEmergencyProfile}
                                 renderer={ProgressBar}
                                 rendererParams={progressBarRendererParams}
                                 filtered={false}
                                 errored={false}
-                                pending={false}
+                                pending={highestLowestCasesLoading}
                                 borderBetweenItem
                                 borderBetweenItemWidth="medium"
                                 borderBetweenItemClassName={styles.progressItemBorder}
