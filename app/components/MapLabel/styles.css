@@ -3,9 +3,9 @@
     flex-direction: column;
     border-radius: var(--dui-border-radius-card);
     background-color: rgba(255, 255, 255, 0.8);
-    padding: var(--dui-spacing-medium);
-    min-width: 16rem;
-    gap: var(--dui-spacing-small);
+    padding: var(--dui-spacing-small);
+    min-width: 18rem;
+    gap: var(--dui-spacing-extra-small);
 
     .bar {
         border-radius: var(--dui-border-radius-card);

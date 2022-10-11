@@ -244,7 +244,7 @@ function PercentageCardGroup(props: Props) {
                 indicatorMonth: region.indicatorMonth,
                 region: region.region,
                 fill: isDefined(filterValues?.region)
-                && (region.region !== filterValues?.region) ? 0.2 : 1,
+                    && (region.region !== filterValues?.region) ? 0.2 : 1,
             }
         ))
     ), [
@@ -258,7 +258,7 @@ function PercentageCardGroup(props: Props) {
                 ...region,
                 normalizedValue: normalFormatter().format(region.contextIndicatorValue ?? 0),
                 fill: isDefined(filterValues?.region)
-                && (region.region !== filterValues?.region) ? 0.2 : 1,
+                    && (region.region !== filterValues?.region) ? 0.2 : 1,
             }
         )).filter((item) => item.region !== 'Global')
     ), [
@@ -301,7 +301,6 @@ function PercentageCardGroup(props: Props) {
         }).sort((a, b) => compareDate(a.date, b.date))
     ), [
         overviewStatsResponse?.uncertaintyGlobal,
-        filterValues?.region,
     ]);
 
     const uncertaintyRegionChart = useMemo(() => (
@@ -476,10 +475,6 @@ function PercentageCardGroup(props: Props) {
                                 barSize={18}
                             >
                                 <Tooltip
-                                    allowEscapeViewBox={{
-                                        x: true,
-                                        y: true,
-                                    }}
                                     cursor={false}
                                 />
                                 <XAxis
@@ -520,10 +515,6 @@ function PercentageCardGroup(props: Props) {
                                 barSize={18}
                             >
                                 <Tooltip
-                                    allowEscapeViewBox={{
-                                        x: true,
-                                        y: true,
-                                    }}
                                     cursor={false}
                                 />
                                 <XAxis
