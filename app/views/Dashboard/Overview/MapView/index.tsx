@@ -202,6 +202,7 @@ interface TooltipProps {
     indicatorValue: number | undefined;
     onHide: () => void;
     lngLat: mapboxgl.LngLatLike;
+    isIndicatorSelected: boolean;
 }
 
 const lightStyle = 'mapbox://styles/mapbox/light-v10';
@@ -239,6 +240,19 @@ const countryLinePaint: mapboxgl.LinePaint = {
 };
 
 const barHeight = 10;
+// Note: This sorting logic maybe required in future
+/* function compareLowestValues(a, b) {
+    const indicatorOne = a.indicatorValue;
+    const indicatorTwo = b.indicatorValue;
+
+    let comparison = 0;
+    if (indicatorOne < indicatorTwo) {
+        comparison = 1;
+    } else if (indicatorOne > indicatorTwo) {
+        comparison = -1;
+    }
+    return comparison;
+} */
 
 function Tooltip(props: TooltipProps) {
     const {
@@ -246,6 +260,7 @@ function Tooltip(props: TooltipProps) {
         lngLat,
         onHide,
         indicatorValue,
+        isIndicatorSelected,
     } = props;
 
     return (
@@ -260,7 +275,7 @@ function Tooltip(props: TooltipProps) {
                 value={(
                     <>
                         <TextOutput
-                            description="(Outbreak)"
+                            description={isIndicatorSelected ? '%(Outbreak)' : '(Outbreak)'}
                             value={normalizedForm(indicatorValue ?? 0)}
                         />
                     </>
@@ -383,6 +398,9 @@ function MapView(props: MapViewProps) {
 
     const recentHighValuesWithIndicator = mostRecentValues?.descMostRecentValues;
     const recentLowValuesWithIndicator = mostRecentValues?.ascMostRecentValues;
+    // Note: This sorting logic maybe required in future
+    // const sortedRecentLowValues = [...recentLowValuesWithIndicator ?? []]
+    // .sort(compareLowestValues);
 
     const progressBarRendererParams = useCallback(
         (_: string, data: AscendingCountryProfileType | DescendingCountryProfileType) => ({
@@ -489,6 +507,7 @@ function MapView(props: MapViewProps) {
                             }}
                             onClick={handleCountryClick}
                             onMouseEnter={handlePointHover}
+                            onMouseLeave={handleHoverClose}
                         />
                         <MapLayer
                             layerKey="country-line"
@@ -510,6 +529,7 @@ function MapView(props: MapViewProps) {
                                 indicatorValue={selectedCountryIndicator}
                                 onHide={handleHoverClose}
                                 lngLat={mapClickProperties.lngLat}
+                                isIndicatorSelected={isIndicatorSelected}
                             />
                         )}
                 </Map>

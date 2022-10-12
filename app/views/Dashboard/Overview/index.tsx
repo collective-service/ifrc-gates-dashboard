@@ -16,7 +16,24 @@ import { FilterType } from '../Filters';
 import { TabTypes } from '..';
 import styles from './styles.css';
 
-interface Props {
+function MapSubHeader(
+    filterValues?: FilterType | undefined,
+    selectedIndicatorName?: string | undefined,
+    selectedOutbreakName?: string | undefined,
+) {
+    if (filterValues?.indicator && filterValues?.outbreak) {
+        return `${selectedIndicatorName ?? filterValues?.indicator} for ${selectedOutbreakName ?? filterValues?.outbreak}`;
+    }
+    if (filterValues?.indicator) {
+        return `${selectedIndicatorName ?? filterValues?.indicator}`;
+    }
+    if (filterValues?.outbreak) {
+        return `Total number of cases by country for ${selectedOutbreakName ?? filterValues?.outbreak}`;
+    }
+    return 'Total number of cases by country';
+}
+
+interface OverViewProps {
     className?: string;
     filterValues?: FilterType | undefined;
     setActiveTab: React.Dispatch<React.SetStateAction<TabTypes | undefined>>;
@@ -25,7 +42,7 @@ interface Props {
     selectedOutbreakName: string | undefined;
 }
 
-function Overview(props: Props) {
+function Overview(props: OverViewProps) {
     const {
         className,
         filterValues,
@@ -86,7 +103,11 @@ function Overview(props: Props) {
                         headingSize="small"
                         headingContainerClassName={styles.mapHeaderContainer}
                         headingDescription={currentTab === 'mapMode'
-                        && 'Total number of cases by country'}
+                            && (filterValues
+                                ? MapSubHeader(
+                                    filterValues, selectedIndicatorName, selectedOutbreakName,
+                                )
+                                : 'Total number of cases by country')}
                         headerActionsContainerClassName={styles.mapActionTabs}
                         headerActions={(
                             <TabList className={styles.dashboardTabList}>
