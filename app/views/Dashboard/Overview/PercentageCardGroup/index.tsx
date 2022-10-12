@@ -416,6 +416,7 @@ function PercentageCardGroup(props: Props) {
                 ) : (
                     <ContainerCard
                         className={styles.trendsCard}
+                        headingClassName={styles.headingContent}
                         heading="Outbreak over last 12 months"
                         headingSize="extraSmall"
                         contentClassName={styles.responsiveContent}
@@ -466,6 +467,7 @@ function PercentageCardGroup(props: Props) {
             <ContainerCard
                 className={styles.regionsCard}
                 contentClassName={styles.responsiveContent}
+                headingClassName={styles.headingContent}
                 heading="Regional Breakdown"
                 headingSize="extraSmall"
                 headerDescription={filterValues?.indicator

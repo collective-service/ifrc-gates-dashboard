@@ -115,6 +115,7 @@ function UncertaintyChart(props: Props) {
         <ContainerCard
             className={_cs(className, styles.areaChart)}
             contentClassName={styles.responsiveContent}
+            headingClassName={styles.headingContent}
             heading={heading}
             headingSize="extraSmall"
             headerDescription={headingDescription}

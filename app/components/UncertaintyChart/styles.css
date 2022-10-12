@@ -22,3 +22,7 @@
     background-color: var(--color-foreground);
     padding: var(--dui-spacing-small);
 }
+
+.heading-content {
+    font-weight: normal;
+}

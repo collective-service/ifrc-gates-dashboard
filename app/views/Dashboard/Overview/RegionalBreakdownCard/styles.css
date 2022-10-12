@@ -3,6 +3,10 @@
     gap: var(--dui-spacing-large);
     overflow: auto;
 
+    .heading-content {
+        font-weight: normal;
+    }
+
     .global-stat-card {
         flex-basis: 40%;
         flex-shrink: 0;
