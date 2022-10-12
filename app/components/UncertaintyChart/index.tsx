@@ -11,17 +11,19 @@ import {
 import {
     ContainerCard,
 } from '@the-deep/deep-ui';
-import { _cs } from '@togglecorp/fujs';
+import { isDefined, _cs } from '@togglecorp/fujs';
 import { getShortMonth } from '#utils/common';
 import styles from './styles.css';
 
 export interface UncertainData {
+    id: string;
     emergency?: string;
     indicatorValue?: number | null;
     date: string;
     uncertainRange?: number[];
     minimumValue?: number,
     maximumValue?: number,
+    region?: string;
 }
 const dateTickFormatter = (d: string) => getShortMonth(d);
 interface Props {
@@ -30,6 +32,16 @@ interface Props {
     emergencyFilterValue?: string;
     headingDescription?: React.ReactNode;
     heading?: React.ReactNode;
+}
+
+interface Payload {
+    name?: string;
+    value?: number;
+    payload?: UncertainData;
+}
+interface TooltipProps {
+    active?: boolean;
+    payload?: Payload[]
 }
 
 function UncertaintyChart(props: Props) {
@@ -66,6 +78,37 @@ function UncertaintyChart(props: Props) {
             ? Math.max(...(dataMax || []))
             : 100;
     }, [uncertainData]);
+
+    const customTooltip = (tooltipProps: TooltipProps) => {
+        const {
+            active,
+            payload: data,
+        } = tooltipProps;
+        if (active && data && data.length > 0) {
+            return (
+                <div className={styles.tooltipCard}>
+                    <div>
+                        {`${data[0].payload?.emergency}`}
+                    </div>
+                    <div>
+                        {isDefined(data[0].payload?.region)
+                            ? `${data[0].payload?.region} - `
+                            : null}
+                        {dateTickFormatter(data[0].payload?.date ?? '')}
+                    </div>
+                    <div>
+                        {data[0].payload?.indicatorValue}
+                        {isDefined(data[0].payload?.minimumValue
+                            && isDefined(data[0].payload.maximumValue))
+                            ? ` [${data[0].payload?.minimumValue} - ${data[0].payload?.maximumValue}] `
+                            : null}
+                    </div>
+                </div>
+            );
+        }
+
+        return null;
+    };
 
     return (
         <ContainerCard
@@ -108,7 +151,7 @@ function UncertaintyChart(props: Props) {
                             strokeWidth: 2,
                         }}
                     />
-                    <Tooltip />
+                    <Tooltip content={customTooltip} />
                 </ComposedChart>
             </ResponsiveContainer>
         </ContainerCard>

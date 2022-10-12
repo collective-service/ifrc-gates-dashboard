@@ -194,7 +194,8 @@ const OVERVIEW_STATS = gql`
             indicatorMonth
             indicatorId
             indicatorName
-            indicatorValueRegional
+            indicatorValueRegional,
+            region,
         }
     }
 `;
@@ -284,6 +285,7 @@ function PercentageCardGroup(props: Props) {
                     date: global.indicatorMonth,
                     minimumValue: negativeRange,
                     maximumValue: positiveRange,
+                    id: global.id,
                 };
             }
 
@@ -297,6 +299,7 @@ function PercentageCardGroup(props: Props) {
                 ],
                 minimumValue: negativeRange,
                 maximumValue: positiveRange,
+                id: global.id,
             };
         }).sort((a, b) => compareDate(a.date, b.date))
     ), [
@@ -321,6 +324,8 @@ function PercentageCardGroup(props: Props) {
                     date: region.indicatorMonth,
                     minimumValue: negativeRange,
                     maximumValue: positiveRange,
+                    region: region.region,
+                    id: region.id,
                 };
             }
 
@@ -334,6 +339,8 @@ function PercentageCardGroup(props: Props) {
                 ],
                 minimumValue: negativeRange,
                 maximumValue: positiveRange,
+                region: region.region,
+                id: region.id,
             };
         }).sort((a, b) => compareDate(a.date, b.date))
     ), [overviewStatsResponse?.uncertaintyRegion]);

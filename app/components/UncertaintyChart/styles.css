@@ -13,3 +13,12 @@
         overflow: hidden;
     }
 }
+
+.tooltip-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dui-spacing-small);
+    border: 1px solid var(--dui-color-line-separator);
+    background-color: var(--dui-color-background);
+    padding: var(--dui-spacing-small);
+}
