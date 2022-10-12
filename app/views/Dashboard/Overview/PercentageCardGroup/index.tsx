@@ -310,6 +310,7 @@ function PercentageCardGroup(props: Props) {
                     minimumValue: negativeRange,
                     maximumValue: positiveRange,
                     indicatorName: global.indicatorName,
+                    id: global.id,
                 };
             }
 
@@ -324,6 +325,7 @@ function PercentageCardGroup(props: Props) {
                 minimumValue: negativeRange,
                 maximumValue: positiveRange,
                 indicatorName: global.indicatorName,
+                id: global.id,
             };
         }).sort((a, b) => compareDate(a.date, b.date))
     ), [
@@ -350,6 +352,7 @@ function PercentageCardGroup(props: Props) {
                     maximumValue: positiveRange,
                     region: region.region,
                     indicatorName: region.indicatorName,
+                    id: region.id,
                 };
             }
 
@@ -365,6 +368,7 @@ function PercentageCardGroup(props: Props) {
                 maximumValue: positiveRange,
                 region: region.region,
                 indicatorName: region.indicatorName,
+                id: region.id,
             };
         }).sort((a, b) => compareDate(a.date, b.date))
     ), [overviewStatsResponse?.uncertaintyRegion]);

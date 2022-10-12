@@ -16,6 +16,7 @@ import { getShortMonth } from '#utils/common';
 import styles from './styles.css';
 
 export interface UncertainData {
+    id: string;
     emergency?: string;
     indicatorValue?: number | null;
     date: string;
@@ -25,7 +26,9 @@ export interface UncertainData {
     indicatorName?: string;
     region?: string;
 }
+
 const dateTickFormatter = (d: string) => getShortMonth(d);
+
 interface Props {
     className?: string;
     uncertainData: UncertainData[] | undefined;
@@ -34,13 +37,15 @@ interface Props {
     heading?: React.ReactNode;
 }
 
+interface Payload {
+    name?: string;
+    value?: number;
+    payload?: UncertainData;
+}
+
 interface TooltipProps {
     active?: boolean;
-    payload?: {
-        name?: string;
-        value?: number;
-        payload?: UncertainData;
-    }[];
+    payload?: Payload[];
 }
 
 function UncertaintyChart(props: Props) {
