@@ -150,7 +150,7 @@ function MapModal(props: ModalProps) {
                     (group, key) => group.reduce(
                         (acc, item) => ({
                             ...acc,
-                            [emergency.emergency]: item.contextIndicatorValue,
+                            [emergency.emergency]: Number(item.contextIndicatorValue),
                             date: item.contextDate,
                         }), { date: key },
                     ),

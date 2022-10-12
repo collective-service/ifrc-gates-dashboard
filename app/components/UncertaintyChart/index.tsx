@@ -20,10 +20,10 @@ export interface UncertainData {
     indicatorValue?: number | null;
     date: string;
     uncertainRange?: number[];
-    minimumValue?: number,
-    maximumValue?: number,
+    minimumValue?: number;
+    maximumValue?: number;
+    indicatorName?: string;
     region?: string;
-    indicatorName?: string | null;
 }
 const dateTickFormatter = (d: string) => getShortMonth(d);
 interface Props {
@@ -40,7 +40,7 @@ interface TooltipProps {
         name?: string;
         value?: number;
         payload?: UncertainData;
-    }[]
+    }[];
 }
 
 function UncertaintyChart(props: Props) {

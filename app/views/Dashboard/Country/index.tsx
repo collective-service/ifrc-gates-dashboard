@@ -7,6 +7,7 @@ import {
     unique,
     compareDate,
     isDefined,
+    compareNumber,
 } from '@togglecorp/fujs';
 import {
     LineChart,
@@ -346,7 +347,9 @@ function Country(props: Props) {
             };
 
             return valueToReturn;
-        });
+        }).sort(
+            (a, b) => compareNumber(b.contextIndicatorValue, a.contextIndicatorValue),
+        );
         return cases;
     }, [
         countryResponse?.contextualData,
@@ -442,7 +445,7 @@ function Country(props: Props) {
                     (group, key) => group.reduce(
                         (acc, item) => ({
                             ...acc,
-                            [emergency.emergency]: item.contextIndicatorValue,
+                            [emergency.emergency]: Number(item.contextIndicatorValue),
                             date: item.contextDate,
                         }), { date: key },
                     ),
