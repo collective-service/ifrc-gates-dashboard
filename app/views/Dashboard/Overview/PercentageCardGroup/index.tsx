@@ -46,7 +46,7 @@ interface LegendProps {
         value: string;
         type?: string;
         id?: string
-    }[]
+    }[];
 }
 
 const normalizedTickFormatter = (d: number) => normalFormatter().format(d);

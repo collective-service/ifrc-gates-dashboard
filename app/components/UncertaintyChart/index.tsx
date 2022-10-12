@@ -16,7 +16,6 @@ import { getShortMonth } from '#utils/common';
 import styles from './styles.css';
 
 export interface UncertainData {
-    id: string;
     emergency?: string;
     indicatorValue?: number | null;
     date: string;
@@ -111,6 +110,9 @@ function UncertaintyChart(props: Props) {
                         }}
                         tickFormatter={dateTickFormatter}
                     />
+                    {/* NOTE: don't need to determine the Y-axis domain
+                    this will auto calculate minium and maximum value
+                    based upon the data provided to chart. */}
                     <YAxis />
                     <Area
                         dataKey="uncertainRange"
