@@ -16,7 +16,6 @@ import { getShortMonth } from '#utils/common';
 import styles from './styles.css';
 
 export interface UncertainData {
-    id: string;
     emergency?: string;
     indicatorValue?: number | null;
     date: string;
@@ -24,6 +23,7 @@ export interface UncertainData {
     minimumValue?: number,
     maximumValue?: number,
     region?: string;
+    indicatorName?: string | null;
 }
 const dateTickFormatter = (d: string) => getShortMonth(d);
 interface Props {
@@ -34,14 +34,13 @@ interface Props {
     heading?: React.ReactNode;
 }
 
-interface Payload {
-    name?: string;
-    value?: number;
-    payload?: UncertainData;
-}
 interface TooltipProps {
     active?: boolean;
-    payload?: Payload[]
+    payload?: {
+        name?: string;
+        value?: number;
+        payload?: UncertainData;
+    }[]
 }
 
 function UncertaintyChart(props: Props) {
@@ -53,6 +52,7 @@ function UncertaintyChart(props: Props) {
         heading,
     } = props;
 
+    // NOTE: don't need to calculate
     const minDomain = useMemo(() => {
         const minimum = uncertainData?.map((min) => (
             Number(min.minimumValue)
@@ -66,6 +66,7 @@ function UncertaintyChart(props: Props) {
             : 0;
     }, [uncertainData]);
 
+    // NOTE: don't need to calculate
     const maxDomain = useMemo(() => {
         const maximum = uncertainData?.map((max) => (
             Number(max.maximumValue)
@@ -88,7 +89,7 @@ function UncertaintyChart(props: Props) {
             return (
                 <div className={styles.tooltipCard}>
                     <div>
-                        {`${data[0].payload?.emergency}`}
+                        {data[0].payload?.indicatorName}
                     </div>
                     <div>
                         {isDefined(data[0].payload?.region)
@@ -132,9 +133,10 @@ function UncertaintyChart(props: Props) {
                         }}
                         tickFormatter={dateTickFormatter}
                     />
-                    <YAxis
-                        domain={[minDomain, maxDomain]}
-                    />
+                    {/* NOTE: don't need to determine the Y-axis domain
+                    this will auto calculate minium and maximum value
+                    based upon the data provided to chart. */}
+                    <YAxis />
                     <Area
                         dataKey="uncertainRange"
                         name="Uncertainty Range"

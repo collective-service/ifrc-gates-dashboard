@@ -621,121 +621,121 @@ function Country(props: Props) {
                                 headingDescription={`Trend chart for ${selectedIndicatorName ?? filterValues?.indicator}`}
                             />
                             {(genderDisaggregation && genderDisaggregation.length > 0
-                                && ageDisaggregation && ageDisaggregation.length > 0
-                            ) && (
-                                <>
-                                    <ContainerCard
-                                        className={styles.disaggregation}
-                                        contentClassName={styles.disaggregationContent}
-                                        heading="Gender Disaggregation"
-                                        headerDescription="Lorem ipsum explaining the topic"
-                                        headingSize="extraSmall"
-                                    >
-                                        {(genderDisaggregation?.length ?? 0) > 0 && (
-                                            <div className={styles.genderDisaggregation}>
-                                                <div>Gender Disaggregation</div>
-                                                <ResponsiveContainer
-                                                    className={styles.responsiveContainer}
-                                                >
-                                                    <BarChart
-                                                        data={genderDisaggregation}
-                                                        barSize={18}
+                                && ageDisaggregation && ageDisaggregation.length > 0)
+                                && (
+                                    <>
+                                        <ContainerCard
+                                            className={styles.disaggregation}
+                                            contentClassName={styles.disaggregationContent}
+                                            heading="Gender Disaggregation"
+                                            headerDescription="Lorem ipsum explaining the topic"
+                                            headingSize="extraSmall"
+                                        >
+                                            {(genderDisaggregation?.length ?? 0) > 0 && (
+                                                <div className={styles.genderDisaggregation}>
+                                                    <div>Gender Disaggregation</div>
+                                                    <ResponsiveContainer
+                                                        className={styles.responsiveContainer}
                                                     >
-                                                        <Bar
-                                                            dataKey="indicatorValue"
-                                                            radius={[10, 10, 0, 0]}
+                                                        <BarChart
+                                                            data={genderDisaggregation}
+                                                            barSize={18}
                                                         >
-                                                            <LabelList
+                                                            <Bar
                                                                 dataKey="indicatorValue"
-                                                                position="insideBottomLeft"
-                                                                fill="#8DD2B1"
-                                                                fontSize={16}
-                                                                angle={270}
-                                                                dx={-15}
-                                                                dy={-3}
-                                                                formatter={customLabel}
+                                                                radius={[10, 10, 0, 0]}
+                                                            >
+                                                                <LabelList
+                                                                    dataKey="indicatorValue"
+                                                                    position="insideBottomLeft"
+                                                                    fill="#8DD2B1"
+                                                                    fontSize={16}
+                                                                    angle={270}
+                                                                    dx={-15}
+                                                                    dy={-3}
+                                                                    formatter={customLabel}
+                                                                />
+                                                            </Bar>
+                                                            <XAxis
+                                                                dataKey="category"
+                                                                tickLine={false}
                                                             />
-                                                        </Bar>
-                                                        <XAxis
-                                                            dataKey="category"
-                                                            tickLine={false}
-                                                        />
-                                                        <YAxis
-                                                            type="number"
-                                                            axisLine={false}
-                                                            tickLine={false}
-                                                            domain={[0, 100]}
-                                                        />
-                                                        <Tooltip
-                                                            allowEscapeViewBox={{
-                                                                x: true,
-                                                                y: true,
-                                                            }}
-                                                            cursor={false}
-                                                        />
-                                                    </BarChart>
-                                                </ResponsiveContainer>
-                                            </div>
-                                        )}
-                                    </ContainerCard>
-                                    <ContainerCard
-                                        className={styles.disaggregation}
-                                        contentClassName={styles.disaggregationContent}
-                                        heading="Age Disaggregation"
-                                        headerDescription="Lorem ipsum explaining the topic"
-                                        headingSize="extraSmall"
-                                    >
-                                        {(ageDisaggregation?.length ?? 0) > 0 && (
-                                            <div className={styles.ageDisaggregation}>
-                                                <div>Age Disaggregation</div>
-                                                <ResponsiveContainer
-                                                    className={styles.responsiveContainer}
-                                                >
-                                                    <BarChart
-                                                        data={ageDisaggregation}
-                                                        barSize={18}
+                                                            <YAxis
+                                                                type="number"
+                                                                axisLine={false}
+                                                                tickLine={false}
+                                                                domain={[0, 100]}
+                                                            />
+                                                            <Tooltip
+                                                                allowEscapeViewBox={{
+                                                                    x: true,
+                                                                    y: true,
+                                                                }}
+                                                                cursor={false}
+                                                            />
+                                                        </BarChart>
+                                                    </ResponsiveContainer>
+                                                </div>
+                                            )}
+                                        </ContainerCard>
+                                        <ContainerCard
+                                            className={styles.disaggregation}
+                                            contentClassName={styles.disaggregationContent}
+                                            heading="Age Disaggregation"
+                                            headerDescription="Lorem ipsum explaining the topic"
+                                            headingSize="extraSmall"
+                                        >
+                                            {(ageDisaggregation?.length ?? 0) > 0 && (
+                                                <div className={styles.ageDisaggregation}>
+                                                    <div>Age Disaggregation</div>
+                                                    <ResponsiveContainer
+                                                        className={styles.responsiveContainer}
                                                     >
-                                                        <Bar
-                                                            dataKey="indicatorValue"
-                                                            radius={[10, 10, 0, 0]}
+                                                        <BarChart
+                                                            data={ageDisaggregation}
+                                                            barSize={18}
                                                         >
-                                                            <LabelList
+                                                            <Bar
                                                                 dataKey="indicatorValue"
-                                                                position="insideBottomLeft"
-                                                                fill="#8DD2B1"
-                                                                fontSize={16}
-                                                                angle={270}
-                                                                dx={-15}
-                                                                dy={-3}
-                                                                formatter={customLabel}
+                                                                radius={[10, 10, 0, 0]}
+                                                            >
+                                                                <LabelList
+                                                                    dataKey="indicatorValue"
+                                                                    position="insideBottomLeft"
+                                                                    fill="#8DD2B1"
+                                                                    fontSize={16}
+                                                                    angle={270}
+                                                                    dx={-15}
+                                                                    dy={-3}
+                                                                    formatter={customLabel}
+                                                                />
+                                                            </Bar>
+                                                            <XAxis
+                                                                dataKey="category"
+                                                                tickLine={false}
+                                                                fontSize={12}
                                                             />
-                                                        </Bar>
-                                                        <XAxis
-                                                            dataKey="category"
-                                                            tickLine={false}
-                                                            fontSize={12}
-                                                        />
-                                                        <YAxis
-                                                            type="number"
-                                                            axisLine={false}
-                                                            tickLine={false}
-                                                            domain={[0, 100]}
-                                                        />
-                                                        <Tooltip
-                                                            allowEscapeViewBox={{
-                                                                x: true,
-                                                                y: true,
-                                                            }}
-                                                            cursor={false}
-                                                        />
-                                                    </BarChart>
-                                                </ResponsiveContainer>
-                                            </div>
+                                                            <YAxis
+                                                                type="number"
+                                                                axisLine={false}
+                                                                tickLine={false}
+                                                                domain={[0, 100]}
+                                                            />
+                                                            <Tooltip
+                                                                allowEscapeViewBox={{
+                                                                    x: true,
+                                                                    y: true,
+                                                                }}
+                                                                cursor={false}
+                                                            />
+                                                        </BarChart>
+                                                    </ResponsiveContainer>
+                                                </div>
 
-                                        )}
-                                    </ContainerCard>
-                                </>
-                            )}
+                                            )}
+                                        </ContainerCard>
+                                    </>
+                                )}
                         </div>
                     )}
                 </div>
@@ -846,18 +846,17 @@ function Country(props: Props) {
                             value={(
                                 <>
                                     {(countryResponse?.countryProfile.medicalStaff)?.toFixed(2)}
-                                    {isDefined(
-                                        countryResponse?.countryProfile.medicalStaffRegion,
-                                    ) && (
-                                        <TextOutput
-                                            labelContainerClassName={styles.regionalText}
-                                            valueContainerClassName={styles.regionalText}
-                                            label={countryResponse?.countryProfile.region}
-                                            value={(countryResponse
-                                                ?.countryProfile.medicalStaffRegion)
-                                                ?.toFixed(2)}
-                                        />
-                                    )}
+                                    {isDefined(countryResponse?.countryProfile.medicalStaffRegion)
+                                        && (
+                                            <TextOutput
+                                                labelContainerClassName={styles.regionalText}
+                                                valueContainerClassName={styles.regionalText}
+                                                label={countryResponse?.countryProfile.region}
+                                                value={(countryResponse
+                                                    ?.countryProfile.medicalStaffRegion)
+                                                    ?.toFixed(2)}
+                                            />
+                                        )}
                                 </>
                             )}
                         />
@@ -916,20 +915,25 @@ function Country(props: Props) {
                     )}
                 </ContainerCard>
             </div>
-            <div className={styles.perceptionCard}>
-                <div className={styles.infoIcon}>
-                    <IoInformationCircle />
+            <div>
+                <div className={styles.sourceHeading}>
+                    Sources
                 </div>
-                <div>
-                    {`COVID-19 Vaccine Perceptions in ${countryResponse?.countryProfile.countryName}
+                <div className={styles.perceptionCard}>
+                    <div className={styles.infoIcon}>
+                        <IoInformationCircle />
+                    </div>
+                    <div>
+                        {`COVID-19 Vaccine Perceptions in ${countryResponse?.countryProfile.countryName}
                     (${countryResponse?.countryProfile.countryName} CDC)`}
+                    </div>
+                    <a
+                        href="https://www.rcce-collective.net/data/data-tracker/"
+                        className={styles.infoIcon}
+                    >
+                        <BiLinkExternal />
+                    </a>
                 </div>
-                <a
-                    href="https://www.rcce-collective.net/data/data-tracker/"
-                    className={styles.infoIcon}
-                >
-                    <BiLinkExternal />
-                </a>
             </div>
         </div>
     );
