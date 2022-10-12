@@ -226,6 +226,21 @@ function PercentageCardGroup(props: Props) {
         selectedOutbreakName,
     } = props;
 
+    const getLineChartColor = useCallback((outbreak?: string) => {
+        let color = '';
+        if (outbreak === 'COVID-19') {
+            color = '#FFDD98';
+        } else if (outbreak === 'Ebola') {
+            color = '#CCB387';
+        } else if (outbreak === 'Monkeypox') {
+            color = '#ACA28E';
+        } else {
+            color = '#C09A57';
+        }
+
+        return color;
+    }, []);
+
     const overviewStatsVariables = useMemo((): OverviewStatsQueryVariables => ({
         emergency: filterValues?.outbreak,
         indicatorId: filterValues?.indicator,
@@ -405,7 +420,7 @@ function PercentageCardGroup(props: Props) {
                         key={`item-${entry.id}`}
                         actions={(
                             <>
-                                <IoSquare color="#ACA28E" />
+                                <IoSquare color={getLineChartColor(filterValues?.outbreak)} />
                                 <span className={styles.outbreakLegendTitleName}>
                                     {entry.value}
                                 </span>
@@ -415,7 +430,10 @@ function PercentageCardGroup(props: Props) {
                 ))}
             </>
         );
-    }, []);
+    }, [
+        filterValues?.outbreak,
+        getLineChartColor,
+    ]);
 
     return (
         <div className={_cs(className, styles.cardInfo)}>
@@ -482,7 +500,7 @@ function PercentageCardGroup(props: Props) {
                                 <Line
                                     type="monotone"
                                     dataKey={filterValues?.outbreak}
-                                    stroke="#ACA28E"
+                                    stroke={getLineChartColor(filterValues?.outbreak)}
                                     strokeWidth={2}
                                     dot={false}
                                 />
