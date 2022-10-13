@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
     ComposedChart,
     Area,
@@ -51,34 +51,6 @@ function UncertaintyChart(props: Props) {
         headingDescription,
         heading,
     } = props;
-
-    // NOTE: don't need to calculate
-    const minDomain = useMemo(() => {
-        const minimum = uncertainData?.map((min) => (
-            Number(min.minimumValue)
-        ));
-        const dataMin = minimum?.filter((value) => (
-            !Number.isNaN(value)
-        ));
-
-        return (dataMin && dataMin?.length > 0)
-            ? Math.min(...(dataMin || []))
-            : 0;
-    }, [uncertainData]);
-
-    // NOTE: don't need to calculate
-    const maxDomain = useMemo(() => {
-        const maximum = uncertainData?.map((max) => (
-            Number(max.maximumValue)
-        ));
-        const dataMax = maximum?.filter((value) => (
-            !Number.isNaN(value)
-        ));
-
-        return (dataMax && dataMax?.length > 0)
-            ? Math.max(...(dataMax || []))
-            : 100;
-    }, [uncertainData]);
 
     const customTooltip = (tooltipProps: TooltipProps) => {
         const {
@@ -134,9 +106,6 @@ function UncertaintyChart(props: Props) {
                         }}
                         tickFormatter={dateTickFormatter}
                     />
-                    {/* NOTE: don't need to determine the Y-axis domain
-                    this will auto calculate minium and maximum value
-                    based upon the data provided to chart. */}
                     <YAxis />
                     <Area
                         dataKey="uncertainRange"
