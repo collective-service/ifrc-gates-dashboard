@@ -60,16 +60,16 @@ function UncertaintyChart(props: Props) {
         if (active && data && data.length > 0) {
             return (
                 <div className={styles.tooltipCard}>
-                    <div>
+                    <div className={styles.tooltipHeading}>
                         {data[0].payload?.indicatorName}
                     </div>
-                    <div>
+                    <div className={styles.tooltipContent}>
                         {isDefined(data[0].payload?.region)
                             ? `${data[0].payload?.region} - `
                             : null}
                         {dateTickFormatter(data[0].payload?.date ?? '')}
                     </div>
-                    <div>
+                    <div className={styles.tooltipContent}>
                         {data[0].payload?.indicatorValue}
                         {isDefined(data[0].payload?.minimumValue
                             && isDefined(data[0].payload.maximumValue))
