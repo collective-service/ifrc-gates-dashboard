@@ -22,8 +22,8 @@ export interface UncertainData {
     uncertainRange?: number[];
     minimumValue?: number;
     maximumValue?: number;
-    indicatorName?: string;
     region?: string;
+    indicatorName?: string | null;
 }
 
 const dateTickFormatter = (d: string) => getShortMonth(d);
