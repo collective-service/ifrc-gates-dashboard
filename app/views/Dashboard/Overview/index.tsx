@@ -22,10 +22,10 @@ function MapSubHeader(
     selectedOutbreakName?: string | undefined,
 ) {
     if (filterValues?.indicator && filterValues?.outbreak) {
-        return `${selectedIndicatorName ?? filterValues?.indicator} for ${selectedOutbreakName ?? filterValues?.outbreak}`;
+        return `${selectedIndicatorName ?? filterValues?.indicator} for ${selectedOutbreakName ?? filterValues?.outbreak} - Latest available data`;
     }
     if (filterValues?.indicator) {
-        return `${selectedIndicatorName ?? filterValues?.indicator}`;
+        return `${selectedIndicatorName ?? filterValues?.indicator} - Latest available data`;
     }
     if (filterValues?.outbreak) {
         return `Total number of cases by country for ${selectedOutbreakName ?? filterValues?.outbreak}`;
