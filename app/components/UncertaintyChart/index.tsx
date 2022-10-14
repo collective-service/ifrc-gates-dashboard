@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
     ComposedChart,
     Area,
@@ -11,7 +11,7 @@ import {
 import {
     ContainerCard,
 } from '@the-deep/deep-ui';
-import { _cs } from '@togglecorp/fujs';
+import { isDefined, _cs } from '@togglecorp/fujs';
 import { getShortMonth } from '#utils/common';
 import styles from './styles.css';
 
@@ -22,6 +22,8 @@ export interface UncertainData {
     uncertainRange?: number[];
     minimumValue?: number,
     maximumValue?: number,
+    region?: string;
+    indicatorName?: string | null;
 }
 const dateTickFormatter = (d: string) => getShortMonth(d);
 interface Props {
@@ -30,6 +32,15 @@ interface Props {
     emergencyFilterValue?: string;
     headingDescription?: React.ReactNode;
     heading?: React.ReactNode;
+}
+
+interface TooltipProps {
+    active?: boolean;
+    payload?: {
+        name?: string;
+        value?: number;
+        payload?: UncertainData;
+    }[]
 }
 
 function UncertaintyChart(props: Props) {
@@ -41,36 +52,42 @@ function UncertaintyChart(props: Props) {
         heading,
     } = props;
 
-    const minDomain = useMemo(() => {
-        const minimum = uncertainData?.map((min) => (
-            Number(min.minimumValue)
-        ));
-        const dataMin = minimum?.filter((value) => (
-            !Number.isNaN(value)
-        ));
+    const customTooltip = (tooltipProps: TooltipProps) => {
+        const {
+            active,
+            payload: data,
+        } = tooltipProps;
+        if (active && data && data.length > 0) {
+            return (
+                <div className={styles.tooltipCard}>
+                    <div className={styles.tooltipHeading}>
+                        {data[0].payload?.indicatorName}
+                    </div>
+                    <div className={styles.tooltipContent}>
+                        {isDefined(data[0].payload?.region)
+                            ? `${data[0].payload?.region} - `
+                            : null}
+                        {dateTickFormatter(data[0].payload?.date ?? '')}
+                    </div>
+                    <div className={styles.tooltipContent}>
+                        {data[0].payload?.indicatorValue}
+                        {isDefined(data[0].payload?.minimumValue
+                            && isDefined(data[0].payload.maximumValue))
+                            ? ` [${data[0].payload?.minimumValue} - ${data[0].payload?.maximumValue}] `
+                            : null}
+                    </div>
+                </div>
+            );
+        }
 
-        return (dataMin && dataMin?.length > 0)
-            ? Math.min(...(dataMin || []))
-            : 0;
-    }, [uncertainData]);
-
-    const maxDomain = useMemo(() => {
-        const maximum = uncertainData?.map((max) => (
-            Number(max.maximumValue)
-        ));
-        const dataMax = maximum?.filter((value) => (
-            !Number.isNaN(value)
-        ));
-
-        return (dataMax && dataMax?.length > 0)
-            ? Math.max(...(dataMax || []))
-            : 100;
-    }, [uncertainData]);
+        return null;
+    };
 
     return (
         <ContainerCard
             className={_cs(className, styles.areaChart)}
             contentClassName={styles.responsiveContent}
+            headingClassName={styles.headingContent}
             heading={heading}
             headingSize="extraSmall"
             headerDescription={headingDescription}
@@ -89,9 +106,7 @@ function UncertaintyChart(props: Props) {
                         }}
                         tickFormatter={dateTickFormatter}
                     />
-                    <YAxis
-                        domain={[minDomain, maxDomain]}
-                    />
+                    <YAxis />
                     <Area
                         dataKey="uncertainRange"
                         name="Uncertainty Range"
@@ -108,7 +123,7 @@ function UncertaintyChart(props: Props) {
                             strokeWidth: 2,
                         }}
                     />
-                    <Tooltip />
+                    <Tooltip content={customTooltip} />
                 </ComposedChart>
             </ResponsiveContainer>
         </ContainerCard>

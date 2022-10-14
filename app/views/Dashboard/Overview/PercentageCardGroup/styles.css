@@ -2,6 +2,10 @@
     display: flex;
     gap: var(--dui-spacing-large);
 
+    .heading-content {
+        font-weight: normal;
+    }
+
     .global-stat-card {
         flex-basis: 20%;
         border-radius: 0;

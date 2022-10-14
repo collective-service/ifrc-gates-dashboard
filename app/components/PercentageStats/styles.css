@@ -6,6 +6,7 @@
 
     .percentage-heading {
         font-weight: var(--dui-font-weight-bold);
+        font-weight: normal;
     }
 
     .icon-container {

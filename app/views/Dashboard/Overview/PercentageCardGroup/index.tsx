@@ -194,7 +194,8 @@ const OVERVIEW_STATS = gql`
             indicatorMonth
             indicatorId
             indicatorName
-            indicatorValueRegional
+            indicatorValueRegional,
+            region,
         }
     }
 `;
@@ -284,6 +285,7 @@ function PercentageCardGroup(props: Props) {
                     date: global.indicatorMonth,
                     minimumValue: negativeRange,
                     maximumValue: positiveRange,
+                    indicatorName: global.indicatorName,
                 };
             }
 
@@ -297,6 +299,7 @@ function PercentageCardGroup(props: Props) {
                 ],
                 minimumValue: negativeRange,
                 maximumValue: positiveRange,
+                indicatorName: global.indicatorName,
             };
         }).sort((a, b) => compareDate(a.date, b.date))
     ), [
@@ -321,6 +324,8 @@ function PercentageCardGroup(props: Props) {
                     date: region.indicatorMonth,
                     minimumValue: negativeRange,
                     maximumValue: positiveRange,
+                    region: region.region,
+                    indicatorName: region.indicatorName,
                 };
             }
 
@@ -334,6 +339,8 @@ function PercentageCardGroup(props: Props) {
                 ],
                 minimumValue: negativeRange,
                 maximumValue: positiveRange,
+                region: region.region,
+                indicatorName: region.indicatorName,
             };
         }).sort((a, b) => compareDate(a.date, b.date))
     ), [overviewStatsResponse?.uncertaintyRegion]);
@@ -409,6 +416,7 @@ function PercentageCardGroup(props: Props) {
                 ) : (
                     <ContainerCard
                         className={styles.trendsCard}
+                        headingClassName={styles.headingContent}
                         heading="Outbreak over last 12 months"
                         headingSize="extraSmall"
                         contentClassName={styles.responsiveContent}
@@ -459,6 +467,7 @@ function PercentageCardGroup(props: Props) {
             <ContainerCard
                 className={styles.regionsCard}
                 contentClassName={styles.responsiveContent}
+                headingClassName={styles.headingContent}
                 heading="Regional Breakdown"
                 headingSize="extraSmall"
                 headerDescription={filterValues?.indicator

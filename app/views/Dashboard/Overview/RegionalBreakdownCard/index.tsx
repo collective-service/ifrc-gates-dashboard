@@ -211,6 +211,7 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
             <ContainerCard
                 className={_cs(styles.globalStatCard)}
                 contentClassName={styles.responsiveContent}
+                headingClassName={styles.headingContent}
                 heading="Total number of cases"
                 headingSize="extraSmall"
                 headerDescription="Total number of cases by outbreak"
@@ -265,6 +266,7 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
             <ContainerCard
                 className={_cs(styles.regionsPieChart)}
                 contentClassName={styles.responsiveContent}
+                headingClassName={styles.headingContent}
                 heading="Regional Breakdown"
                 headingSize="extraSmall"
                 headerDescription="Repartition of cases by region"
