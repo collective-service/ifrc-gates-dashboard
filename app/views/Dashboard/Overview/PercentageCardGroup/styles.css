@@ -34,4 +34,9 @@
             overflow: hidden;
         }
     }
+
+    .outbreak-legend-title-name {
+        color: var(--color-outbreak-title-name);
+        font-size: var(--dui-font-size-medium);
+    }
 }

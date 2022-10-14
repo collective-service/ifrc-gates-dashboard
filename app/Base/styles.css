@@ -87,7 +87,7 @@
     --dui-color-accent: rgb(65, 131, 196);
     --dui-color-brand: rgb(25, 50, 86);
     --dui-color-brand-hover: #06179E;
-    --dui-tab-background-color: #0d2f54;
+    --dui-tab-background-color: #08284B;
 
     --dui-color-text: rgb(100, 99, 99);
     --dui-filter-background-color: #EFF4FA;
@@ -115,6 +115,8 @@
     --color-text-secondary: #8DD2B1;
     --color-text-title: #2F9C67;
     --color-progress-bar: #FF800B;
+
+    --color-outbreak-title-name: #4F4E4E;
 
     /* FIXME:  update Appropriate color */
     --color-indicator-high: #66EEAE;

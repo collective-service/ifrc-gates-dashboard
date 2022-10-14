@@ -1,6 +1,10 @@
-import React, { useMemo, useState } from 'react';
+import React,
+{
+    useMemo,
+    useState,
+} from 'react';
 import {
-    IoCloudDownloadOutline,
+    IoDownloadOutline,
 } from 'react-icons/io5';
 import {
     Tabs,
@@ -292,8 +296,9 @@ function Dashboard() {
                     <DropdownMenu
                         className={styles.button}
                         label="Export"
-                        icons={<IoCloudDownloadOutline />}
                         variant="tertiary"
+                        icons={<IoDownloadOutline />}
+                        hideDropdownIcon
                     >
                         <DropdownMenuItem
                             name={undefined}

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
     BarChart,
     Bar,
@@ -13,7 +13,7 @@ import {
     Cell,
 } from 'recharts';
 import {
-    ContainerCard,
+    ContainerCard, Element,
 } from '@the-deep/deep-ui';
 import {
     compareDate,
@@ -21,6 +21,7 @@ import {
     isDefined,
     _cs,
 } from '@togglecorp/fujs';
+import { IoSquare } from 'react-icons/io5';
 import { useQuery, gql } from '@apollo/client';
 
 import PercentageStats from '#components/PercentageStats';
@@ -39,6 +40,14 @@ import {
 import { FilterType } from '../../Filters';
 
 import styles from './styles.css';
+
+interface LegendProps {
+    payload?: {
+        value: string;
+        type?: string;
+        id?: string
+    }[]
+}
 
 const normalizedTickFormatter = (d: number) => normalFormatter().format(d);
 
@@ -217,6 +226,21 @@ function PercentageCardGroup(props: Props) {
         selectedOutbreakName,
     } = props;
 
+    const getLineChartColor = useCallback((outbreak?: string) => {
+        let color = '';
+        if (outbreak === 'COVID-19') {
+            color = '#FFDD98';
+        } else if (outbreak === 'Ebola') {
+            color = '#CCB387';
+        } else if (outbreak === 'Monkeypox') {
+            color = '#ACA28E';
+        } else {
+            color = '#C09A57';
+        }
+
+        return color;
+    }, []);
+
     const overviewStatsVariables = useMemo((): OverviewStatsQueryVariables => ({
         emergency: filterValues?.outbreak,
         indicatorId: filterValues?.indicator,
@@ -387,6 +411,30 @@ function PercentageCardGroup(props: Props) {
         totalCase?.contextIndicatorValue,
     ]);
 
+    const renderLegend = useCallback((legendProps: LegendProps) => {
+        const { payload } = legendProps;
+        return (
+            <>
+                {payload?.map((entry) => (
+                    <Element
+                        key={`item-${entry.id}`}
+                        actions={(
+                            <>
+                                <IoSquare color={getLineChartColor(filterValues?.outbreak)} />
+                                <span className={styles.outbreakLegendTitleName}>
+                                    {entry.value}
+                                </span>
+                            </>
+                        )}
+                    />
+                ))}
+            </>
+        );
+    }, [
+        filterValues?.outbreak,
+        getLineChartColor,
+    ]);
+
     return (
         <div className={_cs(className, styles.cardInfo)}>
             <PercentageStats
@@ -448,14 +496,11 @@ function PercentageCardGroup(props: Props) {
                                         y: true,
                                     }}
                                 />
-                                <Legend
-                                    iconType="square"
-                                    align="right"
-                                />
+                                <Legend content={renderLegend} />
                                 <Line
                                     type="monotone"
                                     dataKey={filterValues?.outbreak}
-                                    stroke="#4bda8a"
+                                    stroke={getLineChartColor(filterValues?.outbreak)}
                                     strokeWidth={2}
                                     dot={false}
                                 />
