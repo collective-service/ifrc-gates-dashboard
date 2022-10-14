@@ -401,6 +401,10 @@ function MapView(props: MapViewProps) {
 
     const highestDataOnMap = formatOnMap === 'percent' ? 1 : mapIndicatorState[0]?.value;
 
+    const formatOnMap = mapIndicatorState[0]?.format ?? 'percent';
+
+    const highestDataOnMap = formatOnMap === 'percent' ? 1 : mapIndicatorState[0]?.value;
+
     const progressBarRendererParams = useCallback(
         (_: string, data: AscendingCountryProfileType | DescendingCountryProfileType) => ({
             barHeight,
