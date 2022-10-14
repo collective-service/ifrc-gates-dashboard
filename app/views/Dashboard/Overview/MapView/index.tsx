@@ -186,6 +186,7 @@ interface MapViewProps {
     setActiveTab: React.Dispatch<React.SetStateAction<TabTypes | undefined>>;
     filterValues?: FilterType | undefined;
     setFilterValues: React.Dispatch<React.SetStateAction<FilterType | undefined>>;
+    selectedIndicatorName: string | undefined;
 }
 
 interface GeoJsonProps {
@@ -285,6 +286,7 @@ function MapView(props: MapViewProps) {
         setActiveTab,
         filterValues,
         setFilterValues,
+        selectedIndicatorName,
     } = props;
 
     // TODO: Map modal to be included in the mapbox.
@@ -649,6 +651,7 @@ function MapView(props: MapViewProps) {
                         setFilterValues={setFilterValues}
                         countryData={countryData}
                         filterValues={filterValues}
+                        selectedIndicatorName={selectedIndicatorName ?? undefined}
                     />
                 )}
             </ContainerCard>
