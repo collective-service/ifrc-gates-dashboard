@@ -342,6 +342,9 @@ function MapView(props: MapViewProps) {
         },
     );
 
+    const highestValueWithoutIndicator = highestLowestCasesData
+        ?.descCountryEmergencyProfile[0].contextIndicatorValue;
+
     /*
     FIX ME: This might be required to find the highest value for indicatorValue
     const indicatorValues = highestLowestValues?.descCountryEmergencyProfile?.map(
@@ -366,6 +369,8 @@ function MapView(props: MapViewProps) {
             variables: mostRecentVariables,
         },
     );
+
+    const highestValueWithIndicator = mostRecentValues?.descMostRecentValues[0]?.indicatorValue;
 
     const mapIndicatorState = useMemo(() => {
         const countryIndicator = overviewMapData?.overviewMap?.map(
@@ -401,10 +406,6 @@ function MapView(props: MapViewProps) {
 
     const highestDataOnMap = formatOnMap === 'percent' ? 1 : mapIndicatorState[0]?.value;
 
-    const formatOnMap = mapIndicatorState[0]?.format ?? 'percent';
-
-    const highestDataOnMap = formatOnMap === 'percent' ? 1 : mapIndicatorState[0]?.value;
-
     const progressBarRendererParams = useCallback(
         (_: string, data: AscendingCountryProfileType | DescendingCountryProfileType) => ({
             barHeight,
@@ -413,10 +414,10 @@ function MapView(props: MapViewProps) {
             title: data.countryName ?? undefined,
             valueTitle: data.countryName ?? undefined,
             value: data.contextIndicatorValue,
-            totalValue: data.populationSize,
+            totalValue: highestValueWithoutIndicator,
             color: '#98A6B5',
             isPercentageValue: false,
-        }), [],
+        }), [highestValueWithoutIndicator],
     );
 
     const recentProgressBarRendererParams = useCallback(
@@ -425,16 +426,16 @@ function MapView(props: MapViewProps) {
             data: AscendingMostRecentIndicatorType | DescendingMostRecentIndicatorType,
         ) => ({
             barHeight,
-            suffix: '%',
+            suffix: data.format === 'percent' ? '%' : 'M',
             barName: data.countryName ?? undefined,
             title: data.countryName ?? undefined,
             valueTitle: data.countryName ?? undefined,
             value: data.indicatorValue,
-            totalValue: 1,
+            totalValue: highestValueWithIndicator,
             color: '#98A6B5',
             isPercentageValue: data.format === 'percent',
         }),
-        [],
+        [highestValueWithIndicator],
     );
 
     const handlePointHover = React.useCallback(

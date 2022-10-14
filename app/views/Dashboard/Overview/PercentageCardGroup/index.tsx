@@ -517,7 +517,7 @@ function PercentageCardGroup(props: Props) {
                 className={styles.regionsCard}
                 contentClassName={styles.responsiveContent}
                 headingClassName={styles.headingContent}
-                heading="Regional Breakdown"
+                heading={filterValues?.indicator ? 'Regional Percentage' : 'Regional Breakdown'}
                 headingSize="extraSmall"
                 headerDescription={filterValues?.indicator
                     ? selectedIndicatorName ?? filterValues.indicator
