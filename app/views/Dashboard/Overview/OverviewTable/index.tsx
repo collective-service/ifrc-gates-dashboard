@@ -181,6 +181,8 @@ function OverviewTable(props: Props) {
         filterValues,
     } = props;
 
+    const [searchText, setSearchText] = useState<string | undefined>('');
+
     const tableVariables = useMemo((): TableValuesQueryVariables => ({
         indicatorId: filterValues?.indicator,
         emergency: filterValues?.outbreak,
@@ -198,8 +200,6 @@ function OverviewTable(props: Props) {
             variables: tableVariables,
         },
     );
-
-    const [searchText, setSearchText] = useState<string | undefined>('');
 
     const filteredData = useMemo(() => (
         rankedSearchOnList(
@@ -231,29 +231,38 @@ function OverviewTable(props: Props) {
                 columnWidth: 130,
             };
 
+            const monthList = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+            // const testColumn = monthList.map((m) => {
+            //     const obj = createIndicatorColumn(
+            //         m.toLocaleLowerCase(),
+            //         m,
+            //         (item) => {
+            //             const displayValue = item?.data?.find(
+            //                 (val) => monthList.filter(
+            // (el) => el === new Date(val.month).toLocaleString('default', { month: 'short' }),
+            //                 ))?.indicatorValue;
+
+            //             if (!displayValue) {
+            //                 return '-';
+            //             }
+            //             console.log({ displayValue });
+            //             const displayValueWithSuffix = filterValues?.indicator
+            //                 ? `${decimalToPercentage(displayValue)}%`
+            //                 : `${normalCommaFormatter().format(displayValue)}`;
+            //             return displayValueWithSuffix;
+            //         },
+            //         {
+            //             columnWidth: 30,
+            //         },
+            //     );
+            //     return obj;
+            // });
+
+            // console.warn('tst column', testColumn);
+
             return [
                 searchColumn,
-                // TODO: FIX COLOR INDICATORS FOR TABLE
-                createIndicatorColumn(
-                    'jan',
-                    'Jan',
-                    (item) => {
-                        const displayValue = item?.data?.find(
-                            (val) => new Date(val.month).getMonth() === 0,
-                        )?.indicatorValue;
-
-                        if (!displayValue) {
-                            return '-';
-                        }
-                        const displayValueWithSuffix = filterValues?.indicator
-                            ? `${decimalToPercentage(displayValue)}%`
-                            : `${normalCommaFormatter().format(displayValue)}`;
-                        return displayValueWithSuffix;
-                    },
-                    {
-                        columnWidth: 30,
-                    },
-                ),
                 createIndicatorColumn(
                     'feb',
                     'Feb',
@@ -274,208 +283,250 @@ function OverviewTable(props: Props) {
                         columnWidth: 30,
                     },
                 ),
-                createIndicatorColumn(
-                    'mar',
-                    'Mar',
-                    (item) => {
-                        const displayValue = item?.data?.find(
-                            (val) => new Date(val.month).getMonth() === 2,
-                        )?.indicatorValue;
 
-                        if (!displayValue) {
-                            return '-';
-                        }
-                        const displayValueWithSuffix = filterValues?.indicator
-                            ? `${decimalToPercentage(displayValue)}%`
-                            : `${normalCommaFormatter().format(displayValue)}`;
-                        return displayValueWithSuffix;
-                    },
-                    {
-                        columnWidth: 30,
-                    },
-                ),
-                createIndicatorColumn(
-                    'apr',
-                    'Apr',
-                    (item) => {
-                        const displayValue = item?.data?.find(
-                            (val) => new Date(val.month).getMonth() === 3,
-                        )?.indicatorValue;
+                /* createIndicatorColumn(
+                     'jan',
+                     'Jan',
+                     (item) => {
+                         const displayValue = new Date(item?.data?[0].month).getMonth() === 0,
+                         )?.indicatorValue;
 
-                        if (!displayValue) {
-                            return '-';
-                        }
-                        const displayValueWithSuffix = filterValues?.indicator
-                            ? `${decimalToPercentage(displayValue)}%`
-                            : `${normalCommaFormatter().format(displayValue)}`;
-                        return displayValueWithSuffix;
-                    },
-                    {
-                        columnWidth: 30,
-                    },
-                ),
-                createIndicatorColumn(
-                    'may',
-                    'May',
-                    (item) => {
-                        const displayValue = item?.data?.find(
-                            (val) => new Date(val.month).getMonth() === 4,
-                        )?.indicatorValue;
+                         if (!displayValue) {
+                             return '-';
+                         }
+                         const displayValueWithSuffix = filterValues?.indicator
+                             ? `${decimalToPercentage(displayValue)}%`
+                             : `${normalCommaFormatter().format(displayValue)}`;
+                         return displayValueWithSuffix;
+                     },
+                     {
+                         columnWidth: 30,
+                     },
+                 ),
+                 createIndicatorColumn(
+                     'feb',
+                     'Feb',
+                     (item) => {
+                         const displayValue = item?.data?.find(
+                             (val) => new Date(val.month).getMonth() === 1,
+                         )?.indicatorValue;
 
-                        if (!displayValue) {
-                            return '-';
-                        }
-                        const displayValueWithSuffix = filterValues?.indicator
-                            ? `${decimalToPercentage(displayValue)}%`
-                            : `${normalCommaFormatter().format(displayValue)}`;
-                        return displayValueWithSuffix;
-                    },
-                    {
-                        columnWidth: 30,
-                    },
-                ),
-                createIndicatorColumn(
-                    'jun',
-                    'Jun',
-                    (item) => {
-                        const displayValue = item?.data?.find(
-                            (val) => new Date(val.month).getMonth() === 5,
-                        )?.indicatorValue;
+                         if (!displayValue) {
+                             return '-';
+                         }
+                         const displayValueWithSuffix = filterValues?.indicator
+                             ? `${decimalToPercentage(displayValue)}%`
+                             : `${normalCommaFormatter().format(displayValue)}`;
+                         return displayValueWithSuffix;
+                     },
+                     {
+                         columnWidth: 30,
+                     },
+                 ),
+                 createIndicatorColumn(
+                     'mar',
+                     'Mar',
+                     (item) => {
+                         const displayValue = item?.data?.find(
+                             (val) => new Date(val.month).getMonth() === 2,
+                         )?.indicatorValue;
 
-                        if (!displayValue) {
-                            return '-';
-                        }
-                        const displayValueWithSuffix = filterValues?.indicator
-                            ? `${decimalToPercentage(displayValue)}%`
-                            : `${normalCommaFormatter().format(displayValue)}`;
-                        return displayValueWithSuffix;
-                    },
-                    {
-                        columnWidth: 30,
-                    },
-                ),
-                createIndicatorColumn(
-                    'jul',
-                    'July',
-                    (item) => {
-                        const displayValue = item?.data?.find(
-                            (val) => new Date(val.month).getMonth() === 6,
-                        )?.indicatorValue;
+                         if (!displayValue) {
+                             return '-';
+                         }
+                         const displayValueWithSuffix = filterValues?.indicator
+                             ? `${decimalToPercentage(displayValue)}%`
+                             : `${normalCommaFormatter().format(displayValue)}`;
+                         return displayValueWithSuffix;
+                     },
+                     {
+                         columnWidth: 30,
+                     },
+                 ),
+                 createIndicatorColumn(
+                     'apr',
+                     'Apr',
+                     (item) => {
+                         const displayValue = item?.data?.find(
+                             (val) => new Date(val.month).getMonth() === 3,
+                         )?.indicatorValue;
 
-                        if (!displayValue) {
-                            return '-';
-                        }
-                        const displayValueWithSuffix = filterValues?.indicator
-                            ? `${decimalToPercentage(displayValue)}%`
-                            : `${normalCommaFormatter().format(displayValue)}`;
-                        return displayValueWithSuffix;
-                    },
-                    {
-                        columnWidth: 30,
-                    },
-                ),
-                createIndicatorColumn(
-                    'aug',
-                    'Aug',
-                    (item) => {
-                        const displayValue = item?.data?.find(
-                            (val) => new Date(val.month).getMonth() === 7,
-                        )?.indicatorValue;
+                         if (!displayValue) {
+                             return '-';
+                         }
+                         const displayValueWithSuffix = filterValues?.indicator
+                             ? `${decimalToPercentage(displayValue)}%`
+                             : `${normalCommaFormatter().format(displayValue)}`;
+                         return displayValueWithSuffix;
+                     },
+                     {
+                         columnWidth: 30,
+                     },
+                 ),
+                 createIndicatorColumn(
+                     'may',
+                     'May',
+                     (item) => {
+                         const displayValue = item?.data?.find(
+                             (val) => new Date(val.month).getMonth() === 4,
+                         )?.indicatorValue;
 
-                        if (!displayValue) {
-                            return '-';
-                        }
-                        const displayValueWithSuffix = filterValues?.indicator
-                            ? `${decimalToPercentage(displayValue)}%`
-                            : `${normalCommaFormatter().format(displayValue)}`;
-                        return displayValueWithSuffix;
-                    },
-                    {
-                        columnWidth: 30,
-                    },
-                ),
-                createIndicatorColumn(
-                    'sep',
-                    'Sep',
-                    (item) => {
-                        const displayValue = item?.data?.find(
-                            (val) => new Date(val.month).getMonth() === 8,
-                        )?.indicatorValue;
+                         if (!displayValue) {
+                             return '-';
+                         }
+                         const displayValueWithSuffix = filterValues?.indicator
+                             ? `${decimalToPercentage(displayValue)}%`
+                             : `${normalCommaFormatter().format(displayValue)}`;
+                         return displayValueWithSuffix;
+                     },
+                     {
+                         columnWidth: 30,
+                     },
+                 ),
+                 createIndicatorColumn(
+                     'jun',
+                     'Jun',
+                     (item) => {
+                         const displayValue = item?.data?.find(
+                             (val) => new Date(val.month).getMonth() === 5,
+                         )?.indicatorValue;
 
-                        if (!displayValue) {
-                            return '-';
-                        }
-                        const displayValueWithSuffix = filterValues?.indicator
-                            ? `${decimalToPercentage(displayValue)}%`
-                            : `${normalCommaFormatter().format(displayValue)}`;
-                        return displayValueWithSuffix;
-                    },
-                    {
-                        columnWidth: 30,
-                    },
-                ),
-                createIndicatorColumn(
-                    'oct',
-                    'Oct',
-                    (item) => {
-                        const displayValue = item?.data?.find(
-                            (val) => new Date(val.month).getMonth() === 9,
-                        )?.indicatorValue;
+                         if (!displayValue) {
+                             return '-';
+                         }
+                         const displayValueWithSuffix = filterValues?.indicator
+                             ? `${decimalToPercentage(displayValue)}%`
+                             : `${normalCommaFormatter().format(displayValue)}`;
+                         return displayValueWithSuffix;
+                     },
+                     {
+                         columnWidth: 30,
+                     },
+                 ),
+                 createIndicatorColumn(
+                     'jul',
+                     'July',
+                     (item) => {
+                         const displayValue = item?.data?.find(
+                             (val) => new Date(val.month).getMonth() === 6,
+                         )?.indicatorValue;
 
-                        if (!displayValue) {
-                            return '-';
-                        }
-                        const displayValueWithSuffix = filterValues?.indicator
-                            ? `${decimalToPercentage(displayValue)}%`
-                            : `${normalCommaFormatter().format(displayValue)}`;
-                        return displayValueWithSuffix;
-                    },
-                    {
-                        columnWidth: 30,
-                    },
-                ),
-                createIndicatorColumn(
-                    'nov',
-                    'Nov',
-                    (item) => {
-                        const displayValue = item?.data?.find(
-                            (val) => new Date(val.month).getMonth() === 10,
-                        )?.indicatorValue;
+                         if (!displayValue) {
+                             return '-';
+                         }
+                         const displayValueWithSuffix = filterValues?.indicator
+                             ? `${decimalToPercentage(displayValue)}%`
+                             : `${normalCommaFormatter().format(displayValue)}`;
+                         return displayValueWithSuffix;
+                     },
+                     {
+                         columnWidth: 30,
+                     },
+                 ),
+                 createIndicatorColumn(
+                     'aug',
+                     'Aug',
+                     (item) => {
+                         const displayValue = item?.data?.find(
+                             (val) => new Date(val.month).getMonth() === 7,
+                         )?.indicatorValue;
 
-                        if (!displayValue) {
-                            return '-';
-                        }
-                        const displayValueWithSuffix = filterValues?.indicator
-                            ? `${decimalToPercentage(displayValue)}%`
-                            : `${normalCommaFormatter().format(displayValue)}`;
-                        return displayValueWithSuffix;
-                    },
-                    {
-                        columnWidth: 30,
-                    },
-                ),
-                createIndicatorColumn(
-                    'dec',
-                    'Dec',
-                    (item) => {
-                        const displayValue = item?.data?.find(
-                            (val) => new Date(val.month).getMonth() === 11,
-                        )?.indicatorValue;
+                         if (!displayValue) {
+                             return '-';
+                         }
+                         const displayValueWithSuffix = filterValues?.indicator
+                             ? `${decimalToPercentage(displayValue)}%`
+                             : `${normalCommaFormatter().format(displayValue)}`;
+                         return displayValueWithSuffix;
+                     },
+                     {
+                         columnWidth: 30,
+                     },
+                 ),
+                 createIndicatorColumn(
+                     'sep',
+                     'Sep',
+                     (item) => {
+                         const displayValue = item?.data?.find(
+                             (val) => new Date(val.month).getMonth() === 8,
+                         )?.indicatorValue;
 
-                        if (!displayValue) {
-                            return '-';
-                        }
-                        const displayValueWithSuffix = filterValues?.indicator
-                            ? `${decimalToPercentage(displayValue)}%`
-                            : `${normalCommaFormatter().format(displayValue)}`;
-                        return displayValueWithSuffix;
-                    },
-                    {
-                        columnWidth: 30,
-                    },
-                ),
+                         if (!displayValue) {
+                             return '-';
+                         }
+                         const displayValueWithSuffix = filterValues?.indicator
+                             ? `${decimalToPercentage(displayValue)}%`
+                             : `${normalCommaFormatter().format(displayValue)}`;
+                         return displayValueWithSuffix;
+                     },
+                     {
+                         columnWidth: 30,
+                     },
+                 ),
+                 createIndicatorColumn(
+                     'oct',
+                     'Oct',
+                     (item) => {
+                         const displayValue = item?.data?.find(
+                             (val) => new Date(val.month).getMonth() === 9,
+                         )?.indicatorValue;
+
+                         if (!displayValue) {
+                             return '-';
+                         }
+                         const displayValueWithSuffix = filterValues?.indicator
+                             ? `${decimalToPercentage(displayValue)}%`
+                             : `${normalCommaFormatter().format(displayValue)}`;
+                         return displayValueWithSuffix;
+                     },
+                     {
+                         columnWidth: 30,
+                     },
+                 ),
+                 createIndicatorColumn(
+                     'nov',
+                     'Nov',
+                     (item) => {
+                         const displayValue = item?.data?.find(
+                             (val) => new Date(val.month).getMonth() === 10,
+                         )?.indicatorValue;
+
+                         if (!displayValue) {
+                             return '-';
+                         }
+                         const displayValueWithSuffix = filterValues?.indicator
+                             ? `${decimalToPercentage(displayValue)}%`
+                             : `${normalCommaFormatter().format(displayValue)}`;
+                         return displayValueWithSuffix;
+                     },
+                     {
+                         columnWidth: 30,
+                     },
+                 ),
+                 createIndicatorColumn(
+                     'dec',
+                     'Dec',
+                     (item) => {
+                         const displayValue = item?.data?.find(
+                             (val) => new Date(val.month).getMonth() === 11,
+                         )?.indicatorValue;
+
+                         if (!displayValue) {
+                             return '-';
+                         }
+                         const displayValueWithSuffix = filterValues?.indicator
+                             ? `${decimalToPercentage(displayValue)}%`
+                             : `${normalCommaFormatter().format(displayValue)}`;
+                         return displayValueWithSuffix;
+                     },
+                     {
+                         columnWidth: 30,
+                     },
+                 ),
+                 */
             ];
-        }, [
+        },
+        [
             filterValues?.indicator,
             searchText,
         ],
