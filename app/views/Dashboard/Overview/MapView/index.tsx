@@ -2,6 +2,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import {
     _cs,
     doesObjectHaveNoData,
+    compareNumber,
     isDefined,
 } from '@togglecorp/fujs';
 import {
@@ -56,6 +57,7 @@ const MAP_DATA = gql`
             region: $region,
         ) {
             iso3
+            format
             indicatorValue
             countryId
             format
@@ -70,7 +72,7 @@ const HIGHEST_LOWEST_CASES = gql`
     ) {
         descCountryEmergencyProfile: countryEmergencyProfile(
             filters: {
-                contextIndicatorId: "total_cases",
+                contextIndicatorId: "new_cases_per_million",
                 region: $region,
                 emergency: $emergency,
             }
@@ -89,7 +91,7 @@ const HIGHEST_LOWEST_CASES = gql`
         }
         ascCountryEmergencyProfile: countryEmergencyProfile(
             filters: {
-                contextIndicatorId: "total_cases",
+                contextIndicatorId: "new_cases_per_million",
                 region: $region,
                 emergency: $emergency,
             }
@@ -203,33 +205,17 @@ interface TooltipProps {
 }
 
 const lightStyle = 'mapbox://styles/mapbox/light-v10';
-const countryFillPaint: mapboxgl.FillPaint = {
-    // Color each country on the basis of outbreak
-    'fill-color': [
-        'interpolate',
-        ['linear'],
-        ['coalesce', ['feature-state', 'indicatorValue'], 0],
-        0,
-        '#d73027',
-        5000,
-        '#f46d43',
-        750000,
-        '#fdae61',
-        1000000,
-        '#fee08b',
-        2500000,
-        '#ffffbf',
-        5000000,
-        '#d9ef8b',
-        7500000,
-        '#a6d96a',
-        60000000,
-        '#66bd63',
-        91331830,
-        '#1a9850',
-    ],
-    'fill-opacity': 0.5,
-};
+const colors = [
+    '#fff7fb',
+    '#ece7f2',
+    '#d0d1e6',
+    '#a6bddb',
+    '#74a9cf',
+    '#3690c0',
+    '#0570b0',
+    '#045a8d',
+    '#023858',
+];
 
 const countryLinePaint: mapboxgl.LinePaint = {
     'line-color': '#000000',
@@ -387,10 +373,13 @@ function MapView(props: MapViewProps) {
                 id: +indicatorValue.countryId,
                 value: indicatorValue.indicatorValue ?? 0,
                 iso: indicatorValue.iso3,
+                format: indicatorValue.format,
             }),
         )
             .filter((item) => item.value > 0);
-        return countryIndicator ?? [];
+        const sortedData = [...(countryIndicator ?? [])]
+            .sort((a, b) => compareNumber(a.value, b.value, -1));
+        return sortedData;
     }, [overviewMapData?.overviewMap]);
 
     const handleCountryClick = useCallback(
@@ -407,6 +396,10 @@ function MapView(props: MapViewProps) {
     // Note: This sorting logic maybe required in future
     // const sortedRecentLowValues = [...recentLowValuesWithIndicator ?? []]
     // .sort(compareLowestValues);
+
+    const formatOnMap = mapIndicatorState[0]?.format ?? 'percent';
+
+    const highestDataOnMap = formatOnMap === 'percent' ? 1 : mapIndicatorState[0]?.value;
 
     const progressBarRendererParams = useCallback(
         (_: string, data: AscendingCountryProfileType | DescendingCountryProfileType) => ({
@@ -476,6 +469,22 @@ function MapView(props: MapViewProps) {
         filterValues,
     ]);
 
+    const countryFillPaint: mapboxgl.FillPaint = useMemo(() => ({
+        // Color each country on the basis of outbreak
+        'fill-color': [
+            'interpolate',
+            ['linear'],
+            ['coalesce', ['feature-state', 'indicatorValue'], 0],
+            ...(colors.map((color, index) => (
+                [
+                    (highestDataOnMap / (colors.length - 1)) * index,
+                    color,
+                ]
+            )).flat()),
+        ],
+        'fill-opacity': 0.7,
+    }), [highestDataOnMap]);
+
     return (
         <div className={_cs(className, styles.mapViewWrapper)}>
             <ContainerCard className={styles.mapContainer}>
@@ -538,10 +547,12 @@ function MapView(props: MapViewProps) {
                             />
                         )}
                 </Map>
-                {/* FIXME: Need to send max value */}
                 <MapLabel
+                    /* NOTE: All values are indicator so minValue is always 0 */
+                    minValue={0}
+                    maxValue={highestDataOnMap}
                     className={styles.mapLabelBox}
-                    isPercent
+                    isPercent={formatOnMap === 'percent'}
                 />
             </ContainerCard>
             <ContainerCard

@@ -1,6 +1,7 @@
 import React,
 {
     useMemo,
+    useEffect,
     useState,
 } from 'react';
 import {
@@ -134,6 +135,12 @@ function Dashboard() {
     } = useQuery<CountriesAndOutbreaksQuery>(
         COUNTRIES_AND_OUTBREAKS,
     );
+
+    useEffect(() => {
+        if (activeTab === 'country' && !filterValues) {
+            setFilterValues({ country: 'AFG' });
+        }
+    }, [activeTab, filterValues]);
 
     const filterValueCountry = filterValues?.country;
 
