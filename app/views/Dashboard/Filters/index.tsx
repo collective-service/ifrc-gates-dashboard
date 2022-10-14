@@ -126,7 +126,6 @@ function Filters(props: Props) {
                         ...oldValue,
                         [name]: newValue,
                         country: undefined,
-                        indicator: undefined,
                     }));
                 } else if (name === 'country') {
                     onChange((oldValue) => {
