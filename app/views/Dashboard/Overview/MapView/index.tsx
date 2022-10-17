@@ -58,6 +58,7 @@ const MAP_DATA = gql`
             iso3
             indicatorValue
             countryId
+            format
         }
     }
 `;
@@ -104,16 +105,6 @@ const HIGHEST_LOWEST_CASES = gql`
             countryId
             contextIndicatorValue
             populationSize
-        }
-        overviewMap(
-            indicatorId: $indicatorId,
-            emergency: $emergency,
-            region: $region,
-        ) {
-            iso3
-            indicatorValue
-            countryId
-            format
         }
     }
 `;
@@ -171,9 +162,9 @@ const MOST_RECENT_CASES = gql`
     }
 `;
 
-type OverviewMapDataType = NonNullable<OverviewMapDataQuery['overviewMap']>[number];
-type AscendingCountryProfileType = NonNullable<OverviewMapDataQuery['ascCountryEmergencyProfile']>[number];
-type DescendingCountryProfileType = NonNullable<OverviewMapDataQuery['descCountryEmergencyProfile']>[number];
+type OverviewMapDataType = NonNullable<MapDataQuery['overviewMap']>[number];
+type AscendingCountryProfileType = NonNullable<HighestLowestCasesQuery['ascCountryEmergencyProfile']>[number];
+type DescendingCountryProfileType = NonNullable<HighestLowestCasesQuery['descCountryEmergencyProfile']>[number];
 
 type AscendingMostRecentIndicatorType = NonNullable<MostRecentValuesQuery['descMostRecentValues']>[number];
 type DescendingMostRecentIndicatorType = NonNullable<MostRecentValuesQuery['ascMostRecentValues']>[number];
@@ -206,7 +197,7 @@ interface ClickedPoint {
 
 interface TooltipProps {
     countryName: string | undefined;
-    indicatorValue: OverviewMapDataType | undefined;
+    indicatorData: OverviewMapDataType | undefined;
     onHide: () => void;
     lngLat: mapboxgl.LngLatLike;
 }
@@ -246,7 +237,7 @@ const countryLinePaint: mapboxgl.LinePaint = {
 };
 
 const barHeight = 10;
-// Note: This sorting logic maybe required in future
+// NOTE: This sorting logic maybe required in future
 /* function compareLowestValues(a, b) {
     const indicatorOne = a.indicatorValue;
     const indicatorTwo = b.indicatorValue;
@@ -275,7 +266,7 @@ function Tooltip(props: TooltipProps) {
         countryName,
         lngLat,
         onHide,
-        indicatorValue,
+        indicatorData,
     } = props;
 
     return (
@@ -289,10 +280,10 @@ function Tooltip(props: TooltipProps) {
                 label={countryName}
                 value={(
                     <NumberOutput
-                        suffix={indicatorValue?.format === 'percent' ? '%' : '(Outbreak)'}
-                        value={MapTooltipData(indicatorValue)}
-                        normal={indicatorValue?.format === 'raw'}
-                        precision="auto"
+                        suffix={indicatorData?.format === 'percent' ? '%' : '(Outbreak)'}
+                        value={MapTooltipData(indicatorData)}
+                        normal={indicatorData?.format === 'raw'}
+                        precision={1}
                     />
                 )}
             />
@@ -541,7 +532,7 @@ function MapView(props: MapViewProps) {
                             <Tooltip
                                 countryName={mapClickProperties
                                     ?.feature?.properties?.idmc_short}
-                                indicatorValue={selectedCountryIndicator}
+                                indicatorData={selectedCountryIndicator}
                                 onHide={handleHoverClose}
                                 lngLat={mapClickProperties.lngLat}
                             />

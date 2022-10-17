@@ -28,12 +28,12 @@ function MapSubHeader(
         return `${selectedIndicatorName ?? filterValues?.indicator} - Latest available data`;
     }
     if (filterValues?.outbreak) {
-        return `Total number of cases by country for ${selectedOutbreakName ?? filterValues?.outbreak}`;
+        return `New cases per million by country for ${selectedOutbreakName ?? filterValues?.outbreak}`;
     }
-    return 'Total number of cases by country';
+    return 'New cases per million by country';
 }
 
-interface OverViewProps {
+interface Props {
     className?: string;
     filterValues?: FilterType | undefined;
     setActiveTab: React.Dispatch<React.SetStateAction<TabTypes | undefined>>;
@@ -42,7 +42,7 @@ interface OverViewProps {
     selectedOutbreakName: string | undefined;
 }
 
-function Overview(props: OverViewProps) {
+function Overview(props: Props) {
     const {
         className,
         filterValues,
@@ -103,11 +103,9 @@ function Overview(props: OverViewProps) {
                         headingSize="small"
                         headingContainerClassName={styles.mapHeaderContainer}
                         headingDescription={currentTab === 'mapMode'
-                            && (filterValues
-                                ? MapSubHeader(
-                                    filterValues, selectedIndicatorName, selectedOutbreakName,
-                                )
-                                : 'Total number of cases by country')}
+                            && MapSubHeader(
+                                filterValues, selectedIndicatorName, selectedOutbreakName,
+                            )}
                         headerActionsContainerClassName={styles.mapActionTabs}
                         headerActions={(
                             <TabList className={styles.dashboardTabList}>
