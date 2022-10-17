@@ -158,7 +158,6 @@ const OVERVIEW_STATS = gql`
             indicatorMonth
             indicatorId
             indicatorName
-            format
         }
         uncertaintyGlobal: globalLevel (
             filters: {
@@ -181,6 +180,7 @@ const OVERVIEW_STATS = gql`
             indicatorId
             indicatorName
             indicatorValueGlobal
+            format
         }
         uncertaintyRegion: regionLevel (
             filters: {
@@ -291,16 +291,29 @@ function PercentageCardGroup(props: Props) {
         filterValues?.region,
     ]);
 
+    const negativeToZero = useCallback(
+        (indicatorValue?: number | null, errorMarginValue?: number | null) => {
+            const valueInd = isNotDefined(indicatorValue) ? 0 : indicatorValue;
+            const valueErr = isNotDefined(errorMarginValue) ? 0 : errorMarginValue;
+            const difference = (valueInd - valueErr) < 0 ? 0 : valueInd - valueErr;
+
+            return decimalToPercentage(difference);
+        }, [],
+    );
+    const positiveToZero = useCallback(
+        (indicatorValue?: number | null, errorMarginValue?: number | null) => {
+            const valueInd = isNotDefined(indicatorValue) ? 0 : indicatorValue;
+            const valueErr = isNotDefined(errorMarginValue) ? 0 : errorMarginValue;
+            const sum = (valueInd + valueErr) > 1 ? 1 : valueInd + valueErr;
+
+            return decimalToPercentage(sum);
+        }, [],
+    );
+
     const uncertaintyGlobalChart = useMemo(() => (
         overviewStatsResponse?.uncertaintyGlobal.map((global) => {
-            const negativeRange = decimalToPercentage(
-                (global.indicatorValueGlobal && global.errorMargin)
-                && global.indicatorValueGlobal - global.errorMargin,
-            );
-            const positiveRange = decimalToPercentage(
-                (global.indicatorValueGlobal && global.errorMargin)
-                && global.indicatorValueGlobal + global.errorMargin,
-            );
+            const negativeRange = negativeToZero(global.indicatorValueGlobal, global.errorMargin);
+            const positiveRange = positiveToZero(global.indicatorValueGlobal, global.errorMargin);
 
             if (isNotDefined(global.errorMargin)) {
                 return {
@@ -319,8 +332,8 @@ function PercentageCardGroup(props: Props) {
                 indicatorValue: decimalToPercentage(global.indicatorValueGlobal),
                 date: global.indicatorMonth,
                 uncertainRange: [
-                    negativeRange ?? 0,
-                    positiveRange ?? 0,
+                    negativeRange,
+                    positiveRange,
                 ],
                 minimumValue: negativeRange,
                 maximumValue: positiveRange,
@@ -330,18 +343,14 @@ function PercentageCardGroup(props: Props) {
         }).sort((a, b) => compareDate(a.date, b.date))
     ), [
         overviewStatsResponse?.uncertaintyGlobal,
+        negativeToZero,
+        positiveToZero,
     ]);
 
     const uncertaintyRegionChart = useMemo(() => (
         overviewStatsResponse?.uncertaintyRegion.map((region) => {
-            const negativeRange = decimalToPercentage(
-                (region.indicatorValueRegional && region.errorMargin)
-                && region.indicatorValueRegional - region.errorMargin,
-            );
-            const positiveRange = decimalToPercentage(
-                (region.indicatorValueRegional && region.errorMargin)
-                && region.indicatorValueRegional + region.errorMargin,
-            );
+            const negativeRange = negativeToZero(region.indicatorValueRegional, region.errorMargin);
+            const positiveRange = positiveToZero(region.indicatorValueRegional, region.errorMargin);
 
             if (isNotDefined(region.errorMargin)) {
                 return {
@@ -361,8 +370,8 @@ function PercentageCardGroup(props: Props) {
                 indicatorValue: decimalToPercentage(region.indicatorValueRegional),
                 date: region.indicatorMonth,
                 uncertainRange: [
-                    negativeRange ?? 0,
-                    positiveRange ?? 0,
+                    negativeRange,
+                    positiveRange,
                 ],
                 minimumValue: negativeRange,
                 maximumValue: positiveRange,
@@ -371,7 +380,11 @@ function PercentageCardGroup(props: Props) {
                 id: region.id,
             };
         }).sort((a, b) => compareDate(a.date, b.date))
-    ), [overviewStatsResponse?.uncertaintyRegion]);
+    ), [
+        overviewStatsResponse?.uncertaintyRegion,
+        negativeToZero,
+        positiveToZero,
+    ]);
 
     const outbreakLineChart = useMemo(() => (
         overviewStatsResponse?.outbreak.map((outbreak) => (
