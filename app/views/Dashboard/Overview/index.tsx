@@ -16,6 +16,23 @@ import { FilterType } from '../Filters';
 import { TabTypes } from '..';
 import styles from './styles.css';
 
+function MapSubHeader(
+    filterValues?: FilterType | undefined,
+    selectedIndicatorName?: string | undefined,
+    selectedOutbreakName?: string | undefined,
+) {
+    if (filterValues?.indicator && filterValues?.outbreak) {
+        return `${selectedIndicatorName ?? filterValues?.indicator} for ${selectedOutbreakName ?? filterValues?.outbreak} - Latest available data`;
+    }
+    if (filterValues?.indicator) {
+        return `${selectedIndicatorName ?? filterValues?.indicator} - Latest available data`;
+    }
+    if (filterValues?.outbreak) {
+        return `New cases per million by country for ${selectedOutbreakName ?? filterValues?.outbreak}`;
+    }
+    return 'New cases per million by country';
+}
+
 interface Props {
     className?: string;
     filterValues?: FilterType | undefined;
@@ -86,7 +103,9 @@ function Overview(props: Props) {
                         headingSize="small"
                         headingContainerClassName={styles.mapHeaderContainer}
                         headingDescription={currentTab === 'mapMode'
-                        && 'Total number of cases by country'}
+                            && MapSubHeader(
+                                filterValues, selectedIndicatorName, selectedOutbreakName,
+                            )}
                         headerActionsContainerClassName={styles.mapActionTabs}
                         headerActions={(
                             <TabList className={styles.dashboardTabList}>

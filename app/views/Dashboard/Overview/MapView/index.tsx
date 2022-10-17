@@ -10,6 +10,7 @@ import {
     ListView,
     useModalState,
     TextOutput,
+    NumberOutput,
 } from '@the-deep/deep-ui';
 import { gql, useQuery } from '@apollo/client';
 import Map, {
@@ -20,12 +21,8 @@ import Map, {
     MapState,
     MapTooltip,
 } from '@togglecorp/re-map';
-
 import ProgressBar from '#components/ProgressBar';
 import MapLabel from '#components/MapLabel';
-import {
-    normalFormatter,
-} from '#utils/common';
 import { regionBounds } from '#utils/regionBounds';
 import {
     MostRecentValuesQuery,
@@ -41,8 +38,6 @@ import { FilterType } from '#views/Dashboard/Filters';
 
 import MapModal from './MapModal';
 import styles from './styles.css';
-
-const normalizedForm = (d: number) => normalFormatter().format(d);
 
 const tooltipOptions: mapboxgl.PopupOptions = {
     closeButton: false,
@@ -63,6 +58,7 @@ const MAP_DATA = gql`
             iso3
             indicatorValue
             countryId
+            format
         }
     }
 `;
@@ -165,6 +161,8 @@ const MOST_RECENT_CASES = gql`
         }
     }
 `;
+
+type OverviewMapDataType = NonNullable<MapDataQuery['overviewMap']>[number];
 type AscendingCountryProfileType = NonNullable<HighestLowestCasesQuery['ascCountryEmergencyProfile']>[number];
 type DescendingCountryProfileType = NonNullable<HighestLowestCasesQuery['descCountryEmergencyProfile']>[number];
 
@@ -199,7 +197,7 @@ interface ClickedPoint {
 
 interface TooltipProps {
     countryName: string | undefined;
-    indicatorValue: number | undefined;
+    indicatorData: OverviewMapDataType | undefined;
     onHide: () => void;
     lngLat: mapboxgl.LngLatLike;
 }
@@ -239,13 +237,36 @@ const countryLinePaint: mapboxgl.LinePaint = {
 };
 
 const barHeight = 10;
+// NOTE: This sorting logic maybe required in future
+/* function compareLowestValues(a, b) {
+    const indicatorOne = a.indicatorValue;
+    const indicatorTwo = b.indicatorValue;
+
+    let comparison = 0;
+    if (indicatorOne < indicatorTwo) {
+        comparison = 1;
+    } else if (indicatorOne > indicatorTwo) {
+        comparison = -1;
+    }
+    return comparison;
+} */
+
+function MapTooltipData(indicatorData: OverviewMapDataType | undefined) {
+    if (indicatorData?.format === 'percent') {
+        return (Math.round((indicatorData?.indicatorValue) * 1000) / 100) ?? 0;
+    }
+    if (indicatorData?.format === 'raw') {
+        return indicatorData?.indicatorValue;
+    }
+    return 0;
+}
 
 function Tooltip(props: TooltipProps) {
     const {
         countryName,
         lngLat,
         onHide,
-        indicatorValue,
+        indicatorData,
     } = props;
 
     return (
@@ -258,12 +279,12 @@ function Tooltip(props: TooltipProps) {
                 block
                 label={countryName}
                 value={(
-                    <>
-                        <TextOutput
-                            description="(Outbreak)"
-                            value={normalizedForm(indicatorValue ?? 0)}
-                        />
-                    </>
+                    <NumberOutput
+                        suffix={indicatorData?.format === 'percent' ? '%' : '(Outbreak)'}
+                        value={MapTooltipData(indicatorData)}
+                        normal={indicatorData?.format === 'raw'}
+                        precision={1}
+                    />
                 )}
             />
         </MapTooltip>
@@ -293,7 +314,7 @@ function MapView(props: MapViewProps) {
     const [
         selectedCountryIndicator,
         setSelectedCountryIndicator,
-    ] = React.useState<number | undefined>();
+    ] = React.useState<OverviewMapDataType | undefined>();
 
     const [
         countryData,
@@ -383,6 +404,9 @@ function MapView(props: MapViewProps) {
 
     const recentHighValuesWithIndicator = mostRecentValues?.descMostRecentValues;
     const recentLowValuesWithIndicator = mostRecentValues?.ascMostRecentValues;
+    // Note: This sorting logic maybe required in future
+    // const sortedRecentLowValues = [...recentLowValuesWithIndicator ?? []]
+    // .sort(compareLowestValues);
 
     const progressBarRendererParams = useCallback(
         (_: string, data: AscendingCountryProfileType | DescendingCountryProfileType) => ({
@@ -426,7 +450,7 @@ function MapView(props: MapViewProps) {
                 feature: feature as unknown as ClickedPoint['feature'],
                 lngLat,
             });
-            setSelectedCountryIndicator(indicatorData?.indicatorValue ?? 0);
+            setSelectedCountryIndicator(indicatorData);
             return true;
         },
         [setMapClickProperties, overviewMapData],
@@ -489,6 +513,7 @@ function MapView(props: MapViewProps) {
                             }}
                             onClick={handleCountryClick}
                             onMouseEnter={handlePointHover}
+                            onMouseLeave={handleHoverClose}
                         />
                         <MapLayer
                             layerKey="country-line"
@@ -507,7 +532,7 @@ function MapView(props: MapViewProps) {
                             <Tooltip
                                 countryName={mapClickProperties
                                     ?.feature?.properties?.idmc_short}
-                                indicatorValue={selectedCountryIndicator}
+                                indicatorData={selectedCountryIndicator}
                                 onHide={handleHoverClose}
                                 lngLat={mapClickProperties.lngLat}
                             />
@@ -526,7 +551,7 @@ function MapView(props: MapViewProps) {
                     <>
                         <div className={styles.highProgressBox}>
                             <Heading size="extraSmall" className={styles.progressListHeader}>
-                                Highest cases
+                                Top Ranking
                             </Heading>
                             <ListView
                                 className={styles.progressList}
@@ -544,7 +569,7 @@ function MapView(props: MapViewProps) {
                         </div>
                         <div className={styles.lowProgressBox}>
                             <Heading size="extraSmall" className={styles.progressListHeader}>
-                                Lowest cases
+                                Bottom Ranking
                             </Heading>
                             <ListView
                                 className={styles.progressList}
@@ -565,7 +590,7 @@ function MapView(props: MapViewProps) {
                     <>
                         <div className={styles.highProgressBox}>
                             <Heading size="extraSmall" className={styles.progressListHeader}>
-                                Highest cases
+                                Top Ranking
                             </Heading>
                             <ListView
                                 className={styles.progressList}
@@ -583,7 +608,7 @@ function MapView(props: MapViewProps) {
                         </div>
                         <div className={styles.lowProgressBox}>
                             <Heading size="extraSmall" className={styles.progressListHeader}>
-                                Lowest cases
+                                Bottom Ranking
                             </Heading>
                             <ListView
                                 className={styles.progressList}
