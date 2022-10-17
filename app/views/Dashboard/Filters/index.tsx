@@ -147,7 +147,6 @@ function Filters(props: Props) {
                         ...oldValue,
                         outbreak: oldValue?.outbreak ?? 'COVID-19',
                         indicator: newValue,
-                        subvariable: subvariableList?.filterOptions.subvariables[0],
                         // FIXME: Add a handler to select a default subvariable on indicator change
                     }));
                 } else if (name === 'outbreak') {
@@ -173,7 +172,6 @@ function Filters(props: Props) {
         [
             onChange,
             countriesFromProps,
-            subvariableList?.filterOptions.subvariables,
         ],
     );
 

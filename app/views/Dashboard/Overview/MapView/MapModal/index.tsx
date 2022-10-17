@@ -37,12 +37,25 @@ import UncertaintyChart, { UncertainData } from '#components/UncertaintyChart';
 import {
     CountryModalQuery,
     CountryModalQueryVariables,
+    SubvariablesQuery,
+    SubvariablesQueryVariables,
 } from '#generated/types';
 
 import styles from './styles.css';
 
 const dateTickFormatter = (d: string) => getShortMonth(d);
 const normalizedTickFormatter = (d: number) => normalFormatter().format(d);
+
+const SUBVARIABLES = gql`
+    query Subvariables(
+        $iso3: String!,
+        $indicatorId:String
+    ) {
+        filterOptions {
+            subvariables(iso3: $iso3, indicatorId: $indicatorId)
+        }
+    }
+`;
 
 const COUNTRY_PROFILE = gql`
     query CountryModal(
@@ -137,16 +150,36 @@ function MapModal(props: ModalProps) {
         selectedIndicatorName,
     } = props;
 
+    const subvariablesVariables = useMemo(() => (
+        {
+            iso3: countryData?.properties?.iso3 ?? 'AFG',
+            indicatorId: filterValues?.indicator,
+        }
+    ), [
+        countryData?.properties?.iso3,
+        filterValues?.indicator,
+    ]);
+
+    const {
+        data: subVariableList,
+    } = useQuery<SubvariablesQuery, SubvariablesQueryVariables>(
+        SUBVARIABLES,
+        {
+            skip: !filterValues?.indicator,
+            variables: subvariablesVariables,
+        },
+    );
+
     const countryVariables = useMemo((): CountryModalQueryVariables => ({
         iso3: countryData?.properties?.iso3 ?? 'AFG',
         emergency: filterValues?.outbreak,
         indicatorId: filterValues?.indicator,
-        subvariable: filterValues?.subvariable,
+        subvariable: subVariableList?.filterOptions.subvariables[0],
     }
     ), [
         countryData,
+        subVariableList,
         filterValues?.outbreak,
-        filterValues?.subvariable,
         filterValues?.indicator,
     ]);
 
@@ -262,8 +295,15 @@ function MapModal(props: ModalProps) {
                 minimumValue: negativeRange,
                 maximumValue: positiveRange,
             };
-        })
+        }).sort((a, b) => compareDate(a.date, b.date))
     ), [countryResponse?.dataCountryLevel]);
+
+    const latestIndicatorValue = useMemo(() => {
+        if (!uncertaintyChart) {
+            return undefined;
+        }
+        return uncertaintyChart[uncertaintyChart?.length - 1];
+    }, [uncertaintyChart]);
 
     return (
         <Modal
@@ -288,12 +328,24 @@ function MapModal(props: ModalProps) {
                         size="extraLarge"
                         className={styles.countryCaseData}
                     >
-                        {normalizedTickFormatter(countryResponse?.countryProfile?.totalCases ?? 0)}
+                        {
+                            filterValues?.indicator
+                                ? `${latestIndicatorValue?.indicatorValue
+                                    ? latestIndicatorValue?.indicatorValue
+                                    : 0}%`
+                                : normalizedTickFormatter(
+                                    countryResponse?.countryProfile?.totalCases ?? 0,
+                                )
+                        }
                     </Heading>
                     <Heading
                         className={styles.countrySurveyDate}
                     >
-                        {dateTickFormatter(latestDate?.date ?? '')}
+                        {
+                            filterValues?.indicator
+                                ? dateTickFormatter(latestIndicatorValue?.date ?? '')
+                                : dateTickFormatter(latestDate?.date ?? '')
+                        }
                     </Heading>
                 </div>
             )}

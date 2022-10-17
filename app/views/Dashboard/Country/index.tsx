@@ -391,7 +391,7 @@ function Country(props: Props) {
                 minimumValue: negativeRange,
                 maximumValue: positiveRange,
             };
-        })
+        }).sort((a, b) => compareDate(a.date, b.date))
     ), [countryResponse?.dataCountryLevel]);
 
     const StatusUncertainty = useMemo(() => {
