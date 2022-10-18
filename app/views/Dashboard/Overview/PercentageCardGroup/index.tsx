@@ -8,7 +8,6 @@ import {
     YAxis,
     Tooltip,
     Legend,
-    ResponsiveContainer,
     LabelList,
     Cell,
 } from 'recharts';
@@ -26,6 +25,7 @@ import { useQuery, gql } from '@apollo/client';
 
 import PercentageStats from '#components/PercentageStats';
 import UncertaintyChart from '#components/UncertaintyChart';
+import ChartContainer from '#components/ChartContainer';
 
 import {
     decimalToPercentage,
@@ -270,7 +270,9 @@ function PercentageCardGroup(props: Props) {
     ]);
 
     const {
-        data: overviewStatsResponse,
+        loading,
+        previousData: previousOverviewStat,
+        data: overviewStatsResponse = previousOverviewStat,
     } = useQuery<OverviewStatsQuery, OverviewStatsQueryVariables>(
         OVERVIEW_STATS,
         {
@@ -464,6 +466,7 @@ function PercentageCardGroup(props: Props) {
                                 ? uncertaintyRegionChart
                                 : uncertaintyGlobalChart
                         }
+                        loading={loading}
                         emergencyFilterValue={filterValues?.outbreak}
                         heading="Indicator overview over the last 12 months"
                         headingDescription={`Trend chart for ${selectedIndicatorName ?? filterValues?.indicator}`}
@@ -477,7 +480,11 @@ function PercentageCardGroup(props: Props) {
                         contentClassName={styles.responsiveContent}
                         headerDescription={`Number of cases for ${filterValues?.outbreak}`}
                     >
-                        <ResponsiveContainer className={styles.responsiveContainer}>
+                        <ChartContainer
+                            className={styles.responsiveContainer}
+                            data={outbreakLineChart}
+                            loading={loading}
+                        >
                             <LineChart
                                 data={outbreakLineChart}
                                 margin={{
@@ -512,7 +519,7 @@ function PercentageCardGroup(props: Props) {
                                     dot={false}
                                 />
                             </LineChart>
-                        </ResponsiveContainer>
+                        </ChartContainer>
                     </ContainerCard>
                 )}
 
@@ -526,7 +533,9 @@ function PercentageCardGroup(props: Props) {
                     ? selectedIndicatorName ?? filterValues.indicator
                     : selectedOutbreakName ?? filterValues?.outbreak}
             >
-                <ResponsiveContainer
+                <ChartContainer
+                    data={regionalBreakdownRegion}
+                    loading={loading}
                     className={styles.responsiveContainer}
                 >
                     {(filterValues?.indicator)
@@ -610,7 +619,7 @@ function PercentageCardGroup(props: Props) {
                                 </Bar>
                             </BarChart>
                         )}
-                </ResponsiveContainer>
+                </ChartContainer>
             </ContainerCard>
         </div>
     );

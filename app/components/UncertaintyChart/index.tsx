@@ -6,13 +6,15 @@ import {
     YAxis,
     Tooltip,
     Line,
-    ResponsiveContainer,
 } from 'recharts';
 import {
     ContainerCard,
 } from '@the-deep/deep-ui';
 import { isDefined, _cs } from '@togglecorp/fujs';
+
 import { getShortMonth } from '#utils/common';
+import ChartContainer from '#components/ChartContainer';
+
 import styles from './styles.css';
 
 export interface UncertainData {
@@ -32,6 +34,7 @@ interface Props {
     emergencyFilterValue?: string;
     headingDescription?: React.ReactNode;
     heading?: React.ReactNode;
+    loading?: boolean;
 }
 
 interface Payload {
@@ -54,6 +57,7 @@ function UncertaintyChart(props: Props) {
         emergencyFilterValue,
         headingDescription,
         heading,
+        loading,
     } = props;
 
     const customTooltip = (tooltipProps: TooltipProps) => {
@@ -96,7 +100,9 @@ function UncertaintyChart(props: Props) {
             headingSize="extraSmall"
             headerDescription={headingDescription}
         >
-            <ResponsiveContainer
+            <ChartContainer
+                data={uncertainData}
+                loading={loading}
                 className={styles.responsiveContainer}
             >
                 <ComposedChart
@@ -131,7 +137,7 @@ function UncertaintyChart(props: Props) {
                     />
                     <Tooltip content={customTooltip} />
                 </ComposedChart>
-            </ResponsiveContainer>
+            </ChartContainer>
         </ContainerCard>
     );
 }

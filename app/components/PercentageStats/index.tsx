@@ -79,7 +79,6 @@ function PercentageStats(props: Props) {
             footerContentClassName={styles.valueAndSubValue}
             footerContent={(
                 <>
-
                     <NumberOutput
                         className={styles.valueText}
                         value={statValue}
