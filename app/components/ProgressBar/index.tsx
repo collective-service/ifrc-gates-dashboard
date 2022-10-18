@@ -1,19 +1,18 @@
 import React, { useMemo, useCallback } from 'react';
-import { _cs, isNotDefined } from '@togglecorp/fujs';
+import {
+    _cs,
+} from '@togglecorp/fujs';
 import { Button } from '@the-deep/deep-ui';
 import {
-    normalFormatter,
-    decimalToPercentage,
+    formatNumber,
+    FormatType,
 } from '#utils/common';
 
 import styles from './styles.css';
 
-const normalizedForm = (d: number) => normalFormatter().format(d);
-
 export interface Props {
     className?: string | undefined;
     barHeight?: number;
-    suffix?: string;
     barName: string | undefined;
     title: string | undefined;
     valueTitle?: string | undefined;
@@ -24,17 +23,16 @@ export interface Props {
     icon?: React.ReactNode;
     region?: string;
     showRegionalValue?: boolean;
-    isPercentageValue?: boolean;
     indicatorId?: string;
     subVariable?: string;
     onTitleClick?: (indicatorId?: string, subVariable?: string) => void;
+    format: FormatType;
 }
 
 function ProgressBar(props: Props) {
     const {
         className,
         barHeight = 8,
-        suffix,
         barName,
         title,
         valueTitle,
@@ -45,25 +43,11 @@ function ProgressBar(props: Props) {
         icon,
         region,
         showRegionalValue = false,
-        isPercentageValue = false,
         onTitleClick,
         indicatorId,
         subVariable,
+        format,
     } = props;
-
-    const countryPercentage = useMemo(() => {
-        if (isNotDefined(value) || isNotDefined(totalValue)) {
-            return undefined;
-        }
-        if (isPercentageValue) {
-            return decimalToPercentage(value) ?? 0;
-        }
-        return (Math.round((value / totalValue) * 10000) / 100) ?? 0;
-    }, [
-        totalValue,
-        value,
-        isPercentageValue,
-    ]);
 
     const handleTitleClick = useCallback(() => {
         if (!onTitleClick) {
@@ -76,16 +60,25 @@ function ProgressBar(props: Props) {
         subVariable,
     ]);
 
-    const subValuePercentage = useMemo(
-        () => (
-            subValue && totalValue
-            && ((subValue / totalValue) * 100).toFixed(0)
-        ), [totalValue, subValue],
-    );
+    const subValuePercentage = useMemo(() => (
+        `${region}: ${formatNumber('percent', subValue ?? 0)}`
+    ), [
+        subValue,
+        region,
+    ]);
 
-    const valueTooltip = useMemo(() => (
-        (`${valueTitle}: ${((value && normalizedForm(value)) ?? '0')}` ?? undefined)
-    ), [value, valueTitle]);
+    const valueTooltip = useMemo(() => {
+        if (format === 'percent') {
+            return (`${valueTitle}: ${formatNumber(format, value ?? 0)}` ?? undefined);
+        }
+        return (`${valueTitle}: ${value}`);
+    }, [
+        value,
+        valueTitle,
+        format,
+    ]);
+
+    const totalValueForWidth = formatNumber('percent', value ?? 0, totalValue ?? 0);
 
     return (
         <div className={_cs(className, styles.progressInfo)}>
@@ -116,7 +109,7 @@ function ProgressBar(props: Props) {
                         className={styles.progressBarStyle}
                         key={undefined}
                         style={{
-                            width: `${countryPercentage}%`,
+                            width: totalValueForWidth,
                             backgroundColor: color ?? 'blue',
                         }}
                     />
@@ -125,13 +118,14 @@ function ProgressBar(props: Props) {
                     className={styles.progressValue}
                     title={valueTooltip as string}
                 >
-                    {isPercentageValue ? countryPercentage : normalizedForm(value ?? 0)}
-                    {isPercentageValue && suffix}
+                    {format === 'percent'
+                        ? formatNumber('percent', value ?? 0)
+                        : formatNumber(format, value ?? 0, totalValue ?? 0)}
                 </div>
             </div>
             {showRegionalValue && subValuePercentage && (
                 <div className={styles.subValue}>
-                    {`${region}: ${subValuePercentage}${suffix}`}
+                    {subValuePercentage}
                 </div>
             )}
         </div>

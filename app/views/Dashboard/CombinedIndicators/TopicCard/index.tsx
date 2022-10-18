@@ -11,16 +11,20 @@ import {
 import ProgressBar from '#components/ProgressBar';
 import { FilterType } from '#views/Dashboard/Filters';
 import { TabTypes } from '#views/Dashboard';
+import { FormatType } from '#utils/common';
 
-import { IndicatorDataType } from '..';
+import { IndicatorType } from '..';
 
 import styles from './styles.css';
 
 const barHeight = 8;
 
+const indicatorKeySelector = (d: IndicatorType) => d.subvariable ?? '';
+
 interface Props {
-    indicatorKey: string;
-    indicators: IndicatorDataType[];
+    topicName: string;
+    topicDescription?: string;
+    indicators: IndicatorType[] | undefined;
     showRegionalValue: boolean;
     filterValues: FilterType | undefined;
     setFilterValues: React.Dispatch<React.SetStateAction<FilterType | undefined>>;
@@ -29,7 +33,8 @@ interface Props {
 
 function TopicCard(props: Props) {
     const {
-        indicatorKey,
+        topicName,
+        topicDescription,
         indicators,
         showRegionalValue,
         filterValues,
@@ -64,38 +69,35 @@ function TopicCard(props: Props) {
         setFilterValues,
     ]);
 
-    const indicatorRendererParams = useCallback((_: string, data: IndicatorDataType) => ({
+    const indicatorRendererParams = useCallback((_: string, data: IndicatorType) => ({
         className: styles.indicatorItem,
         barHeight,
-        suffix: '%',
         barName: `${data.indicatorName} - ${data.subvariable}`,
-        title: data.indicatorDescription ?? ' ',
-        valueTitle: data.indicatorName ?? '',
-        value: data.indicatorValue ?? 0,
-        subValue: data.indicatorValueRegional ?? 0,
+        title: data.indicatorDescription ?? undefined,
+        valueTitle: data.indicatorName ?? undefined,
+        value: data.indicatorValue ?? undefined,
+        subValue: data.indicatorValueRegional ?? undefined,
         totalValue: 1,
-        indicatorId: data.indicatorId,
-        subVariable: data.indicatorId,
+        indicatorId: data.indicatorId ?? undefined,
+        subVariable: data.subvariable ?? undefined,
         icon: <IoInformationCircleOutline />,
         color: '#98a6b5',
-        region: data.region ?? '',
+        region: data.region ?? undefined,
         showRegionalValue,
-        isPercentageValue: data.format === 'percent',
         onTitleClick: handleIndicatorClick,
+        format: (data.format ?? 'raw') as FormatType,
     }), [
         showRegionalValue,
         handleIndicatorClick,
     ]);
 
-    const indicatorKeySelector = (d: IndicatorDataType) => d.subvariable;
-
     return (
         <ContainerCard
             className={styles.topicCard}
             contentClassName={styles.topicContainer}
-            heading={indicatorKey}
+            heading={topicName}
             headingSize="small"
-            headerDescription={indicators[0]?.topicDescription}
+            headerDescription={topicDescription}
             spacing="loose"
         >
             <List
