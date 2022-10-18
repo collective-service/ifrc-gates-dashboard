@@ -5,6 +5,7 @@ import {
     listToGroupList,
     doesObjectHaveNoData,
     compareString,
+    isDefined,
 } from '@togglecorp/fujs';
 import {
     SelectInput,
@@ -153,6 +154,12 @@ function Filters(props: Props) {
                         ...oldValue,
                         outbreak: newValue,
                         indicator: undefined,
+                    }));
+                } else if (name === 'subvariable') {
+                    onChange((oldValue) => ({
+                        ...oldValue,
+                        indicator: isDefined(newValue) ? oldValue?.indicator : undefined,
+                        subvariable: newValue,
                     }));
                 } else {
                     onChange((oldValue) => ({
