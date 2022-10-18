@@ -28,12 +28,11 @@ import {
     NumberOutput,
 } from '@the-deep/deep-ui';
 import { useQuery, gql } from '@apollo/client';
-import { IoInformationCircle } from 'react-icons/io5';
-import { BiLinkExternal } from 'react-icons/bi';
 
 import UncertaintyChart, { UncertainData } from '#components/UncertaintyChart';
 import PercentageStats from '#components/PercentageStats';
 import ScoreCard from '#components/ScoreCard';
+import Sources from '#components/Sources';
 import {
     decimalToPercentage,
     formatNumber,
@@ -220,6 +219,19 @@ const COUNTRY_PROFILE = gql`
             contextDate
             emergency
             format
+        }
+        sources(
+            iso3: $disaggregationIso3,
+            limit: 5,
+            emergency: $emergency,
+            indicatorId: $indicatorId,
+            subvariable: $subvariable,
+        ) {
+            title
+            link
+            sourceComment
+            organisation
+            maxDate
         }
     }
 `;
@@ -491,6 +503,10 @@ function Country(props: Props) {
     ];
 
     const isScoreCardValueEmpty = scoreCardData.every((score) => isNotDefined(score.value));
+
+    const sourcesList = countryResponse?.sources;
+
+    console.log(sourcesList);
 
     const metricTypeForColor = useCallback((data: ScoreCardProps) => {
         if (isNotDefined(data) || isNotDefined(data.value)) {
@@ -907,26 +923,10 @@ function Country(props: Props) {
                     )}
                 </ContainerCard>
             </div>
-            <div>
-                <div className={styles.sourceHeading}>
-                    Sources
-                </div>
-                <div className={styles.perceptionCard}>
-                    <div className={styles.infoIcon}>
-                        <IoInformationCircle />
-                    </div>
-                    <div>
-                        {`COVID-19 Vaccine Perceptions in ${countryResponse?.countryProfile.countryName}
-                    (${countryResponse?.countryProfile.countryName} CDC)`}
-                    </div>
-                    <a
-                        href="https://www.rcce-collective.net/data/data-tracker/"
-                        className={styles.infoIcon}
-                    >
-                        <BiLinkExternal />
-                    </a>
-                </div>
-            </div>
+            <Sources
+                title="title"
+                sourceComment="comment"
+            />
         </div>
     );
 }

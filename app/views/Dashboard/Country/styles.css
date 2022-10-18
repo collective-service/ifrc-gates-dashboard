@@ -177,25 +177,4 @@
             }
         }
     }
-
-    .perception-card {
-        display: flex;
-        gap: var(--dui-spacing-small);
-
-        p {
-            padding-left: var(--dui-spacing-small);
-        }
-
-        .info-icon {
-            color: var(--color-text-title);
-            font-size: var(--dui-font-size-extra-large);
-        }
-
-    }
-
-    .source-heading {
-        padding: var(--dui-spacing-medium) 0px;
-        font-size: var(--dui-font-size-heading-small);
-        font-weight: var(--dui-font-weight-bold);
-    }
 }

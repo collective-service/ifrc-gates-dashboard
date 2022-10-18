@@ -15,18 +15,4 @@
         }
 
     }
-
-    .perception-wrapper {
-        display: flex;
-        flex-direction: column;
-        padding: var(--dui-spacing-medium);
-
-        .perception-card {
-            width: 20rem;
-
-            p {
-                padding-left: var(--dui-spacing-small);
-            }
-        }
-    }
 }

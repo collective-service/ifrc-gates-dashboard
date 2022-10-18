@@ -20,6 +20,7 @@ import {
     GlobalCombinedIndicatorsQueryVariables,
 } from '#generated/types';
 import { TabTypes } from '#views/Dashboard';
+import Sources from '#components/Sources';
 
 import TopicCard from './TopicCard';
 import { AdvancedOptionType } from '../AdvancedFilters';
@@ -337,14 +338,10 @@ function CombinedIndicators(props: Props) {
                 rendererParams={thematicRendererParams}
                 keySelector={thematicKeySelector}
             />
-            <ContainerCard
-                className={styles.perceptionWrapper}
-                contentClassName={styles.perceptionCard}
-                heading="Sources"
-                headingSize="extraSmall"
-            >
-                <p>COVID-19 Vaccine Perceptions in Africa</p>
-            </ContainerCard>
+            <Sources
+                title="title"
+                sourceComment="comment"
+            />
         </div>
     );
 }
