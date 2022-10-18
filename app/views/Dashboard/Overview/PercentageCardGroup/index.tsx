@@ -217,6 +217,23 @@ interface Props {
     selectedOutbreakName: string | undefined;
 }
 
+const negativeToZero = (
+    (indicatorValue?: number | null, errorMarginValue?: number | null) => {
+        const valueInd = isNotDefined(indicatorValue) ? 0 : indicatorValue;
+        const valueErr = isNotDefined(errorMarginValue) ? 0 : errorMarginValue;
+        const difference = (valueInd - valueErr) < 0 ? 0 : valueInd - valueErr;
+
+        return decimalToPercentage(difference);
+    });
+const positiveToZero = (
+    (indicatorValue?: number | null, errorMarginValue?: number | null) => {
+        const valueInd = isNotDefined(indicatorValue) ? 0 : indicatorValue;
+        const valueErr = isNotDefined(errorMarginValue) ? 0 : errorMarginValue;
+        const sum = (valueInd + valueErr) > 1 ? 1 : valueInd + valueErr;
+
+        return decimalToPercentage(sum);
+    });
+
 function PercentageCardGroup(props: Props) {
     const {
         className,
@@ -291,25 +308,6 @@ function PercentageCardGroup(props: Props) {
         filterValues?.region,
     ]);
 
-    const negativeToZero = useCallback(
-        (indicatorValue?: number | null, errorMarginValue?: number | null) => {
-            const valueInd = isNotDefined(indicatorValue) ? 0 : indicatorValue;
-            const valueErr = isNotDefined(errorMarginValue) ? 0 : errorMarginValue;
-            const difference = (valueInd - valueErr) < 0 ? 0 : valueInd - valueErr;
-
-            return decimalToPercentage(difference);
-        }, [],
-    );
-    const positiveToZero = useCallback(
-        (indicatorValue?: number | null, errorMarginValue?: number | null) => {
-            const valueInd = isNotDefined(indicatorValue) ? 0 : indicatorValue;
-            const valueErr = isNotDefined(errorMarginValue) ? 0 : errorMarginValue;
-            const sum = (valueInd + valueErr) > 1 ? 1 : valueInd + valueErr;
-
-            return decimalToPercentage(sum);
-        }, [],
-    );
-
     const uncertaintyGlobalChart = useMemo(() => (
         overviewStatsResponse?.uncertaintyGlobal.map((global) => {
             const negativeRange = negativeToZero(global.indicatorValueGlobal, global.errorMargin);
@@ -341,11 +339,7 @@ function PercentageCardGroup(props: Props) {
                 id: global.id,
             };
         }).sort((a, b) => compareDate(a.date, b.date))
-    ), [
-        overviewStatsResponse?.uncertaintyGlobal,
-        negativeToZero,
-        positiveToZero,
-    ]);
+    ), [overviewStatsResponse?.uncertaintyGlobal]);
 
     const uncertaintyRegionChart = useMemo(() => (
         overviewStatsResponse?.uncertaintyRegion.map((region) => {
@@ -380,11 +374,7 @@ function PercentageCardGroup(props: Props) {
                 id: region.id,
             };
         }).sort((a, b) => compareDate(a.date, b.date))
-    ), [
-        overviewStatsResponse?.uncertaintyRegion,
-        negativeToZero,
-        positiveToZero,
-    ]);
+    ), [overviewStatsResponse?.uncertaintyRegion]);
 
     const outbreakLineChart = useMemo(() => (
         overviewStatsResponse?.outbreak.map((outbreak) => (
