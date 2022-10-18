@@ -1,5 +1,6 @@
 .table-wrapper {
     display: flex;
+    max-height: 50vh;
 
     .each-table-cell {
         border-right: 1px solid var(--dui-color-line-separator);
@@ -8,10 +9,6 @@
         .cell {
             padding: var(--dui-spacing-small);
             text-align: left;
-
-            &.high-indicator {
-                color: blue;
-            }
         }
     }
 
@@ -27,6 +24,6 @@
 }
 
 .search-column-cell {
-    padding: var(--dui-spacing-medium);
+    padding: 0 var(--dui-spacing-medium);
     font-weight: bold;
 }
