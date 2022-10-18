@@ -1,8 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import {
-    compareString,
     _cs,
-    listToGroupList,
+    compareNumber,
+    encodeDate,
 } from '@togglecorp/fujs';
 import { gql, useQuery } from '@apollo/client';
 import {
@@ -10,20 +10,13 @@ import {
     TableView,
     TableColumn,
     TableHeaderCell,
-    TableHeaderCellProps,
-    TableCell,
-    TableCellProps,
-    TableSortDirection,
-    TableFilterType,
 } from '@the-deep/deep-ui';
 import {
     IoSearch,
 } from 'react-icons/io5';
 
 import {
-    decimalToPercentage,
     rankedSearchOnList,
-    normalCommaFormatter,
 } from '#utils/common';
 import {
     TableValuesQuery,
@@ -31,6 +24,33 @@ import {
 } from '#generated/types';
 import { FilterType } from '#views/Dashboard/Filters';
 import styles from './styles.css';
+
+const colors = [
+    '#fff7fb',
+    '#ece7f2',
+    '#d0d1e6',
+    '#a6bddb',
+    '#74a9cf',
+    '#3690c0',
+    '#0570b0',
+    '#045a8d',
+    '#023858',
+];
+
+const getMonthList = () => {
+    const latestMonth = new Date();
+
+    const months = [];
+    for (let i = 0; i < 12; i += 1) {
+        latestMonth.setMonth(latestMonth.getMonth() - 1);
+        latestMonth.setDate(1);
+
+        months.push(encodeDate(latestMonth));
+    }
+    return months.reverse();
+};
+
+const monthList = getMonthList();
 
 type TableViewProps = NonNullable<TableValuesQuery['overviewTable']>[number];
 
@@ -101,74 +121,61 @@ function countryListCell(props: CountryListCellProps) {
     );
 }
 
-function MyCell<T>(props: TableCellProps<T>) {
-    const { className, value } = props;
-    const highValueIndicator = value && +(value) > 60;
+function getTextColorForHex(inputHex: string) {
+    const hexcolor = inputHex.replace('#', '');
+    const r = parseInt(hexcolor.substr(0, 2), 16);
+    const g = parseInt(hexcolor.substr(2, 2), 16);
+    const b = parseInt(hexcolor.substr(4, 2), 16);
+
+    const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+    return (yiq >= 128) ? 'black' : 'white';
+}
+
+interface ColorRange {
+    minValue: number;
+    maxValue: number;
+    color: string;
+}
+
+interface IndicatorValueProps {
+    className?: string;
+    value?: number;
+    colorRange?: ColorRange[];
+}
+
+function IndicatorValue(props: IndicatorValueProps) {
+    const {
+        className,
+        colorRange,
+        value,
+    } = props;
+
+    const color = useMemo(() => {
+        if (!value) {
+            return colors[0];
+        }
+        return colorRange?.find(
+            (range) => value > range.minValue && value <= range.maxValue,
+        )?.color;
+    }, [
+        colorRange,
+        value,
+    ]);
 
     return (
-        <TableCell
+        <div
             className={_cs(
                 className,
                 styles.cell,
-                highValueIndicator && styles.highIndicator,
             )}
-            value={value}
-        />
+            style={{
+                backgroundColor: color,
+                color: getTextColorForHex(color ?? colors[0]),
+            }}
+        >
+            {value ? value.toFixed(2) : '-'}
+        </div>
     );
-}
-
-function createIndicatorColumn(
-    id: string,
-    title: string,
-    accessor: (item: TableViewProps) => string,
-    options?: {
-        cellAsHeader?: boolean,
-        sortable?: boolean,
-        defaultSortDirection?: TableSortDirection,
-        filterType?: TableFilterType,
-        orderable?: boolean;
-        hideable?: boolean;
-        columnCellClassName?: string;
-        columnClassName?: string;
-        columnWidth?: TableColumn<TableViewProps, string, TableCellProps<string>, TableHeaderCellProps>['columnWidth'];
-        columnStyle?: TableColumn<TableViewProps, string, TableCellProps<string>, TableHeaderCellProps>['columnStyle'];
-    },
-) {
-    const item: TableColumn<
-        TableViewProps,
-        string,
-        TableCellProps<string>,
-        TableHeaderCellProps
-    > & {
-        valueSelector: (item: TableViewProps) => string | undefined | null,
-        valueComparator: (foo: TableViewProps, bar: TableViewProps) => number,
-    } = {
-        id,
-        title,
-        cellAsHeader: options?.cellAsHeader,
-        headerCellRenderer: TableHeaderCell,
-        headerCellRendererParams: {
-            sortable: options?.sortable,
-            filterType: options?.filterType,
-            orderable: options?.orderable,
-            hideable: options?.hideable,
-        },
-        cellRenderer: MyCell,
-        cellRendererParams: (_: string, datum: TableViewProps): TableCellProps<string> => ({
-            value: accessor(datum),
-            tooltip: accessor(datum),
-            className: options?.columnCellClassName,
-        }),
-        valueSelector: accessor,
-        valueComparator: (
-            foo: TableViewProps,
-            bar: TableViewProps,
-        ) => compareString(accessor(foo), accessor(bar)),
-        columnClassName: options?.columnClassName,
-        columnWidth: options?.columnWidth,
-        columnStyle: options?.columnStyle,
-    };
-    return item;
 }
 
 interface Props {
@@ -202,6 +209,25 @@ function OverviewTable(props: Props) {
         },
     );
 
+    const colorRange = useMemo(() => {
+        const largestValue = tableValues
+            ?.overviewTable
+            .map((country) => country.data)
+            .flat()
+            .sort((a, b) => compareNumber(
+                a.indicatorValue,
+                b.indicatorValue,
+                -1,
+            ))?.[0].indicatorValue;
+
+        return colors.map((color, index) => (
+            {
+                minValue: ((largestValue ?? 1) / colors.length) * index,
+                maxValue: ((largestValue ?? 1) / colors.length) * (index + 1),
+                color,
+            }));
+    }, [tableValues?.overviewTable]);
+
     const filteredData = useMemo(() => (
         rankedSearchOnList(
             tableValues?.overviewTable ?? [],
@@ -212,18 +238,9 @@ function OverviewTable(props: Props) {
         tableValues,
         searchText,
     ]);
-    console.log('Check table data here::>>', filteredData);
 
     const columns = useMemo(
         () => {
-            const groupedData = listToGroupList(
-                filteredData,
-                (d) => d.data[0].month,
-                (d) => d.data[0],
-            );
-
-            const dateList = Object.keys(groupedData);
-
             // eslint-disable-next-line max-len
             const searchColumn: TableColumn<TableViewProps, string, CountryListCellProps, CountryListHeaderCellProps> = {
                 id: 'search',
@@ -238,51 +255,38 @@ function OverviewTable(props: Props) {
                 cellRendererParams: (_, datum) => ({
                     title: datum.countryName,
                 }),
-                columnWidth: 130,
+                columnWidth: 240,
             };
 
             return [
                 searchColumn,
-                ...dateList.map(
+                ...monthList.map(
                     (date) => (
-                        createIndicatorColumn(
-                            date.toLowerCase(),
-                            new Date(date).toLocaleDateString('default', { month: 'short' }),
-                            (item) => {
-                                if (item?.data[0].month === date) {
-                                    return String(item?.data?.[0]?.indicatorValue?.toFixed(2));
-                                }
-                                return '-';
+                        {
+                            id: date,
+                            title: new Date(date).toLocaleDateString('default', { month: 'short', year: '2-digit' }),
+                            headerCellRenderer: TableHeaderCell,
+                            headerCellRendererParams: {
+                                sortable: false,
                             },
-                            { columnWidth: 30 },
-                        )
+                            cellRenderer: IndicatorValue,
+                            cellRendererParams: (_: unknown, datum: TableViewProps) => (
+                                {
+                                    value: datum.data.find(
+                                        (item) => item.month === date,
+                                    )?.indicatorValue,
+                                    colorRange,
+                                }
+                            ),
+                            columnWidth: 90,
+                        }
                     ),
                 ),
-                /* createIndicatorColumn(
-                     'jan',
-                     'Jan',
-                     (item) => {
-                         const displayValue = new Date(item?.data?[0].month).getMonth() === 0,
-                         )?.indicatorValue;
-
-                         if (!displayValue) {
-                             return '-';
-                         }
-                         const displayValueWithSuffix = filterValues?.indicator
-                             ? `${decimalToPercentage(displayValue)}%`
-                             : `${normalCommaFormatter().format(displayValue)}`;
-                         return displayValueWithSuffix;
-                     },
-                     {
-                         columnWidth: 30,
-                     },
-                 ),
-                */
             ];
         },
         [
-            filteredData,
             searchText,
+            colorRange,
         ],
     );
 
