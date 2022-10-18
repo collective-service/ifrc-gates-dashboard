@@ -6,18 +6,14 @@ import { IoFileTraySharp } from 'react-icons/io5';
 
 import styles from './styles.css';
 
-interface DataProps {
-    [key: string]: string | number | null | undefined;
-}
-
-interface Props {
+interface Props<T> {
     children: ReactElement;
     className?: string;
     loading?: boolean;
-    data?: DataProps[];
+    data?: T[];
 }
 
-function ChartContainer(props: Props) {
+function ChartContainer<T>(props: Props<T>) {
     const {
         children,
         className,

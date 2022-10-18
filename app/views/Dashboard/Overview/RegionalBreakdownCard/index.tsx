@@ -5,7 +5,6 @@ import {
     XAxis,
     YAxis,
     Tooltip,
-    ResponsiveContainer,
     LabelList,
     Cell,
 } from 'recharts';
@@ -30,6 +29,7 @@ import {
     normalFormatter,
     normalCommaFormatter,
 } from '#utils/common';
+import ChartContainer from '#components/ChartContainer';
 
 import PieChartInfo, { RegionalDataType } from './PieChartInfo';
 import { FilterType } from '../../Filters';
@@ -146,7 +146,9 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
     }), [filterValues?.region]);
 
     const {
-        data: regionalTotalResponse,
+        loading,
+        previousData: previousRegionalData,
+        data: regionalTotalResponse = previousRegionalData,
     } = useQuery<RegionalAndTotalQuery, RegionalAndTotalQueryVariables>(
         REGIONAL_BREAKDOWN_TOTAL,
         {
@@ -216,7 +218,11 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
                 headingSize="extraSmall"
                 headerDescription="Total number of cases by outbreak"
             >
-                <ResponsiveContainer className={styles.responsiveContainer}>
+                <ChartContainer
+                    data={totalBarChart}
+                    loading={loading}
+                    className={styles.responsiveContainer}
+                >
                     <BarChart
                         data={totalBarChart}
                         barSize={18}
@@ -261,7 +267,7 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
                             />
                         </Bar>
                     </BarChart>
-                </ResponsiveContainer>
+                </ChartContainer>
             </ContainerCard>
             <ContainerCard
                 className={_cs(styles.regionsPieChart)}
@@ -279,7 +285,8 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
                     rendererParams={pieChartInfoRendererParams}
                     filtered={false}
                     errored={false}
-                    pending={false}
+                    compactPendingMessage
+                    pending={loading}
                 />
                 <ListView
                     className={styles.breakdownLabelWrapper}
@@ -289,7 +296,8 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
                     rendererParams={regionalLabelRendererParams}
                     filtered={false}
                     errored={false}
-                    pending={false}
+                    pending={loading}
+                    compactPendingMessage
                 />
             </ContainerCard>
         </div>

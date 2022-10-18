@@ -2,12 +2,13 @@ import React from 'react';
 import { _cs, isDefined } from '@togglecorp/fujs';
 import { NumberOutput } from '@the-deep/deep-ui';
 import {
-    ResponsiveContainer,
     Pie,
     PieChart,
     Cell,
     Tooltip,
 } from 'recharts';
+
+import ChartContainer from '#components/ChartContainer';
 
 import { FilterType } from '../../../Filters';
 import styles from './styles.css';
@@ -71,7 +72,8 @@ function PieChartInfo(props: PieChartInfoProps) {
                 {region}
             </div>
             <div className={styles.pieChartHolder}>
-                <ResponsiveContainer
+                <ChartContainer
+                    data={regionalData}
                     className={styles.responsiveContainer}
                 >
                     <PieChart
@@ -102,7 +104,7 @@ function PieChartInfo(props: PieChartInfoProps) {
                             label={aggregatedValue}
                         />
                     </PieChart>
-                </ResponsiveContainer>
+                </ChartContainer>
             </div>
         </div>
     );

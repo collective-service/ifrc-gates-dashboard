@@ -343,7 +343,7 @@ function MapView(props: MapViewProps) {
     );
 
     const highestValueWithoutIndicator = highestLowestCasesData
-        ?.descCountryEmergencyProfile[0].contextIndicatorValue;
+        ?.descCountryEmergencyProfile[0]?.contextIndicatorValue;
 
     /*
     FIX ME: This might be required to find the highest value for indicatorValue
@@ -413,7 +413,7 @@ function MapView(props: MapViewProps) {
             barName: data.countryName,
             title: data.countryName ?? undefined,
             valueTitle: data.countryName ?? undefined,
-            value: data.contextIndicatorValue,
+            value: data?.contextIndicatorValue,
             totalValue: highestValueWithoutIndicator,
             color: '#98A6B5',
             isPercentageValue: false,

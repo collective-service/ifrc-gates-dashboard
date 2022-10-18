@@ -6,7 +6,6 @@ import {
     YAxis,
     Tooltip,
     Line,
-    ResponsiveContainer,
 } from 'recharts';
 import {
     ContainerCard,
@@ -14,6 +13,7 @@ import {
 import { isDefined, _cs } from '@togglecorp/fujs';
 
 import { getShortMonth } from '#utils/common';
+import ChartContainer from '#components/ChartContainer';
 
 import styles from './styles.css';
 
@@ -100,7 +100,9 @@ function UncertaintyChart(props: Props) {
             headingSize="extraSmall"
             headerDescription={headingDescription}
         >
-            <ResponsiveContainer
+            <ChartContainer
+                data={uncertainData}
+                loading={loading}
                 className={styles.responsiveContainer}
             >
                 <ComposedChart
@@ -135,7 +137,7 @@ function UncertaintyChart(props: Props) {
                     />
                     <Tooltip content={customTooltip} />
                 </ComposedChart>
-            </ResponsiveContainer>
+            </ChartContainer>
         </ContainerCard>
     );
 }

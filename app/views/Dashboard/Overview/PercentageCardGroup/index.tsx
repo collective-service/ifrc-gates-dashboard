@@ -8,7 +8,6 @@ import {
     YAxis,
     Tooltip,
     Legend,
-    ResponsiveContainer,
     LabelList,
     Cell,
 } from 'recharts';
@@ -271,9 +270,9 @@ function PercentageCardGroup(props: Props) {
     ]);
 
     const {
+        loading,
         previousData: previousOverviewStat,
         data: overviewStatsResponse = previousOverviewStat,
-        loading: loadingData,
     } = useQuery<OverviewStatsQuery, OverviewStatsQueryVariables>(
         OVERVIEW_STATS,
         {
@@ -467,6 +466,7 @@ function PercentageCardGroup(props: Props) {
                                 ? uncertaintyRegionChart
                                 : uncertaintyGlobalChart
                         }
+                        loading={loading}
                         emergencyFilterValue={filterValues?.outbreak}
                         heading="Indicator overview over the last 12 months"
                         headingDescription={`Trend chart for ${selectedIndicatorName ?? filterValues?.indicator}`}
@@ -483,7 +483,7 @@ function PercentageCardGroup(props: Props) {
                         <ChartContainer
                             className={styles.responsiveContainer}
                             data={outbreakLineChart}
-                            loading={loadingData}
+                            loading={loading}
                         >
                             <LineChart
                                 data={outbreakLineChart}
@@ -533,7 +533,9 @@ function PercentageCardGroup(props: Props) {
                     ? selectedIndicatorName ?? filterValues.indicator
                     : selectedOutbreakName ?? filterValues?.outbreak}
             >
-                <ResponsiveContainer
+                <ChartContainer
+                    data={regionalBreakdownRegion}
+                    loading={loading}
                     className={styles.responsiveContainer}
                 >
                     {(filterValues?.indicator)
@@ -617,7 +619,7 @@ function PercentageCardGroup(props: Props) {
                                 </Bar>
                             </BarChart>
                         )}
-                </ResponsiveContainer>
+                </ChartContainer>
             </ContainerCard>
         </div>
     );
