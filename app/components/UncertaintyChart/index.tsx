@@ -19,14 +19,12 @@ export interface UncertainData {
     emergency?: string;
     indicatorValue?: number | null;
     date: string;
-    uncertainRange?: number[];
+    uncertainRange?: (number | undefined)[];
     minimumValue?: number;
     maximumValue?: number;
     region?: string;
     indicatorName?: string | null;
 }
-
-const dateTickFormatter = (d: string) => getShortMonth(d);
 
 interface Props {
     className?: string;
@@ -46,6 +44,8 @@ interface TooltipProps {
     active?: boolean;
     payload?: Payload[];
 }
+
+const dateTickFormatter = (d: string) => getShortMonth(d);
 
 function UncertaintyChart(props: Props) {
     const {
@@ -110,10 +110,9 @@ function UncertaintyChart(props: Props) {
                         }}
                         tickFormatter={dateTickFormatter}
                     />
-                    {/* NOTE: don't need to determine the Y-axis domain
-                    this will auto calculate minium and maximum value
-                    based upon the data provided to chart. */}
-                    <YAxis />
+                    <YAxis
+                        allowDecimals={false}
+                    />
                     <Area
                         dataKey="uncertainRange"
                         name="Uncertainty Range"
