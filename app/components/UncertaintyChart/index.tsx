@@ -12,7 +12,9 @@ import {
     ContainerCard,
 } from '@the-deep/deep-ui';
 import { isDefined, _cs } from '@togglecorp/fujs';
+
 import { getShortMonth } from '#utils/common';
+
 import styles from './styles.css';
 
 export interface UncertainData {
@@ -32,6 +34,7 @@ interface Props {
     emergencyFilterValue?: string;
     headingDescription?: React.ReactNode;
     heading?: React.ReactNode;
+    loading?: boolean;
 }
 
 interface Payload {
@@ -54,6 +57,7 @@ function UncertaintyChart(props: Props) {
         emergencyFilterValue,
         headingDescription,
         heading,
+        loading,
     } = props;
 
     const customTooltip = (tooltipProps: TooltipProps) => {

@@ -26,6 +26,7 @@ import { useQuery, gql } from '@apollo/client';
 
 import PercentageStats from '#components/PercentageStats';
 import UncertaintyChart from '#components/UncertaintyChart';
+import ChartContainer from '#components/ChartContainer';
 
 import {
     decimalToPercentage,
@@ -270,7 +271,9 @@ function PercentageCardGroup(props: Props) {
     ]);
 
     const {
-        data: overviewStatsResponse,
+        previousData: previousOverviewStat,
+        data: overviewStatsResponse = previousOverviewStat,
+        loading: loadingData,
     } = useQuery<OverviewStatsQuery, OverviewStatsQueryVariables>(
         OVERVIEW_STATS,
         {
@@ -477,7 +480,11 @@ function PercentageCardGroup(props: Props) {
                         contentClassName={styles.responsiveContent}
                         headerDescription={`Number of cases for ${filterValues?.outbreak}`}
                     >
-                        <ResponsiveContainer className={styles.responsiveContainer}>
+                        <ChartContainer
+                            className={styles.responsiveContainer}
+                            data={outbreakLineChart}
+                            loading={loadingData}
+                        >
                             <LineChart
                                 data={outbreakLineChart}
                                 margin={{
@@ -512,7 +519,7 @@ function PercentageCardGroup(props: Props) {
                                     dot={false}
                                 />
                             </LineChart>
-                        </ResponsiveContainer>
+                        </ChartContainer>
                     </ContainerCard>
                 )}
 
