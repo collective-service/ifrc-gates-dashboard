@@ -71,7 +71,7 @@ function ProgressBar(props: Props) {
         if (format === 'percent') {
             return (`${valueTitle}: ${formatNumber(format, value ?? 0)}` ?? undefined);
         }
-        return (`${valueTitle}: ${value}`);
+        return (`${valueTitle}: ${formatNumber('raw', value ?? 0)}`);
     }, [
         value,
         valueTitle,

@@ -20,6 +20,8 @@ import {
 
 import {
     rankedSearchOnList,
+    formatNumber,
+    FormatType,
 } from '#utils/common';
 import {
     TableValuesQuery,
@@ -62,7 +64,8 @@ interface TableViewProps {
     iso3: string;
     data: {
         [key: string]: number | undefined,
-    }
+    };
+    format?: FormatType;
 }
 
 const tableKeySelector = (p: TableViewProps) => p.countryId;
@@ -84,6 +87,7 @@ const TABLE_DATA = gql`
                 data {
                     indicatorValue
                     month
+                    format
                 }
         }
     }
@@ -152,6 +156,7 @@ interface IndicatorValueProps {
     className?: string;
     value?: number;
     colorRange?: ColorRange[];
+    format?: FormatType;
 }
 
 function IndicatorValue(props: IndicatorValueProps) {
@@ -159,6 +164,7 @@ function IndicatorValue(props: IndicatorValueProps) {
         className,
         colorRange,
         value,
+        format,
     } = props;
 
     const color = useMemo(() => {
@@ -166,7 +172,8 @@ function IndicatorValue(props: IndicatorValueProps) {
             return colors[0];
         }
         return colorRange?.find(
-            (range) => value > range.minValue && value <= range.maxValue,
+            (range) => value > range.minValue
+            && value <= range.maxValue,
         )?.color;
     }, [
         colorRange,
@@ -184,7 +191,7 @@ function IndicatorValue(props: IndicatorValueProps) {
                 color: getTextColorForHex(color ?? colors[0]),
             }}
         >
-            {value ? value.toFixed(2) : '-'}
+            {value ? formatNumber(format as FormatType, value) : '-'}
         </div>
     );
 }
@@ -251,6 +258,7 @@ function OverviewTable(props: Props) {
     const sortedData = useMemo(() => {
         const transformedTableData = tableValues?.overviewTable?.map((item) => ({
             ...item,
+            format: item.data[0].format,
             data: item.data.reduce(
                 (acc, curr) => ({
                     ...acc,
@@ -311,6 +319,7 @@ function OverviewTable(props: Props) {
                             cellRendererParams: (_: unknown, datum: TableViewProps) => (
                                 {
                                     value: datum.data[date],
+                                    format: datum.format,
                                     colorRange,
                                 }
                             ),

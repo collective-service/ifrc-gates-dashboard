@@ -17,8 +17,7 @@ export interface Props {
     indicatorDescription?: string | null;
     headerDescription?: React.ReactNode;
     headingSize?: headingSizeType;
-    suffix?: string;
-    statValue: number | null | undefined;
+    statValue: string | undefined;
     subValue?: number;
     newDeaths?: number | null;
     newCasesPerMillion?: number | null;
@@ -34,7 +33,6 @@ function PercentageStats(props: Props) {
         indicatorDescription,
         statValue,
         subValue,
-        suffix,
         newDeaths,
         newCasesPerMillion,
     } = props;
@@ -79,18 +77,15 @@ function PercentageStats(props: Props) {
             footerContentClassName={styles.valueAndSubValue}
             footerContent={(
                 <>
-                    <NumberOutput
+                    <div
                         className={styles.valueText}
-                        value={statValue}
-                        normal
-                        precision="auto"
-                        suffix={suffix}
-                    />
+                    >
+                        {statValue}
+                    </div>
                     {subValue && (
                         <NumberOutput
                             className={styles.subValueText}
                             value={subValue}
-                            suffix={suffix}
                         />
                     )}
                 </>

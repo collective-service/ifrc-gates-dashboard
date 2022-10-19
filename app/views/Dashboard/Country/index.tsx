@@ -36,6 +36,7 @@ import PercentageStats from '#components/PercentageStats';
 import ScoreCard from '#components/ScoreCard';
 import {
     decimalToPercentage,
+    formatNumber,
     getShortMonth,
     normalFormatter,
 } from '#utils/common';
@@ -394,7 +395,7 @@ function Country(props: Props) {
         }).sort((a, b) => compareDate(a.date, b.date))
     ), [countryResponse?.dataCountryLevel]);
 
-    const StatusUncertainty = useMemo(() => {
+    const statusUncertainty = useMemo(() => {
         const dataCountryLevel = countryResponse?.dataCountryLevel;
         if (!dataCountryLevel) {
             return undefined;
@@ -509,7 +510,8 @@ function Country(props: Props) {
 
     const statusRendererParams = useCallback((_, data: CountryWiseOutbreakCases) => ({
         heading: data.emergency,
-        statValue: data.contextIndicatorValue,
+        // TODO: fetch format from server
+        statValue: formatNumber('raw', data.contextIndicatorValue ?? 0),
         newDeaths: data.newDeaths,
         newCasesPerMillion: data.newCasesPerMillion,
     }), []);
@@ -596,15 +598,16 @@ function Country(props: Props) {
                     )}
                     {filterValues?.indicator && (
                         <div className={styles.indicatorWrapper}>
-                            {(StatusUncertainty?.indicatorValue) && (
+                            {(statusUncertainty?.indicatorValue) && (
                                 <PercentageStats
                                     className={styles.percentageCard}
-                                    indicatorDescription={StatusUncertainty?.indicatorDescription}
+                                    indicatorDescription={statusUncertainty?.indicatorDescription}
                                     headingSize="extraSmall"
-                                    statValue={decimalToPercentage(
-                                        StatusUncertainty?.indicatorValue,
+                                    // TODO: fetch format from server
+                                    statValue={formatNumber(
+                                        'percent',
+                                        statusUncertainty?.indicatorValue,
                                     )}
-                                    suffix="%"
                                     icon={null}
                                 />
                             )}
