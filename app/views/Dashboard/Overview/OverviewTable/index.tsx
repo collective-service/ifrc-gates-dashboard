@@ -52,7 +52,15 @@ const getMonthList = () => {
 
 const monthList = getMonthList();
 
-type TableViewProps = NonNullable<TableValuesQuery['overviewTable']>[number];
+// type TableViewProps = NonNullable<TableValuesQuery['overviewTable']>[number];
+interface TableViewProps {
+    countryName: string;
+    countryId: string;
+    iso3: string;
+    data: {
+        [key: string]: number | undefined,
+    }
+}
 
 const tableKeySelector = (p: TableViewProps) => p.countryId;
 
@@ -228,15 +236,26 @@ function OverviewTable(props: Props) {
             }));
     }, [tableValues?.overviewTable]);
 
+    const transformedData = useMemo(() => tableValues?.overviewTable?.map((item) => ({
+        ...item,
+        data: item.data.reduce(
+            (acc, curr) => ({
+                ...acc,
+                [curr.month]: curr.indicatorValue,
+            }),
+            {},
+        ),
+    })), [tableValues?.overviewTable]);
+
     const filteredData = useMemo(() => (
         rankedSearchOnList(
-            tableValues?.overviewTable ?? [],
+            transformedData ?? [],
             searchText,
             (item) => item.countryName,
         )
     ), [
-        tableValues,
         searchText,
+        transformedData,
     ]);
 
     const columns = useMemo(
@@ -272,9 +291,7 @@ function OverviewTable(props: Props) {
                             cellRenderer: IndicatorValue,
                             cellRendererParams: (_: unknown, datum: TableViewProps) => (
                                 {
-                                    value: datum.data.find(
-                                        (item) => item.month === date,
-                                    )?.indicatorValue,
+                                    value: datum.data[date],
                                     colorRange,
                                 }
                             ),
