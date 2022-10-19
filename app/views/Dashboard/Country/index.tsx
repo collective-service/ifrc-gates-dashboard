@@ -350,12 +350,14 @@ function Country(props: Props) {
     const uncertaintyChart: UncertainData[] | undefined = useMemo(() => (
         countryResponse?.dataCountryLevel.map((country) => {
             const negativeRange = decimalToPercentage(
-                (country?.indicatorValue && country?.errorMargin)
-                && country?.indicatorValue - country?.errorMargin,
+                (isDefined(country?.indicatorValue) && isDefined(country?.errorMargin))
+                    ? country?.indicatorValue - country?.errorMargin
+                    : undefined,
             );
             const positiveRange = decimalToPercentage(
-                (country?.indicatorValue && country?.errorMargin)
-                && country?.indicatorValue + country?.errorMargin,
+                (isDefined(country?.indicatorValue) && isDefined(country?.errorMargin))
+                    ? country?.indicatorValue + country?.errorMargin
+                    : undefined,
             );
 
             if (isNotDefined(country.errorMargin)) {
@@ -363,8 +365,6 @@ function Country(props: Props) {
                     emergency: country.emergency,
                     indicatorValue: decimalToPercentage(country.indicatorValue),
                     date: country.indicatorMonth,
-                    minimumValue: negativeRange,
-                    maximumValue: positiveRange,
                 };
             }
 
