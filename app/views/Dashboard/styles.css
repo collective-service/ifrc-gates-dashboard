@@ -6,6 +6,11 @@
     padding: 0 var(--dui-spacing-ultra-large);
     gap: var(--dui-spacing-medium);
 
+    .header-text {
+        background-color: transparent;
+        width: 60%;
+    }
+
     .dashboard-buttons {
         display: flex;
         align-items: center;
