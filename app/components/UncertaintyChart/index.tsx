@@ -117,6 +117,8 @@ function UncertaintyChart(props: Props) {
                         tickFormatter={dateTickFormatter}
                     />
                     <YAxis
+                        axisLine={false}
+                        tickLine={false}
                         allowDecimals={false}
                     />
                     <Area

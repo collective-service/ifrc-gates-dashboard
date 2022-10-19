@@ -77,19 +77,10 @@ const customLabel = (val: number | string | undefined) => (
 const COUNTRY_PROFILE = gql`
     query Country(
         $iso3: String,
-        $disaggregationIso3: String!,
-        $contextIndicatorId: String!,
+        $requiredIso3: String!,
         $emergency: String,
-        $gte: Date!,
-        $uncertaintyIso3: String!,
-        $subvariable: String!,
+        $subvariable: String,
         $indicatorId: String,
-        $category: String!,
-        $uncertaintyEmergency: String!,
-        $isTwelveMonth: Boolean,
-        $contextDate: Ordering,
-        $limit: Int!,
-        $offset: Int!,
     ) {
         countryProfile(iso3: $iso3) {
             iso3
@@ -117,11 +108,19 @@ const COUNTRY_PROFILE = gql`
             newDeaths
         }
         disaggregation {
-            ageDisaggregation(iso3: $disaggregationIso3) {
+            ageDisaggregation(
+                iso3: $requiredIso3,
+                indicatorId: $indicatorId,
+                subvariable: $subvariable,
+            ) {
                 category
                 indicatorValue
             }
-            genderDisaggregation(iso3: $disaggregationIso3) {
+            genderDisaggregation(
+                iso3: $requiredIso3,
+                indicatorId: $indicatorId,
+                subvariable: $subvariable,
+            ) {
                 category
                 indicatorValue
             }
@@ -129,16 +128,16 @@ const COUNTRY_PROFILE = gql`
         contextualData(
             filters: {
                 iso3: $iso3,
-                contextIndicatorId:$contextIndicatorId,
+                contextIndicatorId: "total_cases",
                 emergency: $emergency,
-                isTwelveMonth: $isTwelveMonth,
+                isTwelveMonth: true,
             }
             order: {
-                contextDate: $contextDate,
+                contextDate: DESC,
             }
             pagination: {
-                limit: $limit,
-                offset: $offset,
+                limit: 12,
+                offset: 0,
             }
         ) {
             id
@@ -150,14 +149,16 @@ const COUNTRY_PROFILE = gql`
         }
         dataCountryLevel(
             filters: {
-                indicatorMonth: {
-                    gte: $gte
-                },
-                iso3: $uncertaintyIso3,
+                isTwelveMonth: true
+                iso3: $iso3,
                 subvariable: $subvariable,
                 indicatorId: $indicatorId,
-                category: $category,
-                emergency: $uncertaintyEmergency,
+                category: "Global",
+                emergency: $emergency,
+            }
+            pagination: {
+                limit: 12,
+                offset: 0,
             }
         ) {
             errorMargin
@@ -236,21 +237,10 @@ function Country(props: Props) {
 
     const countryVariables = useMemo((): CountryQueryVariables => ({
         iso3: filterValues?.country ?? 'AFG',
-        // FIXME: filter needed to be handle from backend
-        gte: '2021-08-01',
-        contextIndicatorId: 'total_cases',
-        disaggregationIso3: filterValues?.country ?? 'AFG',
+        requiredIso3: filterValues?.country ?? 'AFG',
         emergency: filterValues?.outbreak,
-        uncertaintyIso3: filterValues?.country ?? 'AFG',
-        subvariable: filterValues?.subvariable ?? '',
+        subvariable: filterValues?.subvariable,
         indicatorId: filterValues?.indicator,
-        isTwelveMonth: true,
-        contextDate: 'DESC',
-        // NOTE: Only Global response needed
-        category: 'Global',
-        uncertaintyEmergency: filterValues?.outbreak ?? '',
-        limit: 12,
-        offset: 0,
     }), [
         filterValues?.country,
         filterValues?.outbreak,
@@ -360,12 +350,14 @@ function Country(props: Props) {
     const uncertaintyChart: UncertainData[] | undefined = useMemo(() => (
         countryResponse?.dataCountryLevel.map((country) => {
             const negativeRange = decimalToPercentage(
-                (country?.indicatorValue && country?.errorMargin)
-                && country?.indicatorValue - country?.errorMargin,
+                (isDefined(country?.indicatorValue) && isDefined(country?.errorMargin))
+                    ? country?.indicatorValue - country?.errorMargin
+                    : undefined,
             );
             const positiveRange = decimalToPercentage(
-                (country?.indicatorValue && country?.errorMargin)
-                && country?.indicatorValue + country?.errorMargin,
+                (isDefined(country?.indicatorValue) && isDefined(country?.errorMargin))
+                    ? country?.indicatorValue + country?.errorMargin
+                    : undefined,
             );
 
             if (isNotDefined(country.errorMargin)) {
@@ -373,8 +365,6 @@ function Country(props: Props) {
                     emergency: country.emergency,
                     indicatorValue: decimalToPercentage(country.indicatorValue),
                     date: country.indicatorMonth,
-                    minimumValue: negativeRange,
-                    maximumValue: positiveRange,
                 };
             }
 
@@ -401,7 +391,7 @@ function Country(props: Props) {
                 minimumValue: negativeRange,
                 maximumValue: positiveRange,
             };
-        })
+        }).sort((a, b) => compareDate(a.date, b.date))
     ), [countryResponse?.dataCountryLevel]);
 
     const StatusUncertainty = useMemo(() => {
@@ -606,139 +596,135 @@ function Country(props: Props) {
                     )}
                     {filterValues?.indicator && (
                         <div className={styles.indicatorWrapper}>
-                            <PercentageStats
-                                className={styles.percentageCard}
-                                indicatorDescription={StatusUncertainty?.indicatorDescription}
-                                headingSize="extraSmall"
-                                statValue={decimalToPercentage(
-                                    StatusUncertainty?.indicatorValue,
-                                )}
-                                suffix="%"
-                                icon={null}
-                            />
-                            <UncertaintyChart
-                                className={styles.indicatorsChart}
-                                uncertainData={(uncertaintyChart && uncertaintyChart) ?? []}
-                                emergencyFilterValue={filterValues.outbreak}
-                                heading="Indicator overview over the last 12 months"
-                                headingDescription={`Trend chart for ${selectedIndicatorName ?? filterValues?.indicator}`}
-                            />
-                            {(genderDisaggregation && genderDisaggregation.length > 0
-                                && ageDisaggregation && ageDisaggregation.length > 0)
-                                && (
-                                    <>
-                                        <ContainerCard
-                                            className={styles.disaggregation}
-                                            contentClassName={styles.disaggregationContent}
-                                            heading="Gender Disaggregation"
-                                            headerDescription="Lorem ipsum explaining the topic"
-                                            headingSize="extraSmall"
+                            {(StatusUncertainty?.indicatorValue) && (
+                                <PercentageStats
+                                    className={styles.percentageCard}
+                                    indicatorDescription={StatusUncertainty?.indicatorDescription}
+                                    headingSize="extraSmall"
+                                    statValue={decimalToPercentage(
+                                        StatusUncertainty?.indicatorValue,
+                                    )}
+                                    suffix="%"
+                                    icon={null}
+                                />
+                            )}
+                            {(uncertaintyChart?.length ?? 0) > 0 && (
+                                <UncertaintyChart
+                                    className={styles.indicatorsChart}
+                                    uncertainData={(uncertaintyChart && uncertaintyChart) ?? []}
+                                    emergencyFilterValue={filterValues.outbreak}
+                                    heading="Indicator overview over the last 12 months"
+                                    headingDescription={`Trend chart for ${selectedIndicatorName ?? filterValues?.indicator}`}
+                                />
+                            )}
+                            {(genderDisaggregation?.length ?? 0) > 0 && (
+                                <ContainerCard
+                                    className={styles.genderDisaggregation}
+                                    contentClassName={styles.genderDisaggregationContent}
+                                    heading="Gender Disaggregation"
+                                    headerDescription={selectedIndicatorName}
+                                    headingSize="extraSmall"
+                                >
+                                    <div className={styles.genderDisaggregation}>
+                                        <ResponsiveContainer
+                                            className={styles.responsiveContainer}
                                         >
-                                            {(genderDisaggregation?.length ?? 0) > 0 && (
-                                                <div className={styles.genderDisaggregation}>
-                                                    <div>Gender Disaggregation</div>
-                                                    <ResponsiveContainer
-                                                        className={styles.responsiveContainer}
-                                                    >
-                                                        <BarChart
-                                                            data={genderDisaggregation}
-                                                            barSize={18}
-                                                        >
-                                                            <Bar
-                                                                dataKey="indicatorValue"
-                                                                radius={[10, 10, 0, 0]}
-                                                            >
-                                                                <LabelList
-                                                                    dataKey="indicatorValue"
-                                                                    position="insideBottomLeft"
-                                                                    fill="#8DD2B1"
-                                                                    fontSize={16}
-                                                                    angle={270}
-                                                                    dx={-15}
-                                                                    dy={-3}
-                                                                    formatter={customLabel}
-                                                                />
-                                                            </Bar>
-                                                            <XAxis
-                                                                dataKey="category"
-                                                                tickLine={false}
-                                                            />
-                                                            <YAxis
-                                                                type="number"
-                                                                axisLine={false}
-                                                                tickLine={false}
-                                                                domain={[0, 100]}
-                                                            />
-                                                            <Tooltip
-                                                                allowEscapeViewBox={{
-                                                                    x: true,
-                                                                    y: true,
-                                                                }}
-                                                                cursor={false}
-                                                            />
-                                                        </BarChart>
-                                                    </ResponsiveContainer>
-                                                </div>
-                                            )}
-                                        </ContainerCard>
-                                        <ContainerCard
-                                            className={styles.disaggregation}
-                                            contentClassName={styles.disaggregationContent}
-                                            heading="Age Disaggregation"
-                                            headerDescription="Lorem ipsum explaining the topic"
-                                            headingSize="extraSmall"
+                                            <BarChart
+                                                data={genderDisaggregation}
+                                                barSize={18}
+                                            >
+                                                <Bar
+                                                    dataKey="indicatorValue"
+                                                    radius={[10, 10, 0, 0]}
+                                                    fill="#8DD2B1"
+                                                >
+                                                    <LabelList
+                                                        dataKey="indicatorValue"
+                                                        position="insideBottomLeft"
+                                                        fill="#8DD2B1"
+                                                        fontSize={16}
+                                                        angle={270}
+                                                        dx={-15}
+                                                        dy={-3}
+                                                        formatter={customLabel}
+                                                    />
+                                                </Bar>
+                                                <XAxis
+                                                    dataKey="category"
+                                                    tickLine={false}
+                                                />
+                                                <YAxis
+                                                    type="number"
+                                                    axisLine={false}
+                                                    tickLine={false}
+                                                    domain={[0, 100]}
+                                                />
+                                                <Tooltip
+                                                    allowEscapeViewBox={{
+                                                        x: true,
+                                                        y: true,
+                                                    }}
+                                                    cursor={false}
+                                                />
+                                            </BarChart>
+                                        </ResponsiveContainer>
+                                    </div>
+                                </ContainerCard>
+                            )}
+                            {(ageDisaggregation?.length ?? 0) > 0 && (
+                                <ContainerCard
+                                    className={styles.ageDisaggregation}
+                                    contentClassName={styles.ageDisaggregationContent}
+                                    heading="Age Disaggregation"
+                                    headerDescription={selectedIndicatorName}
+                                    headingSize="extraSmall"
+                                >
+                                    <div className={styles.ageDisaggregation}>
+                                        <ResponsiveContainer
+                                            className={styles.responsiveContainer}
                                         >
-                                            {(ageDisaggregation?.length ?? 0) > 0 && (
-                                                <div className={styles.ageDisaggregation}>
-                                                    <div>Age Disaggregation</div>
-                                                    <ResponsiveContainer
-                                                        className={styles.responsiveContainer}
-                                                    >
-                                                        <BarChart
-                                                            data={ageDisaggregation}
-                                                            barSize={18}
-                                                        >
-                                                            <Bar
-                                                                dataKey="indicatorValue"
-                                                                radius={[10, 10, 0, 0]}
-                                                            >
-                                                                <LabelList
-                                                                    dataKey="indicatorValue"
-                                                                    position="insideBottomLeft"
-                                                                    fill="#8DD2B1"
-                                                                    fontSize={16}
-                                                                    angle={270}
-                                                                    dx={-15}
-                                                                    dy={-3}
-                                                                    formatter={customLabel}
-                                                                />
-                                                            </Bar>
-                                                            <XAxis
-                                                                dataKey="category"
-                                                                tickLine={false}
-                                                                fontSize={12}
-                                                            />
-                                                            <YAxis
-                                                                type="number"
-                                                                axisLine={false}
-                                                                tickLine={false}
-                                                                domain={[0, 100]}
-                                                            />
-                                                            <Tooltip
-                                                                allowEscapeViewBox={{
-                                                                    x: true,
-                                                                    y: true,
-                                                                }}
-                                                                cursor={false}
-                                                            />
-                                                        </BarChart>
-                                                    </ResponsiveContainer>
-                                                </div>
-
-                                            )}
-                                        </ContainerCard>
-                                    </>
-                                )}
+                                            <BarChart
+                                                data={ageDisaggregation}
+                                                barSize={18}
+                                            >
+                                                <Bar
+                                                    dataKey="indicatorValue"
+                                                    radius={[10, 10, 0, 0]}
+                                                >
+                                                    <LabelList
+                                                        dataKey="indicatorValue"
+                                                        position="insideBottomLeft"
+                                                        fill="#8DD2B1"
+                                                        fontSize={16}
+                                                        angle={270}
+                                                        dx={-15}
+                                                        dy={-3}
+                                                        formatter={customLabel}
+                                                    />
+                                                </Bar>
+                                                <XAxis
+                                                    dataKey="category"
+                                                    tickLine={false}
+                                                    fontSize={12}
+                                                />
+                                                <YAxis
+                                                    type="number"
+                                                    axisLine={false}
+                                                    tickLine={false}
+                                                    domain={[0, 100]}
+                                                />
+                                                <Tooltip
+                                                    allowEscapeViewBox={{
+                                                        x: true,
+                                                        y: true,
+                                                    }}
+                                                    cursor={false}
+                                                />
+                                            </BarChart>
+                                        </ResponsiveContainer>
+                                    </div>
+                                </ContainerCard>
+                            )}
                         </div>
                     )}
                 </div>

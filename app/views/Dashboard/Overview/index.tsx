@@ -133,6 +133,7 @@ function Overview(props: Props) {
                                 filterValues={filterValues}
                                 setActiveTab={setActiveTab}
                                 setFilterValues={setFilterValues}
+                                selectedIndicatorName={selectedIndicatorName ?? undefined}
                             />
                         </TabPanel>
                         <TabPanel

@@ -14,6 +14,7 @@ import {
     TabPanel,
     DropdownMenu,
     DropdownMenuItem,
+    ContainerCard,
 } from '@the-deep/deep-ui';
 import { isDefined } from '@togglecorp/fujs';
 import { gql, useQuery } from '@apollo/client';
@@ -294,6 +295,18 @@ function Dashboard() {
 
     return (
         <div className={styles.dashboardNavigation}>
+            <ContainerCard
+                className={styles.headerText}
+                heading="Behavioural dashboard"
+                headingSize="large"
+            >
+                This dashboard measures and tracks key social
+                behavioural data on COVID-19 from multiple research
+                projects conducted in the field or at the global level
+                by partners and academic communities. Its aim is to help the RCCE community,
+                Collective Service partners and the coordination
+                team to analyse the situation at global, regional and country level.
+            </ContainerCard>
             <Tabs
                 value={activeTab}
                 onChange={handleActiveTabChange}

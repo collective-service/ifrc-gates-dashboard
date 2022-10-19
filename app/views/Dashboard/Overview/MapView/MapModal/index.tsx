@@ -5,6 +5,8 @@ import {
     mapToList,
     unique,
     compareDate,
+    isNotDefined,
+    isDefined,
 } from '@togglecorp/fujs';
 import {
     Modal,
@@ -26,14 +28,18 @@ import {
     IoInformationCircle,
 } from 'react-icons/io5';
 import {
+    decimalToPercentage,
     getShortMonth,
     normalFormatter,
 } from '#utils/common';
 import { FilterType } from '#views/Dashboard/Filters';
 import { TabTypes } from '#views/Dashboard';
+import UncertaintyChart, { UncertainData } from '#components/UncertaintyChart';
 import {
     CountryModalQuery,
     CountryModalQueryVariables,
+    SubvariablesQuery,
+    SubvariablesQueryVariables,
 } from '#generated/types';
 
 import styles from './styles.css';
@@ -41,12 +47,23 @@ import styles from './styles.css';
 const dateTickFormatter = (d: string) => getShortMonth(d);
 const normalizedTickFormatter = (d: number) => normalFormatter().format(d);
 
+const SUBVARIABLES = gql`
+    query Subvariables(
+        $iso3: String!,
+        $indicatorId:String
+    ) {
+        filterOptions {
+            subvariables(iso3: $iso3, indicatorId: $indicatorId)
+        }
+    }
+`;
+
 const COUNTRY_PROFILE = gql`
     query CountryModal(
         $iso3: String,
-        $contextIndicatorId: String!,
-        $isTwelveMonth: Boolean,
         $emergency: String,
+        $subvariable: String,
+        $indicatorId: String,
     ) {
         countryProfile(iso3: $iso3) {
             iso3
@@ -56,9 +73,9 @@ const COUNTRY_PROFILE = gql`
         contextualData(
             filters: {
                 iso3: $iso3,
-                contextIndicatorId:$contextIndicatorId,
+                contextIndicatorId:"total_cases",
                 emergency: $emergency,
-                isTwelveMonth: $isTwelveMonth,
+                isTwelveMonth: true,
             }
             order: {
                 contextDate: DESC,
@@ -86,6 +103,30 @@ const COUNTRY_PROFILE = gql`
               contextIndicatorId
             }
         }
+        dataCountryLevel(
+            filters: {
+                isTwelveMonth: true
+                iso3: $iso3,
+                subvariable: $subvariable,
+                indicatorId: $indicatorId,
+                category: "Global",
+                emergency: $emergency,
+            }
+            pagination: {
+                limit: 12,
+                offset: 0,
+            }
+        ) {
+            errorMargin
+            indicatorName
+            indicatorValue
+            indicatorMonth
+            indicatorDescription
+            indicatorId
+            subvariable
+            interpolated
+            emergency
+        }
     }
 `;
 
@@ -96,6 +137,7 @@ interface ModalProps {
     setFilterValues: React.Dispatch<React.SetStateAction<FilterType | undefined>>;
     countryData: mapboxgl.MapboxGeoJSONFeature | undefined;
     filterValues: FilterType | undefined;
+    selectedIndicatorName: string | undefined;
 }
 
 function MapModal(props: ModalProps) {
@@ -106,17 +148,40 @@ function MapModal(props: ModalProps) {
         setFilterValues,
         countryData,
         filterValues,
+        selectedIndicatorName,
     } = props;
+
+    const subvariablesVariables = useMemo(() => (
+        {
+            iso3: countryData?.properties?.iso3 ?? 'AFG',
+            indicatorId: filterValues?.indicator,
+        }
+    ), [
+        countryData?.properties?.iso3,
+        filterValues?.indicator,
+    ]);
+
+    const {
+        data: subVariableList,
+    } = useQuery<SubvariablesQuery, SubvariablesQueryVariables>(
+        SUBVARIABLES,
+        {
+            skip: !filterValues?.indicator,
+            variables: subvariablesVariables,
+        },
+    );
 
     const countryVariables = useMemo((): CountryModalQueryVariables => ({
         iso3: countryData?.properties?.iso3 ?? 'AFG',
-        contextIndicatorId: 'total_cases',
-        isTwelveMonth: true,
         emergency: filterValues?.outbreak,
+        indicatorId: filterValues?.indicator,
+        subvariable: subVariableList?.filterOptions.subvariables[0],
     }
     ), [
         countryData,
+        subVariableList,
         filterValues?.outbreak,
+        filterValues?.indicator,
     ]);
 
     const {
@@ -187,6 +252,60 @@ function MapModal(props: ModalProps) {
         })
     ), [countryResponse?.contextualData]);
 
+    const uncertaintyChart: UncertainData[] | undefined = useMemo(() => (
+        countryResponse?.dataCountryLevel.map((country) => {
+            const negativeRange = decimalToPercentage(
+                (isDefined(country?.indicatorValue) && isDefined(country?.errorMargin))
+                    ? country?.indicatorValue - country?.errorMargin
+                    : undefined,
+            );
+            const positiveRange = decimalToPercentage(
+                (isDefined(country?.indicatorValue) && isDefined(country?.errorMargin))
+                    ? country?.indicatorValue + country?.errorMargin
+                    : undefined,
+            );
+
+            if (isNotDefined(country.errorMargin)) {
+                return {
+                    emergency: country.emergency,
+                    indicatorValue: decimalToPercentage(country.indicatorValue),
+                    date: country.indicatorMonth,
+                };
+            }
+
+            if (country.interpolated) {
+                return {
+                    emergency: country.emergency,
+                    date: country.indicatorMonth,
+                    uncertainRange: [
+                        negativeRange ?? 0,
+                        positiveRange ?? 0,
+                    ],
+                    minimumValue: negativeRange,
+                    maximumValue: positiveRange,
+                };
+            }
+            return {
+                emergency: country.emergency,
+                indicatorValue: decimalToPercentage(country.indicatorValue),
+                date: country.indicatorMonth,
+                uncertainRange: [
+                    negativeRange ?? 0,
+                    positiveRange ?? 0,
+                ],
+                minimumValue: negativeRange,
+                maximumValue: positiveRange,
+            };
+        }).sort((a, b) => compareDate(a.date, b.date))
+    ), [countryResponse?.dataCountryLevel]);
+
+    const latestIndicatorValue = useMemo(() => {
+        if (!uncertaintyChart) {
+            return undefined;
+        }
+        return uncertaintyChart[uncertaintyChart?.length - 1];
+    }, [uncertaintyChart]);
+
     return (
         <Modal
             onCloseButtonClick={onModalClose}
@@ -210,12 +329,24 @@ function MapModal(props: ModalProps) {
                         size="extraLarge"
                         className={styles.countryCaseData}
                     >
-                        {normalizedTickFormatter(countryResponse?.countryProfile?.totalCases ?? 0)}
+                        {
+                            filterValues?.indicator
+                                ? `${latestIndicatorValue?.indicatorValue
+                                    ? latestIndicatorValue?.indicatorValue
+                                    : 0}%`
+                                : normalizedTickFormatter(
+                                    countryResponse?.countryProfile?.totalCases ?? 0,
+                                )
+                        }
                     </Heading>
                     <Heading
                         className={styles.countrySurveyDate}
                     >
-                        {dateTickFormatter(latestDate?.date ?? '')}
+                        {
+                            filterValues?.indicator
+                                ? dateTickFormatter(latestIndicatorValue?.date ?? '')
+                                : dateTickFormatter(latestDate?.date ?? '')
+                        }
                     </Heading>
                 </div>
             )}
@@ -240,43 +371,53 @@ function MapModal(props: ModalProps) {
                 </div>
             )}
         >
-            <ResponsiveContainer className={styles.responsiveContainer}>
-                <LineChart
-                    data={emergencyLineChart}
-                    margin={{
-                        right: 10,
-                    }}
-                >
-                    <XAxis
-                        dataKey="date"
-                        tickLine={false}
-                        padding={{ left: 28 }}
-                        tickFormatter={dateTickFormatter}
-                    />
-                    <YAxis
-                        axisLine={false}
-                        tickLine={false}
-                        padding={{ top: 5 }}
-                        tickFormatter={normalizedTickFormatter}
-                    />
-                    <Tooltip />
-                    <Legend
-                        iconType="rect"
-                        align="right"
-                        verticalAlign="bottom"
-                    />
-                    {outbreaks.map((outbreak) => (
-                        <Line
-                            key={outbreak.emergency}
-                            dataKey={outbreak.emergency}
-                            type="monotone"
-                            stroke={outbreak.fill}
-                            strokeWidth={3}
-                            dot={false}
+            {!filterValues?.indicator && (
+                <ResponsiveContainer className={styles.responsiveContainer}>
+                    <LineChart
+                        data={emergencyLineChart}
+                        margin={{
+                            right: 10,
+                        }}
+                    >
+                        <XAxis
+                            dataKey="date"
+                            tickLine={false}
+                            padding={{ left: 28 }}
+                            tickFormatter={dateTickFormatter}
                         />
-                    ))}
-                </LineChart>
-            </ResponsiveContainer>
+                        <YAxis
+                            axisLine={false}
+                            tickLine={false}
+                            padding={{ top: 5 }}
+                            tickFormatter={normalizedTickFormatter}
+                        />
+                        <Tooltip />
+                        <Legend
+                            iconType="rect"
+                            align="right"
+                            verticalAlign="bottom"
+                        />
+                        {outbreaks.map((outbreak) => (
+                            <Line
+                                key={outbreak.emergency}
+                                dataKey={outbreak.emergency}
+                                type="monotone"
+                                stroke={outbreak.fill}
+                                strokeWidth={3}
+                                dot={false}
+                            />
+                        ))}
+                    </LineChart>
+                </ResponsiveContainer>
+            )}
+            {(uncertaintyChart?.length ?? 0) > 0 && filterValues?.indicator && (
+                <UncertaintyChart
+                    uncertainData={(uncertaintyChart && uncertaintyChart) ?? []}
+                    emergencyFilterValue={filterValues?.outbreak}
+                    heading="Indicator overview over the last 12 months"
+                    headingDescription={`Trend chart for ${selectedIndicatorName ?? filterValues?.indicator}`}
+                />
+            )}
         </Modal>
     );
 }
