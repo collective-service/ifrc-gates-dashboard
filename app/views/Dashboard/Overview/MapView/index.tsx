@@ -33,6 +33,7 @@ import {
     HighestLowestCasesQuery,
     HighestLowestCasesQueryVariables,
 } from '#generated/types';
+import { FormatType } from '#utils/common';
 
 import { TabTypes } from '#views/Dashboard';
 import { FilterType } from '#views/Dashboard/Filters';
@@ -57,7 +58,6 @@ const MAP_DATA = gql`
             region: $region,
         ) {
             iso3
-            format
             indicatorValue
             countryId
             format
@@ -88,6 +88,7 @@ const HIGHEST_LOWEST_CASES = gql`
             countryId
             contextIndicatorValue
             populationSize
+            format
         }
         ascCountryEmergencyProfile: countryEmergencyProfile(
             filters: {
@@ -107,6 +108,7 @@ const HIGHEST_LOWEST_CASES = gql`
             countryId
             contextIndicatorValue
             populationSize
+            format
         }
     }
 `;
@@ -409,14 +411,13 @@ function MapView(props: MapViewProps) {
     const progressBarRendererParams = useCallback(
         (_: string, data: AscendingCountryProfileType | DescendingCountryProfileType) => ({
             barHeight,
-            suffix: 'M',
             barName: data.countryName,
             title: data.countryName ?? undefined,
             valueTitle: data.countryName ?? undefined,
             value: data?.contextIndicatorValue,
             totalValue: highestValueWithoutIndicator,
             color: '#98A6B5',
-            isPercentageValue: false,
+            format: data.format as FormatType,
         }), [highestValueWithoutIndicator],
     );
 
@@ -426,14 +427,13 @@ function MapView(props: MapViewProps) {
             data: AscendingMostRecentIndicatorType | DescendingMostRecentIndicatorType,
         ) => ({
             barHeight,
-            suffix: data.format === 'percent' ? '%' : 'M',
             barName: data.countryName ?? undefined,
             title: data.countryName ?? undefined,
             valueTitle: data.countryName ?? undefined,
             value: data.indicatorValue,
             totalValue: highestValueWithIndicator,
             color: '#98A6B5',
-            isPercentageValue: data.format === 'percent',
+            format: data.format as FormatType,
         }),
         [highestValueWithIndicator],
     );

@@ -1,9 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { gql, useQuery } from '@apollo/client';
 import {
-    listToGroupList,
     _cs,
-    mapToList,
     isDefined,
     isNotDefined,
 } from '@togglecorp/fujs';
@@ -14,12 +12,12 @@ import {
 } from '@the-deep/deep-ui';
 
 import {
-    CombinedIndicatorsDataQuery,
-    CombinedIndicatorsDataQueryVariables,
-    CombinedIndicatorsRegionalQuery,
-    CombinedIndicatorsRegionalQueryVariables,
-    CombinedIndicatorsGlobalQuery,
-    CombinedIndicatorsGlobalQueryVariables,
+    CountryCombinedIndicatorsQuery,
+    CountryCombinedIndicatorsQueryVariables,
+    RegionalCombinedIndicatorsQuery,
+    RegionalCombinedIndicatorsQueryVariables,
+    GlobalCombinedIndicatorsQuery,
+    GlobalCombinedIndicatorsQueryVariables,
 } from '#generated/types';
 import { TabTypes } from '#views/Dashboard';
 
@@ -28,129 +26,130 @@ import { AdvancedOptionType } from '../AdvancedFilters';
 import { FilterType } from '../Filters';
 import styles from './styles.css';
 
-const COMBINED_INDICATORS_DATA = gql`
-    query CombinedIndicatorsData (
+const COUNTRY_COMBINED_INDICATORS = gql`
+    query CountryCombinedIndicators (
+        $emergency: String,
         $iso3: String,
-        $emergency: String,
-        $topic: String,
-        $thematic: String,
-        $type: String,
-        $keywords: [String!],
+        $topic: String
+        $thematic: String
+        $type: String
     ) {
-        dataCountryLevelMostRecent(
-            filters: {
-                iso3: $iso3,
-                emergency: $emergency,
-                type: $type,
-                thematic: $thematic,
-                topic: $topic,
-                keywords: $keywords,
-                category: "Global",
-            }
-        ) {
-            emergency
-            iso3
-            region
-            indicatorName
-            indicatorDescription
-            indicatorValue
-            indicatorValueRegional
-            type
+        countryCombinedIndicators (filters: {
+            category: "Global",
+            emergency: $emergency,
+            iso3: $iso3,
+            topic: $topic,
+            thematic: $thematic,
+            type: $type,
+        }) {
             thematic
             thematicDescription
-            topic
-            topicDescription
-            subvariable
-            indicatorId
-            format
+            topics {
+                indicators {
+                    indicatorId
+                    indicatorName
+                    indicatorDescription
+                    indicatorValueRegional
+                    indicatorValue
+                    region
+                    subvariable
+                    format
+                }
+                topicDescription
+                topicName
+            }
         }
     }
 `;
 
-export type IndicatorDataType = NonNullable<CombinedIndicatorsDataQuery['dataCountryLevelMostRecent']>[number];
+export type CountryIndicatorType = NonNullable<CountryCombinedIndicatorsQuery['countryCombinedIndicators']>[number];
 
-const COMBINED_INDICATORS_REGIONAL = gql`
-    query CombinedIndicatorsRegional (
+const REGIONAL_COMBINED_INDICATORS = gql`
+    query RegionalCombinedIndicators (
+        $emergency: String,
         $region: String,
-        $emergency: String,
-        $type: String,
-        $thematic: String,
-        $topic: String,
-        $isCombinedIndicators: Boolean,
+        $topic: String
+        $thematic: String
+        $type: String
     ) {
-        regionLevel(
-            filters: {
-                emergency: $emergency,
-                region: $region,
-                type: $type,
-                thematic: $thematic,
-                topic: $topic,
-                isCombinedIndicators: $isCombinedIndicators,
-                category: "Global"
-            }
-        ) {
-            emergency
-            region
-            indicatorId
-            indicatorName
-            indicatorDescription
-            indicatorValueRegional
-            type
+        regionCombinedIndicators (filters: {
+            category: "Global",
+            emergency: $emergency,
+            region: $region,
+            topic: $topic,
+            thematic: $thematic,
+            type: $type,
+        }) {
             thematic
             thematicDescription
-            topic
-            topicDescription
-            subvariable
-            format
+            topics {
+                indicators {
+                    indicatorId
+                    indicatorName
+                    indicatorDescription
+                    indicatorValueRegional
+                    indicatorValue
+                    region
+                    subvariable
+                    format
+                }
+                topicDescription
+                topicName
+            }
         }
     }
 `;
 
-export type RegionalIndicatorType = NonNullable<CombinedIndicatorsRegionalQuery['regionLevel']>[number];
+export type RegionalIndicatorType = NonNullable<RegionalCombinedIndicatorsQuery['regionCombinedIndicators']>[number];
 
-const COMBINED_INDICATORS_GLOBAL = gql`
-    query CombinedIndicatorsGlobal (
+const GLOBAL_COMBINED_INDICATORS = gql`
+    query GlobalCombinedIndicators(
         $emergency: String,
         $type: String,
         $thematic: String,
         $topic: String,
-        $isCombinedIndicators: Boolean,
     ) {
-        globalLevel (
-            filters: {
-                emergency: $emergency,
-                type: $type,
-                thematic: $thematic,
-                topic: $topic,
-                isCombinedIndicators: $isCombinedIndicators,
-                category: "Global",
-            }
-        ) {
-            emergency
-            indicatorId
-            indicatorName
-            indicatorDescription
-            indicatorValueGlobal
-            region
-            type
+        globalCombinedIndicators(filters: {
+            category: "Global",
+            topic: $topic,
+            thematic: $thematic,
+            type: $type,
+            emergency: $emergency,
+        }) {
             thematic
             thematicDescription
-            topic
-            topicDescription
-            subvariable
-            format
+            topics {
+                indicators {
+                    indicatorId
+                    indicatorName
+                    indicatorDescription
+                    indicatorValueRegional
+                    indicatorValue
+                    region
+                    subvariable
+                    format
+                }
+                topicDescription
+                topicName
+            }
         }
     }
 `;
 
-interface SeparatedThematic {
-    key: string;
-    items: IndicatorDataType[];
-}
+export type GlobalIndicatorType = NonNullable<GlobalCombinedIndicatorsQuery['globalCombinedIndicators']>[number];
+
+export type TopicIndicatorType = NonNullable<
+    | GlobalIndicatorType['topics']
+    | CountryIndicatorType['topics']
+    | RegionalIndicatorType['topics']
+>[number];
+
+export type IndicatorType = NonNullable<TopicIndicatorType['indicators']>[number];
 
 interface ThematicProps {
     thematicName: string;
-    indicators: IndicatorDataType[];
+    thematicDescription: string;
+    indicators: TopicIndicatorType[] | undefined;
     showRegionalValue: boolean;
     filterValues: FilterType | undefined;
     setFilterValues: React.Dispatch<React.SetStateAction<FilterType | undefined>>;
@@ -160,6 +159,7 @@ interface ThematicProps {
 function ThematicRenderer(props: ThematicProps) {
     const {
         thematicName,
+        thematicDescription,
         indicators,
         showRegionalValue,
         filterValues,
@@ -167,26 +167,12 @@ function ThematicRenderer(props: ThematicProps) {
         setActiveTab,
     } = props;
 
-    const topicKeySelector = (d: SeparatedThematic) => d.key;
+    const topicKeySelector = (d: TopicIndicatorType) => d.topicName;
 
-    const topicSeparatedIndicators = useMemo(() => {
-        const topicGroupedList = listToGroupList(
-            indicators,
-            (data) => data?.topic ?? '',
-        );
-        const topicSeparatedIndicatorList = mapToList(
-            topicGroupedList,
-            (items, key) => ({
-                key,
-                items,
-            }),
-        );
-        return topicSeparatedIndicatorList;
-    }, [indicators]);
-
-    const topicRendererParams = useCallback((key: string, data: SeparatedThematic) => ({
-        indicatorKey: key,
-        indicators: data.items,
+    const topicRendererParams = useCallback((_: string, data: TopicIndicatorType) => ({
+        topicName: data.topicName,
+        topicDescription: data.topicDescription ?? '',
+        indicators: data.indicators ?? undefined,
         showRegionalValue,
         filterValues,
         setFilterValues,
@@ -205,10 +191,10 @@ function ThematicRenderer(props: ThematicProps) {
             <ContainerCard
                 className={styles.thematicHeader}
                 heading={thematicName}
-                headerDescription={indicators[0]?.thematicDescription}
+                headerDescription={thematicDescription}
             />
             <List
-                data={topicSeparatedIndicators}
+                data={indicators}
                 keySelector={topicKeySelector}
                 renderer={TopicCard}
                 rendererParams={topicRendererParams}
@@ -235,10 +221,10 @@ function CombinedIndicators(props: Props) {
     } = props;
 
     const {
-        data: combinedIndicatorsData,
-        loading: combinedIndicatorsLoading,
-    } = useQuery<CombinedIndicatorsDataQuery, CombinedIndicatorsDataQueryVariables>(
-        COMBINED_INDICATORS_DATA,
+        data: countryCombinedIndicatorsData,
+        loading: countryCombinedIndicatorsLoading,
+    } = useQuery<CountryCombinedIndicatorsQuery, CountryCombinedIndicatorsQueryVariables>(
+        COUNTRY_COMBINED_INDICATORS,
         {
             skip: isNotDefined(filterValues?.country),
             variables: {
@@ -247,7 +233,6 @@ function CombinedIndicators(props: Props) {
                 type: advancedFilterValues?.type,
                 thematic: advancedFilterValues?.thematic,
                 topic: advancedFilterValues?.topic,
-                keywords: advancedFilterValues?.keywords,
             },
         },
     );
@@ -255,12 +240,11 @@ function CombinedIndicators(props: Props) {
     const {
         data: regionalCombinedIndicatorsData,
         loading: regionalCombinedIndicatorsLoading,
-    } = useQuery<CombinedIndicatorsRegionalQuery, CombinedIndicatorsRegionalQueryVariables>(
-        COMBINED_INDICATORS_REGIONAL,
+    } = useQuery<RegionalCombinedIndicatorsQuery, RegionalCombinedIndicatorsQueryVariables>(
+        REGIONAL_COMBINED_INDICATORS,
         {
             skip: isDefined(filterValues?.country) || isNotDefined(filterValues?.region),
             variables: {
-                isCombinedIndicators: true,
                 emergency: filterValues?.outbreak,
                 region: filterValues?.region,
                 type: advancedFilterValues?.type,
@@ -273,12 +257,11 @@ function CombinedIndicators(props: Props) {
     const {
         data: globalCombinedIndicatorsData,
         loading: globalCombinedIndicatorsLoading,
-    } = useQuery<CombinedIndicatorsGlobalQuery, CombinedIndicatorsGlobalQueryVariables>(
-        COMBINED_INDICATORS_GLOBAL,
+    } = useQuery<GlobalCombinedIndicatorsQuery, GlobalCombinedIndicatorsQueryVariables>(
+        GLOBAL_COMBINED_INDICATORS,
         {
             skip: isDefined(filterValues?.country) || isDefined(filterValues?.region),
             variables: {
-                isCombinedIndicators: true,
                 emergency: filterValues?.outbreak,
                 thematic: advancedFilterValues?.thematic,
                 type: advancedFilterValues?.type,
@@ -289,66 +272,48 @@ function CombinedIndicators(props: Props) {
 
     const selectedIndicatorsData = useMemo(() => {
         if (isDefined(filterValues?.country)) {
-            return combinedIndicatorsData?.dataCountryLevelMostRecent;
+            return countryCombinedIndicatorsData?.countryCombinedIndicators;
         }
 
         if (isDefined(filterValues?.region)) {
-            return regionalCombinedIndicatorsData?.regionLevel.map((regional) => ({
-                ...regional,
-                iso3: '',
-                indicatorValueGlobal: 0,
-                indicatorValueRegional: 0,
-                indicatorValue: regional.indicatorValueRegional,
-            }));
+            return regionalCombinedIndicatorsData?.regionCombinedIndicators;
         }
 
-        return globalCombinedIndicatorsData?.globalLevel.map((global) => ({
-            ...global,
-            iso3: '',
-            indicatorValueRegional: 0,
-            indicatorValueGlobal: 0,
-            indicatorValue: global.indicatorValueGlobal,
-        }));
+        return globalCombinedIndicatorsData?.globalCombinedIndicators;
     }, [
         filterValues?.country,
         filterValues?.region,
-        regionalCombinedIndicatorsData?.regionLevel,
-        combinedIndicatorsData?.dataCountryLevelMostRecent,
-        globalCombinedIndicatorsData?.globalLevel,
+        regionalCombinedIndicatorsData?.regionCombinedIndicators,
+        countryCombinedIndicatorsData?.countryCombinedIndicators,
+        globalCombinedIndicatorsData?.globalCombinedIndicators,
     ]);
 
-    const thematicSeparatedIndicators = useMemo(() => {
-        const thematicGroupedList = listToGroupList(
-            selectedIndicatorsData,
-            (data) => data?.thematic ?? '',
-        );
-        const thematicSeparatedIndicatorList = mapToList(
-            thematicGroupedList,
-            (items, key) => ({
-                key,
-                items,
-            }),
-        );
-        return thematicSeparatedIndicatorList;
-    }, [selectedIndicatorsData]);
-
-    const thematicRendererParams = useCallback((_: string, item: SeparatedThematic) => ({
-        thematicName: item.key,
-        indicators: item.items,
-        showRegionalValue: isDefined(filterValues?.country),
-        setFilterValues,
-        filterValues,
-        setActiveTab,
-    }), [
-        filterValues,
-        setFilterValues,
-        setActiveTab,
-    ]);
-    const topicKeySelector = (d: SeparatedThematic) => d.key;
+    const thematicRendererParams = useCallback(
+        (
+            _: string,
+            item: RegionalIndicatorType | CountryIndicatorType | GlobalIndicatorType,
+        ) => ({
+            thematicName: item.thematic,
+            thematicDescription: item.thematicDescription ?? '',
+            indicators: item.topics ?? undefined,
+            showRegionalValue: isDefined(filterValues?.country),
+            setFilterValues,
+            filterValues,
+            setActiveTab,
+        }
+        ), [
+            filterValues,
+            setFilterValues,
+            setActiveTab,
+        ],
+    );
+    const thematicKeySelector = (
+        d: RegionalIndicatorType | CountryIndicatorType | GlobalIndicatorType,
+    ) => d.thematic;
 
     const loading = useMemo(() => {
         if (isDefined(filterValues?.country)) {
-            return combinedIndicatorsLoading;
+            return countryCombinedIndicatorsLoading;
         }
 
         if (isDefined(filterValues?.region)) {
@@ -358,7 +323,7 @@ function CombinedIndicators(props: Props) {
         return globalCombinedIndicatorsLoading;
     }, [
         filterValues,
-        combinedIndicatorsLoading,
+        countryCombinedIndicatorsLoading,
         regionalCombinedIndicatorsLoading,
         globalCombinedIndicatorsLoading,
     ]);
@@ -367,10 +332,10 @@ function CombinedIndicators(props: Props) {
         <div className={_cs(className, styles.combinedIndicatorWrapper)}>
             {loading && <PendingAnimation />}
             <List
-                data={thematicSeparatedIndicators}
+                data={selectedIndicatorsData}
                 renderer={ThematicRenderer}
                 rendererParams={thematicRendererParams}
-                keySelector={topicKeySelector}
+                keySelector={thematicKeySelector}
             />
             <ContainerCard
                 className={styles.perceptionWrapper}

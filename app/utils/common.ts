@@ -129,3 +129,24 @@ export function rankedSearchOnList<T>(
             searchString,
         ));
 }
+
+export type FormatType = 'thousand' | 'million' | 'raw' | 'percent';
+export function formatNumber(
+    format: FormatType,
+    value: number,
+    totalValue?: number,
+) {
+    if (format === 'thousand') {
+        return `${Math.round(value * 100) / 100000}K`;
+    }
+    if (format === 'million') {
+        return `${Math.round(value * 100) / 100000000}M`;
+    }
+    if (format === 'percent') {
+        if (isDefined(totalValue) && totalValue > 0) {
+            return `${Math.round((value / totalValue) * 1000) / 10}%`;
+        }
+        return `${Math.round(value * 1000) / 10}%`;
+    }
+    return `${value}`;
+}
