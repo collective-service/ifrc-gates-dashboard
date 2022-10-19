@@ -220,18 +220,23 @@ const COUNTRY_PROFILE = gql`
             emergency
             format
         }
-        sources(
-            iso3: $disaggregationIso3,
-            limit: 5,
-            emergency: $emergency,
-            indicatorId: $indicatorId,
-            subvariable: $subvariable,
+        dataGranular(
+            filters: {
+                iso3: $iso3,
+                emergency: $emergency,
+                indicatorId: $indicatorId,
+                subvariable: $granularSubvariable,
+            }
+            pagination: {
+                limit: $granularLimit,
+                offset: 0,
+            }
         ) {
             title
             link
             sourceComment
             organisation
-            maxDate
+            sourceDate
         }
     }
 `;
@@ -504,7 +509,7 @@ function Country(props: Props) {
 
     const isScoreCardValueEmpty = scoreCardData.every((score) => isNotDefined(score.value));
 
-    const sourcesList = countryResponse?.sources;
+    const sourcesList = countryResponse?.dataGranular;
 
     console.log(sourcesList);
 
