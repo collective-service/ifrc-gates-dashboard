@@ -467,7 +467,7 @@ function MapView(props: MapViewProps) {
     const selectedRegionBounds = useMemo(() => {
         if (doesObjectHaveNoData(filterValues)) {
             return (
-                [90, -45, -90, 75] as [number, number, number, number]
+                [90, -55, -90, 80] as [number, number, number, number]
             );
         }
         const regionData = regionBounds?.find(

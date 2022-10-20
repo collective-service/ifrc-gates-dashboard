@@ -43,6 +43,15 @@ import { FilterType } from '../../Filters';
 
 import styles from './styles.css';
 
+export interface RegionalTooltipData {
+    contextIndicatorValue?: number;
+    fill?: number;
+    id: string;
+    indicatorMonth?: string;
+    contextDate?: string;
+    region?: string;
+}
+
 interface LegendProps {
     payload?: {
         value: string;
@@ -223,6 +232,19 @@ interface Props {
     selectedIndicatorName: string | undefined;
     selectedOutbreakName: string | undefined;
 }
+
+interface Payload {
+    name?: string;
+    value?: number;
+    payload?: RegionalTooltipData;
+}
+
+interface TooltipProps {
+    active?: boolean;
+    payload?: Payload[];
+}
+
+const dateTickFormatter = (d: string) => getShortMonth(d);
 
 const negativeToZero = (
     (indicatorValue?: number | null, errorMarginValue?: number | null) => {
@@ -475,6 +497,31 @@ function PercentageCardGroup(props: Props) {
         getLineChartColor,
     ]);
 
+    const customRegionalTooltip = (tooltipProps: TooltipProps) => {
+        const {
+            active,
+            payload: regionalData,
+        } = tooltipProps;
+        if (active && regionalData && regionalData.length > 0) {
+            return (
+                <div className={styles.tooltipCard}>
+                    <div className={styles.tooltipHeading}>
+                        {regionalData[0].payload?.region}
+                    </div>
+                    <div className={styles.tooltipContent}>
+                        {filterValues?.indicator
+                            ? (dateTickFormatter(regionalData[0].payload?.indicatorMonth ?? ''))
+                            : (dateTickFormatter(regionalData[0].payload?.contextDate ?? ''))}
+                    </div>
+                    <div className={styles.tooltipContent}>
+                        {regionalData[0].payload?.contextIndicatorValue}
+                    </div>
+                </div>
+            );
+        }
+        return null;
+    };
+
     return (
         <div className={_cs(className, styles.cardInfo)}>
             <PercentageStats
@@ -539,6 +586,8 @@ function PercentageCardGroup(props: Props) {
                                         x: true,
                                         y: true,
                                     }}
+                                // NOTE: Need to implement similar custom tooltip
+                                // content={customRegionalTooltip}
                                 />
                                 <Legend content={renderLegend} />
                                 <Line
@@ -576,6 +625,7 @@ function PercentageCardGroup(props: Props) {
                             >
                                 <Tooltip
                                     cursor={false}
+                                    content={customRegionalTooltip}
                                 />
                                 <XAxis
                                     dataKey="region"
@@ -616,6 +666,7 @@ function PercentageCardGroup(props: Props) {
                             >
                                 <Tooltip
                                     cursor={false}
+                                    content={customRegionalTooltip}
                                 />
                                 <XAxis
                                     dataKey="region"
