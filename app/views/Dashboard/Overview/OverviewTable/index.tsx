@@ -10,6 +10,9 @@ import {
     TableView,
     TableColumn,
     TableHeaderCell,
+    useSortState,
+    SortContext,
+    TableSortDirection,
 } from '@the-deep/deep-ui';
 import {
     IoSearch,
@@ -186,6 +189,11 @@ function IndicatorValue(props: IndicatorValueProps) {
     );
 }
 
+const defaultSorting = {
+    name: monthList[11],
+    direction: 'Descending' as TableSortDirection,
+};
+
 interface Props {
     className?: string;
     filterValues?: FilterType | undefined;
@@ -198,6 +206,10 @@ function OverviewTable(props: Props) {
     } = props;
 
     const [searchText, setSearchText] = useState<string | undefined>('');
+
+    const sortState = useSortState(defaultSorting);
+    const { sorting } = sortState;
+    const validSorting = sorting ?? defaultSorting;
 
     const tableVariables = useMemo((): TableValuesQueryVariables => ({
         indicatorId: filterValues?.indicator,
@@ -236,27 +248,33 @@ function OverviewTable(props: Props) {
             }));
     }, [tableValues?.overviewTable]);
 
-    const transformedData = useMemo(() => tableValues?.overviewTable?.map((item) => ({
-        ...item,
-        data: item.data.reduce(
-            (acc, curr) => ({
-                ...acc,
-                [curr.month]: curr.indicatorValue,
-            }),
-            {},
-        ),
-    })), [tableValues?.overviewTable]);
+    const sortedData = useMemo(() => {
+        const transformedTableData = tableValues?.overviewTable?.map((item) => ({
+            ...item,
+            data: item.data.reduce(
+                (acc, curr) => ({
+                    ...acc,
+                    [curr.month]: curr.indicatorValue,
+                }),
+                {} as { [key: string]: number },
+            ),
+        }));
 
-    const filteredData = useMemo(() => (
-        rankedSearchOnList(
-            transformedData ?? [],
+        const filteredData = rankedSearchOnList(
+            transformedTableData ?? [],
             searchText,
             (item) => item.countryName,
-        )
-    ), [
-        searchText,
-        transformedData,
-    ]);
+        );
+
+        if (!validSorting?.name) {
+            return filteredData;
+        }
+        return [...filteredData].sort((a, b) => compareNumber(
+            a.data[validSorting?.name],
+            b.data[validSorting?.name],
+            validSorting?.direction === 'Ascending' ? 1 : -1,
+        ));
+    }, [tableValues?.overviewTable, validSorting, searchText]);
 
     const columns = useMemo(
         () => {
@@ -285,8 +303,9 @@ function OverviewTable(props: Props) {
                             id: date,
                             title: new Date(date).toLocaleDateString('default', { month: 'short', year: '2-digit' }),
                             headerCellRenderer: TableHeaderCell,
+                            headerCellRendererClassName: styles.countryColumnHeader,
                             headerCellRendererParams: {
-                                sortable: false,
+                                sortable: true,
                             },
                             cellRenderer: IndicatorValue,
                             cellRendererParams: (_: unknown, datum: TableViewProps) => (
@@ -295,7 +314,7 @@ function OverviewTable(props: Props) {
                                     colorRange,
                                 }
                             ),
-                            columnWidth: 90,
+                            columnWidth: 92,
                         }
                     ),
                 ),
@@ -308,19 +327,21 @@ function OverviewTable(props: Props) {
     );
 
     return (
-        <TableView
-            className={_cs(className, styles.tableWrapper)}
-            headerCellClassName={styles.headerRowStyle}
-            cellClassName={styles.eachTableCell}
-            columns={columns}
-            keySelector={tableKeySelector}
-            data={filteredData}
-            errored={false}
-            pending={tableValuesLoading}
-            filtered={false}
-            pendingMessage="Loading..."
-            emptyMessage="No projects to show."
-        />
+        <SortContext.Provider value={sortState}>
+            <TableView
+                className={_cs(className, styles.tableWrapper)}
+                headerCellClassName={styles.headerRowStyle}
+                cellClassName={styles.eachTableCell}
+                columns={columns}
+                keySelector={tableKeySelector}
+                data={sortedData}
+                errored={false}
+                pending={tableValuesLoading}
+                filtered={false}
+                pendingMessage="Loading..."
+                emptyMessage="No projects to show."
+            />
+        </SortContext.Provider>
     );
 }
 
