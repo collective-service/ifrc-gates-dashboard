@@ -66,10 +66,13 @@ interface CountryWiseOutbreakCases extends EmergencyItems {
     key: string;
 }
 
+type SourcesList = NonNullable<CountryQuery['dataGranular']>[number];
+
 const dateTickFormatter = (d: string) => getShortMonth(d);
 const normalizedTickFormatter = (d: number) => normalFormatter().format(d);
 const percentageKeySelector = (d: CountryWiseOutbreakCases) => d.key;
 const readinessKeySelector = (d: ScoreCardProps) => d.title;
+const sourcesKeySelector = (d: SourcesList) => d.id;
 const customLabel = (val: number | string | undefined) => (
     `${val}%`
 );
@@ -81,6 +84,7 @@ const COUNTRY_PROFILE = gql`
         $emergency: String,
         $subvariable: String,
         $indicatorId: String,
+        $granularLimit: Int!,
     ) {
         countryProfile(iso3: $iso3) {
             iso3
@@ -225,13 +229,15 @@ const COUNTRY_PROFILE = gql`
                 iso3: $iso3,
                 emergency: $emergency,
                 indicatorId: $indicatorId,
-                subvariable: $granularSubvariable,
+                subvariable: $subvariable,
+                isDistinctSources: true
             }
             pagination: {
                 limit: $granularLimit,
                 offset: 0,
             }
         ) {
+            id
             title
             link
             sourceComment
@@ -259,6 +265,7 @@ function Country(props: Props) {
         emergency: filterValues?.outbreak,
         subvariable: filterValues?.subvariable,
         indicatorId: filterValues?.indicator,
+        granularLimit: 3,
     }), [
         filterValues?.country,
         filterValues?.outbreak,
@@ -509,10 +516,6 @@ function Country(props: Props) {
 
     const isScoreCardValueEmpty = scoreCardData.every((score) => isNotDefined(score.value));
 
-    const sourcesList = countryResponse?.dataGranular;
-
-    console.log(sourcesList);
-
     const metricTypeForColor = useCallback((data: ScoreCardProps) => {
         if (isNotDefined(data) || isNotDefined(data.value)) {
             return undefined;
@@ -542,6 +545,12 @@ function Country(props: Props) {
         value: data.value,
         indicator: metricTypeForColor(data),
     }), [metricTypeForColor]);
+
+    const sourcesRendererParams = useCallback((_, data: SourcesList) => ({
+        title: data.title,
+        link: data.link,
+        sourceComment: data.sourceComment,
+    }), []);
 
     return (
         <div className={_cs(className, styles.countryWrapper)}>
@@ -928,9 +937,14 @@ function Country(props: Props) {
                     )}
                 </ContainerCard>
             </div>
-            <Sources
-                title="title"
-                sourceComment="comment"
+            <ListView
+                renderer={Sources}
+                rendererParams={sourcesRendererParams}
+                keySelector={sourcesKeySelector}
+                data={countryResponse?.dataGranular}
+                errored={false}
+                filtered={false}
+                pending={false}
             />
         </div>
     );
