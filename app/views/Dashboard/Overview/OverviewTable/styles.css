@@ -23,6 +23,10 @@
     padding: var(--dui-spacing-medium) !important;
 }
 
+.country-column-header {
+    font-size: small;
+}
+
 .search-column-cell {
     padding: 0 var(--dui-spacing-medium);
     font-weight: bold;
