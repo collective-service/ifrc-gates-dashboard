@@ -427,7 +427,6 @@ function PercentageCardGroup(props: Props) {
         regionalBreakdownRegion,
         filterValues?.region,
     ]);
-    console.log(regionalBreakdownRegion, regionTotalCase);
 
     const totalCaseValue = useMemo(() => {
         if (filterValues?.region && filterValues?.indicator && filterValues?.outbreak) {

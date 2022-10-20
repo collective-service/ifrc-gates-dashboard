@@ -12,6 +12,7 @@ interface Props {
     link?: string;
     title?: string;
     sourceComment?: string;
+    organization?: string;
 }
 
 function Sources(props: Props) {
@@ -20,6 +21,7 @@ function Sources(props: Props) {
         link,
         title,
         sourceComment,
+        organization,
     } = props;
 
     return (
@@ -27,19 +29,19 @@ function Sources(props: Props) {
             className={_cs(className)}
             title={sourceComment}
         >
-            <div className={styles.sourceHeading}>
-                Sources
-            </div>
             <div className={styles.perceptionCard}>
                 <div className={styles.infoIcon}>
                     <IoInformationCircle />
                 </div>
                 <div>
                     {title}
+                    {organization && `-(${organization})`}
                 </div>
                 <a
                     href={link}
                     className={styles.infoIcon}
+                    target="_blank"
+                    rel="noreferrer"
                 >
                     <BiLinkExternal />
                 </a>

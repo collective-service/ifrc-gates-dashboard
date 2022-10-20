@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
     isNotDefined,
     listToGroupList,
@@ -26,8 +26,10 @@ import {
     TextOutput,
     ListView,
     NumberOutput,
+    Button,
 } from '@the-deep/deep-ui';
 import { useQuery, gql } from '@apollo/client';
+import { IoChevronDownOutline } from 'react-icons/io5';
 
 import UncertaintyChart, { UncertainData } from '#components/UncertaintyChart';
 import PercentageStats from '#components/PercentageStats';
@@ -42,6 +44,8 @@ import {
 import {
     CountryQuery,
     CountryQueryVariables,
+    SourcesQuery,
+    SourcesQueryVariables,
 } from '#generated/types';
 
 import { FilterType } from '../Filters';
@@ -66,7 +70,7 @@ interface CountryWiseOutbreakCases extends EmergencyItems {
     key: string;
 }
 
-type SourcesList = NonNullable<CountryQuery['dataGranular']>[number];
+type SourcesList = NonNullable<SourcesQuery['dataGranular']>[number];
 
 const dateTickFormatter = (d: string) => getShortMonth(d);
 const normalizedTickFormatter = (d: number) => normalFormatter().format(d);
@@ -84,7 +88,6 @@ const COUNTRY_PROFILE = gql`
         $emergency: String,
         $subvariable: String,
         $indicatorId: String,
-        $granularLimit: Int!,
     ) {
         countryProfile(iso3: $iso3) {
             iso3
@@ -224,6 +227,17 @@ const COUNTRY_PROFILE = gql`
             emergency
             format
         }
+    }
+`;
+
+const SOURCES = gql`
+    query Sources(
+        $iso3: String,
+        $emergency: String,
+        $subvariable: String,
+        $indicatorId: String,
+        $granularLimit: Int!,
+    ) {
         dataGranular(
             filters: {
                 iso3: $iso3,
@@ -259,14 +273,29 @@ function Country(props: Props) {
         selectedIndicatorName,
     } = props;
 
+    const [dataGranularLimit, setDataGranularLimit] = useState(3);
+
     const countryVariables = useMemo((): CountryQueryVariables => ({
         iso3: filterValues?.country ?? 'AFG',
         requiredIso3: filterValues?.country ?? 'AFG',
         emergency: filterValues?.outbreak,
         subvariable: filterValues?.subvariable,
         indicatorId: filterValues?.indicator,
-        granularLimit: 3,
     }), [
+        filterValues?.country,
+        filterValues?.outbreak,
+        filterValues?.indicator,
+        filterValues?.subvariable,
+    ]);
+
+    const sourcesVariables = useMemo((): SourcesQueryVariables => ({
+        iso3: filterValues?.country ?? 'AFG',
+        emergency: filterValues?.outbreak,
+        subvariable: filterValues?.subvariable,
+        indicatorId: filterValues?.indicator,
+        granularLimit: dataGranularLimit,
+    }), [
+        dataGranularLimit,
         filterValues?.country,
         filterValues?.outbreak,
         filterValues?.indicator,
@@ -279,6 +308,15 @@ function Country(props: Props) {
         COUNTRY_PROFILE,
         {
             variables: countryVariables,
+        },
+    );
+
+    const {
+        data: sourcesResponse,
+    } = useQuery<SourcesQuery, SourcesQueryVariables>(
+        SOURCES,
+        {
+            variables: sourcesVariables,
         },
     );
 
@@ -547,9 +585,10 @@ function Country(props: Props) {
     }), [metricTypeForColor]);
 
     const sourcesRendererParams = useCallback((_, data: SourcesList) => ({
-        title: data.title,
-        link: data.link,
-        sourceComment: data.sourceComment,
+        title: data?.title ?? '',
+        link: data?.link ?? '',
+        sourceComment: data?.sourceComment ?? '',
+        organization: data?.organisation ?? '',
     }), []);
 
     return (
@@ -937,11 +976,22 @@ function Country(props: Props) {
                     )}
                 </ContainerCard>
             </div>
+            <div className={styles.sourceHeading}>
+                Sources
+                <Button
+                    name
+                    variant="transparent"
+                    onClick={() => setDataGranularLimit(5)}
+                    actions={<IoChevronDownOutline />}
+                >
+                    See more
+                </Button>
+            </div>
             <ListView
                 renderer={Sources}
                 rendererParams={sourcesRendererParams}
                 keySelector={sourcesKeySelector}
-                data={countryResponse?.dataGranular}
+                data={sourcesResponse?.dataGranular}
                 errored={false}
                 filtered={false}
                 pending={false}

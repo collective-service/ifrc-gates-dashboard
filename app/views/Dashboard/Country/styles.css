@@ -1,7 +1,6 @@
 .country-wrapper {
     display: flex;
     flex-direction: column;
-    gap: var(--dui-spacing-extra-large);
 
     .country-main {
         display: flex;
@@ -93,6 +92,7 @@
                         }
                     }
                 }
+
                 .age-disaggregation {
                     flex-basis: calc(55% - var(--dui-spacing-small));
                     flex-grow: 1;
@@ -176,5 +176,13 @@
                 }
             }
         }
+    }
+
+    .source-heading {
+        display: flex;
+        gap: var(--dui-spacing-small);
+        padding: var(--dui-spacing-medium) 0px;
+        font-size: var(--dui-font-size-heading-small);
+        font-weight: var(--dui-font-weight-bold);
     }
 }
