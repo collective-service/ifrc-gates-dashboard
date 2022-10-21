@@ -245,7 +245,7 @@ const SOURCES = gql`
                 emergency: $emergency,
                 indicatorId: $indicatorId,
                 subvariable: $subvariable,
-                isDistinctSources: true
+                isDistinctSources: true,
             }
         ) {
             id
@@ -563,7 +563,9 @@ function Country(props: Props) {
         return 'red' as const;
     }, []);
 
-    const sourcesList = useMemo(() => sourcesResponse?.dataGranular.slice(0, 3), [
+    const sourcesList = useMemo(() => (
+        sourcesResponse?.dataGranular.slice(0, 3)
+    ), [
         sourcesResponse?.dataGranular,
     ]);
 

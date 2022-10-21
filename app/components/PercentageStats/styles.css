@@ -24,7 +24,7 @@
 
         .value-text {
             color: var(--color-text-secondary);
-            font-size: var(--dui-font-size-ultra-large);
+            font-size: var(--dui-font-size-mega-large);
             font-weight: var(--dui-font-weight-bold);
         }
 
