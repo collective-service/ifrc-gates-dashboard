@@ -1,0 +1,13 @@
+.source-heading {
+    display: flex;
+    gap: var(--dui-spacing-small);
+    padding: var(--dui-spacing-medium) 0px;
+    font-size: var(--dui-font-size-heading-small);
+    font-weight: var(--dui-font-weight-bold);
+}
+
+.sources {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dui-spacing-medium);
+}

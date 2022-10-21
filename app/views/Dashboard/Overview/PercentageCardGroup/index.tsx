@@ -419,7 +419,19 @@ function PercentageCardGroup(props: Props) {
         filterValues?.indicator,
     ]);
 
+    const regionTotalCase = useMemo(() => (
+        regionalBreakdownRegion?.find(
+            (total) => total.region === filterValues?.region,
+        )
+    ), [
+        regionalBreakdownRegion,
+        filterValues?.region,
+    ]);
+
     const totalCaseValue = useMemo(() => {
+        if (filterValues?.region && filterValues?.indicator && filterValues?.outbreak) {
+            return regionTotalCase?.contextIndicatorValue;
+        }
         if (filterValues?.indicator) {
             return formatNumber(
                 (globalTotalCase?.format ?? 'raw') as FormatType,
@@ -431,9 +443,12 @@ function PercentageCardGroup(props: Props) {
             totalCase?.contextIndicatorValue ?? 0,
         );
     }, [
+        regionTotalCase?.contextIndicatorValue,
         globalTotalCase?.indicatorValueGlobal,
         filterValues?.indicator,
         totalCase?.contextIndicatorValue,
+        filterValues?.region,
+        filterValues?.outbreak,
     ]);
 
     const renderLegend = useCallback((legendProps: LegendProps) => {

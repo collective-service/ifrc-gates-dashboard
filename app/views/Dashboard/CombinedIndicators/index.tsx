@@ -6,9 +6,12 @@ import {
     isNotDefined,
 } from '@togglecorp/fujs';
 import {
+    Button,
     ContainerCard,
     List,
+    ListView,
     PendingAnimation,
+    useModalState,
 } from '@the-deep/deep-ui';
 
 import {
@@ -18,8 +21,13 @@ import {
     RegionalCombinedIndicatorsQueryVariables,
     GlobalCombinedIndicatorsQuery,
     GlobalCombinedIndicatorsQueryVariables,
+    SourcesQueryVariables,
+    SourcesQuery,
 } from '#generated/types';
 import { TabTypes } from '#views/Dashboard';
+import Sources from '#components/Sources';
+import SourcesModal from '#components/SourcesModal';
+import { IoChevronDownOutline } from 'react-icons/io5';
 
 import TopicCard from './TopicCard';
 import { AdvancedOptionType } from '../AdvancedFilters';
@@ -136,6 +144,31 @@ const GLOBAL_COMBINED_INDICATORS = gql`
     }
 `;
 
+type SourcesList = NonNullable<SourcesQuery['dataGranular']>[number];
+const sourcesKeySelector = (d: SourcesList) => d.id;
+
+const COMBINED_SOURCES = gql`
+    query CombinedSources(
+        $iso3: String,
+        $emergency: String,
+    ) {
+        dataGranular(
+            filters: {
+                iso3: $iso3,
+                emergency: $emergency,
+                isDistinctSources: true
+            }
+        ) {
+            id
+            title
+            link
+            sourceComment
+            organisation
+            sourceDate
+        }
+    }
+`;
+
 export type GlobalIndicatorType = NonNullable<GlobalCombinedIndicatorsQuery['globalCombinedIndicators']>[number];
 
 export type TopicIndicatorType = NonNullable<
@@ -220,6 +253,29 @@ function CombinedIndicators(props: Props) {
         setActiveTab,
     } = props;
 
+    const [
+        sourceModalShown,
+        showSourceModal,
+        hideSourceModal,
+    ] = useModalState(false);
+
+    const sourcesVariables = useMemo((): SourcesQueryVariables => ({
+        iso3: filterValues?.country ?? 'AFG',
+        emergency: filterValues?.outbreak,
+    }), [
+        filterValues?.country,
+        filterValues?.outbreak,
+    ]);
+
+    const {
+        data: sourcesResponse,
+    } = useQuery<SourcesQuery, SourcesQueryVariables>(
+        COMBINED_SOURCES,
+        {
+            variables: sourcesVariables,
+        },
+    );
+
     const {
         data: countryCombinedIndicatorsData,
         loading: countryCombinedIndicatorsLoading,
@@ -288,25 +344,31 @@ function CombinedIndicators(props: Props) {
         globalCombinedIndicatorsData?.globalCombinedIndicators,
     ]);
 
-    const thematicRendererParams = useCallback(
-        (
-            _: string,
-            item: RegionalIndicatorType | CountryIndicatorType | GlobalIndicatorType,
-        ) => ({
-            thematicName: item.thematic,
-            thematicDescription: item.thematicDescription ?? '',
-            indicators: item.topics ?? undefined,
-            showRegionalValue: isDefined(filterValues?.country),
-            setFilterValues,
-            filterValues,
-            setActiveTab,
-        }
-        ), [
-            filterValues,
-            setFilterValues,
-            setActiveTab,
-        ],
-    );
+    const thematicRendererParams = useCallback((
+        _: string,
+        item: RegionalIndicatorType | CountryIndicatorType | GlobalIndicatorType,
+    ) => ({
+        thematicName: item.thematic,
+        thematicDescription: item.thematicDescription ?? '',
+        indicators: item.topics ?? undefined,
+        showRegionalValue: isDefined(filterValues?.country),
+        setFilterValues,
+        filterValues,
+        setActiveTab,
+    }
+    ), [
+        filterValues,
+        setFilterValues,
+        setActiveTab,
+    ]);
+
+    const sourcesRendererParams = useCallback((_, data: SourcesList) => ({
+        title: data?.title ?? '',
+        link: data?.link ?? '',
+        sourceComment: data?.sourceComment ?? '',
+        organization: data?.organisation ?? '',
+    }), []);
+
     const thematicKeySelector = (
         d: RegionalIndicatorType | CountryIndicatorType | GlobalIndicatorType,
     ) => d.thematic;
@@ -328,6 +390,10 @@ function CombinedIndicators(props: Props) {
         globalCombinedIndicatorsLoading,
     ]);
 
+    const sourcesList = useMemo(() => sourcesResponse?.dataGranular.slice(0, 3), [
+        sourcesResponse?.dataGranular,
+    ]);
+
     return (
         <div className={_cs(className, styles.combinedIndicatorWrapper)}>
             {loading && <PendingAnimation />}
@@ -337,14 +403,42 @@ function CombinedIndicators(props: Props) {
                 rendererParams={thematicRendererParams}
                 keySelector={thematicKeySelector}
             />
-            <ContainerCard
-                className={styles.perceptionWrapper}
-                contentClassName={styles.perceptionCard}
-                heading="Sources"
-                headingSize="extraSmall"
-            >
-                <p>COVID-19 Vaccine Perceptions in Africa</p>
-            </ContainerCard>
+            <div>
+                { sourcesResponse?.dataGranular
+                    && (sourcesResponse?.dataGranular.length > 0)
+                    && (
+                        <>
+                            <div className={styles.sourceHeading}>
+                                Sources
+                                <Button
+                                    name={undefined}
+                                    variant="transparent"
+                                    onClick={showSourceModal}
+                                    actions={<IoChevronDownOutline />}
+                                    disabled={(sourcesResponse?.dataGranular.length ?? 0) <= 3}
+                                >
+                                    See more
+                                </Button>
+                            </div>
+                            <ListView
+                                className={styles.sources}
+                                renderer={Sources}
+                                rendererParams={sourcesRendererParams}
+                                keySelector={sourcesKeySelector}
+                                data={sourcesList}
+                                errored={false}
+                                filtered={false}
+                                pending={false}
+                            />
+                        </>
+                    )}
+            </div>
+            {sourceModalShown && (
+                <SourcesModal
+                    onModalClose={hideSourceModal}
+                    sourcesList={sourcesResponse?.dataGranular}
+                />
+            )}
         </div>
     );
 }

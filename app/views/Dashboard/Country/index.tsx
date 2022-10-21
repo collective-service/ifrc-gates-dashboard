@@ -26,14 +26,17 @@ import {
     TextOutput,
     ListView,
     NumberOutput,
+    Button,
+    useModalState,
 } from '@the-deep/deep-ui';
 import { useQuery, gql } from '@apollo/client';
-import { IoInformationCircle } from 'react-icons/io5';
-import { BiLinkExternal } from 'react-icons/bi';
+import { IoChevronDownOutline } from 'react-icons/io5';
 
 import UncertaintyChart, { UncertainData } from '#components/UncertaintyChart';
 import PercentageStats from '#components/PercentageStats';
 import ScoreCard from '#components/ScoreCard';
+import Sources from '#components/Sources';
+import SourcesModal from '#components/SourcesModal';
 import {
     decimalToPercentage,
     formatNumber,
@@ -43,6 +46,8 @@ import {
 import {
     CountryQuery,
     CountryQueryVariables,
+    SourcesQuery,
+    SourcesQueryVariables,
 } from '#generated/types';
 
 import { FilterType } from '../Filters';
@@ -67,10 +72,13 @@ interface CountryWiseOutbreakCases extends EmergencyItems {
     key: string;
 }
 
+type SourcesList = NonNullable<SourcesQuery['dataGranular']>[number];
+
 const dateTickFormatter = (d: string) => getShortMonth(d);
 const normalizedTickFormatter = (d: number) => normalFormatter().format(d);
 const percentageKeySelector = (d: CountryWiseOutbreakCases) => d.key;
 const readinessKeySelector = (d: ScoreCardProps) => d.title;
+const sourcesKeySelector = (d: SourcesList) => d.id;
 const customLabel = (val: number | string | undefined) => (
     `${val}%`
 );
@@ -223,6 +231,32 @@ const COUNTRY_PROFILE = gql`
         }
     }
 `;
+
+const SOURCES = gql`
+    query Sources(
+        $iso3: String,
+        $emergency: String,
+        $subvariable: String,
+        $indicatorId: String,
+    ) {
+        dataGranular(
+            filters: {
+                iso3: $iso3,
+                emergency: $emergency,
+                indicatorId: $indicatorId,
+                subvariable: $subvariable,
+                isDistinctSources: true
+            }
+        ) {
+            id
+            title
+            link
+            sourceComment
+            organisation
+            sourceDate
+        }
+    }
+`;
 interface Props {
     className?: string;
     filterValues?: FilterType | undefined;
@@ -249,12 +283,33 @@ function Country(props: Props) {
         filterValues?.subvariable,
     ]);
 
+    const sourcesVariables = useMemo((): SourcesQueryVariables => ({
+        iso3: filterValues?.country ?? 'AFG',
+        emergency: filterValues?.outbreak,
+        subvariable: filterValues?.subvariable,
+        indicatorId: filterValues?.indicator,
+    }), [
+        filterValues?.country,
+        filterValues?.outbreak,
+        filterValues?.indicator,
+        filterValues?.subvariable,
+    ]);
+
     const {
         data: countryResponse,
     } = useQuery<CountryQuery, CountryQueryVariables>(
         COUNTRY_PROFILE,
         {
             variables: countryVariables,
+        },
+    );
+
+    const {
+        data: sourcesResponse,
+    } = useQuery<SourcesQuery, SourcesQueryVariables>(
+        SOURCES,
+        {
+            variables: sourcesVariables,
         },
     );
 
@@ -508,6 +563,16 @@ function Country(props: Props) {
         return 'red' as const;
     }, []);
 
+    const sourcesList = useMemo(() => sourcesResponse?.dataGranular.slice(0, 3), [
+        sourcesResponse?.dataGranular,
+    ]);
+
+    const [
+        sourceModalShown,
+        showSourceModal,
+        hideSourceModal,
+    ] = useModalState(false);
+
     const statusRendererParams = useCallback((_, data: CountryWiseOutbreakCases) => ({
         heading: data.emergency,
         // TODO: fetch format from server
@@ -521,6 +586,13 @@ function Country(props: Props) {
         value: data.value,
         indicator: metricTypeForColor(data),
     }), [metricTypeForColor]);
+
+    const sourcesRendererParams = useCallback((_, data: SourcesList) => ({
+        title: data?.title ?? '',
+        link: data?.link ?? '',
+        sourceComment: data?.sourceComment ?? '',
+        organization: data?.organisation ?? '',
+    }), []);
 
     return (
         <div className={_cs(className, styles.countryWrapper)}>
@@ -693,6 +765,7 @@ function Country(props: Props) {
                                                 <Bar
                                                     dataKey="indicatorValue"
                                                     radius={[10, 10, 0, 0]}
+                                                    fill="#8DD2B1"
                                                 >
                                                     <LabelList
                                                         dataKey="indicatorValue"
@@ -907,26 +980,38 @@ function Country(props: Props) {
                     )}
                 </ContainerCard>
             </div>
-            <div>
-                <div className={styles.sourceHeading}>
-                    Sources
-                </div>
-                <div className={styles.perceptionCard}>
-                    <div className={styles.infoIcon}>
-                        <IoInformationCircle />
+            {sourcesList && (sourcesList.length > 0) && (
+                <>
+                    <div className={styles.sourceHeading}>
+                        Sources
+                        <Button
+                            name={undefined}
+                            onClick={showSourceModal}
+                            variant="transparent"
+                            actions={<IoChevronDownOutline />}
+                            disabled={(sourcesResponse?.dataGranular.length ?? 0) <= 3}
+                        >
+                            See more
+                        </Button>
                     </div>
-                    <div>
-                        {`COVID-19 Vaccine Perceptions in ${countryResponse?.countryProfile.countryName}
-                    (${countryResponse?.countryProfile.countryName} CDC)`}
-                    </div>
-                    <a
-                        href="https://www.rcce-collective.net/data/data-tracker/"
-                        className={styles.infoIcon}
-                    >
-                        <BiLinkExternal />
-                    </a>
-                </div>
-            </div>
+                    <ListView
+                        className={styles.sources}
+                        renderer={Sources}
+                        rendererParams={sourcesRendererParams}
+                        keySelector={sourcesKeySelector}
+                        data={sourcesList}
+                        errored={false}
+                        filtered={false}
+                        pending={false}
+                    />
+                </>
+            )}
+            {sourceModalShown && (
+                <SourcesModal
+                    onModalClose={hideSourceModal}
+                    sourcesList={sourcesResponse?.dataGranular}
+                />
+            )}
         </div>
     );
 }

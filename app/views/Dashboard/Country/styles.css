@@ -1,7 +1,6 @@
 .country-wrapper {
     display: flex;
     flex-direction: column;
-    gap: var(--dui-spacing-extra-large);
 
     .country-main {
         display: flex;
@@ -93,6 +92,7 @@
                         }
                     }
                 }
+
                 .age-disaggregation {
                     flex-basis: calc(55% - var(--dui-spacing-small));
                     flex-grow: 1;
@@ -178,24 +178,23 @@
         }
     }
 
-    .perception-card {
+    .source-heading {
         display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: var(--dui-spacing-medium);
+        padding: var(--dui-spacing-medium) 0px;
+        width: 40vw;
+        font-size: var(--dui-font-size-heading-small);
+        font-weight: var(--dui-font-weight-bold);
         gap: var(--dui-spacing-small);
-
-        p {
-            padding-left: var(--dui-spacing-small);
-        }
-
-        .info-icon {
-            color: var(--color-text-title);
-            font-size: var(--dui-font-size-extra-large);
-        }
 
     }
 
-    .source-heading {
-        padding: var(--dui-spacing-medium) 0px;
-        font-size: var(--dui-font-size-heading-small);
-        font-weight: var(--dui-font-weight-bold);
+    .sources {
+        display: flex;
+        flex-direction: column;
+        width: 40vw;
+        gap: var(--dui-spacing-small);
     }
 }
