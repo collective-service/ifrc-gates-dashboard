@@ -81,7 +81,7 @@ export function removeNull<T>(
 
 export function decimalToPercentage(value: number | null | undefined) {
     return (
-        value ? Math.round((value * 10000)) / 100 : undefined
+        value ? Math.round((value * 1000)) / 10 : undefined
     );
 }
 
@@ -137,16 +137,16 @@ export function formatNumber(
     totalValue?: number,
 ) {
     if (format === 'thousand') {
-        return `${Math.round(value * 100) / 100000}K`;
+        return `${Math.round(value / 100) / 10}K`;
     }
     if (format === 'million') {
-        return `${Math.round(value * 100) / 100000000}M`;
+        return `${Math.round(value / 100000) / 10}M`;
     }
     if (format === 'percent') {
         if (isDefined(totalValue) && totalValue > 0) {
             return `${Math.round((value / totalValue) * 1000) / 10}%`;
         }
-        return `${Math.round(value * 1000) / 10}%`;
+        return `${decimalToPercentage(value)}%`;
     }
-    return `${value}`;
+    return `${normalCommaFormatter().format(Math.round(value * 10) / 10)}`;
 }

@@ -29,8 +29,10 @@ import ChartContainer from '#components/ChartContainer';
 
 import {
     decimalToPercentage,
+    formatNumber,
     getShortMonth,
     normalFormatter,
+    FormatType,
 } from '#utils/common';
 import {
     OverviewStatsQuery,
@@ -80,6 +82,7 @@ const OVERVIEW_STATS = gql`
         ) {
             contextIndicatorValue
             emergency
+            format
         }
         totalCasesGlobal: globalLevel (
             filters: {
@@ -101,6 +104,7 @@ const OVERVIEW_STATS = gql`
             indicatorValueGlobal
             indicatorMonth
             emergency
+            format
         }
         outbreak: epiDataGlobal (
             filters: {
@@ -122,6 +126,7 @@ const OVERVIEW_STATS = gql`
             contextIndicatorValue
             contextDate
             emergency
+            format
         }
         regionalBreakdownGlobal: epiDataGlobal (
             filters: {
@@ -158,6 +163,7 @@ const OVERVIEW_STATS = gql`
             indicatorMonth
             indicatorId
             indicatorName
+            format
         }
         uncertaintyGlobal: globalLevel (
             filters: {
@@ -203,8 +209,9 @@ const OVERVIEW_STATS = gql`
             indicatorMonth
             indicatorId
             indicatorName
-            indicatorValueRegional,
-            region,
+            indicatorValueRegional
+            region
+            format
         }
     }
 `;
@@ -300,7 +307,10 @@ function PercentageCardGroup(props: Props) {
         overviewStatsResponse?.regionalBreakdownGlobal.map((region) => (
             {
                 ...region,
-                normalizedValue: normalFormatter().format(region.contextIndicatorValue ?? 0),
+                normalizedValue: formatNumber(
+                    region.format as FormatType,
+                    region.contextIndicatorValue ?? 0,
+                ),
                 fill: isDefined(filterValues?.region)
                     && (region.region !== filterValues?.region) ? 0.2 : 1,
             }
@@ -411,9 +421,15 @@ function PercentageCardGroup(props: Props) {
 
     const totalCaseValue = useMemo(() => {
         if (filterValues?.indicator) {
-            return decimalToPercentage(globalTotalCase?.indicatorValueGlobal);
+            return formatNumber(
+                (globalTotalCase?.format ?? 'raw') as FormatType,
+                globalTotalCase?.indicatorValueGlobal ?? 0,
+            );
         }
-        return totalCase?.contextIndicatorValue;
+        return formatNumber(
+            (totalCase?.format ?? 'raw') as FormatType,
+            totalCase?.contextIndicatorValue ?? 0,
+        );
     }, [
         globalTotalCase?.indicatorValueGlobal,
         filterValues?.indicator,
@@ -450,7 +466,6 @@ function PercentageCardGroup(props: Props) {
                 className={styles.globalStatCard}
                 heading={!filterValues?.indicator && totalCase?.emergency}
                 headingSize="extraSmall"
-                suffix={filterValues?.indicator && '%'}
                 headerDescription={!filterValues?.indicator && (
                     <p>
                         All Outbreak numbers:
