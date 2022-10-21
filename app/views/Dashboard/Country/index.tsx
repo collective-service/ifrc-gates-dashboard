@@ -672,7 +672,7 @@ function Country(props: Props) {
                     )}
                     {filterValues?.indicator && (
                         <div className={styles.indicatorWrapper}>
-                            {(statusUncertainty?.indicatorValue) && (
+                            {((statusUncertainty?.indicatorValue ?? 0) > 0) && (
                                 <PercentageStats
                                     className={styles.percentageCard}
                                     indicatorDescription={statusUncertainty?.indicatorDescription}
@@ -680,12 +680,12 @@ function Country(props: Props) {
                                     // TODO: fetch format from server
                                     statValue={formatNumber(
                                         'percent',
-                                        statusUncertainty?.indicatorValue,
+                                        statusUncertainty?.indicatorValue ?? 0,
                                     )}
                                     icon={null}
                                 />
                             )}
-                            {(uncertaintyChart?.length ?? 0) > 0 && (
+                            {((uncertaintyChart?.length ?? 0) > 0) && (
                                 <UncertaintyChart
                                     className={styles.indicatorsChart}
                                     uncertainData={(uncertaintyChart && uncertaintyChart) ?? []}

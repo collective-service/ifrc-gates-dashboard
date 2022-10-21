@@ -331,6 +331,7 @@ function PercentageCardGroup(props: Props) {
         overviewStatsResponse?.regionalBreakdownGlobal.map((region) => (
             {
                 ...region,
+                contextIndicatorValue: region.contextIndicatorValue ?? 0,
                 normalizedValue: formatNumber(
                     region.format as FormatType,
                     region.contextIndicatorValue ?? 0,
@@ -352,7 +353,7 @@ function PercentageCardGroup(props: Props) {
             if (isNotDefined(global.errorMargin)) {
                 return {
                     emergency: global.emergency,
-                    indicatorValue: decimalToPercentage(global.indicatorValueGlobal),
+                    indicatorValue: global.indicatorValueGlobal,
                     date: global.indicatorMonth,
                     minimumValue: negativeRange,
                     maximumValue: positiveRange,
@@ -364,7 +365,7 @@ function PercentageCardGroup(props: Props) {
 
             return {
                 emergency: global.emergency,
-                indicatorValue: decimalToPercentage(global.indicatorValueGlobal),
+                indicatorValue: global.indicatorValueGlobal,
                 date: global.indicatorMonth,
                 uncertainRange: [
                     negativeRange,
@@ -387,7 +388,7 @@ function PercentageCardGroup(props: Props) {
             if (isNotDefined(region.errorMargin)) {
                 return {
                     emergency: region.emergency,
-                    indicatorValue: decimalToPercentage(region.indicatorValueRegional),
+                    indicatorValue: region.indicatorValueRegional,
                     date: region.indicatorMonth,
                     minimumValue: negativeRange,
                     maximumValue: positiveRange,
@@ -400,7 +401,7 @@ function PercentageCardGroup(props: Props) {
 
             return {
                 emergency: region.emergency,
-                indicatorValue: decimalToPercentage(region.indicatorValueRegional),
+                indicatorValue: region.indicatorValueRegional,
                 date: region.indicatorMonth,
                 uncertainRange: [
                     negativeRange,

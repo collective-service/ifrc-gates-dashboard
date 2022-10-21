@@ -146,7 +146,7 @@ export function formatNumber(
         if (isDefined(totalValue) && totalValue > 0) {
             return `${Math.round((value / totalValue) * 1000) / 10}%`;
         }
-        return `${decimalToPercentage(value)}%`;
+        return `${value ? decimalToPercentage(value) : 0}%`;
     }
     return `${normalCommaFormatter().format(Math.round(value * 10) / 10)}`;
 }
