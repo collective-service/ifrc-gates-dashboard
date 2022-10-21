@@ -43,6 +43,16 @@ import { FilterType } from '../../Filters';
 
 import styles from './styles.css';
 
+export interface RegionalTooltipData {
+    contextIndicatorValue?: number;
+    fill?: number;
+    id: string;
+    indicatorMonth?: string;
+    contextDate?: string;
+    region?: string;
+    format?: FormatType;
+}
+
 interface LegendProps {
     payload?: {
         value: string;
@@ -52,10 +62,6 @@ interface LegendProps {
 }
 
 const normalizedTickFormatter = (d: number) => normalFormatter().format(d);
-
-const customLabel = (val: number | string | undefined) => (
-    `${val}%`
-);
 
 const OVERVIEW_STATS = gql`
     query OverviewStats(
@@ -224,6 +230,19 @@ interface Props {
     selectedOutbreakName: string | undefined;
 }
 
+interface Payload {
+    name?: string;
+    value?: number;
+    payload?: RegionalTooltipData;
+}
+
+interface TooltipProps {
+    active?: boolean;
+    payload?: Payload[];
+}
+
+const dateTickFormatter = (d: string) => getShortMonth(d);
+
 const negativeToZero = (
     (indicatorValue?: number | null, errorMarginValue?: number | null) => {
         const valueInd = isNotDefined(indicatorValue) ? 0 : indicatorValue;
@@ -291,9 +310,14 @@ function PercentageCardGroup(props: Props) {
         overviewStatsResponse?.regionalBreakdownRegion.map((region) => (
             {
                 id: region.id,
-                contextIndicatorValue: decimalToPercentage(region.indicatorValueRegional),
+                contextIndicatorValue: region.indicatorValueRegional,
+                normalizedValue: formatNumber(
+                    region.format as FormatType,
+                    region.indicatorValueRegional ?? 0,
+                ),
                 indicatorMonth: region.indicatorMonth,
                 region: region.region,
+                format: region.format,
                 fill: isDefined(filterValues?.region)
                     && (region.region !== filterValues?.region) ? 0.2 : 1,
             }
@@ -334,6 +358,7 @@ function PercentageCardGroup(props: Props) {
                     maximumValue: positiveRange,
                     indicatorName: global.indicatorName,
                     id: global.id,
+                    format: global.format as FormatType,
                 };
             }
 
@@ -349,6 +374,7 @@ function PercentageCardGroup(props: Props) {
                 maximumValue: positiveRange,
                 indicatorName: global.indicatorName,
                 id: global.id,
+                format: global.format as FormatType,
             };
         }).sort((a, b) => compareDate(a.date, b.date))
     ), [overviewStatsResponse?.uncertaintyGlobal]);
@@ -368,6 +394,7 @@ function PercentageCardGroup(props: Props) {
                     region: region.region,
                     indicatorName: region.indicatorName,
                     id: region.id,
+                    format: region.format as FormatType,
                 };
             }
 
@@ -384,6 +411,7 @@ function PercentageCardGroup(props: Props) {
                 region: region.region,
                 indicatorName: region.indicatorName,
                 id: region.id,
+                format: region.format as FormatType,
             };
         }).sort((a, b) => compareDate(a.date, b.date))
     ), [overviewStatsResponse?.uncertaintyRegion]);
@@ -430,7 +458,10 @@ function PercentageCardGroup(props: Props) {
 
     const totalCaseValue = useMemo(() => {
         if (filterValues?.region && filterValues?.indicator && filterValues?.outbreak) {
-            return regionTotalCase?.contextIndicatorValue;
+            return formatNumber(
+                regionTotalCase?.format as FormatType,
+                regionTotalCase?.contextIndicatorValue ?? 0,
+            );
         }
         if (filterValues?.indicator) {
             return formatNumber(
@@ -449,6 +480,9 @@ function PercentageCardGroup(props: Props) {
         totalCase?.contextIndicatorValue,
         filterValues?.region,
         filterValues?.outbreak,
+        globalTotalCase?.format,
+        regionTotalCase?.format,
+        totalCase?.format,
     ]);
 
     const renderLegend = useCallback((legendProps: LegendProps) => {
@@ -474,6 +508,33 @@ function PercentageCardGroup(props: Props) {
         filterValues?.outbreak,
         getLineChartColor,
     ]);
+
+    const customRegionalTooltip = (tooltipProps: TooltipProps) => {
+        const {
+            active,
+            payload: regionalData,
+        } = tooltipProps;
+        if (active && regionalData && regionalData.length > 0) {
+            const format = regionalData[0]?.payload?.format;
+            return (
+                <div className={styles.tooltipCard}>
+                    <div className={styles.tooltipHeading}>
+                        {regionalData[0].payload?.region}
+                    </div>
+                    <div className={styles.tooltipContent}>
+                        {filterValues?.indicator
+                            ? (dateTickFormatter(regionalData[0].payload?.indicatorMonth ?? ''))
+                            : (dateTickFormatter(regionalData[0].payload?.contextDate ?? ''))}
+                    </div>
+                    <div className={styles.tooltipContent}>
+                        {formatNumber(format as FormatType,
+                            regionalData[0].payload?.contextIndicatorValue ?? 0)}
+                    </div>
+                </div>
+            );
+        }
+        return null;
+    };
 
     return (
         <div className={_cs(className, styles.cardInfo)}>
@@ -539,6 +600,8 @@ function PercentageCardGroup(props: Props) {
                                         x: true,
                                         y: true,
                                     }}
+                                // NOTE: Need to implement similar custom tooltip
+                                // content={customRegionalTooltip}
                                 />
                                 <Legend content={renderLegend} />
                                 <Line
@@ -576,6 +639,7 @@ function PercentageCardGroup(props: Props) {
                             >
                                 <Tooltip
                                     cursor={false}
+                                    content={customRegionalTooltip}
                                 />
                                 <XAxis
                                     dataKey="region"
@@ -598,14 +662,13 @@ function PercentageCardGroup(props: Props) {
                                         />
                                     ))}
                                     <LabelList
-                                        dataKey="contextIndicatorValue"
+                                        dataKey="normalizedValue"
                                         position="insideBottomLeft"
                                         fill="#8DD2B1"
                                         fontSize={16}
                                         angle={270}
                                         dx={-15}
                                         dy={-3}
-                                        formatter={customLabel}
                                     />
                                 </Bar>
                             </BarChart>
@@ -616,6 +679,7 @@ function PercentageCardGroup(props: Props) {
                             >
                                 <Tooltip
                                     cursor={false}
+                                    content={customRegionalTooltip}
                                 />
                                 <XAxis
                                     dataKey="region"
