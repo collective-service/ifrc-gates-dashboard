@@ -63,12 +63,6 @@ interface LegendProps {
 
 const normalizedTickFormatter = (d: number) => normalFormatter().format(d);
 
-const customLabel = (val: number | string | undefined) => (
-    `${val}%`
-);
-
-console.log(customLabel);
-
 const OVERVIEW_STATS = gql`
     query OverviewStats(
         $emergency: String,
@@ -486,6 +480,9 @@ function PercentageCardGroup(props: Props) {
         totalCase?.contextIndicatorValue,
         filterValues?.region,
         filterValues?.outbreak,
+        globalTotalCase?.format,
+        regionTotalCase?.format,
+        totalCase?.format,
     ]);
 
     const renderLegend = useCallback((legendProps: LegendProps) => {

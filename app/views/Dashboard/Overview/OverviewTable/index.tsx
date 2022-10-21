@@ -258,7 +258,7 @@ function OverviewTable(props: Props) {
     const sortedData = useMemo(() => {
         const transformedTableData = tableValues?.overviewTable?.map((item) => ({
             ...item,
-            format: item.data[0].format,
+            format: item.data[0].format as FormatType,
             data: item.data.reduce(
                 (acc, curr) => ({
                     ...acc,
