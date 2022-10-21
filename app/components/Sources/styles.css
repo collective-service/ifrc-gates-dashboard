@@ -1,14 +1,18 @@
-.perception-card {
-    display: flex;
-    gap: var(--dui-spacing-small);
+.sources-wrapper {
+    width: 20vw;
 
-    p {
-        padding-left: var(--dui-spacing-small);
+    .perception-card {
+        display: flex;
+        gap: var(--dui-spacing-small);
+
+        p {
+            padding-left: var(--dui-spacing-small);
+        }
+
+        .info-icon {
+            color: var(--color-text-title);
+            font-size: var(--dui-font-size-extra-large);
+        }
+
     }
-
-    .info-icon {
-        color: var(--color-text-title);
-        font-size: var(--dui-font-size-extra-large);
-    }
-
 }

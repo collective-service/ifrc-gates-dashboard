@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { gql, useQuery } from '@apollo/client';
 import {
     _cs,
@@ -145,8 +145,8 @@ const GLOBAL_COMBINED_INDICATORS = gql`
 type SourcesList = NonNullable<SourcesQuery['dataGranular']>[number];
 const sourcesKeySelector = (d: SourcesList) => d.id;
 
-const SOURCES = gql`
-    query Sources(
+const COMBINED_SOURCES = gql`
+    query CombinedSources(
         $iso3: String,
         $emergency: String,
         $subvariable: String,
@@ -260,16 +260,12 @@ function CombinedIndicators(props: Props) {
         setActiveTab,
     } = props;
 
-    const [dataGranularLimit, setDataGranularLimit] = useState(3);
-
     const sourcesVariables = useMemo((): SourcesQueryVariables => ({
         iso3: filterValues?.country ?? 'AFG',
         emergency: filterValues?.outbreak,
         subvariable: filterValues?.subvariable,
         indicatorId: filterValues?.indicator,
-        granularLimit: dataGranularLimit,
     }), [
-        dataGranularLimit,
         filterValues?.country,
         filterValues?.outbreak,
         filterValues?.indicator,
@@ -279,7 +275,7 @@ function CombinedIndicators(props: Props) {
     const {
         data: sourcesResponse,
     } = useQuery<SourcesQuery, SourcesQueryVariables>(
-        SOURCES,
+        COMBINED_SOURCES,
         {
             variables: sourcesVariables,
         },
@@ -414,7 +410,6 @@ function CombinedIndicators(props: Props) {
                     <Button
                         name
                         variant="transparent"
-                        onClick={() => setDataGranularLimit(5)}
                         actions={<IoChevronDownOutline />}
                     >
                         See more

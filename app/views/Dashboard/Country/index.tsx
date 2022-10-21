@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
     isNotDefined,
     listToGroupList,
@@ -27,6 +27,7 @@ import {
     ListView,
     NumberOutput,
     Button,
+    useModalState,
 } from '@the-deep/deep-ui';
 import { useQuery, gql } from '@apollo/client';
 import { IoChevronDownOutline } from 'react-icons/io5';
@@ -35,6 +36,7 @@ import UncertaintyChart, { UncertainData } from '#components/UncertaintyChart';
 import PercentageStats from '#components/PercentageStats';
 import ScoreCard from '#components/ScoreCard';
 import Sources from '#components/Sources';
+import SourcesModal from '#components/SourcesModal';
 import {
     decimalToPercentage,
     formatNumber,
@@ -236,7 +238,6 @@ const SOURCES = gql`
         $emergency: String,
         $subvariable: String,
         $indicatorId: String,
-        $granularLimit: Int!,
     ) {
         dataGranular(
             filters: {
@@ -245,10 +246,6 @@ const SOURCES = gql`
                 indicatorId: $indicatorId,
                 subvariable: $subvariable,
                 isDistinctSources: true
-            }
-            pagination: {
-                limit: $granularLimit,
-                offset: 0,
             }
         ) {
             id
@@ -273,8 +270,6 @@ function Country(props: Props) {
         selectedIndicatorName,
     } = props;
 
-    const [dataGranularLimit, setDataGranularLimit] = useState(3);
-
     const countryVariables = useMemo((): CountryQueryVariables => ({
         iso3: filterValues?.country ?? 'AFG',
         requiredIso3: filterValues?.country ?? 'AFG',
@@ -293,9 +288,7 @@ function Country(props: Props) {
         emergency: filterValues?.outbreak,
         subvariable: filterValues?.subvariable,
         indicatorId: filterValues?.indicator,
-        granularLimit: dataGranularLimit,
     }), [
-        dataGranularLimit,
         filterValues?.country,
         filterValues?.outbreak,
         filterValues?.indicator,
@@ -569,6 +562,16 @@ function Country(props: Props) {
         }
         return 'red' as const;
     }, []);
+
+    const sourcesList = useMemo(() => sourcesResponse?.dataGranular.slice(0, 3), [
+        sourcesResponse?.dataGranular,
+    ]);
+
+    const [
+        mapModalShown,
+        showMapModal,
+        hideMapModal,
+    ] = useModalState(false);
 
     const statusRendererParams = useCallback((_, data: CountryWiseOutbreakCases) => ({
         heading: data.emergency,
@@ -980,8 +983,8 @@ function Country(props: Props) {
                 Sources
                 <Button
                     name
+                    onClick={() => showMapModal()}
                     variant="transparent"
-                    onClick={() => setDataGranularLimit(5)}
                     actions={<IoChevronDownOutline />}
                 >
                     See more
@@ -991,11 +994,17 @@ function Country(props: Props) {
                 renderer={Sources}
                 rendererParams={sourcesRendererParams}
                 keySelector={sourcesKeySelector}
-                data={sourcesResponse?.dataGranular}
+                data={sourcesList}
                 errored={false}
                 filtered={false}
                 pending={false}
             />
+            {mapModalShown && (
+                <SourcesModal
+                    onModalClose={hideMapModal}
+                    sourcesList={sourcesResponse?.dataGranular}
+                />
+            )}
         </div>
     );
 }

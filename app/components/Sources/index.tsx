@@ -13,6 +13,7 @@ interface Props {
     title?: string;
     sourceComment?: string;
     organization?: string;
+    sourceDate?: string;
 }
 
 function Sources(props: Props) {
@@ -22,11 +23,12 @@ function Sources(props: Props) {
         title,
         sourceComment,
         organization,
+        sourceDate,
     } = props;
 
     return (
         <div
-            className={_cs(className)}
+            className={_cs(className, styles.sourcesWrapper)}
             title={sourceComment}
         >
             <div className={styles.perceptionCard}>
@@ -36,6 +38,7 @@ function Sources(props: Props) {
                 <div>
                     {title}
                     {organization && `-(${organization})`}
+                    {sourceDate && `-${sourceDate}`}
                 </div>
                 <a
                     href={link}
