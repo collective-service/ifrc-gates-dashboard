@@ -11,6 +11,7 @@ import {
     List,
     ListView,
     PendingAnimation,
+    useModalState,
 } from '@the-deep/deep-ui';
 
 import {
@@ -25,6 +26,7 @@ import {
 } from '#generated/types';
 import { TabTypes } from '#views/Dashboard';
 import Sources from '#components/Sources';
+import SourcesModal from '#components/SourcesModal';
 import { IoChevronDownOutline } from 'react-icons/io5';
 
 import TopicCard from './TopicCard';
@@ -149,21 +151,12 @@ const COMBINED_SOURCES = gql`
     query CombinedSources(
         $iso3: String,
         $emergency: String,
-        $subvariable: String,
-        $indicatorId: String,
-        $granularLimit: Int!,
     ) {
         dataGranular(
             filters: {
                 iso3: $iso3,
                 emergency: $emergency,
-                indicatorId: $indicatorId,
-                subvariable: $subvariable,
                 isDistinctSources: true
-            }
-            pagination: {
-                limit: $granularLimit,
-                offset: 0,
             }
         ) {
             id
@@ -260,16 +253,18 @@ function CombinedIndicators(props: Props) {
         setActiveTab,
     } = props;
 
+    const [
+        sourceModalShown,
+        showSourceModal,
+        hideSourceModal,
+    ] = useModalState(false);
+
     const sourcesVariables = useMemo((): SourcesQueryVariables => ({
         iso3: filterValues?.country ?? 'AFG',
         emergency: filterValues?.outbreak,
-        subvariable: filterValues?.subvariable,
-        indicatorId: filterValues?.indicator,
     }), [
         filterValues?.country,
         filterValues?.outbreak,
-        filterValues?.indicator,
-        filterValues?.subvariable,
     ]);
 
     const {
@@ -395,6 +390,10 @@ function CombinedIndicators(props: Props) {
         globalCombinedIndicatorsLoading,
     ]);
 
+    const sourcesList = useMemo(() => sourcesResponse?.dataGranular.slice(0, 3), [
+        sourcesResponse?.dataGranular,
+    ]);
+
     return (
         <div className={_cs(className, styles.combinedIndicatorWrapper)}>
             {loading && <PendingAnimation />}
@@ -405,26 +404,41 @@ function CombinedIndicators(props: Props) {
                 keySelector={thematicKeySelector}
             />
             <div>
-                <div className={styles.sourceHeading}>
-                    Sources
-                    <Button
-                        name
-                        variant="transparent"
-                        actions={<IoChevronDownOutline />}
-                    >
-                        See more
-                    </Button>
-                </div>
-                <ListView
-                    renderer={Sources}
-                    rendererParams={sourcesRendererParams}
-                    keySelector={sourcesKeySelector}
-                    data={sourcesResponse?.dataGranular}
-                    errored={false}
-                    filtered={false}
-                    pending={false}
-                />
+                { sourcesResponse?.dataGranular
+                    && (sourcesResponse?.dataGranular.length > 0)
+                    && (
+                        <>
+                            <div className={styles.sourceHeading}>
+                                Sources
+                                <Button
+                                    name={undefined}
+                                    variant="transparent"
+                                    onClick={showSourceModal}
+                                    actions={<IoChevronDownOutline />}
+                                    disabled={(sourcesResponse?.dataGranular.length ?? 0) <= 3}
+                                >
+                                    See more
+                                </Button>
+                            </div>
+                            <ListView
+                                className={styles.sources}
+                                renderer={Sources}
+                                rendererParams={sourcesRendererParams}
+                                keySelector={sourcesKeySelector}
+                                data={sourcesList}
+                                errored={false}
+                                filtered={false}
+                                pending={false}
+                            />
+                        </>
+                    )}
             </div>
+            {sourceModalShown && (
+                <SourcesModal
+                    onModalClose={hideSourceModal}
+                    sourcesList={sourcesResponse?.dataGranular}
+                />
+            )}
         </div>
     );
 }

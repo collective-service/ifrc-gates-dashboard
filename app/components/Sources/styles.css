@@ -1,15 +1,18 @@
 .sources-wrapper {
-    width: 20vw;
+    width: 98%;
 
     .perception-card {
         display: flex;
+        align-items: center;
         gap: var(--dui-spacing-small);
 
-        p {
+        .label {
+            flex-grow: 1;
             padding-left: var(--dui-spacing-small);
         }
 
         .info-icon {
+            flex-shrink: 0;
             color: var(--color-text-title);
             font-size: var(--dui-font-size-extra-large);
         }

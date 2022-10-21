@@ -4,7 +4,12 @@ import { IoInformationCircle } from 'react-icons/io5';
 import { BiLinkExternal } from 'react-icons/bi';
 import {
     _cs,
+    isDefined,
 } from '@togglecorp/fujs';
+import {
+    TextOutput,
+} from '@the-deep/deep-ui';
+
 import styles from './styles.css';
 
 interface Props {
@@ -35,11 +40,16 @@ function Sources(props: Props) {
                 <div className={styles.infoIcon}>
                     <IoInformationCircle />
                 </div>
-                <div>
-                    {title}
-                    {organization && `-(${organization})`}
-                    {sourceDate && `-${sourceDate}`}
-                </div>
+                <TextOutput
+                    className={styles.label}
+                    label={`
+                        ${title}
+                        ${isDefined(organization) ? `- ${organization}` : ''}
+                        ${isDefined(sourceDate) ? `- ${sourceDate}` : ''}
+                    `}
+                    spacing="compact"
+                    hideLabelColon
+                />
                 <a
                     href={link}
                     className={styles.infoIcon}

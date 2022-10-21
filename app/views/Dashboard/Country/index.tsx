@@ -568,9 +568,9 @@ function Country(props: Props) {
     ]);
 
     const [
-        mapModalShown,
-        showMapModal,
-        hideMapModal,
+        sourceModalShown,
+        showSourceModal,
+        hideSourceModal,
     ] = useModalState(false);
 
     const statusRendererParams = useCallback((_, data: CountryWiseOutbreakCases) => ({
@@ -765,6 +765,7 @@ function Country(props: Props) {
                                                 <Bar
                                                     dataKey="indicatorValue"
                                                     radius={[10, 10, 0, 0]}
+                                                    fill="#8DD2B1"
                                                 >
                                                     <LabelList
                                                         dataKey="indicatorValue"
@@ -979,29 +980,35 @@ function Country(props: Props) {
                     )}
                 </ContainerCard>
             </div>
-            <div className={styles.sourceHeading}>
-                Sources
-                <Button
-                    name
-                    onClick={() => showMapModal()}
-                    variant="transparent"
-                    actions={<IoChevronDownOutline />}
-                >
-                    See more
-                </Button>
-            </div>
-            <ListView
-                renderer={Sources}
-                rendererParams={sourcesRendererParams}
-                keySelector={sourcesKeySelector}
-                data={sourcesList}
-                errored={false}
-                filtered={false}
-                pending={false}
-            />
-            {mapModalShown && (
+            {sourcesList && (sourcesList.length > 0) && (
+                <>
+                    <div className={styles.sourceHeading}>
+                        Sources
+                        <Button
+                            name={undefined}
+                            onClick={showSourceModal}
+                            variant="transparent"
+                            actions={<IoChevronDownOutline />}
+                            disabled={(sourcesResponse?.dataGranular.length ?? 0) <= 3}
+                        >
+                            See more
+                        </Button>
+                    </div>
+                    <ListView
+                        className={styles.sources}
+                        renderer={Sources}
+                        rendererParams={sourcesRendererParams}
+                        keySelector={sourcesKeySelector}
+                        data={sourcesList}
+                        errored={false}
+                        filtered={false}
+                        pending={false}
+                    />
+                </>
+            )}
+            {sourceModalShown && (
                 <SourcesModal
-                    onModalClose={hideMapModal}
+                    onModalClose={hideSourceModal}
                     sourcesList={sourcesResponse?.dataGranular}
                 />
             )}

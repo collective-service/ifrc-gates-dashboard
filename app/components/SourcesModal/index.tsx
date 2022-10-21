@@ -3,7 +3,6 @@ import {
     Modal,
     ListView,
 } from '@the-deep/deep-ui';
-import { _cs } from '@togglecorp/fujs';
 import { SourcesQuery } from '#generated/types';
 import Sources from '#components/Sources';
 
@@ -38,6 +37,7 @@ function SourcesModal(props: Props) {
             headingClassName={styles.sourceHeading}
         >
             <ListView
+                className={styles.sources}
                 renderer={Sources}
                 rendererParams={sourcesRendererParams}
                 keySelector={sourcesKeySelector}
