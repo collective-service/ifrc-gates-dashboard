@@ -12,7 +12,7 @@ import {
 } from '@the-deep/deep-ui';
 import { isDefined, _cs } from '@togglecorp/fujs';
 
-import { getShortMonth } from '#utils/common';
+import { formatNumber, FormatType, getShortMonth } from '#utils/common';
 import ChartContainer from '#components/ChartContainer';
 
 import styles from './styles.css';
@@ -26,6 +26,7 @@ export interface UncertainData {
     maximumValue?: number;
     region?: string;
     indicatorName?: string | null;
+    format?: FormatType;
 }
 
 interface Props {
@@ -66,6 +67,7 @@ function UncertaintyChart(props: Props) {
             payload: data,
         } = tooltipProps;
         if (active && data && data.length > 0) {
+            const format = data[0].payload?.format;
             return (
                 <div className={styles.tooltipCard}>
                     <div className={styles.tooltipHeading}>
@@ -78,7 +80,8 @@ function UncertaintyChart(props: Props) {
                         {dateTickFormatter(data[0].payload?.date ?? '')}
                     </div>
                     <div className={styles.tooltipContent}>
-                        {data[0].payload?.indicatorValue}
+                        {formatNumber(format as FormatType,
+                            data[0].payload?.indicatorValue ?? 0)}
                         {isDefined(data[0].payload?.minimumValue
                             && isDefined(data[0].payload.maximumValue))
                             ? ` [${data[0].payload?.minimumValue} - ${data[0].payload?.maximumValue}] `

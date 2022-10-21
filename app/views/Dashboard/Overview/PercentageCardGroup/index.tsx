@@ -50,6 +50,7 @@ export interface RegionalTooltipData {
     indicatorMonth?: string;
     contextDate?: string;
     region?: string;
+    format?: FormatType;
 }
 
 interface LegendProps {
@@ -65,6 +66,8 @@ const normalizedTickFormatter = (d: number) => normalFormatter().format(d);
 const customLabel = (val: number | string | undefined) => (
     `${val}%`
 );
+
+console.log(customLabel);
 
 const OVERVIEW_STATS = gql`
     query OverviewStats(
@@ -313,9 +316,14 @@ function PercentageCardGroup(props: Props) {
         overviewStatsResponse?.regionalBreakdownRegion.map((region) => (
             {
                 id: region.id,
-                contextIndicatorValue: decimalToPercentage(region.indicatorValueRegional),
+                contextIndicatorValue: region.indicatorValueRegional,
+                normalizedValue: formatNumber(
+                    region.format as FormatType,
+                    region.indicatorValueRegional ?? 0,
+                ),
                 indicatorMonth: region.indicatorMonth,
                 region: region.region,
+                format: region.format,
                 fill: isDefined(filterValues?.region)
                     && (region.region !== filterValues?.region) ? 0.2 : 1,
             }
@@ -356,6 +364,7 @@ function PercentageCardGroup(props: Props) {
                     maximumValue: positiveRange,
                     indicatorName: global.indicatorName,
                     id: global.id,
+                    format: global.format as FormatType,
                 };
             }
 
@@ -371,6 +380,7 @@ function PercentageCardGroup(props: Props) {
                 maximumValue: positiveRange,
                 indicatorName: global.indicatorName,
                 id: global.id,
+                format: global.format as FormatType,
             };
         }).sort((a, b) => compareDate(a.date, b.date))
     ), [overviewStatsResponse?.uncertaintyGlobal]);
@@ -390,6 +400,7 @@ function PercentageCardGroup(props: Props) {
                     region: region.region,
                     indicatorName: region.indicatorName,
                     id: region.id,
+                    format: region.format as FormatType,
                 };
             }
 
@@ -406,6 +417,7 @@ function PercentageCardGroup(props: Props) {
                 region: region.region,
                 indicatorName: region.indicatorName,
                 id: region.id,
+                format: region.format as FormatType,
             };
         }).sort((a, b) => compareDate(a.date, b.date))
     ), [overviewStatsResponse?.uncertaintyRegion]);
@@ -452,7 +464,10 @@ function PercentageCardGroup(props: Props) {
 
     const totalCaseValue = useMemo(() => {
         if (filterValues?.region && filterValues?.indicator && filterValues?.outbreak) {
-            return regionTotalCase?.contextIndicatorValue;
+            return formatNumber(
+                regionTotalCase?.format as FormatType,
+                regionTotalCase?.contextIndicatorValue ?? 0,
+            );
         }
         if (filterValues?.indicator) {
             return formatNumber(
@@ -503,6 +518,7 @@ function PercentageCardGroup(props: Props) {
             payload: regionalData,
         } = tooltipProps;
         if (active && regionalData && regionalData.length > 0) {
+            const format = regionalData[0]?.payload?.format;
             return (
                 <div className={styles.tooltipCard}>
                     <div className={styles.tooltipHeading}>
@@ -514,7 +530,8 @@ function PercentageCardGroup(props: Props) {
                             : (dateTickFormatter(regionalData[0].payload?.contextDate ?? ''))}
                     </div>
                     <div className={styles.tooltipContent}>
-                        {regionalData[0].payload?.contextIndicatorValue}
+                        {formatNumber(format as FormatType,
+                            regionalData[0].payload?.contextIndicatorValue ?? 0)}
                     </div>
                 </div>
             );
@@ -648,14 +665,13 @@ function PercentageCardGroup(props: Props) {
                                         />
                                     ))}
                                     <LabelList
-                                        dataKey="contextIndicatorValue"
+                                        dataKey="normalizedValue"
                                         position="insideBottomLeft"
                                         fill="#8DD2B1"
                                         fontSize={16}
                                         angle={270}
                                         dx={-15}
                                         dy={-3}
-                                        formatter={customLabel}
                                     />
                                 </Bar>
                             </BarChart>
