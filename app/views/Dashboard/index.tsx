@@ -1,22 +1,26 @@
-import React,
-{
+import React, {
     useMemo,
+    useCallback,
     useEffect,
     useState,
 } from 'react';
 import {
     IoDownloadOutline,
+    // IoCloseSharp,
 } from 'react-icons/io5';
+import { saveAs } from 'file-saver';
+// import stringify from 'csv-stringify/lib/sync.js';
 import {
     Tabs,
     TabList,
     Tab,
     TabPanel,
+    // Button,
     DropdownMenu,
     DropdownMenuItem,
     ContainerCard,
 } from '@the-deep/deep-ui';
-import { isDefined } from '@togglecorp/fujs';
+import { isDefined, isNotDefined } from '@togglecorp/fujs';
 import { gql, useQuery } from '@apollo/client';
 
 import useSessionStorage from '#hooks/useSessionStorage';
@@ -31,14 +35,19 @@ import {
     SubvariablesQuery,
     SubvariablesQueryVariables,
     IndicatorsQueryVariables,
+    ExportMetaQuery,
+    ExportMetaQueryVariables,
 } from '#generated/types';
 import { getRegionForCountry } from '#utils/common';
+import useRecursiveCsvExport from '#hooks/useRecursiveCSVExport';
+import ProgressBar from '#components/ProgressBar';
 
 import Overview from './Overview';
 import Country from './Country';
 import CombinedIndicators from './CombinedIndicators';
 import Filters, { FilterType } from './Filters';
 import { AdvancedOptionType } from './AdvancedFilters';
+
 import styles from './styles.css';
 
 export type TabTypes = 'country' | 'overview' | 'combinedIndicators';
@@ -119,6 +128,23 @@ const SUBVARIABLES = gql`
     }
 `;
 
+const EXPORT_META = gql`
+    query ExportMeta(
+        $iso3: String,
+        $indicatorId:String
+    ) {
+        exportMeta(
+            iso3: $iso3,
+            indicatorId: $indicatorId,
+        ) {
+            maxPageLimit
+            totalCountryContextualDataCount
+            totalRawDataCount
+            totalSummaryCount
+        }
+    }
+`;
+
 function Dashboard() {
     const [
         activeTab,
@@ -153,6 +179,7 @@ function Dashboard() {
             return {
                 iso3: filterValueCountry,
                 outbreak: filterValues?.outbreak,
+                include_header: false,
             };
         }
         return undefined;
@@ -208,6 +235,58 @@ function Dashboard() {
         filterValues?.indicator,
     ]);
 
+    const exportParams = useMemo(() => {
+        if (isDefined(filterValues?.indicator) || isDefined(filterValueCountry)) {
+            return {
+                iso3: filterValueCountry,
+                indicator_id: filterValues?.indicator,
+                include_header: false,
+            };
+        }
+        return {};
+    }, [
+        filterValueCountry,
+        filterValues?.indicator,
+    ]);
+
+    const [
+        pendingExport,
+        exportData,
+        exportFullString,
+        exportTotal,
+        triggerExportStart,
+        // handleCancelExport,
+    ] = useRecursiveCsvExport({
+        onFailure: () => {
+            // eslint-disable-next-line no-console
+            console.error('failed to download');
+        },
+    });
+
+    const exportMetaVariables = useMemo(() => {
+        if (isDefined(filterValues?.indicator) || isDefined(filterValueCountry)) {
+            return {
+                iso3: filterValueCountry,
+                indicatorId: filterValues?.indicator,
+            };
+        }
+        return undefined;
+    }, [
+        filterValueCountry,
+        filterValues?.indicator,
+    ]);
+
+    const {
+        data: exportMetaCount,
+        loading: exportMetaLoading,
+    } = useQuery<ExportMetaQuery, ExportMetaQueryVariables>(
+        EXPORT_META,
+        {
+            skip: !exportMetaVariables,
+            variables: exportMetaVariables,
+        },
+    );
+
     const {
         data: subvariableList,
         loading: subvariablesLoading,
@@ -248,22 +327,40 @@ function Dashboard() {
         }
     };
 
-    const handleRawDataExportClick = () => {
-        // FIXME: Handle onClick
-        // eslint-disable-next-line no-console
-        console.log('Handle raw data click');
-    };
+    const disableExportButton = isNotDefined(filterValueCountry || filterValues?.indicator);
+
+    const handleRawDataExportClick = useCallback(() => {
+        if (exportMetaCount?.exportMeta?.totalRawDataCount) {
+            triggerExportStart(
+                'server://export-raw-data/',
+                exportMetaCount?.exportMeta?.totalRawDataCount,
+                exportParams,
+            );
+        }
+    }, [
+        exportParams,
+        exportMetaCount,
+        triggerExportStart,
+    ]);
 
     const handleSummarizedDataExportClick = () => {
-        // FIXME: Handle onClick
-        // eslint-disable-next-line no-console
-        console.log('Handle summarized data click');
+        if (exportMetaCount?.exportMeta?.totalSummaryCount) {
+            triggerExportStart(
+                'server://export-summary/',
+                exportMetaCount?.exportMeta?.totalSummaryCount,
+                exportParams,
+            );
+        }
     };
 
     const handleContextualCountryDataExportClick = () => {
-        // FIXME: Handle onClick
-        // eslint-disable-next-line no-console
-        console.log('Handle contextual country data click');
+        if (exportMetaCount?.exportMeta?.totalCountryContextualDataCount) {
+            triggerExportStart(
+                'server://export-country-contextual-data/',
+                exportMetaCount?.exportMeta?.totalCountryContextualDataCount,
+                exportParams,
+            );
+        }
     };
 
     const narrativeVariables = useMemo((): NarrativeQueryVariables => ({
@@ -310,6 +407,41 @@ function Dashboard() {
         indicatorList,
     ]);
 
+    useEffect(() => {
+        if (!pendingExport) {
+            if (exportData?.length > 0) {
+                if (exportData.length === exportTotal) {
+                    /*
+                    const dataString = stringify(exportData, {
+                        columns: headers,
+                    });
+                    */
+                    const blob = new Blob(
+                        [exportFullString],
+                        { type: 'text/csv' },
+                    );
+                    saveAs(blob, 'Final');
+                } else {
+                    // eslint-disable-next-line no-console
+                    console.error('CSV num rows mismatch', `expected: ${exportTotal}`, `got: ${exportData.length}`);
+                }
+            }
+        }
+    }, [pendingExport, exportData, exportTotal, exportFullString]);
+
+    const isExportPending = exportMetaLoading || pendingExport;
+
+    const progress = useMemo(() => {
+        if (!exportTotal) {
+            return 0;
+        }
+
+        return Math.round(100 * (exportData?.length / exportTotal) ?? 0) / 100;
+    }, [
+        exportData,
+        exportTotal,
+    ]);
+
     return (
         <div className={styles.dashboardNavigation}>
             <Tabs
@@ -335,32 +467,43 @@ function Dashboard() {
                         <div className={styles.dashboardButtons}>
                             <DropdownMenu
                                 className={styles.button}
-                                label="Export"
+                                label={isExportPending ? `Preparing Export (${progress * 100}%)` : 'Export'}
                                 variant="tertiary"
                                 icons={<IoDownloadOutline />}
                                 hideDropdownIcon
-                                // NOTE: This button has been disabled till export is functional.
-                                // (For deployment purposes)
-                                disabled
+                                disabled={
+                                    exportMetaLoading
+                                    || pendingExport
+                                    || disableExportButton
+                                }
                             >
-                                <DropdownMenuItem
-                                    name={undefined}
-                                    onClick={handleRawDataExportClick}
-                                >
-                                    Export as CSV
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                    name={undefined}
-                                    onClick={handleSummarizedDataExportClick}
-                                >
-                                    Export Summarized Data
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                    name={undefined}
-                                    onClick={handleContextualCountryDataExportClick}
-                                >
-                                    Export Contextual Country Data
-                                </DropdownMenuItem>
+                                {(exportMetaCount?.exportMeta?.totalRawDataCount ?? 0) > 0 && (
+                                    <DropdownMenuItem
+                                        name={undefined}
+                                        onClick={handleRawDataExportClick}
+                                    >
+                                        Export Raw Data as CSV
+                                    </DropdownMenuItem>
+                                )}
+                                {(exportMetaCount?.exportMeta?.totalSummaryCount ?? 0) > 0 && (
+                                    <DropdownMenuItem
+                                        name={undefined}
+                                        onClick={handleSummarizedDataExportClick}
+                                    >
+                                        Export Summarized Data
+                                    </DropdownMenuItem>
+                                )}
+                                {(exportMetaCount
+                                    ?.exportMeta
+                                    ?.totalCountryContextualDataCount ?? 0) > 0
+                                && (
+                                    <DropdownMenuItem
+                                        name={undefined}
+                                        onClick={handleContextualCountryDataExportClick}
+                                    >
+                                        Export Contextual Country Data
+                                    </DropdownMenuItem>
+                                )}
                             </DropdownMenu>
                             <TabList className={styles.dashboardTabList}>
                                 <Tab
@@ -438,6 +581,33 @@ function Dashboard() {
                     </TabPanel>
                 </div>
             </Tabs>
+            {isExportPending && (
+                <div className={styles.exportProgressBar}>
+                    <div className={styles.topContainer}>
+                        Preparing Export...
+                        {/*
+                            <Button
+                                name={undefined}
+                                icons={<IoCloseSharp />}
+                                className={styles.cancelExportButton}
+                                onClick={handleCancelExport}
+                                variant="transparent"
+                            >
+                                Cancel
+                            </Button>
+                        */}
+                    </div>
+                    <ProgressBar
+                        className={styles.progressBar}
+                        color="var(--dui-color-brand)"
+                        title={undefined}
+                        barName={undefined}
+                        value={progress}
+                        totalValue={1}
+                        format="percent"
+                    />
+                </div>
+            )}
         </div>
     );
 }

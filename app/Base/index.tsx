@@ -22,13 +22,6 @@ import { trackingId, gaConfig } from '#base/configs/googleAnalytics';
 import { mapboxToken } from '#base/configs/env';
 
 import Dashboard from '#views/Dashboard';
-import {
-    processGatesUrls,
-    processGatesOptions,
-    processGatesResponse,
-    processGatesError,
-    RequestContext,
-} from '#base/utils/restRequest';
 
 import styles from './styles.css';
 
@@ -88,16 +81,6 @@ function Base() {
         [],
     );
 
-    const requestContextValue = useMemo(
-        () => ({
-            transformUrl: processGatesUrls,
-            transformOptions: processGatesOptions,
-            transformResponse: processGatesResponse,
-            transformError: processGatesError,
-        }),
-        [],
-    );
-
     return (
         <div className={styles.base}>
             <ErrorBoundary
@@ -109,11 +92,9 @@ function Base() {
                     />
                 )}
             >
-                <RequestContext.Provider value={requestContextValue}>
-                    <ApolloProvider client={apolloClient}>
-                        {page}
-                    </ApolloProvider>
-                </RequestContext.Provider>
+                <ApolloProvider client={apolloClient}>
+                    {page}
+                </ApolloProvider>
             </ErrorBoundary>
         </div>
     );
