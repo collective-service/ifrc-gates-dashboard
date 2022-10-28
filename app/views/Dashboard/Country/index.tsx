@@ -249,6 +249,9 @@ const SOURCES = gql`
                 subvariable: $subvariable,
                 isDistinctSources: true,
             }
+            order: {
+                sourceDate: DESC,
+            }
         ) {
             id
             title
@@ -587,9 +590,10 @@ function Country(props: Props) {
 
     const sourcesRendererParams = useCallback((_, data: SourcesList) => ({
         title: data?.title ?? '',
-        link: data?.link ?? '',
+        link: data?.link,
+        sourceDate: data?.sourceDate,
         sourceComment: data?.sourceComment ?? '',
-        organization: data?.organisation ?? '',
+        organization: data?.organisation,
     }), []);
 
     return (
