@@ -41,7 +41,9 @@ import {
     decimalToPercentage,
     formatNumber,
     getShortMonth,
+    negativeToZero,
     normalFormatter,
+    positiveToZero,
 } from '#utils/common';
 import {
     CountryQuery,
@@ -405,21 +407,14 @@ function Country(props: Props) {
 
     const uncertaintyChart: UncertainData[] | undefined = useMemo(() => (
         countryResponse?.dataCountryLevel.map((country) => {
-            const negativeRange = decimalToPercentage(
-                (isDefined(country?.indicatorValue) && isDefined(country?.errorMargin))
-                    ? country?.indicatorValue - country?.errorMargin
-                    : undefined,
-            );
-            const positiveRange = decimalToPercentage(
-                (isDefined(country?.indicatorValue) && isDefined(country?.errorMargin))
-                    ? country?.indicatorValue + country?.errorMargin
-                    : undefined,
-            );
+            const negativeRange = negativeToZero(country.indicatorValue, country.errorMargin);
+            const positiveRange = positiveToZero(country.indicatorValue, country.errorMargin);
 
             if (isNotDefined(country.errorMargin)) {
                 return {
                     emergency: country.emergency,
                     indicatorValue: decimalToPercentage(country.indicatorValue),
+                    tooltipValue: country.indicatorValue,
                     date: country.indicatorMonth,
                 };
             }
@@ -439,6 +434,7 @@ function Country(props: Props) {
             return {
                 emergency: country.emergency,
                 indicatorValue: decimalToPercentage(country.indicatorValue),
+                tooltipValue: country.indicatorValue,
                 date: country.indicatorMonth,
                 uncertainRange: [
                     negativeRange ?? 0,

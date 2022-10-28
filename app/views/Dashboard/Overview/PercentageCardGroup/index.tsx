@@ -33,6 +33,8 @@ import {
     getShortMonth,
     normalFormatter,
     FormatType,
+    negativeToZero,
+    positiveToZero,
 } from '#utils/common';
 import {
     OverviewStatsQuery,
@@ -243,23 +245,6 @@ interface TooltipProps {
 
 const dateTickFormatter = (d: string) => getShortMonth(d);
 
-const negativeToZero = (
-    (indicatorValue?: number | null, errorMarginValue?: number | null) => {
-        const valueInd = isNotDefined(indicatorValue) ? 0 : indicatorValue;
-        const valueErr = isNotDefined(errorMarginValue) ? 0 : errorMarginValue;
-        const difference = (valueInd - valueErr) < 0 ? 0 : valueInd - valueErr;
-
-        return decimalToPercentage(difference);
-    });
-const positiveToZero = (
-    (indicatorValue?: number | null, errorMarginValue?: number | null) => {
-        const valueInd = isNotDefined(indicatorValue) ? 0 : indicatorValue;
-        const valueErr = isNotDefined(errorMarginValue) ? 0 : errorMarginValue;
-        const sum = (valueInd + valueErr) > 1 ? 1 : valueInd + valueErr;
-
-        return decimalToPercentage(sum);
-    });
-
 function PercentageCardGroup(props: Props) {
     const {
         className,
@@ -353,7 +338,8 @@ function PercentageCardGroup(props: Props) {
             if (isNotDefined(global.errorMargin)) {
                 return {
                     emergency: global.emergency,
-                    indicatorValue: global.indicatorValueGlobal,
+                    indicatorValue: decimalToPercentage(global.indicatorValueGlobal),
+                    tooltipValue: global.indicatorValueGlobal,
                     date: global.indicatorMonth,
                     minimumValue: negativeRange,
                     maximumValue: positiveRange,
@@ -365,7 +351,8 @@ function PercentageCardGroup(props: Props) {
 
             return {
                 emergency: global.emergency,
-                indicatorValue: global.indicatorValueGlobal,
+                indicatorValue: decimalToPercentage(global.indicatorValueGlobal),
+                tooltipValue: global.indicatorValueGlobal,
                 date: global.indicatorMonth,
                 uncertainRange: [
                     negativeRange,
@@ -388,7 +375,8 @@ function PercentageCardGroup(props: Props) {
             if (isNotDefined(region.errorMargin)) {
                 return {
                     emergency: region.emergency,
-                    indicatorValue: region.indicatorValueRegional,
+                    indicatorValue: decimalToPercentage(region.indicatorValueRegional),
+                    tooltipValue: region.indicatorValueRegional,
                     date: region.indicatorMonth,
                     minimumValue: negativeRange,
                     maximumValue: positiveRange,
@@ -401,7 +389,8 @@ function PercentageCardGroup(props: Props) {
 
             return {
                 emergency: region.emergency,
-                indicatorValue: region.indicatorValueRegional,
+                indicatorValue: decimalToPercentage(region.indicatorValueRegional),
+                tooltipValue: region.indicatorValueRegional,
                 date: region.indicatorMonth,
                 uncertainRange: [
                     negativeRange,
