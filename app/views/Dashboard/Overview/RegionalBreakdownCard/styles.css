@@ -34,6 +34,26 @@
             overflow: hidden;
         }
     }
+
+    .tooltip-card {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid var(--dui-color-separator);
+        box-shadow: 0px 0px 4px var(--dui-card-box-shadow);
+        background-color: var(--color-foreground);
+        padding: var(--dui-spacing-small) var(--dui-spacing-medium);
+        font-size: var(--dui-font-size-medium);
+        gap: 0;
+
+        .tooltip-heading {
+            font-weight: var(--dui-font-weight-bold);
+        }
+
+        .tooltip-content {
+            color: var(--dui-color-description);
+            font-size: var(--dui-font-size-small);
+        }
+    }
 }
 
 .breakdown-label-wrapper {

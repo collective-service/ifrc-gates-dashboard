@@ -36,6 +36,7 @@ import {
     FormatType,
     negativeToZero,
     positiveToZero,
+    normalCommaFormatter,
 } from '#utils/common';
 import {
     OverviewStatsQuery,
@@ -65,6 +66,7 @@ interface LegendProps {
 }
 
 const normalizedTickFormatter = (d: number) => normalFormatter().format(d);
+const dateTickFormatter = (d: string) => getShortMonth(d);
 
 const OVERVIEW_STATS = gql`
     query OverviewStats(
@@ -243,8 +245,18 @@ interface TooltipProps {
     active?: boolean;
     payload?: Payload[];
 }
-
-const dateTickFormatter = (d: string) => getShortMonth(d);
+interface OutbreakTooltipProps {
+    active?: boolean;
+    payload?: {
+        name?: string;
+        value?: number;
+        payload?: {
+            contextDate: string;
+            id: string;
+            format: string;
+        };
+    }[];
+}
 
 function PercentageCardGroup(props: Props) {
     const {
@@ -412,7 +424,7 @@ function PercentageCardGroup(props: Props) {
             {
                 id: outbreak.id,
                 emergency: outbreak.emergency,
-                contextDate: getShortMonth(outbreak.contextDate),
+                contextDate: outbreak.contextDate,
                 [outbreak.emergency]: outbreak.contextIndicatorValue,
             }
         ))
@@ -514,12 +526,35 @@ function PercentageCardGroup(props: Props) {
                     </div>
                     <div className={styles.tooltipContent}>
                         {filterValues?.indicator
-                            ? (dateTickFormatter(regionalData[0].payload?.indicatorMonth ?? ''))
-                            : (dateTickFormatter(regionalData[0].payload?.contextDate ?? ''))}
+                            ? (`(${regionalData[0].payload?.indicatorMonth})`)
+                            : (`(${regionalData[0].payload?.contextDate})`)}
                     </div>
                     <div className={styles.tooltipContent}>
                         {formatNumber(format as FormatType,
                             regionalData[0].payload?.contextIndicatorValue ?? 0)}
+                    </div>
+                </div>
+            );
+        }
+        return null;
+    };
+    const customOutbreakTooltip = (outbreakTooltipProps: OutbreakTooltipProps) => {
+        const {
+            active,
+            payload: outbreakData,
+        } = outbreakTooltipProps;
+
+        if (active && outbreakData) {
+            return (
+                <div className={styles.tooltipCard}>
+                    <div className={styles.tooltipHeading}>
+                        {outbreakData[0].name}
+                    </div>
+                    <div className={styles.tooltipContent}>
+                        {`(${outbreakData[0].payload?.contextDate})`}
+                    </div>
+                    <div className={styles.tooltipContent}>
+                        {normalCommaFormatter().format(outbreakData[0].value ?? 0)}
                     </div>
                 </div>
             );
@@ -572,9 +607,9 @@ function PercentageCardGroup(props: Props) {
                                 <XAxis
                                     dataKey="contextDate"
                                     reversed
-                                    axisLine={false}
                                     tickLine={false}
                                     padding={{ left: 20 }}
+                                    tickFormatter={dateTickFormatter}
                                 />
                                 <YAxis
                                     axisLine={false}
@@ -583,12 +618,7 @@ function PercentageCardGroup(props: Props) {
                                     tickFormatter={normalizedTickFormatter}
                                 />
                                 <Tooltip
-                                    allowEscapeViewBox={{
-                                        x: true,
-                                        y: true,
-                                    }}
-                                // NOTE: Need to implement similar custom tooltip
-                                // content={customRegionalTooltip}
+                                    content={customOutbreakTooltip}
                                 />
                                 <Legend content={renderLegend} />
                                 <Line

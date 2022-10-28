@@ -40,6 +40,7 @@ import {
     formatNumber,
     getShortMonth,
     negativeToZero,
+    normalCommaFormatter,
     normalFormatter,
     positiveToZero,
 } from '#utils/common';
@@ -201,6 +202,7 @@ const COUNTRY_PROFILE = gql`
               contextDate
               id
               contextIndicatorId
+              format
             }
         }
         newDeaths: countryEmergencyProfile(
@@ -248,6 +250,20 @@ interface Props {
     className?: string;
     filterValues?: FilterType | undefined;
     selectedIndicatorName: string | undefined;
+}
+
+interface Payload {
+    name?: string;
+    value?: number;
+    payload?: {
+        date: string;
+        id: string;
+        format: string;
+    };
+}
+interface TooltipProps {
+    active?: boolean;
+    payload?: Payload[];
 }
 
 function Country(props: Props) {
@@ -381,6 +397,7 @@ function Country(props: Props) {
                     indicatorValue: decimalToPercentage(country.indicatorValue),
                     tooltipValue: country.indicatorValue,
                     date: country.indicatorMonth,
+                    indicatorName: country.indicatorName,
                 };
             }
 
@@ -394,6 +411,7 @@ function Country(props: Props) {
                     ],
                     minimumValue: negativeRange,
                     maximumValue: positiveRange,
+                    indicatorName: country.indicatorName,
                 };
             }
             return {
@@ -407,6 +425,7 @@ function Country(props: Props) {
                 ],
                 minimumValue: negativeRange,
                 maximumValue: positiveRange,
+                indicatorName: country.indicatorName,
             };
         }).sort((a, b) => compareDate(a.date, b.date))
     ), [countryResponse?.dataCountryLevel]);
@@ -453,6 +472,8 @@ function Country(props: Props) {
                         (acc, item) => ({
                             ...acc,
                             [emergency.emergency]: Number(item.contextIndicatorValue),
+                            format: item.format,
+                            id: item.id,
                             date: item.contextDate,
                         }), { date: key },
                     ),
@@ -529,6 +550,39 @@ function Country(props: Props) {
         }
         return outbreaks.map((o) => o.emergency).join(', ');
     }, [filterValues?.outbreak, outbreaks]);
+
+    const customOutbreakTooltip = (tooltipProps: TooltipProps) => {
+        const {
+            active,
+            payload,
+        } = tooltipProps;
+
+        const outbreakData = payload?.map((load) => ({
+            ...load,
+            id: `${load.payload?.id}-${load.value}`,
+        })).sort((a, b) => compareNumber(b.value, a.value));
+
+        if (active && outbreakData) {
+            return (
+                <div className={styles.tooltipCard}>
+                    {outbreakData.map((item) => (
+                        <div key={item.id}>
+                            <div className={styles.tooltipHeading}>
+                                {item.name}
+                            </div>
+                            <div className={styles.tooltipContent}>
+                                {`(${item.payload?.date})`}
+                            </div>
+                            <div className={styles.tooltipContent}>
+                                {normalCommaFormatter().format(item.value ?? 0)}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+        return null;
+    };
 
     return (
         <div className={_cs(className, styles.countryWrapper)}>
@@ -725,7 +779,9 @@ function Country(props: Props) {
                                         padding={{ top: 30 }}
                                         tickFormatter={normalizedTickFormatter}
                                     />
-                                    <Tooltip />
+                                    <Tooltip
+                                        content={customOutbreakTooltip}
+                                    />
                                     <Legend
                                         iconType="rect"
                                         align="right"
