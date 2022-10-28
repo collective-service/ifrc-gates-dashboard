@@ -8,7 +8,7 @@
     border-radius: var(--dui-border-radius-card);
     box-shadow: 0px 0px 10px var(--dui-card-box-shadow);
     padding: var(--dui-spacing-medium);
-    color: var(--color-text-secondary);
+    color: var(--dui-color-label);
 
     .readiness-title {
         font-size: var(--dui-font-size-heading-extra-small);
@@ -20,20 +20,23 @@
         font-weight: var(--dui-font-weight-bold);
     }
 
-}
+    &.no-data {
+        background-color: var(--dui-color-foreground);
+    }
 
-.green {
-    background-color: var(--color-indicator-high);
-}
+    &.green {
+        background-color: var(--color-indicator-high);
+    }
 
-.yellow {
-    background-color: var(--color-indicator-medium-high);
-}
+    &.yellow {
+        background-color: var(--color-indicator-medium-high);
+    }
 
-.orange {
-    background-color: var(--color-indicator-medium-low);
-}
+    &.orange {
+        background-color: var(--color-indicator-medium-low);
+    }
 
-.red {
-    background-color: var(--color-indicator-low);
+    &.red {
+        background-color: var(--color-indicator-low);
+    }
 }

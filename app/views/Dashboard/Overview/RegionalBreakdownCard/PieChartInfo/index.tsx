@@ -98,7 +98,7 @@ function PieChartInfo(props: PieChartInfoProps) {
                         </Pie>
                         <Tooltip
                             allowEscapeViewBox={{
-                                x: false,
+                                x: true,
                                 y: true,
                             }}
                             label={aggregatedValue}

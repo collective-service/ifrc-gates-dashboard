@@ -36,11 +36,7 @@
     }
 
     .outbreak-card {
-        font-size: var(--dui-font-size-large);
-        font-weight: normal;
-
-        .outbreak-card-title {
-            color: var(--color-text-secondary);
-        }
+        display: flex;
+        flex-direction: column;
     }
 }

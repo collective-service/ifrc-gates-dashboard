@@ -18,10 +18,6 @@ function ScoreCard(props: Props) {
         indicator,
     } = props;
 
-    if (!value) {
-        return null;
-    }
-
     return (
         <div className={_cs(
             className,
@@ -30,6 +26,7 @@ function ScoreCard(props: Props) {
             indicator === 'yellow' && styles.yellow,
             indicator === 'orange' && styles.orange,
             indicator === 'red' && styles.red,
+            !indicator && styles.noData,
         )}
         >
             <div className={styles.readinessTitle}>{title}</div>
@@ -37,7 +34,7 @@ function ScoreCard(props: Props) {
                 styles.readinessValue,
             )}
             >
-                {(value ? `${value}%` : 'N/A')}
+                {(value ? `${Math.round(value)}%` : 'N/A')}
             </div>
         </div>
     );

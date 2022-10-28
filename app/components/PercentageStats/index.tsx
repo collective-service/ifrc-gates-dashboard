@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
     ContainerCard,
     NumberOutput,
@@ -14,7 +14,7 @@ export interface Props {
     className?: string;
     icon?: React.ReactNode;
     heading?: React.ReactNode;
-    indicatorDescription?: string | null;
+    subHeading?: React.ReactNode;
     headerDescription?: React.ReactNode;
     headingSize?: headingSizeType;
     statValue: string | undefined;
@@ -28,24 +28,14 @@ function PercentageStats(props: Props) {
         className,
         icon,
         heading,
+        subHeading,
         headingSize = 'extraSmall',
         headerDescription,
-        indicatorDescription,
         statValue,
         subValue,
         newDeaths,
         newCasesPerMillion,
     } = props;
-
-    const formattedHeading = useMemo(() => (
-        <div className={styles.outbreakCard}>
-            Total number of
-            <span className={styles.outbreakCardTitle}>
-                {` ${heading} `}
-            </span>
-            cases
-        </div>
-    ), [heading]);
 
     return (
         <ContainerCard
@@ -53,19 +43,24 @@ function PercentageStats(props: Props) {
             headingClassName={styles.percentageHeading}
             heading={(
                 <>
-                    {indicatorDescription}
-                    {(!indicatorDescription && !heading) && 'Total Percentage'}
-                    {heading && (
+                    {(heading || subHeading) && (
                         <>
-                            {formattedHeading}
-                            <Tooltip>
-                                <div>
-                                    {`Deaths: ${newDeaths}`}
-                                </div>
-                                <div>
-                                    {`Cases Per Million: ${newCasesPerMillion}`}
-                                </div>
-                            </Tooltip>
+                            <div className={styles.outbreakCard}>
+                                <span>
+                                    {heading}
+                                </span>
+                                {subHeading}
+                            </div>
+                            {(newDeaths || newCasesPerMillion) && (
+                                <Tooltip>
+                                    <div>
+                                        {`Deaths: ${newDeaths ?? 0}`}
+                                    </div>
+                                    <div>
+                                        {`Cases Per Million: ${newCasesPerMillion ?? 0}`}
+                                    </div>
+                                </Tooltip>
+                            )}
                         </>
                     )}
                 </>
@@ -77,9 +72,7 @@ function PercentageStats(props: Props) {
             footerContentClassName={styles.valueAndSubValue}
             footerContent={(
                 <>
-                    <div
-                        className={styles.valueText}
-                    >
+                    <div className={styles.valueText}>
                         {statValue}
                     </div>
                     {subValue && (

@@ -35,7 +35,7 @@
         .progress-list {
             font-size: small;
 
-            .progressItemBorder {
+            .progress-item-border {
                 margin-top: var(--dui-spacing-medium);
             }
         }
