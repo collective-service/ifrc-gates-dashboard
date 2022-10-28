@@ -14,11 +14,11 @@ import styles from './styles.css';
 
 interface Props {
     className?: string;
-    link?: string;
+    link?: string | null;
     title?: string;
     sourceComment?: string;
-    organization?: string;
-    sourceDate?: string;
+    organization?: string | null;
+    sourceDate?: string | null;
 }
 
 function Sources(props: Props) {
@@ -50,14 +50,16 @@ function Sources(props: Props) {
                     spacing="compact"
                     hideLabelColon
                 />
-                <a
-                    href={link}
-                    className={styles.infoIcon}
-                    target="_blank"
-                    rel="noreferrer"
-                >
-                    <BiLinkExternal />
-                </a>
+                {link && (
+                    <a
+                        href={link}
+                        className={styles.infoIcon}
+                        target="_blank"
+                        rel="noreferrer"
+                    >
+                        <BiLinkExternal />
+                    </a>
+                )}
             </div>
         </div>
     );

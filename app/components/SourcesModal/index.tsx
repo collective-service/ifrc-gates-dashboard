@@ -24,10 +24,10 @@ function SourcesModal(props: Props) {
 
     const sourcesRendererParams = useCallback((_, data: SourcesList) => ({
         title: data?.title ?? '',
-        link: data?.link ?? '',
+        link: data?.link,
         sourceComment: data?.sourceComment ?? '',
-        organization: data?.organisation ?? '',
-        sourceDate: data?.sourceDate ?? '',
+        organization: data?.organisation,
+        sourceDate: data?.sourceDate,
     }), []);
     return (
         <Modal

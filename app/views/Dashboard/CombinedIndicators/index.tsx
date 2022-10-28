@@ -158,6 +158,9 @@ const COMBINED_SOURCES = gql`
                 emergency: $emergency,
                 isDistinctSources: true
             }
+            order: {
+                sourceDate: DESC,
+            }
         ) {
             id
             title
@@ -364,9 +367,10 @@ function CombinedIndicators(props: Props) {
 
     const sourcesRendererParams = useCallback((_, data: SourcesList) => ({
         title: data?.title ?? '',
-        link: data?.link ?? '',
+        link: data?.link,
+        sourceDate: data.sourceDate,
         sourceComment: data?.sourceComment ?? '',
-        organization: data?.organisation ?? '',
+        organization: data?.organisation,
     }), []);
 
     const thematicKeySelector = (

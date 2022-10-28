@@ -6,6 +6,7 @@ import {
     compareStringSearch,
     caseInsensitiveSubmatch,
     isFalsyString,
+    isNotDefined,
 } from '@togglecorp/fujs';
 
 import { CountriesAndOutbreaksQuery } from '#generated/types';
@@ -146,7 +147,27 @@ export function formatNumber(
         if (isDefined(totalValue) && totalValue > 0) {
             return `${Math.round((value / totalValue) * 1000) / 10}%`;
         }
-        return `${decimalToPercentage(value)}%`;
+        return `${value ? decimalToPercentage(value) : 0}%`;
     }
     return `${normalCommaFormatter().format(Math.round(value * 10) / 10)}`;
 }
+
+export const negativeToZero = (
+    (indicatorValue?: number | null, errorMarginValue?: number | null) => {
+        const valueInd = isNotDefined(indicatorValue) ? 0 : indicatorValue;
+        const valueErr = isNotDefined(errorMarginValue) ? 0 : errorMarginValue;
+        const difference = (valueInd - valueErr) < 0 ? 0 : valueInd - valueErr;
+
+        return decimalToPercentage(difference);
+    }
+);
+
+export const positiveToZero = (
+    (indicatorValue?: number | null, errorMarginValue?: number | null) => {
+        const valueInd = isNotDefined(indicatorValue) ? 0 : indicatorValue;
+        const valueErr = isNotDefined(errorMarginValue) ? 0 : errorMarginValue;
+        const sum = (valueInd + valueErr) > 1 ? 1 : valueInd + valueErr;
+
+        return decimalToPercentage(sum);
+    }
+);

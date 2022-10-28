@@ -20,6 +20,7 @@ import styles from './styles.css';
 export interface UncertainData {
     emergency?: string;
     indicatorValue?: number | null;
+    tooltipValue?: number | null
     date: string;
     uncertainRange?: (number | undefined)[];
     minimumValue?: number;
@@ -81,7 +82,7 @@ function UncertaintyChart(props: Props) {
                     </div>
                     <div className={styles.tooltipContent}>
                         {formatNumber(format as FormatType,
-                            data[0].payload?.indicatorValue ?? 0)}
+                            data[0].payload?.tooltipValue ?? 0)}
                         {isDefined(data[0].payload?.minimumValue
                             && isDefined(data[0].payload.maximumValue))
                             ? ` [${data[0].payload?.minimumValue} - ${data[0].payload?.maximumValue}] `

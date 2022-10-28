@@ -41,7 +41,9 @@ import {
     decimalToPercentage,
     formatNumber,
     getShortMonth,
+    negativeToZero,
     normalFormatter,
+    positiveToZero,
 } from '#utils/common';
 import {
     CountryQuery,
@@ -247,6 +249,9 @@ const SOURCES = gql`
                 subvariable: $subvariable,
                 isDistinctSources: true,
             }
+            order: {
+                sourceDate: DESC,
+            }
         ) {
             id
             title
@@ -405,21 +410,14 @@ function Country(props: Props) {
 
     const uncertaintyChart: UncertainData[] | undefined = useMemo(() => (
         countryResponse?.dataCountryLevel.map((country) => {
-            const negativeRange = decimalToPercentage(
-                (isDefined(country?.indicatorValue) && isDefined(country?.errorMargin))
-                    ? country?.indicatorValue - country?.errorMargin
-                    : undefined,
-            );
-            const positiveRange = decimalToPercentage(
-                (isDefined(country?.indicatorValue) && isDefined(country?.errorMargin))
-                    ? country?.indicatorValue + country?.errorMargin
-                    : undefined,
-            );
+            const negativeRange = negativeToZero(country.indicatorValue, country.errorMargin);
+            const positiveRange = positiveToZero(country.indicatorValue, country.errorMargin);
 
             if (isNotDefined(country.errorMargin)) {
                 return {
                     emergency: country.emergency,
                     indicatorValue: decimalToPercentage(country.indicatorValue),
+                    tooltipValue: country.indicatorValue,
                     date: country.indicatorMonth,
                 };
             }
@@ -439,6 +437,7 @@ function Country(props: Props) {
             return {
                 emergency: country.emergency,
                 indicatorValue: decimalToPercentage(country.indicatorValue),
+                tooltipValue: country.indicatorValue,
                 date: country.indicatorMonth,
                 uncertainRange: [
                     negativeRange ?? 0,
@@ -591,9 +590,10 @@ function Country(props: Props) {
 
     const sourcesRendererParams = useCallback((_, data: SourcesList) => ({
         title: data?.title ?? '',
-        link: data?.link ?? '',
+        link: data?.link,
+        sourceDate: data?.sourceDate,
         sourceComment: data?.sourceComment ?? '',
-        organization: data?.organisation ?? '',
+        organization: data?.organisation,
     }), []);
 
     return (
@@ -672,7 +672,7 @@ function Country(props: Props) {
                     )}
                     {filterValues?.indicator && (
                         <div className={styles.indicatorWrapper}>
-                            {(statusUncertainty?.indicatorValue) && (
+                            {((statusUncertainty?.indicatorValue ?? 0) > 0) && (
                                 <PercentageStats
                                     className={styles.percentageCard}
                                     indicatorDescription={statusUncertainty?.indicatorDescription}
@@ -680,12 +680,12 @@ function Country(props: Props) {
                                     // TODO: fetch format from server
                                     statValue={formatNumber(
                                         'percent',
-                                        statusUncertainty?.indicatorValue,
+                                        statusUncertainty?.indicatorValue ?? 0,
                                     )}
                                     icon={null}
                                 />
                             )}
-                            {(uncertaintyChart?.length ?? 0) > 0 && (
+                            {((uncertaintyChart?.length ?? 0) > 0) && (
                                 <UncertaintyChart
                                     className={styles.indicatorsChart}
                                     uncertainData={(uncertaintyChart && uncertaintyChart) ?? []}

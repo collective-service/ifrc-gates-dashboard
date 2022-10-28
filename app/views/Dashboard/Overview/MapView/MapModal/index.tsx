@@ -6,15 +6,14 @@ import {
     unique,
     compareDate,
     isNotDefined,
-    isDefined,
 } from '@togglecorp/fujs';
 import {
     Modal,
     Heading,
     Button,
+    ListView,
 } from '@the-deep/deep-ui';
 import { useQuery, gql } from '@apollo/client';
-import { BiLinkExternal } from 'react-icons/bi';
 import {
     LineChart,
     Line,
@@ -25,16 +24,16 @@ import {
     Tooltip,
 } from 'recharts';
 import {
-    IoInformationCircle,
-} from 'react-icons/io5';
-import {
     decimalToPercentage,
     getShortMonth,
+    negativeToZero,
     normalFormatter,
+    positiveToZero,
 } from '#utils/common';
 import { FilterType } from '#views/Dashboard/Filters';
 import { TabTypes } from '#views/Dashboard';
 import UncertaintyChart, { UncertainData } from '#components/UncertaintyChart';
+import Sources from '#components/Sources';
 import {
     CountryModalQuery,
     CountryModalQueryVariables,
@@ -44,8 +43,11 @@ import {
 
 import styles from './styles.css';
 
+type SourcesList = NonNullable<CountryModalQuery['dataGranular']>[number];
+
 const dateTickFormatter = (d: string) => getShortMonth(d);
 const normalizedTickFormatter = (d: number) => normalFormatter().format(d);
+const sourcesKeySelector = (d: SourcesList) => d.id;
 
 const SUBVARIABLES = gql`
     query Subvariables(
@@ -127,6 +129,25 @@ const COUNTRY_PROFILE = gql`
             interpolated
             emergency
         }
+        dataGranular(
+            filters: {
+                iso3: $iso3,
+                emergency: $emergency,
+                indicatorId: $indicatorId,
+                subvariable: $subvariable,
+                isDistinctSources: true,
+            }
+            order: {
+                sourceDate: DESC,
+            }
+        ) {
+            id
+            title
+            link
+            sourceComment
+            organisation
+            sourceDate
+        }
     }
 `;
 
@@ -203,6 +224,20 @@ function MapModal(props: ModalProps) {
         setFilterValues,
     ]);
 
+    const sourcesList = useMemo(() => (
+        countryResponse?.dataGranular.slice(0, 3)
+    ), [
+        countryResponse?.dataGranular,
+    ]);
+
+    const sourcesRendererParams = useCallback((_, data: SourcesList) => ({
+        title: data?.title ?? '',
+        link: data?.link,
+        sourceDate: data?.sourceDate,
+        sourceComment: data?.sourceComment ?? '',
+        organization: data?.organisation,
+    }), []);
+
     const emergencyLineChart = useMemo(() => {
         const emergencyMapList = countryResponse?.contextualDataWithMultipleEmergency.map(
             (emergency) => {
@@ -254,21 +289,14 @@ function MapModal(props: ModalProps) {
 
     const uncertaintyChart: UncertainData[] | undefined = useMemo(() => (
         countryResponse?.dataCountryLevel.map((country) => {
-            const negativeRange = decimalToPercentage(
-                (isDefined(country?.indicatorValue) && isDefined(country?.errorMargin))
-                    ? country?.indicatorValue - country?.errorMargin
-                    : undefined,
-            );
-            const positiveRange = decimalToPercentage(
-                (isDefined(country?.indicatorValue) && isDefined(country?.errorMargin))
-                    ? country?.indicatorValue + country?.errorMargin
-                    : undefined,
-            );
+            const negativeRange = negativeToZero(country.indicatorValue, country.errorMargin);
+            const positiveRange = positiveToZero(country.indicatorValue, country.errorMargin);
 
             if (isNotDefined(country.errorMargin)) {
                 return {
                     emergency: country.emergency,
                     indicatorValue: decimalToPercentage(country.indicatorValue),
+                    tooltipValue: country.indicatorValue,
                     date: country.indicatorMonth,
                 };
             }
@@ -288,6 +316,7 @@ function MapModal(props: ModalProps) {
             return {
                 emergency: country.emergency,
                 indicatorValue: decimalToPercentage(country.indicatorValue),
+                tooltipValue: country.indicatorValue,
                 date: country.indicatorMonth,
                 uncertainRange: [
                     negativeRange ?? 0,
@@ -351,24 +380,16 @@ function MapModal(props: ModalProps) {
                 </div>
             )}
             footer={(
-                <div className={styles.perceptionCard}>
-                    <div className={styles.infoIcon}>
-                        <IoInformationCircle />
-                    </div>
-                    &nbsp;
-                    <div>
-                        {`COVID-19 Vaccine Perceptions in ${countryResponse?.countryProfile.countryName}
-                    (${countryResponse?.countryProfile.countryName} CDC)`}
-                    </div>
-                    &nbsp;
-                    &nbsp;
-                    <a
-                        href="https://www.rcce-collective.net/data/data-tracker/"
-                        className={styles.infoIcon}
-                    >
-                        <BiLinkExternal />
-                    </a>
-                </div>
+                <ListView
+                    className={styles.sources}
+                    renderer={Sources}
+                    rendererParams={sourcesRendererParams}
+                    keySelector={sourcesKeySelector}
+                    data={sourcesList}
+                    errored={false}
+                    filtered={false}
+                    pending={false}
+                />
             )}
         >
             {!filterValues?.indicator && (
