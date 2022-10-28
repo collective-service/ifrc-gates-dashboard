@@ -12,9 +12,11 @@
 
         .map-header-container {
             padding: var(--dui-spacing-large);
+            overflow-y: auto;
         }
 
         .map-action-tabs {
+            flex-shrink: 0;
             padding: var(--dui-spacing-large);
         }
     }

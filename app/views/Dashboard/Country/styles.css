@@ -1,6 +1,7 @@
 .country-wrapper {
     display: flex;
     flex-direction: column;
+    gap: var(--dui-spacing-large);
 
     .country-main {
         display: flex;
@@ -33,6 +34,7 @@
                     .readiness-list-card {
                         display: flex;
                         flex-grow: 1;
+                        flex-wrap: wrap;
                         box-shadow: 0px 0px 10px var(--dui-card-box-shadow);
                         background-color: var(--color-background-alt);
                         padding: var(--dui-spacing-medium);
@@ -178,23 +180,10 @@
         }
     }
 
-    .source-heading {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-top: var(--dui-spacing-medium);
-        padding: var(--dui-spacing-medium) 0px;
-        width: 40vw;
-        font-size: var(--dui-font-size-heading-small);
-        font-weight: var(--dui-font-weight-bold);
-        gap: var(--dui-spacing-small);
-
-    }
-
     .sources {
         display: flex;
         flex-direction: column;
-        width: 40vw;
         gap: var(--dui-spacing-small);
+        max-width: 50rem;
     }
 }

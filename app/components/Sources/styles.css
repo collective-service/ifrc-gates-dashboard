@@ -1,21 +1,17 @@
 .sources-wrapper {
-    width: 98%;
+    display: flex;
+    align-items: center;
+    padding: var(--dui-spacing-small);
+    gap: var(--dui-spacing-small);
 
-    .perception-card {
-        display: flex;
-        align-items: center;
-        gap: var(--dui-spacing-small);
+    .label {
+        flex-grow: 1;
+        padding-left: var(--dui-spacing-small);
+    }
 
-        .label {
-            flex-grow: 1;
-            padding-left: var(--dui-spacing-small);
-        }
-
-        .info-icon {
-            flex-shrink: 0;
-            color: var(--color-text-title);
-            font-size: var(--dui-font-size-extra-large);
-        }
-
+    .info-icon {
+        flex-shrink: 0;
+        color: var(--color-text-title);
+        font-size: var(--dui-font-size-extra-large);
     }
 }

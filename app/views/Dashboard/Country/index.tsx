@@ -22,6 +22,7 @@ import {
     Bar,
 } from 'recharts';
 import {
+    Container,
     ContainerCard,
     TextOutput,
     ListView,
@@ -983,9 +984,11 @@ function Country(props: Props) {
                 </ContainerCard>
             </div>
             {sourcesList && (sourcesList.length > 0) && (
-                <>
-                    <div className={styles.sourceHeading}>
-                        Sources
+                <Container
+                    heading="Sources"
+                    headingSize="extraSmall"
+                    className={styles.sources}
+                    headerActions={(
                         <Button
                             name={undefined}
                             onClick={showSourceModal}
@@ -995,9 +998,9 @@ function Country(props: Props) {
                         >
                             See more
                         </Button>
-                    </div>
+                    )}
+                >
                     <ListView
-                        className={styles.sources}
                         renderer={Sources}
                         rendererParams={sourcesRendererParams}
                         keySelector={sourcesKeySelector}
@@ -1006,7 +1009,7 @@ function Country(props: Props) {
                         filtered={false}
                         pending={false}
                     />
-                </>
+                </Container>
             )}
             {sourceModalShown && (
                 <SourcesModal

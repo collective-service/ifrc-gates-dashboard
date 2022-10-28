@@ -1,57 +1,62 @@
 .dashboard-navigation {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
     background-color: var(--color-background);
-    padding: 0 var(--dui-spacing-ultra-large);
-    gap: var(--dui-spacing-medium);
 
-    .header-text {
-        background-color: transparent;
-        width: 60%;
+    .header-wrapper {
+        background-color: var(--color-foreground);
     }
 
-    .dashboard-buttons {
-        display: flex;
-        align-items: center;
-        flex-shrink: 0;
-        justify-content: space-between;
-        padding: var(--dui-spacing-medium) var(--dui-spacing-extra-small);
-        gap: var(--dui-spacing-medium);
-    }
+    .header-container {
+        margin: auto;
+        padding: var(--dui-spacing-extra-large);
+        max-width: 100rem;
 
-    .button {
-        border-radius: var(--dui-border-radius-tag);
-        border-color: var(--dui-tab-background-color);
-        color: var(--dui-tab-background-color);
-        font-size: var(--dui-font-size-large);
-        font-weight: normal;
-    }
-
-    .dashboard-tab-list {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: flex-end;
-        border: var(--width-separator-thin) solid var(--dui-tab-background-color);
-        border-radius: var(--dui-border-radius-progress-bar);
-
-        .default-tab-mode {
-            padding: var(--dui-spacing-small) var(--dui-spacing-large);
-            color: var(--dui-tab-background-color);
-            font-weight: normal;
-
-            &:nth-child(1),
-            &:nth-child(2) {
-                border-right: var(--width-separator-thin) solid var(--dui-tab-background-color);
-            }
+        .header-text {
+            background-color: transparent;
+            max-width: 60rem;
         }
 
-        .active-tab {
-            background-color: var(--dui-tab-background-color);
-            color: var(--color-foreground);
+        .dashboard-buttons {
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+            justify-content: space-between;
+            padding: var(--dui-spacing-medium) var(--dui-spacing-extra-small);
+            gap: var(--dui-spacing-medium);
+        }
 
-            &:hover {
+        .button {
+            border-radius: var(--dui-border-radius-tag);
+            border-color: var(--dui-tab-background-color);
+            color: var(--dui-tab-background-color);
+            font-size: var(--dui-font-size-large);
+            font-weight: normal;
+        }
+
+        .dashboard-tab-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            border: var(--width-separator-thin) solid var(--dui-tab-background-color);
+            border-radius: var(--dui-border-radius-progress-bar);
+
+            .default-tab-mode {
+                padding: var(--dui-spacing-small) var(--dui-spacing-large);
+                color: var(--dui-tab-background-color);
+                font-weight: normal;
+
+                &:nth-child(1),
+                &:nth-child(2) {
+                    border-right: var(--width-separator-thin) solid var(--dui-tab-background-color);
+                }
+            }
+
+            .active-tab {
                 background-color: var(--dui-tab-background-color);
+                color: var(--color-foreground);
+
+                &:hover {
+                    background-color: var(--dui-tab-background-color);
+                }
             }
         }
     }
@@ -59,6 +64,9 @@
     .content {
         position: relative;
         flex-grow: 1;
+        margin: var(--dui-spacing-extra-large) auto;
+        padding: 0 var(--dui-spacing-extra-large);
+        max-width: 100rem;
     }
 
 }
