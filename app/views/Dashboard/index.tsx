@@ -295,97 +295,102 @@ function Dashboard() {
 
     return (
         <div className={styles.dashboardNavigation}>
-            <ContainerCard
-                className={styles.headerText}
-                heading="Behavioural dashboard"
-                headingSize="large"
-            >
-                This dashboard measures and tracks key social
-                behavioural data on COVID-19 from multiple research
-                projects conducted in the field or at the global level
-                by partners and academic communities. Its aim is to help the RCCE community,
-                Collective Service partners and the coordination
-                team to analyse the situation at global, regional and country level.
-            </ContainerCard>
             <Tabs
                 value={activeTab}
                 onChange={handleActiveTabChange}
                 variant="secondary"
             >
-                <div className={styles.dashboardButtons}>
-                    <DropdownMenu
-                        className={styles.button}
-                        label="Export"
-                        variant="tertiary"
-                        icons={<IoDownloadOutline />}
-                        hideDropdownIcon
-                    >
-                        <DropdownMenuItem
-                            name={undefined}
-                            onClick={handleRawDataExportClick}
+                <div className={styles.headerWrapper}>
+                    <div className={styles.headerContainer}>
+                        <ContainerCard
+                            className={styles.headerText}
+                            heading="Behavioural dashboard"
+                            headingSize="large"
                         >
-                            Export as CSV
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                            name={undefined}
-                            onClick={handleSummarizedDataExportClick}
-                        >
-                            Export Summarized Data
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                            name={undefined}
-                            onClick={handleContextualCountryDataExportClick}
-                        >
-                            Export Contextual Country Data
-                        </DropdownMenuItem>
-                    </DropdownMenu>
-                    <TabList className={styles.dashboardTabList}>
-                        <Tab
-                            name="overview"
-                            className={styles.defaultTabMode}
-                            activeClassName={styles.activeTab}
-                        >
-                            Overview
-                        </Tab>
-                        <Tab
-                            name="country"
-                            className={styles.defaultTabMode}
-                            activeClassName={styles.activeTab}
-                        >
-                            Country
-                        </Tab>
-                        <Tab
-                            name="combinedIndicators"
-                            className={styles.defaultTabMode}
-                            activeClassName={styles.activeTab}
-                        >
-                            Combined Indicators
-                        </Tab>
-                    </TabList>
+                            This dashboard measures and tracks key social
+                            behavioural data on COVID-19 from multiple research
+                            projects conducted in the field or at the global level
+                            by partners and academic communities. Its
+                            aim is to help the RCCE community,
+                            Collective Service partners and the coordination
+                            team to analyse the situation at global, regional and country level.
+                        </ContainerCard>
+                        <div className={styles.dashboardButtons}>
+                            <DropdownMenu
+                                className={styles.button}
+                                label="Export"
+                                variant="tertiary"
+                                icons={<IoDownloadOutline />}
+                                hideDropdownIcon
+                            >
+                                <DropdownMenuItem
+                                    name={undefined}
+                                    onClick={handleRawDataExportClick}
+                                >
+                                    Export as CSV
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    name={undefined}
+                                    onClick={handleSummarizedDataExportClick}
+                                >
+                                    Export Summarized Data
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    name={undefined}
+                                    onClick={handleContextualCountryDataExportClick}
+                                >
+                                    Export Contextual Country Data
+                                </DropdownMenuItem>
+                            </DropdownMenu>
+                            <TabList className={styles.dashboardTabList}>
+                                <Tab
+                                    name="overview"
+                                    className={styles.defaultTabMode}
+                                    activeClassName={styles.activeTab}
+                                >
+                                    Overview
+                                </Tab>
+                                <Tab
+                                    name="country"
+                                    className={styles.defaultTabMode}
+                                    activeClassName={styles.activeTab}
+                                >
+                                    Country
+                                </Tab>
+                                <Tab
+                                    name="combinedIndicators"
+                                    className={styles.defaultTabMode}
+                                    activeClassName={styles.activeTab}
+                                >
+                                    Combined Indicators
+                                </Tab>
+                            </TabList>
+                        </div>
+                        {/* TODO: 1 object will be fetched */}
+                        {activeTab !== 'overview' && (
+                            <Narratives
+                                narrative={narrativeStatement}
+                            />
+                        )}
+                        <Filters
+                            activeTab={activeTab}
+                            value={filterValues}
+                            onChange={setFilterValues}
+                            advancedFilterValues={advancedFilterValues}
+                            setAdvancedFilterValues={setAdvancedFilterValues}
+                            countries={countriesAndOutbreaks?.countries}
+                            emergencies={countriesAndOutbreaks?.outBreaks}
+                            subvariableList={subvariableList}
+                            globalIndicatorList={globalIndicatorList}
+                            indicatorList={indicatorList}
+                            emergenciesLoading={countriesAndOutbreaksLoading}
+                            countriesLoading={countriesAndOutbreaksLoading}
+                            subvariablesLoading={subvariablesLoading}
+                            globalIndicatorsLoading={globalIndicatorsLoading}
+                            indicatorsLoading={indicatorsLoading}
+                        />
+                    </div>
                 </div>
-                {/* TODO: 1 object will be fetched */}
-                {activeTab !== 'overview' && (
-                    <Narratives
-                        narrative={narrativeStatement}
-                    />
-                )}
-                <Filters
-                    activeTab={activeTab}
-                    value={filterValues}
-                    onChange={setFilterValues}
-                    advancedFilterValues={advancedFilterValues}
-                    setAdvancedFilterValues={setAdvancedFilterValues}
-                    countries={countriesAndOutbreaks?.countries}
-                    emergencies={countriesAndOutbreaks?.outBreaks}
-                    subvariableList={subvariableList}
-                    globalIndicatorList={globalIndicatorList}
-                    indicatorList={indicatorList}
-                    emergenciesLoading={countriesAndOutbreaksLoading}
-                    countriesLoading={countriesAndOutbreaksLoading}
-                    subvariablesLoading={subvariablesLoading}
-                    globalIndicatorsLoading={globalIndicatorsLoading}
-                    indicatorsLoading={indicatorsLoading}
-                />
                 <div className={styles.content}>
                     <TabPanel name="overview">
                         <Overview

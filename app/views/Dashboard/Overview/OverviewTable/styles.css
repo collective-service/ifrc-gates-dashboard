@@ -1,6 +1,6 @@
 .table-wrapper {
     display: flex;
-    max-height: 50vh;
+    height: 42rem;
 
     .each-table-cell {
         border-right: 1px solid var(--dui-color-line-separator);

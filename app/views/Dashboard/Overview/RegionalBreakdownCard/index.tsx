@@ -296,7 +296,7 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
                     rendererParams={regionalLabelRendererParams}
                     filtered={false}
                     errored={false}
-                    pending={loading}
+                    pending={false}
                     compactPendingMessage
                 />
             </ContainerCard>

@@ -126,9 +126,7 @@ function Overview(props: Props) {
                             </TabList>
                         )}
                     >
-                        <TabPanel
-                            name="mapMode"
-                        >
+                        <TabPanel name="mapMode">
                             <MapView
                                 filterValues={filterValues}
                                 setActiveTab={setActiveTab}
@@ -136,9 +134,7 @@ function Overview(props: Props) {
                                 selectedIndicatorName={selectedIndicatorName ?? undefined}
                             />
                         </TabPanel>
-                        <TabPanel
-                            name="tableMode"
-                        >
+                        <TabPanel name="tableMode">
                             <OverviewTable
                                 filterValues={filterValues}
                             />

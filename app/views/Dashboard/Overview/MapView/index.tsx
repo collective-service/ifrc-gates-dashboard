@@ -413,9 +413,9 @@ function MapView(props: MapViewProps) {
     const progressBarRendererParams = useCallback(
         (_: string, data: AscendingCountryProfileType | DescendingCountryProfileType) => ({
             barHeight,
-            barName: data.countryName,
-            title: data.countryName ?? undefined,
-            valueTitle: data.countryName ?? undefined,
+            barName: data.countryName ?? 'N/A',
+            title: data.countryName ?? 'N/A',
+            valueTitle: data.countryName ?? 'N/A',
             value: data?.contextIndicatorValue,
             totalValue: highestValueWithoutIndicator,
             color: '#98A6B5',
@@ -429,9 +429,9 @@ function MapView(props: MapViewProps) {
             data: AscendingMostRecentIndicatorType | DescendingMostRecentIndicatorType,
         ) => ({
             barHeight,
-            barName: data.countryName ?? undefined,
-            title: data.countryName ?? undefined,
-            valueTitle: data.countryName ?? undefined,
+            barName: data.countryName ?? 'N/A',
+            title: data.countryName ?? 'N/A',
+            valueTitle: data.countryName ?? 'N/A',
             value: data.indicatorValue,
             totalValue: highestValueWithIndicator,
             color: '#98A6B5',

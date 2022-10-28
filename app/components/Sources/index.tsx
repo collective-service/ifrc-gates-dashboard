@@ -36,31 +36,29 @@ function Sources(props: Props) {
             className={_cs(className, styles.sourcesWrapper)}
             title={sourceComment}
         >
-            <div className={styles.perceptionCard}>
-                <div className={styles.infoIcon}>
-                    <IoInformationCircle />
-                </div>
-                <TextOutput
-                    className={styles.label}
-                    label={`
-                        ${title}
-                        ${isDefined(organization) ? `- ${organization}` : ''}
-                        ${isDefined(sourceDate) ? `- ${sourceDate}` : ''}
-                    `}
-                    spacing="compact"
-                    hideLabelColon
-                />
-                {link && (
-                    <a
-                        href={link}
-                        className={styles.infoIcon}
-                        target="_blank"
-                        rel="noreferrer"
-                    >
-                        <BiLinkExternal />
-                    </a>
-                )}
+            <div className={styles.infoIcon}>
+                <IoInformationCircle />
             </div>
+            <TextOutput
+                className={styles.label}
+                label={`
+                    ${title}
+                    ${isDefined(organization) ? `- ${organization}` : ''}
+                    ${isDefined(sourceDate) ? `- ${sourceDate}` : ''}
+                `}
+                spacing="compact"
+                hideLabelColon
+            />
+            {link && (
+                <a
+                    href={link}
+                    className={styles.infoIcon}
+                    target="_blank"
+                    rel="noreferrer"
+                >
+                    <BiLinkExternal />
+                </a>
+            )}
         </div>
     );
 }
