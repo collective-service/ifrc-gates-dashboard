@@ -1,5 +1,4 @@
 import React, { useCallback, useMemo } from 'react';
-import Select, { MultiValue } from 'react-select';
 
 import {
     RadioInput,
@@ -18,7 +17,6 @@ export interface AdvancedOptionType {
     type?: string;
     thematic?: string;
     topic?: string;
-    keywords?: string[];
 }
 
 interface Thematic {
@@ -32,7 +30,6 @@ query AdvancedFilterOptions($thematic: String!, $type: String!) {
             types
             thematics(type: $type)
             topics(thematic: $thematic)
-            keywords
         }
     }
 `;
@@ -61,11 +58,6 @@ interface Topic {
 const topicKeySelector = (d: Topic) => d.key;
 const topicLabelSelector = (d: Topic) => d.label;
 
-interface LabelValue {
-    label: string;
-    value: string;
-}
-
 interface Props {
     value: AdvancedOptionType | undefined;
     onChange: React.Dispatch<React.SetStateAction<AdvancedOptionType | undefined>>;
@@ -83,7 +75,8 @@ function AdvancedFilters(props: Props) {
     }), [value?.type, value?.thematic]);
 
     const {
-        data: advancedFilterOptions,
+        previousData: prevData,
+        data: advancedFilterOptions = prevData,
         loading: advancedFiltersLoading,
     } = useQuery<AdvancedFilterOptionsQuery, AdvancedFilterOptionsQueryVariables>(
         ADVANCED_FILTER_OPTIONS,
@@ -113,22 +106,14 @@ function AdvancedFilters(props: Props) {
         }))
     ), [advancedFilterOptions?.filterOptions?.topics]);
 
-    const keywords = useMemo(() => (
-        advancedFilterOptions?.filterOptions?.keywords?.map((keyword) => ({
-            value: keyword,
-            label: keyword,
-        }))
-    ), [advancedFilterOptions?.filterOptions?.keywords]);
-
     const handleInputChange = useCallback(
         (newValue: string | string[] | undefined, name: keyof AdvancedOptionType) => {
             if (onChange) {
                 if (name === 'type') {
-                    onChange((oldValue) => ({
+                    onChange(() => ({
                         type: newValue as string,
                         thematic: undefined,
                         topic: undefined,
-                        keywords: oldValue?.keywords,
                     }));
                 } else if (name === 'thematic') {
                     onChange((oldValue) => ({
@@ -136,19 +121,12 @@ function AdvancedFilters(props: Props) {
                         type: oldValue?.type,
                         thematic: newValue as string,
                         topic: undefined,
-                        keywords: oldValue?.keywords,
                     }));
                 } else if (name === 'topic') {
                     onChange((oldValue) => ({
                         type: oldValue?.type,
                         thematic: oldValue?.thematic,
                         topic: newValue as string,
-                        keywords: oldValue?.keywords,
-                    }));
-                } else if (name === 'keywords') {
-                    onChange((oldValue) => ({
-                        ...oldValue,
-                        keywords: newValue as string[],
                     }));
                 } else {
                     onChange((oldValue) => ({
@@ -160,21 +138,6 @@ function AdvancedFilters(props: Props) {
         },
         [onChange],
     );
-
-    const handleSelectChange = useCallback(
-        (newValue: MultiValue<LabelValue>) => {
-            const newValueList = newValue?.map((v) => v.value);
-            handleInputChange(newValueList, 'keywords');
-        },
-        [handleInputChange],
-    );
-
-    const keywordValue = useMemo(() => (
-        value?.keywords?.map((keyword) => ({
-            value: keyword,
-            label: keyword,
-        }))
-    ), [value?.keywords]);
 
     return (
         <div className={styles.advancedFilters}>
@@ -212,15 +175,6 @@ function AdvancedFilters(props: Props) {
                 onChange={handleInputChange}
                 variant="general"
                 disabled={advancedFiltersLoading}
-            />
-            <Select
-                className={styles.keywords}
-                classNamePrefix="react-select"
-                isMulti
-                onChange={handleSelectChange}
-                options={keywords}
-                value={keywordValue}
-                placeholder="Keywords"
             />
         </div>
     );

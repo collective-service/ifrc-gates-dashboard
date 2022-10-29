@@ -22,24 +22,19 @@ import {
     Bar,
 } from 'recharts';
 import {
-    Container,
     ContainerCard,
     TextOutput,
     ListView,
     NumberOutput,
-    Button,
-    useModalState,
     PendingMessage,
 } from '@the-deep/deep-ui';
 import { useQuery, gql } from '@apollo/client';
-import { IoChevronDownOutline } from 'react-icons/io5';
 
 import UncertaintyChart, { UncertainData } from '#components/UncertaintyChart';
 import PercentageStats from '#components/PercentageStats';
 import ScoreCard from '#components/ScoreCard';
-import Sources from '#components/Sources';
 import ChartContainer from '#components/ChartContainer';
-import SourcesModal from '#components/SourcesModal';
+
 import {
     decimalToPercentage,
     formatNumber,
@@ -51,9 +46,8 @@ import {
 import {
     CountryQuery,
     CountryQueryVariables,
-    SourcesQuery,
-    SourcesQueryVariables,
 } from '#generated/types';
+import Sources from '#components/Sources';
 
 import { FilterType } from '../Filters';
 
@@ -77,13 +71,10 @@ interface CountryWiseOutbreakCases extends EmergencyItems {
     key: string;
 }
 
-type SourcesList = NonNullable<SourcesQuery['dataGranular']>[number];
-
 const dateTickFormatter = (d: string) => getShortMonth(d);
 const normalizedTickFormatter = (d: number) => normalFormatter().format(d);
 const percentageKeySelector = (d: CountryWiseOutbreakCases) => d.key;
 const readinessKeySelector = (d: ScoreCardProps) => d.title;
-const sourcesKeySelector = (d: SourcesList) => d.id;
 const customLabel = (val: number | string | undefined) => (
     `${val}%`
 );
@@ -253,34 +244,6 @@ const COUNTRY_PROFILE = gql`
     }
 `;
 
-const SOURCES = gql`
-    query Sources(
-        $iso3: String,
-        $emergency: String,
-        $subvariable: String,
-        $indicatorId: String,
-    ) {
-        dataGranular(
-            filters: {
-                iso3: $iso3,
-                emergency: $emergency,
-                indicatorId: $indicatorId,
-                subvariable: $subvariable,
-                isDistinctSources: true,
-            }
-            order: {
-                sourceDate: DESC,
-            }
-        ) {
-            id
-            title
-            link
-            sourceComment
-            organisation
-            sourceDate
-        }
-    }
-`;
 interface Props {
     className?: string;
     filterValues?: FilterType | undefined;
@@ -307,18 +270,6 @@ function Country(props: Props) {
         filterValues?.subvariable,
     ]);
 
-    const sourcesVariables = useMemo((): SourcesQueryVariables => ({
-        iso3: filterValues?.country ?? 'AFG',
-        emergency: filterValues?.outbreak,
-        subvariable: filterValues?.subvariable,
-        indicatorId: filterValues?.indicator,
-    }), [
-        filterValues?.country,
-        filterValues?.outbreak,
-        filterValues?.indicator,
-        filterValues?.subvariable,
-    ]);
-
     const {
         data: countryResponse,
         loading: countryResponseLoading,
@@ -326,16 +277,6 @@ function Country(props: Props) {
         COUNTRY_PROFILE,
         {
             variables: countryVariables,
-        },
-    );
-
-    const {
-        data: sourcesResponse,
-        loading: sourcesResponseLoading,
-    } = useQuery<SourcesQuery, SourcesQueryVariables>(
-        SOURCES,
-        {
-            variables: sourcesVariables,
         },
     );
 
@@ -567,18 +508,6 @@ function Country(props: Props) {
         countryResponse?.countryProfile,
     ]);
 
-    const sourcesList = useMemo(() => (
-        sourcesResponse?.dataGranular.slice(0, 3)
-    ), [
-        sourcesResponse?.dataGranular,
-    ]);
-
-    const [
-        sourceModalShown,
-        showSourceModal,
-        hideSourceModal,
-    ] = useModalState(false);
-
     const statusRendererParams = useCallback((_, data: CountryWiseOutbreakCases) => ({
         heading: data.emergency,
         // TODO: fetch format from server
@@ -594,14 +523,6 @@ function Country(props: Props) {
         indicator: metricTypeForColor(data),
     }), []);
 
-    const sourcesRendererParams = useCallback((_, data: SourcesList) => ({
-        title: data?.title ?? '',
-        link: data?.link,
-        sourceDate: data?.sourceDate,
-        sourceComment: data?.sourceComment ?? '',
-        organization: data?.organisation,
-    }), []);
-
     const currentOutbreak = useMemo(() => {
         if (filterValues?.outbreak) {
             return filterValues.outbreak;
@@ -609,11 +530,9 @@ function Country(props: Props) {
         return outbreaks.map((o) => o.emergency).join(', ');
     }, [filterValues?.outbreak, outbreaks]);
 
-    const loading = countryResponseLoading || sourcesResponseLoading;
-
     return (
         <div className={_cs(className, styles.countryWrapper)}>
-            {loading && <PendingMessage />}
+            {countryResponseLoading && <PendingMessage />}
             <div className={styles.countryMain}>
                 <div className={styles.countryDetailWrapper}>
                     <ContainerCard
@@ -785,6 +704,7 @@ function Country(props: Props) {
                             heading="Outbreaks overview over the last 12 months"
                             headingDescription={`Number of cases for ${currentOutbreak}`}
                             headingSize="extraSmall"
+                            headingClassName={styles.heading}
                             contentClassName={styles.responsiveContent}
                         >
                             <ChartContainer
@@ -1004,39 +924,12 @@ function Country(props: Props) {
                     )}
                 </ContainerCard>
             </div>
-            {sourcesList && (sourcesList.length > 0) && (
-                <Container
-                    heading="Sources"
-                    headingSize="extraSmall"
-                    className={styles.sources}
-                    headerActions={((sourcesResponse?.dataGranular.length ?? 0) > 3) && (
-                        <Button
-                            name={undefined}
-                            onClick={showSourceModal}
-                            variant="transparent"
-                            actions={<IoChevronDownOutline />}
-                        >
-                            See more
-                        </Button>
-                    )}
-                >
-                    <ListView
-                        renderer={Sources}
-                        rendererParams={sourcesRendererParams}
-                        keySelector={sourcesKeySelector}
-                        data={sourcesList}
-                        errored={false}
-                        filtered={false}
-                        pending={false}
-                    />
-                </Container>
-            )}
-            {sourceModalShown && (
-                <SourcesModal
-                    onModalClose={hideSourceModal}
-                    sourcesList={sourcesResponse?.dataGranular}
-                />
-            )}
+            <Sources
+                country={filterValues?.country}
+                emergency={filterValues?.outbreak}
+                subvariable={filterValues?.subvariable}
+                indicatorId={filterValues?.indicator}
+            />
         </div>
     );
 }
