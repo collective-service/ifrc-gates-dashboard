@@ -27,6 +27,7 @@ import { useQuery, gql } from '@apollo/client';
 import PercentageStats from '#components/PercentageStats';
 import UncertaintyChart from '#components/UncertaintyChart';
 import ChartContainer from '#components/ChartContainer';
+import CustomTooltip from '#components/CustomTooltip';
 
 import {
     decimalToPercentage,
@@ -36,7 +37,6 @@ import {
     FormatType,
     negativeToZero,
     positiveToZero,
-    normalCommaFormatter,
 } from '#utils/common';
 import {
     OverviewStatsQuery,
@@ -518,22 +518,17 @@ function PercentageCardGroup(props: Props) {
             payload: regionalData,
         } = tooltipProps;
         if (active && regionalData && regionalData.length > 0) {
-            const format = regionalData[0]?.payload?.format;
+            const format = regionalData[0]?.payload?.format as FormatType;
+
             return (
-                <div className={styles.tooltipCard}>
-                    <div className={styles.tooltipHeading}>
-                        {regionalData[0].payload?.region}
-                    </div>
-                    <div className={styles.tooltipContent}>
-                        {filterValues?.indicator
-                            ? (`(${regionalData[0].payload?.indicatorMonth})`)
-                            : (`(${regionalData[0].payload?.contextDate})`)}
-                    </div>
-                    <div className={styles.tooltipContent}>
-                        {formatNumber(format as FormatType,
-                            regionalData[0].payload?.contextIndicatorValue ?? 0)}
-                    </div>
-                </div>
+                <CustomTooltip
+                    format={filterValues?.indicator ? format : 'raw'}
+                    heading={regionalData[0].payload?.region}
+                    subHeading={filterValues?.indicator
+                        ? (`(${regionalData[0].payload?.indicatorMonth})`)
+                        : (`(${regionalData[0].payload?.contextDate})`)}
+                    value={regionalData[0].payload?.contextIndicatorValue}
+                />
             );
         }
         return null;
@@ -546,17 +541,12 @@ function PercentageCardGroup(props: Props) {
 
         if (active && outbreakData) {
             return (
-                <div className={styles.tooltipCard}>
-                    <div className={styles.tooltipHeading}>
-                        {outbreakData[0].name}
-                    </div>
-                    <div className={styles.tooltipContent}>
-                        {`(${outbreakData[0].payload?.contextDate})`}
-                    </div>
-                    <div className={styles.tooltipContent}>
-                        {normalCommaFormatter().format(outbreakData[0].value ?? 0)}
-                    </div>
-                </div>
+                <CustomTooltip
+                    format="raw"
+                    heading={outbreakData[0].name}
+                    subHeading={`(${outbreakData[0].payload?.contextDate})`}
+                    value={outbreakData[0].value}
+                />
             );
         }
         return null;

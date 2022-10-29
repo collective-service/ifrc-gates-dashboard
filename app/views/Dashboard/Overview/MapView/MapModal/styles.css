@@ -14,7 +14,7 @@
             background-color: var(--color-foreground);
             padding: var(--dui-spacing-small) var(--dui-spacing-medium);
             font-size: var(--dui-font-size-medium);
-            gap: 0;
+            gap: var(--dui-spacing-small);
 
             .tooltip-heading {
                 font-weight: var(--dui-font-weight-bold);

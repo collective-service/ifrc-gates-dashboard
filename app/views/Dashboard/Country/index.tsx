@@ -34,10 +34,12 @@ import UncertaintyChart, { UncertainData } from '#components/UncertaintyChart';
 import PercentageStats from '#components/PercentageStats';
 import ScoreCard from '#components/ScoreCard';
 import ChartContainer from '#components/ChartContainer';
+import CustomTooltip from '#components/CustomTooltip';
 
 import {
     decimalToPercentage,
     formatNumber,
+    FormatType,
     getShortMonth,
     negativeToZero,
     normalCommaFormatter,
@@ -137,6 +139,7 @@ const COUNTRY_PROFILE = gql`
             ) {
                 category
                 indicatorValue
+                format
             }
             genderDisaggregation(
                 iso3: $requiredIso3,
@@ -145,6 +148,7 @@ const COUNTRY_PROFILE = gql`
             ) {
                 category
                 indicatorValue
+                format
             }
         }
         contextualData(
@@ -192,6 +196,7 @@ const COUNTRY_PROFILE = gql`
             subvariable
             interpolated
             emergency
+            format
         }
         contextualDataWithMultipleEmergency(
             iso3: $iso3,
@@ -246,12 +251,6 @@ const COUNTRY_PROFILE = gql`
     }
 `;
 
-interface Props {
-    className?: string;
-    filterValues?: FilterType | undefined;
-    selectedIndicatorName: string | undefined;
-}
-
 interface Payload {
     name?: string;
     value?: number;
@@ -264,6 +263,43 @@ interface Payload {
 interface TooltipProps {
     active?: boolean;
     payload?: Payload[];
+}
+
+interface DisaggregationTooltipProps {
+    active?: boolean;
+    payload?: {
+        name: string;
+        payload?: {
+            format?: FormatType;
+            category?: string;
+            value?: number;
+        };
+    }[];
+}
+
+function CustomDisaggregationTooltip(disaggregationTooltipProps: DisaggregationTooltipProps) {
+    const {
+        active,
+        payload,
+    } = disaggregationTooltipProps;
+
+    if (active && payload && payload.length > 0) {
+        const format = payload[0]?.payload?.format as FormatType;
+        return (
+            <CustomTooltip
+                format={format}
+                heading={payload[0]?.payload?.category}
+                value={payload[0]?.payload?.value}
+            />
+        );
+    }
+    return null;
+}
+
+interface Props {
+    className?: string;
+    filterValues?: FilterType | undefined;
+    selectedIndicatorName: string | undefined;
 }
 
 function Country(props: Props) {
@@ -398,6 +434,7 @@ function Country(props: Props) {
                     tooltipValue: country.indicatorValue,
                     date: country.indicatorMonth,
                     indicatorName: country.indicatorName,
+                    format: country.format as FormatType,
                 };
             }
 
@@ -412,6 +449,7 @@ function Country(props: Props) {
                     minimumValue: negativeRange,
                     maximumValue: positiveRange,
                     indicatorName: country.indicatorName,
+                    format: country.format as FormatType,
                 };
             }
             return {
@@ -426,6 +464,7 @@ function Country(props: Props) {
                 minimumValue: negativeRange,
                 maximumValue: positiveRange,
                 indicatorName: country.indicatorName,
+                format: country.format as FormatType,
             };
         }).sort((a, b) => compareDate(a.date, b.date))
     ), [countryResponse?.dataCountryLevel]);
@@ -446,7 +485,8 @@ function Country(props: Props) {
             {
                 category: age.category,
                 indicatorValue: decimalToPercentage(age.indicatorValue),
-                normalizedValue: normalFormatter().format(age.indicatorValue ?? 0),
+                value: age.indicatorValue,
+                format: age.format as FormatType,
             }
         )), [countryResponse?.disaggregation.ageDisaggregation]);
 
@@ -455,7 +495,8 @@ function Country(props: Props) {
             {
                 category: gender.category,
                 indicatorValue: decimalToPercentage(gender.indicatorValue),
-                normalizedValue: normalFormatter().format(gender.indicatorValue ?? 0),
+                format: gender.format as FormatType,
+                value: gender.indicatorValue,
             }
         )), [countryResponse?.disaggregation.genderDisaggregation]);
 
@@ -687,9 +728,10 @@ function Country(props: Props) {
                                                 <Tooltip
                                                     allowEscapeViewBox={{
                                                         x: true,
-                                                        y: true,
+                                                        y: false,
                                                     }}
                                                     cursor={false}
+                                                    content={<CustomDisaggregationTooltip />}
                                                 />
                                             </BarChart>
                                         </ResponsiveContainer>
@@ -742,9 +784,10 @@ function Country(props: Props) {
                                                 <Tooltip
                                                     allowEscapeViewBox={{
                                                         x: true,
-                                                        y: true,
+                                                        y: false,
                                                     }}
                                                     cursor={false}
+                                                    content={<CustomDisaggregationTooltip />}
                                                 />
                                             </BarChart>
                                         </ResponsiveContainer>

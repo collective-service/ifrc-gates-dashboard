@@ -40,4 +40,14 @@
             }
         }
     }
+
+    .label {
+        font-weight: var(--dui-font-weight-bold);
+    }
+
+    .description {
+        color: var(--dui-color-text-description);
+        font-size: var(--dui-font-size-extra-small);
+        font-weight: var(--dui-font-weight-regular);
+    }
 }

@@ -3,6 +3,7 @@ import {
     _cs,
     doesObjectHaveNoData,
     compareNumber,
+    isDefined,
 } from '@togglecorp/fujs';
 import {
     Heading,
@@ -10,7 +11,6 @@ import {
     ListView,
     useModalState,
     TextOutput,
-    NumberOutput,
 } from '@the-deep/deep-ui';
 import { gql, useQuery } from '@apollo/client';
 import Map, {
@@ -31,7 +31,7 @@ import {
     TopBottomCountriesRankingQuery,
     TopBottomCountriesRankingQueryVariables,
 } from '#generated/types';
-import { FormatType } from '#utils/common';
+import { formatNumber, FormatType } from '#utils/common';
 import { TabTypes } from '#views/Dashboard';
 import { FilterType } from '#views/Dashboard/Filters';
 
@@ -123,6 +123,7 @@ interface ClickedPoint {
 interface TooltipProps {
     countryName: string | undefined;
     indicatorData: OverviewMapDataType | undefined;
+    indicatorName: string | undefined;
     onHide: () => void;
     lngLat: mapboxgl.LngLatLike;
 }
@@ -160,22 +161,13 @@ const barHeight = 10;
     return comparison;
 } */
 
-function getTooltipValue(indicatorData: OverviewMapDataType | undefined) {
-    if (indicatorData?.format === 'percent') {
-        return (Math.round((indicatorData?.indicatorValue) * 1000) / 100) ?? 0;
-    }
-    if (indicatorData?.format === 'raw') {
-        return indicatorData?.indicatorValue;
-    }
-    return 0;
-}
-
 function Tooltip(props: TooltipProps) {
     const {
         countryName,
         lngLat,
         onHide,
         indicatorData,
+        indicatorName,
     } = props;
 
     return (
@@ -187,17 +179,25 @@ function Tooltip(props: TooltipProps) {
         >
             <TextOutput
                 block
-                label={countryName}
-                value={indicatorData ? (
-                    <NumberOutput
-                        suffix={indicatorData.format === 'percent' ? '%' : '(Outbreak)'}
-                        value={getTooltipValue(indicatorData)}
-                        normal={indicatorData.format === 'raw'}
-                        precision={1}
-                    />
-                ) : (
-                    'N/A'
+                labelContainerClassName={styles.label}
+                label={(
+                    <>
+                        {countryName}
+                        {/* TODO: Get outbreak from server */}
+                        <div className={styles.description}>
+                            {isDefined(indicatorName)
+                                ? indicatorName
+                                : 'New cases per million for COVID-19'}
+                        </div>
+                    </>
                 )}
+                value={
+                    formatNumber(
+                        (indicatorData?.format ?? 'raw') as FormatType,
+                        indicatorData?.indicatorValue,
+                    )
+                }
+                hideLabelColon
             />
         </MapTooltip>
     );
@@ -440,6 +440,7 @@ function MapView(props: MapViewProps) {
                                 countryName={mapClickProperties
                                     ?.feature?.properties?.idmc_short}
                                 indicatorData={selectedCountryIndicator}
+                                indicatorName={selectedIndicatorName}
                                 onHide={handleHoverClose}
                                 lngLat={mapClickProperties.lngLat}
                             />
@@ -451,6 +452,7 @@ function MapView(props: MapViewProps) {
                     maxValue={highestDataOnMap}
                     className={styles.mapLabelBox}
                     isPercent={formatOnMap === 'percent'}
+                    format={formatOnMap as FormatType}
                 />
             </ContainerCard>
             <ContainerCard

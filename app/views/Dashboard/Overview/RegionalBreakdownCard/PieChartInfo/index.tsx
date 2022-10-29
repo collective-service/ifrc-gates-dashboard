@@ -8,7 +8,8 @@ import {
 } from 'recharts';
 
 import ChartContainer from '#components/ChartContainer';
-import { formatNumber, FormatType } from '#utils/common';
+import { FormatType } from '#utils/common';
+import CustomTooltip from '#components/CustomTooltip';
 
 import { FilterType } from '../../../Filters';
 import styles from './styles.css';
@@ -17,12 +18,12 @@ export type RegionalDataType = {
     fill: string;
     emergency: string;
     contextIndicatorValue?: number | null;
-    format?: string;
+    format?: FormatType;
     region?: string;
     contextDate?: string;
 }
 
-interface PieChartInfoProps {
+interface Props {
     className?: string;
     region?: string;
     regionalData?: RegionalDataType[];
@@ -38,7 +39,7 @@ interface TooltipProps {
     payload?: Payload[];
 }
 
-function PieChartInfo(props: PieChartInfoProps) {
+function PieChartInfo(props: Props) {
     const {
         className,
         region,
@@ -57,18 +58,13 @@ function PieChartInfo(props: PieChartInfoProps) {
         } = tooltipProps;
         if (active && pieData) {
             return (
-                <div className={styles.tooltipCard}>
-                    <div className={styles.tooltipHeading}>
-                        {pieData[0].payload?.region}
-                    </div>
-                    <div className={styles.tooltipContent}>
-                        {`(${pieData[0].payload?.contextDate})`}
-                    </div>
-                    <div className={styles.tooltipContent}>
-                        {` ${pieData[0].payload?.emergency} - ${formatNumber(pieData[0].payload?.format as FormatType,
-                            pieData[0].payload?.contextIndicatorValue ?? 0)}`}
-                    </div>
-                </div>
+                <CustomTooltip
+                    format="raw"
+                    heading={pieData[0].payload?.region}
+                    subHeading={`(${pieData[0].payload?.contextDate})`}
+                    valueLabel={pieData[0].payload?.emergency}
+                    value={pieData[0].payload?.contextIndicatorValue}
+                />
             );
         }
         return null;
@@ -112,7 +108,7 @@ function PieChartInfo(props: PieChartInfoProps) {
                         </Pie>
                         <Tooltip
                             allowEscapeViewBox={{
-                                x: true,
+                                x: false,
                                 y: true,
                             }}
                             content={customPieChartTooltip}

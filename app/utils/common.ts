@@ -134,9 +134,12 @@ export function rankedSearchOnList<T>(
 export type FormatType = 'thousand' | 'million' | 'raw' | 'percent';
 export function formatNumber(
     format: FormatType,
-    value: number,
+    value: number | null | undefined,
     totalValue?: number,
 ) {
+    if (isNotDefined(value) || value === null) {
+        return 'N/A';
+    }
     if (format === 'thousand') {
         return `${Math.round(value / 100) / 10}K`;
     }
