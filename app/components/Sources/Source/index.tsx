@@ -6,9 +6,6 @@ import {
     _cs,
     isDefined,
 } from '@togglecorp/fujs';
-import {
-    TextOutput,
-} from '@the-deep/deep-ui';
 
 import styles from './styles.css';
 
@@ -39,16 +36,15 @@ function Source(props: Props) {
             <div className={styles.infoIcon}>
                 <IoInformationCircle />
             </div>
-            <TextOutput
+            <div
                 className={styles.label}
-                label={`
+            >
+                {`
                     ${title}
                     ${isDefined(organization) ? `- ${organization}` : ''}
                     ${isDefined(sourceDate) ? `- ${sourceDate}` : ''}
                 `}
-                spacing="compact"
-                hideLabelColon
-            />
+            </div>
             {link && (
                 <a
                     href={link}

@@ -18,7 +18,6 @@ import {
     Line,
     XAxis,
     YAxis,
-    ResponsiveContainer,
     Legend,
     Tooltip,
 } from 'recharts';
@@ -33,6 +32,7 @@ import { FilterType } from '#views/Dashboard/Filters';
 import { TabTypes } from '#views/Dashboard';
 import UncertaintyChart, { UncertainData } from '#components/UncertaintyChart';
 import Sources from '#components/Sources';
+import ChartContainer from '#components/ChartContainer';
 import {
     CountryModalQuery,
     CountryModalQueryVariables,
@@ -42,7 +42,7 @@ import {
 
 import styles from './styles.css';
 
-const dateTickFormatter = (d: string) => getShortMonth(d);
+const dateTickFormatter = (d: string) => getShortMonth(d, 'numeric');
 const normalizedTickFormatter = (d: number) => normalFormatter().format(d);
 
 const SUBVARIABLES = gql`
@@ -191,10 +191,9 @@ function MapModal(props: ModalProps) {
         },
     );
 
-    const handleModalCountryName = useCallback(() => {
-        const isoName = countryData?.properties?.iso3;
+    const handleModalCountryNameClick = useCallback(() => {
         setActiveTab('country');
-        setFilterValues({ country: isoName });
+        setFilterValues({ country: countryData?.properties?.iso3 });
     }, [
         countryData,
         setActiveTab,
@@ -298,15 +297,17 @@ function MapModal(props: ModalProps) {
         return uncertaintyChart[uncertaintyChart?.length - 1];
     }, [uncertaintyChart]);
 
+    const date = filterValues?.indicator ? latestIndicatorValue?.date : latestDate?.date;
+
     return (
         <Modal
             onCloseButtonClick={onModalClose}
-            className={_cs(className, styles.responsiveContent)}
-            size="medium"
+            className={_cs(className, styles.mapModal)}
+            size="large"
             heading={(
                 <Button
-                    name="map_modal"
-                    onClick={handleModalCountryName}
+                    name={undefined}
+                    onClick={handleModalCountryNameClick}
                     variant="action"
                 >
                     {
@@ -334,70 +335,73 @@ function MapModal(props: ModalProps) {
                     <Heading
                         className={styles.countrySurveyDate}
                     >
-                        {
-                            filterValues?.indicator
-                                ? dateTickFormatter(latestIndicatorValue?.date ?? '')
-                                : dateTickFormatter(latestDate?.date ?? '')
-                        }
+                        {date ? dateTickFormatter(date) : undefined}
                     </Heading>
                 </div>
             )}
-            footer={(
-                <Sources
-                    country={countryData?.properties?.iso3 ?? 'AFG'}
-                    emergency={filterValues?.outbreak}
-                    indicatorId={filterValues?.indicator}
-                    subvariable={subVariableList?.filterOptions.subvariables[0]}
-                />
-            )}
+            freeHeight
         >
             {!filterValues?.indicator && (
-                <ResponsiveContainer className={styles.responsiveContainer}>
-                    <LineChart
+                <div className={styles.chartContainer}>
+                    <ChartContainer
                         data={emergencyLineChart}
-                        margin={{
-                            right: 10,
-                        }}
                     >
-                        <XAxis
-                            dataKey="date"
-                            tickLine={false}
-                            padding={{ left: 28 }}
-                            tickFormatter={dateTickFormatter}
-                        />
-                        <YAxis
-                            axisLine={false}
-                            tickLine={false}
-                            padding={{ top: 5 }}
-                            tickFormatter={normalizedTickFormatter}
-                        />
-                        <Tooltip />
-                        <Legend
-                            iconType="rect"
-                            align="right"
-                            verticalAlign="bottom"
-                        />
-                        {outbreaks.map((outbreak) => (
-                            <Line
-                                key={outbreak.emergency}
-                                dataKey={outbreak.emergency}
-                                type="monotone"
-                                stroke={outbreak.fill}
-                                strokeWidth={3}
-                                dot={false}
+                        <LineChart
+                            data={emergencyLineChart}
+                            margin={{
+                                right: 10,
+                            }}
+                        >
+                            <XAxis
+                                dataKey="date"
+                                tickLine={false}
+                                padding={{ left: 28 }}
+                                tickFormatter={dateTickFormatter}
                             />
-                        ))}
-                    </LineChart>
-                </ResponsiveContainer>
+                            <YAxis
+                                axisLine={false}
+                                tickLine={false}
+                                padding={{ top: 5 }}
+                                tickFormatter={normalizedTickFormatter}
+                            />
+                            <Tooltip
+                                allowEscapeViewBox={{ x: true, y: true }}
+                            />
+                            <Legend
+                                iconType="rect"
+                                align="right"
+                                verticalAlign="bottom"
+                            />
+                            {outbreaks.map((outbreak) => (
+                                <Line
+                                    key={outbreak.emergency}
+                                    dataKey={outbreak.emergency}
+                                    type="monotone"
+                                    stroke={outbreak.fill}
+                                    strokeWidth={3}
+                                    dot={false}
+                                />
+                            ))}
+                        </LineChart>
+                    </ChartContainer>
+                </div>
             )}
             {(uncertaintyChart?.length ?? 0) > 0 && filterValues?.indicator && (
                 <UncertaintyChart
+                    className={styles.chartContainer}
                     uncertainData={(uncertaintyChart && uncertaintyChart) ?? []}
                     emergencyFilterValue={filterValues?.outbreak}
                     heading="Indicator overview over the last 12 months"
                     headingDescription={`Trend chart for ${selectedIndicatorName ?? filterValues?.indicator}`}
                 />
             )}
+            <Sources
+                className={styles.sources}
+                country={countryData?.properties?.iso3 ?? 'AFG'}
+                emergency={filterValues?.outbreak}
+                indicatorId={filterValues?.indicator}
+                subvariable={subVariableList?.filterOptions.subvariables[0]}
+            />
         </Modal>
     );
 }

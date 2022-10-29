@@ -1,9 +1,14 @@
-.responsive-content {
+.map-modal {
     min-height: 16rem;
-    overflow: hidden !important;
 
-    .responsive-container {
+    .chart-container {
+        width: 98%;
+        height: 26rem;
         overflow: hidden;
+    }
+
+    .sources {
+        width: 100%;
     }
 }
 
