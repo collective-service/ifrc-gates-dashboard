@@ -1,6 +1,6 @@
 import React, { ReactElement } from 'react';
 import { ResponsiveContainer } from 'recharts';
-import { isNotDefined, _cs } from '@togglecorp/fujs';
+import { isNotDefined } from '@togglecorp/fujs';
 import { Message } from '@the-deep/deep-ui';
 import { IoFileTraySharp } from 'react-icons/io5';
 
@@ -26,7 +26,7 @@ function ChartContainer<T>(props: Props<T>) {
     if (empty || loading) {
         return (
             <ResponsiveContainer
-                className={_cs(className)}
+                className={className}
                 {...otherProps}
             >
                 <Message
@@ -42,7 +42,7 @@ function ChartContainer<T>(props: Props<T>) {
 
     return (
         <ResponsiveContainer
-            className={_cs(className)}
+            className={className}
             {...otherProps}
         >
             {children}
