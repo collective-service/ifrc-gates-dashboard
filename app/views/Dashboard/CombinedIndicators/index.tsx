@@ -2,17 +2,18 @@ import React, { useCallback, useMemo } from 'react';
 import { gql, useQuery } from '@apollo/client';
 import {
     _cs,
+    doesObjectHaveNoData,
     isDefined,
     isNotDefined,
 } from '@togglecorp/fujs';
 import {
-    Button,
     ContainerCard,
     List,
     ListView,
-    PendingAnimation,
-    useModalState,
 } from '@the-deep/deep-ui';
+import {
+    IoFileTraySharp,
+} from 'react-icons/io5';
 
 import {
     CountryCombinedIndicatorsQuery,
@@ -21,13 +22,9 @@ import {
     RegionalCombinedIndicatorsQueryVariables,
     GlobalCombinedIndicatorsQuery,
     GlobalCombinedIndicatorsQueryVariables,
-    SourcesQueryVariables,
-    SourcesQuery,
 } from '#generated/types';
 import { TabTypes } from '#views/Dashboard';
 import Sources from '#components/Sources';
-import SourcesModal from '#components/SourcesModal';
-import { IoChevronDownOutline } from 'react-icons/io5';
 
 import TopicCard from './TopicCard';
 import { AdvancedOptionType } from '../AdvancedFilters';
@@ -144,34 +141,6 @@ const GLOBAL_COMBINED_INDICATORS = gql`
     }
 `;
 
-type SourcesList = NonNullable<SourcesQuery['dataGranular']>[number];
-const sourcesKeySelector = (d: SourcesList) => d.id;
-
-const COMBINED_SOURCES = gql`
-    query CombinedSources(
-        $iso3: String,
-        $emergency: String,
-    ) {
-        dataGranular(
-            filters: {
-                iso3: $iso3,
-                emergency: $emergency,
-                isDistinctSources: true
-            }
-            order: {
-                sourceDate: DESC,
-            }
-        ) {
-            id
-            title
-            link
-            sourceComment
-            organisation
-            sourceDate
-        }
-    }
-`;
-
 export type GlobalIndicatorType = NonNullable<GlobalCombinedIndicatorsQuery['globalCombinedIndicators']>[number];
 
 export type TopicIndicatorType = NonNullable<
@@ -255,29 +224,6 @@ function CombinedIndicators(props: Props) {
         setFilterValues,
         setActiveTab,
     } = props;
-
-    const [
-        sourceModalShown,
-        showSourceModal,
-        hideSourceModal,
-    ] = useModalState(false);
-
-    const sourcesVariables = useMemo((): SourcesQueryVariables => ({
-        iso3: filterValues?.country ?? 'AFG',
-        emergency: filterValues?.outbreak,
-    }), [
-        filterValues?.country,
-        filterValues?.outbreak,
-    ]);
-
-    const {
-        data: sourcesResponse,
-    } = useQuery<SourcesQuery, SourcesQueryVariables>(
-        COMBINED_SOURCES,
-        {
-            variables: sourcesVariables,
-        },
-    );
 
     const {
         data: countryCombinedIndicatorsData,
@@ -365,14 +311,6 @@ function CombinedIndicators(props: Props) {
         setActiveTab,
     ]);
 
-    const sourcesRendererParams = useCallback((_, data: SourcesList) => ({
-        title: data?.title ?? '',
-        link: data?.link,
-        sourceDate: data.sourceDate,
-        sourceComment: data?.sourceComment ?? '',
-        organization: data?.organisation,
-    }), []);
-
     const thematicKeySelector = (
         d: RegionalIndicatorType | CountryIndicatorType | GlobalIndicatorType,
     ) => d.thematic;
@@ -394,55 +332,36 @@ function CombinedIndicators(props: Props) {
         globalCombinedIndicatorsLoading,
     ]);
 
-    const sourcesList = useMemo(() => sourcesResponse?.dataGranular.slice(0, 3), [
-        sourcesResponse?.dataGranular,
-    ]);
+    const filterDataEmpty = doesObjectHaveNoData(filterValues)
+        && doesObjectHaveNoData(advancedFilterValues);
 
     return (
         <div className={_cs(className, styles.combinedIndicatorWrapper)}>
-            {loading && <PendingAnimation />}
-            <List
+            <ListView
+                className={_cs(
+                    styles.themes,
+                    (selectedIndicatorsData?.length ?? 0) === 0 && styles.empty,
+                )}
                 data={selectedIndicatorsData}
                 renderer={ThematicRenderer}
                 rendererParams={thematicRendererParams}
                 keySelector={thematicKeySelector}
+                emptyMessage="No indicators available"
+                filteredEmptyMessage="Couldn't find thematic data based on the current filters"
+                emptyIcon={<IoFileTraySharp />}
+                filteredEmptyIcon={<IoFileTraySharp />}
+                pending={loading}
+                errored={false}
+                filtered={!filterDataEmpty}
+                messageShown
+                messageIconShown
             />
-            <div>
-                { sourcesResponse?.dataGranular
-                    && (sourcesResponse?.dataGranular.length > 0)
-                    && (
-                        <>
-                            <div className={styles.sourceHeading}>
-                                Sources
-                                <Button
-                                    name={undefined}
-                                    variant="transparent"
-                                    onClick={showSourceModal}
-                                    actions={<IoChevronDownOutline />}
-                                    disabled={(sourcesResponse?.dataGranular.length ?? 0) <= 3}
-                                >
-                                    See more
-                                </Button>
-                            </div>
-                            <ListView
-                                className={styles.sources}
-                                renderer={Sources}
-                                rendererParams={sourcesRendererParams}
-                                keySelector={sourcesKeySelector}
-                                data={sourcesList}
-                                errored={false}
-                                filtered={false}
-                                pending={false}
-                            />
-                        </>
-                    )}
-            </div>
-            {sourceModalShown && (
-                <SourcesModal
-                    onModalClose={hideSourceModal}
-                    sourcesList={sourcesResponse?.dataGranular}
-                />
-            )}
+            <Sources
+                country={filterValues?.country}
+                emergency={filterValues?.outbreak}
+                subvariable={filterValues?.subvariable}
+                indicatorId={filterValues?.indicator}
+            />
         </div>
     );
 }

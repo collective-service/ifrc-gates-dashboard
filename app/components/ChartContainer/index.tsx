@@ -23,7 +23,7 @@ function ChartContainer<T>(props: Props<T>) {
     } = props;
     const empty = isNotDefined(data) || (data.length < 1);
 
-    if (empty) {
+    if (empty || loading) {
         return (
             <ResponsiveContainer
                 className={_cs(className)}

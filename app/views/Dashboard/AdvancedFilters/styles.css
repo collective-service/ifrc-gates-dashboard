@@ -11,24 +11,4 @@
     .filter{
         flex-shrink: 0;
     }
-
-    .keywords {
-        border-radius: 2rem;
-        min-width: 18rem;
-
-        :global {
-            .react-select__control {
-                /* TODO: Fix this after the design is finalized for this input */
-                border-radius: 2rem;
-                border-color: var(--dui-color-separator);
-                min-height: 36px;
-            }
-            .css-tlfecz-indicatorContainer {
-                padding: 6px;
-            }
-            .react-select__input-container {
-                margin: 0;
-            }
-        }
-    }
 }

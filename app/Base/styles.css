@@ -118,11 +118,10 @@
 
     --color-outbreak-title-name: #4F4E4E;
 
-    /* FIXME:  update Appropriate color */
-    --color-indicator-high: #66EEAE;
-    --color-indicator-medium-high: #FFFDC6;
-    --color-indicator-medium-low: #ED5A7D;
-    --color-indicator-low: #B516CF;
+    --color-indicator-high: #f4e8ff;
+    --color-indicator-medium-high: #dcfce7;
+    --color-indicator-medium-low: #fff4de;
+    --color-indicator-low: #ffe2e6;
 
     --color-navbar: rgb(51, 64, 83);
     --color-text-on-navbar: rgba(255, 255, 255, .9);

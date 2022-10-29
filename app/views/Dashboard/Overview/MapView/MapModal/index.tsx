@@ -11,7 +11,6 @@ import {
     Modal,
     Heading,
     Button,
-    ListView,
 } from '@the-deep/deep-ui';
 import { useQuery, gql } from '@apollo/client';
 import {
@@ -43,11 +42,8 @@ import {
 
 import styles from './styles.css';
 
-type SourcesList = NonNullable<CountryModalQuery['dataGranular']>[number];
-
 const dateTickFormatter = (d: string) => getShortMonth(d);
 const normalizedTickFormatter = (d: number) => normalFormatter().format(d);
-const sourcesKeySelector = (d: SourcesList) => d.id;
 
 const SUBVARIABLES = gql`
     query Subvariables(
@@ -129,25 +125,6 @@ const COUNTRY_PROFILE = gql`
             interpolated
             emergency
         }
-        dataGranular(
-            filters: {
-                iso3: $iso3,
-                emergency: $emergency,
-                indicatorId: $indicatorId,
-                subvariable: $subvariable,
-                isDistinctSources: true,
-            }
-            order: {
-                sourceDate: DESC,
-            }
-        ) {
-            id
-            title
-            link
-            sourceComment
-            organisation
-            sourceDate
-        }
     }
 `;
 
@@ -223,20 +200,6 @@ function MapModal(props: ModalProps) {
         setActiveTab,
         setFilterValues,
     ]);
-
-    const sourcesList = useMemo(() => (
-        countryResponse?.dataGranular.slice(0, 3)
-    ), [
-        countryResponse?.dataGranular,
-    ]);
-
-    const sourcesRendererParams = useCallback((_, data: SourcesList) => ({
-        title: data?.title ?? '',
-        link: data?.link,
-        sourceDate: data?.sourceDate,
-        sourceComment: data?.sourceComment ?? '',
-        organization: data?.organisation,
-    }), []);
 
     const emergencyLineChart = useMemo(() => {
         const emergencyMapList = countryResponse?.contextualDataWithMultipleEmergency.map(
@@ -380,15 +343,11 @@ function MapModal(props: ModalProps) {
                 </div>
             )}
             footer={(
-                <ListView
-                    className={styles.sources}
-                    renderer={Sources}
-                    rendererParams={sourcesRendererParams}
-                    keySelector={sourcesKeySelector}
-                    data={sourcesList}
-                    errored={false}
-                    filtered={false}
-                    pending={false}
+                <Sources
+                    country={countryData?.properties?.iso3 ?? 'AFG'}
+                    emergency={filterValues?.outbreak}
+                    indicatorId={filterValues?.indicator}
+                    subvariable={subVariableList?.filterOptions.subvariables[0]}
                 />
             )}
         >

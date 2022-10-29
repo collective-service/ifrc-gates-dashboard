@@ -22,22 +22,19 @@ import {
     Bar,
 } from 'recharts';
 import {
-    Container,
     ContainerCard,
     TextOutput,
     ListView,
     NumberOutput,
-    Button,
-    useModalState,
+    PendingMessage,
 } from '@the-deep/deep-ui';
 import { useQuery, gql } from '@apollo/client';
-import { IoChevronDownOutline } from 'react-icons/io5';
 
 import UncertaintyChart, { UncertainData } from '#components/UncertaintyChart';
 import PercentageStats from '#components/PercentageStats';
 import ScoreCard from '#components/ScoreCard';
-import Sources from '#components/Sources';
-import SourcesModal from '#components/SourcesModal';
+import ChartContainer from '#components/ChartContainer';
+
 import {
     decimalToPercentage,
     formatNumber,
@@ -49,9 +46,8 @@ import {
 import {
     CountryQuery,
     CountryQueryVariables,
-    SourcesQuery,
-    SourcesQueryVariables,
 } from '#generated/types';
+import Sources from '#components/Sources';
 
 import { FilterType } from '../Filters';
 
@@ -75,16 +71,29 @@ interface CountryWiseOutbreakCases extends EmergencyItems {
     key: string;
 }
 
-type SourcesList = NonNullable<SourcesQuery['dataGranular']>[number];
-
 const dateTickFormatter = (d: string) => getShortMonth(d);
 const normalizedTickFormatter = (d: number) => normalFormatter().format(d);
 const percentageKeySelector = (d: CountryWiseOutbreakCases) => d.key;
 const readinessKeySelector = (d: ScoreCardProps) => d.title;
-const sourcesKeySelector = (d: SourcesList) => d.id;
 const customLabel = (val: number | string | undefined) => (
     `${val}%`
 );
+
+function metricTypeForColor(data: ScoreCardProps) {
+    if (isNotDefined(data) || isNotDefined(data.value)) {
+        return undefined;
+    }
+    if (data.value > 75) {
+        return 'green' as const;
+    }
+    if ((data.value <= 75) && (data.value > 50)) {
+        return 'yellow' as const;
+    }
+    if ((data.value <= 50) && (data.value > 25)) {
+        return 'orange' as const;
+    }
+    return 'red' as const;
+}
 
 const COUNTRY_PROFILE = gql`
     query Country(
@@ -235,34 +244,6 @@ const COUNTRY_PROFILE = gql`
     }
 `;
 
-const SOURCES = gql`
-    query Sources(
-        $iso3: String,
-        $emergency: String,
-        $subvariable: String,
-        $indicatorId: String,
-    ) {
-        dataGranular(
-            filters: {
-                iso3: $iso3,
-                emergency: $emergency,
-                indicatorId: $indicatorId,
-                subvariable: $subvariable,
-                isDistinctSources: true,
-            }
-            order: {
-                sourceDate: DESC,
-            }
-        ) {
-            id
-            title
-            link
-            sourceComment
-            organisation
-            sourceDate
-        }
-    }
-`;
 interface Props {
     className?: string;
     filterValues?: FilterType | undefined;
@@ -289,33 +270,13 @@ function Country(props: Props) {
         filterValues?.subvariable,
     ]);
 
-    const sourcesVariables = useMemo((): SourcesQueryVariables => ({
-        iso3: filterValues?.country ?? 'AFG',
-        emergency: filterValues?.outbreak,
-        subvariable: filterValues?.subvariable,
-        indicatorId: filterValues?.indicator,
-    }), [
-        filterValues?.country,
-        filterValues?.outbreak,
-        filterValues?.indicator,
-        filterValues?.subvariable,
-    ]);
-
     const {
         data: countryResponse,
+        loading: countryResponseLoading,
     } = useQuery<CountryQuery, CountryQueryVariables>(
         COUNTRY_PROFILE,
         {
             variables: countryVariables,
-        },
-    );
-
-    const {
-        data: sourcesResponse,
-    } = useQuery<SourcesQuery, SourcesQueryVariables>(
-        SOURCES,
-        {
-            variables: sourcesVariables,
         },
     );
 
@@ -526,7 +487,7 @@ function Country(props: Props) {
         })
     ), [countryResponse?.contextualData]);
 
-    const scoreCardData: ScoreCardProps[] = [
+    const scoreCardData: ScoreCardProps[] = useMemo(() => ([
         {
             title: 'Readiness',
             value: countryResponse?.countryProfile.readiness ?? undefined,
@@ -543,42 +504,15 @@ function Country(props: Props) {
             title: 'Response',
             value: countryResponse?.countryProfile.response ?? undefined,
         },
-    ];
-
-    const isScoreCardValueEmpty = scoreCardData.every((score) => isNotDefined(score.value));
-
-    const metricTypeForColor = useCallback((data: ScoreCardProps) => {
-        if (isNotDefined(data) || isNotDefined(data.value)) {
-            return undefined;
-        }
-        if (data.value > 75) {
-            return 'green' as const;
-        }
-        if ((data.value <= 75) && (data.value > 50)) {
-            return 'yellow' as const;
-        }
-        if ((data.value <= 50) && (data.value > 25)) {
-            return 'orange' as const;
-        }
-        return 'red' as const;
-    }, []);
-
-    const sourcesList = useMemo(() => (
-        sourcesResponse?.dataGranular.slice(0, 3)
-    ), [
-        sourcesResponse?.dataGranular,
+    ]), [
+        countryResponse?.countryProfile,
     ]);
-
-    const [
-        sourceModalShown,
-        showSourceModal,
-        hideSourceModal,
-    ] = useModalState(false);
 
     const statusRendererParams = useCallback((_, data: CountryWiseOutbreakCases) => ({
         heading: data.emergency,
         // TODO: fetch format from server
         statValue: formatNumber('raw', data.contextIndicatorValue ?? 0),
+        subHeading: 'Number of cases',
         newDeaths: data.newDeaths,
         newCasesPerMillion: data.newCasesPerMillion,
     }), []);
@@ -587,96 +521,54 @@ function Country(props: Props) {
         title: data.title,
         value: data.value,
         indicator: metricTypeForColor(data),
-    }), [metricTypeForColor]);
-
-    const sourcesRendererParams = useCallback((_, data: SourcesList) => ({
-        title: data?.title ?? '',
-        link: data?.link,
-        sourceDate: data?.sourceDate,
-        sourceComment: data?.sourceComment ?? '',
-        organization: data?.organisation,
     }), []);
+
+    const currentOutbreak = useMemo(() => {
+        if (filterValues?.outbreak) {
+            return filterValues.outbreak;
+        }
+        return outbreaks.map((o) => o.emergency).join(', ');
+    }, [filterValues?.outbreak, outbreaks]);
 
     return (
         <div className={_cs(className, styles.countryWrapper)}>
+            {countryResponseLoading && <PendingMessage />}
             <div className={styles.countryMain}>
                 <div className={styles.countryDetailWrapper}>
                     <ContainerCard
                         className={styles.statusCardContainer}
                         contentClassName={styles.statusContainer}
                     >
-                        <ListView
-                            className={styles.infoCards}
-                            renderer={PercentageStats}
-                            rendererParams={statusRendererParams}
-                            data={countryWiseOutbreakCases}
-                            keySelector={percentageKeySelector}
-                            errored={false}
-                            filtered={false}
-                            pending={false}
-                        />
-                        {!isScoreCardValueEmpty && (
+                        {countryWiseOutbreakCases.length > 0 && (
                             <ListView
-                                className={styles.readinessListCard}
-                                renderer={ScoreCard}
-                                rendererParams={readinessRendererParams}
-                                data={scoreCardData}
-                                keySelector={readinessKeySelector}
+                                className={styles.infoCards}
+                                renderer={PercentageStats}
+                                rendererParams={statusRendererParams}
+                                data={countryWiseOutbreakCases}
+                                keySelector={percentageKeySelector}
                                 errored={false}
                                 filtered={false}
                                 pending={false}
                             />
                         )}
+                        <ListView
+                            className={styles.readinessListCard}
+                            renderer={ScoreCard}
+                            rendererParams={readinessRendererParams}
+                            data={scoreCardData}
+                            keySelector={readinessKeySelector}
+                            errored={false}
+                            filtered={false}
+                            pending={false}
+                        />
                     </ContainerCard>
-                    {!filterValues?.indicator && (
-                        <ContainerCard
-                            className={styles.countryTrend}
-                            heading="Outbreaks overview over the last 12 months"
-                            headingDescription={`Number of cases for ${outbreaks.map((o) => o.emergency).join(', ')}`}
-                            headingSize="extraSmall"
-                            contentClassName={styles.responsiveContent}
-                        >
-                            <ResponsiveContainer className={styles.responsiveContainer}>
-                                <LineChart
-                                    data={emergencyLineChart}
-                                >
-                                    <XAxis
-                                        dataKey="date"
-                                        tickLine={false}
-                                        tickFormatter={dateTickFormatter}
-                                    />
-                                    <YAxis
-                                        axisLine={false}
-                                        tickLine={false}
-                                        padding={{ top: 30 }}
-                                        tickFormatter={normalizedTickFormatter}
-                                    />
-                                    <Tooltip />
-                                    <Legend
-                                        iconType="rect"
-                                        align="right"
-                                        verticalAlign="bottom"
-                                    />
-                                    {outbreaks.map((outbreak) => (
-                                        <Line
-                                            key={outbreak.emergency}
-                                            dataKey={outbreak.emergency}
-                                            type="monotone"
-                                            stroke={outbreak.fill}
-                                            strokeWidth={3}
-                                            dot={false}
-                                        />
-                                    ))}
-                                </LineChart>
-                            </ResponsiveContainer>
-                        </ContainerCard>
-                    )}
-                    {filterValues?.indicator && (
+                    {filterValues?.indicator ? (
                         <div className={styles.indicatorWrapper}>
                             {((statusUncertainty?.indicatorValue ?? 0) > 0) && (
                                 <PercentageStats
                                     className={styles.percentageCard}
-                                    indicatorDescription={statusUncertainty?.indicatorDescription}
+                                    heading="Global"
+                                    headerDescription={statusUncertainty?.indicatorDescription}
                                     headingSize="extraSmall"
                                     // TODO: fetch format from server
                                     statValue={formatNumber(
@@ -701,6 +593,7 @@ function Country(props: Props) {
                                     contentClassName={styles.genderDisaggregationContent}
                                     heading="Gender Disaggregation"
                                     headerDescription={selectedIndicatorName}
+                                    headingClassName={styles.heading}
                                     headingSize="extraSmall"
                                 >
                                     <div className={styles.genderDisaggregation}>
@@ -805,6 +698,52 @@ function Country(props: Props) {
                                 </ContainerCard>
                             )}
                         </div>
+                    ) : (
+                        <ContainerCard
+                            className={styles.countryTrend}
+                            heading="Outbreaks overview over the last 12 months"
+                            headingDescription={`Number of cases for ${currentOutbreak}`}
+                            headingSize="extraSmall"
+                            headingClassName={styles.heading}
+                            contentClassName={styles.responsiveContent}
+                        >
+                            <ChartContainer
+                                className={styles.responsiveContainer}
+                                data={emergencyLineChart}
+                            >
+                                <LineChart
+                                    data={emergencyLineChart}
+                                >
+                                    <XAxis
+                                        dataKey="date"
+                                        tickLine={false}
+                                        tickFormatter={dateTickFormatter}
+                                    />
+                                    <YAxis
+                                        axisLine={false}
+                                        tickLine={false}
+                                        padding={{ top: 30 }}
+                                        tickFormatter={normalizedTickFormatter}
+                                    />
+                                    <Tooltip />
+                                    <Legend
+                                        iconType="rect"
+                                        align="right"
+                                        verticalAlign="bottom"
+                                    />
+                                    {outbreaks.map((outbreak) => (
+                                        <Line
+                                            key={outbreak.emergency}
+                                            dataKey={outbreak.emergency}
+                                            type="monotone"
+                                            stroke={outbreak.fill}
+                                            strokeWidth={3}
+                                            dot={false}
+                                        />
+                                    ))}
+                                </LineChart>
+                            </ChartContainer>
+                        </ContainerCard>
                     )}
                 </div>
                 <ContainerCard
@@ -812,7 +751,7 @@ function Country(props: Props) {
                     headingSectionClassName={styles.countryHeader}
                     headerIconsContainerClassName={styles.countryAvatar}
                     headingClassName={styles.countryHeading}
-                    headerIcons={(
+                    headerIcons={countryResponse?.countryProfile?.iso3 && (
                         <img
                             src={`https://rcce-dashboard.s3.eu-west-3.amazonaws.com/flags/${countryResponse?.countryProfile?.iso3}.png`}
                             alt={isDefined(countryResponse?.countryProfile.countryName)
@@ -951,14 +890,16 @@ function Country(props: Props) {
                             )}
                         />
                     )}
-                    <TextOutput
-                        className={styles.countryTextOutput}
-                        valueContainerClassName={styles.valueText}
-                        labelContainerClassName={styles.labelText}
-                        hideLabelColon
-                        label="Regional cases %"
-                        value={`${regional}%`}
-                    />
+                    {isDefined(regional) && (
+                        <TextOutput
+                            className={styles.countryTextOutput}
+                            valueContainerClassName={styles.valueText}
+                            labelContainerClassName={styles.labelText}
+                            hideLabelColon
+                            label="Regional cases %"
+                            value={`${regional}%`}
+                        />
+                    )}
                     {isDefined(economicSupportIndex) && (
                         <TextOutput
                             className={styles.countryTextOutput}
@@ -983,40 +924,12 @@ function Country(props: Props) {
                     )}
                 </ContainerCard>
             </div>
-            {sourcesList && (sourcesList.length > 0) && (
-                <Container
-                    heading="Sources"
-                    headingSize="extraSmall"
-                    className={styles.sources}
-                    headerActions={(
-                        <Button
-                            name={undefined}
-                            onClick={showSourceModal}
-                            variant="transparent"
-                            actions={<IoChevronDownOutline />}
-                            disabled={(sourcesResponse?.dataGranular.length ?? 0) <= 3}
-                        >
-                            See more
-                        </Button>
-                    )}
-                >
-                    <ListView
-                        renderer={Sources}
-                        rendererParams={sourcesRendererParams}
-                        keySelector={sourcesKeySelector}
-                        data={sourcesList}
-                        errored={false}
-                        filtered={false}
-                        pending={false}
-                    />
-                </Container>
-            )}
-            {sourceModalShown && (
-                <SourcesModal
-                    onModalClose={hideSourceModal}
-                    sourcesList={sourcesResponse?.dataGranular}
-                />
-            )}
+            <Sources
+                country={filterValues?.country}
+                emergency={filterValues?.outbreak}
+                subvariable={filterValues?.subvariable}
+                indicatorId={filterValues?.indicator}
+            />
         </div>
     );
 }

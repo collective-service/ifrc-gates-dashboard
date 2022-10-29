@@ -12,7 +12,8 @@ import {
     Cell,
 } from 'recharts';
 import {
-    ContainerCard, Element,
+    ContainerCard,
+    Element,
 } from '@the-deep/deep-ui';
 import {
     compareDate,
@@ -530,13 +531,9 @@ function PercentageCardGroup(props: Props) {
         <div className={_cs(className, styles.cardInfo)}>
             <PercentageStats
                 className={styles.globalStatCard}
-                heading={!filterValues?.indicator && totalCase?.emergency}
+                heading={!filterValues?.indicator ? totalCase?.emergency : 'Total Percentage'}
+                subHeading={!filterValues?.indicator && 'Total nubmer of cases'}
                 headingSize="extraSmall"
-                headerDescription={!filterValues?.indicator && (
-                    <p>
-                        All Outbreak numbers:
-                    </p>
-                )}
                 statValue={totalCaseValue}
             />
             {uncertaintyChartActive

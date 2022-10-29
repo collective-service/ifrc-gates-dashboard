@@ -240,7 +240,7 @@ const barHeight = 10;
     return comparison;
 } */
 
-function MapTooltipData(indicatorData: OverviewMapDataType | undefined) {
+function getTooltipValue(indicatorData: OverviewMapDataType | undefined) {
     if (indicatorData?.format === 'percent') {
         return (Math.round((indicatorData?.indicatorValue) * 1000) / 100) ?? 0;
     }
@@ -262,18 +262,21 @@ function Tooltip(props: TooltipProps) {
         <MapTooltip
             coordinates={lngLat}
             tooltipOptions={tooltipOptions}
+            trackPointer
             onHide={onHide}
         >
             <TextOutput
                 block
                 label={countryName}
-                value={(
+                value={indicatorData ? (
                     <NumberOutput
-                        suffix={indicatorData?.format === 'percent' ? '%' : '(Outbreak)'}
-                        value={MapTooltipData(indicatorData)}
-                        normal={indicatorData?.format === 'raw'}
+                        suffix={indicatorData.format === 'percent' ? '%' : '(Outbreak)'}
+                        value={getTooltipValue(indicatorData)}
+                        normal={indicatorData.format === 'raw'}
                         precision={1}
                     />
+                ) : (
+                    'N/A'
                 )}
             />
         </MapTooltip>

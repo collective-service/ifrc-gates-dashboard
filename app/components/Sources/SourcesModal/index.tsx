@@ -3,12 +3,13 @@ import {
     Modal,
     ListView,
 } from '@the-deep/deep-ui';
-import { SourcesQuery } from '#generated/types';
-import Sources from '#components/Sources';
+import { CombinedSourcesQuery } from '#generated/types';
+
+import Source from '../Source';
 
 import styles from './styles.css';
 
-type SourcesList = NonNullable<SourcesQuery['dataGranular']>[number];
+type SourcesList = NonNullable<CombinedSourcesQuery['dataGranular']>[number];
 
 interface Props {
     onModalClose: () => void;
@@ -38,7 +39,7 @@ function SourcesModal(props: Props) {
         >
             <ListView
                 className={styles.sources}
-                renderer={Sources}
+                renderer={Source}
                 rendererParams={sourcesRendererParams}
                 keySelector={sourcesKeySelector}
                 data={sourcesList}

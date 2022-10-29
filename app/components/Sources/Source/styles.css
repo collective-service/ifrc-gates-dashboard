@@ -1,0 +1,17 @@
+.source {
+    display: flex;
+    align-items: center;
+    padding: var(--dui-spacing-extra-small);
+    gap: var(--dui-spacing-extra-small);
+
+    .label {
+        flex-grow: 1;
+    }
+
+    .info-icon {
+        flex-shrink: 0;
+        line-height: 0.1;
+        color: var(--color-text-title);
+        font-size: var(--dui-font-size-extra-large);
+    }
+}

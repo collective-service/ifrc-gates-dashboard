@@ -231,6 +231,7 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
                             content={(<CustomTooltip />)}
                             isAnimationActive={false}
                             cursor={false}
+                            allowEscapeViewBox={{ x: true, y: true }}
                         />
                         <XAxis
                             dataKey="emergency"
