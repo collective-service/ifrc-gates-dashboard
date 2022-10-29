@@ -110,25 +110,30 @@ const COUNTRY_PROFILE = gql`
             iso3
             countryName
             populationSize
-            internetAccess
-            literacyRate
-            washAccessNational
-            medicalStaff
-            stringency
-            economicSupportIndex
+            region
             readiness
             vulnerability
             risk
             response
-            newCasesRegionShare
-            region
+            stringency
             stringencyRegion
-            washAccessNationalRegion
-            literacyRateRegion
-            internetAccessRegion
+            stringencyFormat
+            economicSupportIndex
             economicSupportIndexRegion
+            medicalStaff
             medicalStaffRegion
+            medicalStaffFormat
+            literacyRate
+            literacyRateRegion
+            literacyRateFormat
+            internetAccess
+            internetAccessRegion
+            internetAccessFormat
+            washAccessNational
+            washAccessNationalRegion
+            washAccessNationalFormat
             newCasesPerMillion
+            newCasesRegionShare
             newDeaths
         }
         disaggregation {
@@ -333,44 +338,116 @@ function Country(props: Props) {
     );
 
     const internetAccess = useMemo(() => (
-        decimalToPercentage(countryResponse?.countryProfile.internetAccess)
-    ), [countryResponse?.countryProfile.internetAccess]);
+        formatNumber(
+            (countryResponse?.countryProfile.internetAccessFormat ?? 'raw') as FormatType,
+            countryResponse?.countryProfile.internetAccess,
+        )
+    ), [
+        countryResponse?.countryProfile.internetAccess,
+        countryResponse?.countryProfile.internetAccessFormat,
+    ]);
 
     const literacyRate = useMemo(() => (
-        decimalToPercentage(countryResponse?.countryProfile.literacyRate)
-    ), [countryResponse?.countryProfile.literacyRate]);
+        formatNumber(
+            (countryResponse?.countryProfile?.literacyRateFormat ?? 'raw') as FormatType,
+            countryResponse?.countryProfile.literacyRate,
+        )
+    ), [
+        countryResponse?.countryProfile.literacyRate,
+        countryResponse?.countryProfile.literacyRateFormat,
+    ]);
 
     const washAccessNational = useMemo(() => (
-        decimalToPercentage(countryResponse?.countryProfile.washAccessNational)
-    ), [countryResponse?.countryProfile.washAccessNational]);
+        formatNumber(
+            (countryResponse?.countryProfile?.washAccessNationalFormat ?? 'raw') as FormatType,
+            countryResponse?.countryProfile.washAccessNational,
+        )
+    ), [
+        countryResponse?.countryProfile.washAccessNational,
+        countryResponse?.countryProfile.washAccessNationalFormat,
+    ]);
 
     const stringency = useMemo(() => (
-        decimalToPercentage(countryResponse?.countryProfile.stringency)
-    ), [countryResponse?.countryProfile.stringency]);
+        formatNumber(
+            (countryResponse?.countryProfile?.stringencyFormat ?? 'raw') as FormatType,
+            countryResponse?.countryProfile.stringency,
+        )
+    ), [
+        countryResponse?.countryProfile.stringency,
+        countryResponse?.countryProfile.stringencyFormat,
+    ]);
 
+    const medicalStaff = useMemo(() => (
+        formatNumber(
+            (countryResponse?.countryProfile?.medicalStaffFormat ?? 'raw') as FormatType,
+            countryResponse?.countryProfile?.medicalStaff,
+        )
+    ), [
+        countryResponse?.countryProfile?.medicalStaff,
+        countryResponse?.countryProfile?.medicalStaffFormat,
+    ]);
+
+    const medicalStaffRegional = useMemo(() => (
+        formatNumber(
+            (countryResponse?.countryProfile?.medicalStaffFormat ?? 'raw') as FormatType,
+            countryResponse?.countryProfile?.medicalStaffRegion,
+        )
+    ), [
+        countryResponse?.countryProfile?.medicalStaffRegion,
+        countryResponse?.countryProfile?.medicalStaffFormat,
+    ]);
+
+    // TODO: use formatNumber for normalization
     const economicSupportIndex = useMemo(() => (
         decimalToPercentage(countryResponse?.countryProfile.economicSupportIndex)
     ), [countryResponse?.countryProfile.economicSupportIndex]);
 
+    // TODO: use formatNumber for normalization
     const economicSupportIndexRegion = useMemo(() => (
         decimalToPercentage(countryResponse?.countryProfile.economicSupportIndexRegion)
     ), [countryResponse?.countryProfile.economicSupportIndexRegion]);
 
     const stringencyRegion = useMemo(() => (
-        decimalToPercentage(countryResponse?.countryProfile.stringencyRegion)
-    ), [countryResponse?.countryProfile.stringencyRegion]);
+        formatNumber(
+            (countryResponse?.countryProfile?.stringencyFormat ?? 'raw') as FormatType,
+            countryResponse?.countryProfile.stringencyRegion,
+        )
+    ), [
+        countryResponse?.countryProfile.stringencyRegion,
+        countryResponse?.countryProfile.stringencyFormat,
+    ]);
 
     const washAccessNationalRegion = useMemo(() => (
-        decimalToPercentage(countryResponse?.countryProfile.washAccessNationalRegion)
-    ), [countryResponse?.countryProfile.washAccessNationalRegion]);
+        formatNumber(
+            (countryResponse?.countryProfile.washAccessNationalFormat ?? 'raw') as FormatType,
+            countryResponse?.countryProfile.washAccessNationalRegion,
+        )
+    ), [
+        countryResponse?.countryProfile.washAccessNationalRegion,
+        countryResponse?.countryProfile.washAccessNationalFormat,
+    ]);
 
     const literacyRateRegion = useMemo(() => (
-        decimalToPercentage(countryResponse?.countryProfile.literacyRateRegion)
-    ), [countryResponse?.countryProfile.literacyRateRegion]);
+        formatNumber(
+            (countryResponse?.countryProfile?.literacyRateFormat) as FormatType,
+            countryResponse?.countryProfile.literacyRateRegion,
+        )
+    ), [
+        countryResponse?.countryProfile.literacyRateRegion,
+        countryResponse?.countryProfile.literacyRateFormat,
+    ]);
 
     const internetAccessRegion = useMemo(() => (
-        decimalToPercentage(countryResponse?.countryProfile.internetAccessRegion)
-    ), [countryResponse?.countryProfile.internetAccessRegion]);
+        formatNumber(
+            (countryResponse?.countryProfile.internetAccessFormat ?? 'raw') as FormatType,
+            countryResponse?.countryProfile.internetAccessRegion,
+        )
+    ), [
+        countryResponse?.countryProfile.internetAccessRegion,
+        countryResponse?.countryProfile.internetAccessFormat,
+    ]);
+
+    console.warn(countryResponse?.countryProfile);
 
     const regional = useMemo(() => (
         decimalToPercentage(countryResponse?.countryProfile.newCasesRegionShare)
@@ -885,13 +962,13 @@ function Country(props: Props) {
                             label="Internet access"
                             value={(
                                 <>
-                                    {`${internetAccess}%`}
+                                    {internetAccess}
                                     {isDefined(internetAccessRegion) && (
                                         <TextOutput
                                             labelContainerClassName={styles.regionalText}
                                             valueContainerClassName={styles.regionalText}
                                             label={countryResponse?.countryProfile.region}
-                                            value={`${internetAccessRegion}%`}
+                                            value={internetAccessRegion}
                                         />
                                     )}
                                 </>
@@ -907,13 +984,13 @@ function Country(props: Props) {
                             label="Literacy rate"
                             value={(
                                 <>
-                                    {`${literacyRate}%`}
+                                    {literacyRate}
                                     {isDefined(literacyRateRegion) && (
                                         <TextOutput
                                             labelContainerClassName={styles.regionalText}
                                             valueContainerClassName={styles.regionalText}
                                             label={countryResponse?.countryProfile.region}
-                                            value={`${literacyRateRegion}%`}
+                                            value={literacyRateRegion}
                                         />
                                     )}
                                 </>
@@ -929,13 +1006,13 @@ function Country(props: Props) {
                             label="Access to basic washing facilities"
                             value={(
                                 <>
-                                    {`${washAccessNational}%`}
+                                    {washAccessNational}
                                     {isDefined(washAccessNationalRegion) && (
                                         <TextOutput
                                             labelContainerClassName={styles.regionalText}
                                             valueContainerClassName={styles.regionalText}
                                             label={countryResponse?.countryProfile.region}
-                                            value={`${washAccessNationalRegion}%`}
+                                            value={washAccessNationalRegion}
                                         />
                                     )}
                                 </>
@@ -951,16 +1028,14 @@ function Country(props: Props) {
                             label="Doctors and nurses per 1000 people"
                             value={(
                                 <>
-                                    {(countryResponse?.countryProfile.medicalStaff)?.toFixed(2)}
+                                    {medicalStaff}
                                     {isDefined(countryResponse?.countryProfile.medicalStaffRegion)
                                         && (
                                             <TextOutput
                                                 labelContainerClassName={styles.regionalText}
                                                 valueContainerClassName={styles.regionalText}
                                                 label={countryResponse?.countryProfile.region}
-                                                value={(countryResponse
-                                                    ?.countryProfile.medicalStaffRegion)
-                                                    ?.toFixed(2)}
+                                                value={medicalStaffRegional}
                                             />
                                         )}
                                 </>
@@ -976,13 +1051,13 @@ function Country(props: Props) {
                             label="Stringency"
                             value={(
                                 <>
-                                    {`${stringency}%`}
+                                    {stringency}
                                     {isDefined(stringencyRegion) && (
                                         <TextOutput
                                             labelContainerClassName={styles.regionalText}
                                             valueContainerClassName={styles.regionalText}
                                             label={countryResponse?.countryProfile.region}
-                                            value={`${stringencyRegion}%`}
+                                            value={stringencyRegion}
                                         />
                                     )}
                                 </>
