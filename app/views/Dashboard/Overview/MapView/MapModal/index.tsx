@@ -6,6 +6,7 @@ import {
     unique,
     compareDate,
     isNotDefined,
+    compareNumber,
 } from '@togglecorp/fujs';
 import {
     Modal,
@@ -25,6 +26,7 @@ import {
     decimalToPercentage,
     getShortMonth,
     negativeToZero,
+    normalCommaFormatter,
     normalFormatter,
     positiveToZero,
 } from '#utils/common';
@@ -44,6 +46,19 @@ import styles from './styles.css';
 
 const dateTickFormatter = (d: string) => getShortMonth(d, 'numeric');
 const normalizedTickFormatter = (d: number) => normalFormatter().format(d);
+
+interface TooltipProps {
+    active?: boolean;
+    payload?: {
+        name?: string;
+        value?: number;
+        payload?: {
+            date: string;
+            id: string;
+            format: string;
+        };
+    }[];
+}
 
 const SUBVARIABLES = gql`
     query Subvariables(
@@ -99,6 +114,7 @@ const COUNTRY_PROFILE = gql`
               contextDate
               id
               contextIndicatorId
+              format
             }
         }
         dataCountryLevel(
@@ -214,6 +230,8 @@ function MapModal(props: ModalProps) {
                             ...acc,
                             [emergency.emergency]: Number(item.contextIndicatorValue),
                             date: item.contextDate,
+                            format: item.format,
+                            id: item.id,
                         }), { date: key },
                     ),
                 ).sort((a, b) => compareDate(a.date, b.date));
@@ -260,6 +278,7 @@ function MapModal(props: ModalProps) {
                     indicatorValue: decimalToPercentage(country.indicatorValue),
                     tooltipValue: country.indicatorValue,
                     date: country.indicatorMonth,
+                    indicatorName: country.indicatorName,
                 };
             }
 
@@ -273,6 +292,7 @@ function MapModal(props: ModalProps) {
                     ],
                     minimumValue: negativeRange,
                     maximumValue: positiveRange,
+                    indicatorName: country.indicatorName,
                 };
             }
             return {
@@ -286,6 +306,7 @@ function MapModal(props: ModalProps) {
                 ],
                 minimumValue: negativeRange,
                 maximumValue: positiveRange,
+                indicatorName: country.indicatorName,
             };
         }).sort((a, b) => compareDate(a.date, b.date))
     ), [countryResponse?.dataCountryLevel]);
@@ -298,6 +319,38 @@ function MapModal(props: ModalProps) {
     }, [uncertaintyChart]);
 
     const date = filterValues?.indicator ? latestIndicatorValue?.date : latestDate?.date;
+    const customOutbreakTooltip = (tooltipProps: TooltipProps) => {
+        const {
+            active,
+            payload,
+        } = tooltipProps;
+
+        const outbreakData = payload?.map((load) => ({
+            ...load,
+            id: `${load.payload?.id}-${load.value}`,
+        })).sort((a, b) => compareNumber(b.value, a.value));
+
+        if (active && outbreakData) {
+            return (
+                <div className={styles.tooltipCard}>
+                    {outbreakData.map((item) => (
+                        <div key={item.id}>
+                            <div className={styles.tooltipHeading}>
+                                {item.name}
+                            </div>
+                            <div className={styles.tooltipContent}>
+                                {`(${item.payload?.date})`}
+                            </div>
+                            <div className={styles.tooltipContent}>
+                                {normalCommaFormatter().format(item.value ?? 0)}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+        return null;
+    };
 
     return (
         <Modal
@@ -364,13 +417,13 @@ function MapModal(props: ModalProps) {
                                 padding={{ top: 5 }}
                                 tickFormatter={normalizedTickFormatter}
                             />
-                            <Tooltip
-                                allowEscapeViewBox={{ x: true, y: true }}
-                            />
                             <Legend
                                 iconType="rect"
                                 align="right"
                                 verticalAlign="bottom"
+                            />
+                            <Tooltip
+                                content={customOutbreakTooltip}
                             />
                             {outbreaks.map((outbreak) => (
                                 <Line

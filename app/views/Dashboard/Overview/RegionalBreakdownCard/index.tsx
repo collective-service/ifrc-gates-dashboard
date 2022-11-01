@@ -48,25 +48,16 @@ export interface RegionalLabelRendererProps {
 
 type EpiDataGlobal = NonNullable<RegionalAndTotalQuery>['total'][number];
 
-interface CustomProps {
-    active?: false;
-    payload?: {
-        value?: number;
-    }[];
-    label?: string;
+interface Payload {
+    name?: string;
+    value?: number;
+    payload?: EpiDataGlobal;
 }
 
-function CustomTooltip(customProps: CustomProps) {
-    const { active, payload, label } = customProps;
-
-    if (active && payload && payload.length > 0) {
-        return (
-            <div>
-                <p>{`${label} : ${normalCommaFormatter().format(payload[0]?.value ?? 0)}`}</p>
-            </div>
-        );
-    }
-    return null;
+interface TooltipProps {
+    active?: false;
+    payload?: Payload[]
+    label?: string;
 }
 
 const REGIONAL_BREAKDOWN_TOTAL = gql`
@@ -82,11 +73,13 @@ const REGIONAL_BREAKDOWN_TOTAL = gql`
             isGlobal: $isGlobal,
         }
         ) {
+            contextDate
             region
             contextIndicatorValue
             mostRecent
             emergency
             id
+            format
         }
         regional: epiDataGlobal(
         filters: {
@@ -95,11 +88,13 @@ const REGIONAL_BREAKDOWN_TOTAL = gql`
             contextIndicatorId: "total_cases"
         }
         ) {
+            contextDate
             region
             contextIndicatorValue
             mostRecent
             emergency
             id
+            format
         }
     }
 `;
@@ -164,6 +159,9 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
                 emergency: item.emergency,
                 fill: item.emergency === 'Monkeypox' ? '#ACA28E' : '#FFDD98',
                 contextIndicatorValue: item.contextIndicatorValue,
+                format: item.format,
+                region: item.region,
+                contextDate: item.contextDate,
             }),
         );
 
@@ -183,6 +181,33 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
         emergency: entry.emergency,
         fill: entry.emergency === 'Monkeypox' ? '#ACA28E' : '#FFDD98',
     }));
+
+    function CustomTotalTooltip(tooltipProps: TooltipProps) {
+        const {
+            active,
+            payload: totalCases,
+            label,
+        } = tooltipProps;
+
+        if (active && totalCases && totalCases.length > 0) {
+            return (
+                <div className={styles.tooltipCard}>
+                    <div className={styles.tooltipHeading}>
+                        {label}
+                    </div>
+                    <div className={styles.tooltipContent}>
+                        {`(${totalCases[0].payload?.contextDate})`}
+                    </div>
+                    <div className={styles.tooltipContent}>
+                        {normalCommaFormatter().format(
+                            totalCases[0].payload?.contextIndicatorValue ?? 0,
+                        )}
+                    </div>
+                </div>
+            );
+        }
+        return null;
+    }
 
     const totalBarChart = regionalTotalResponse?.total.map((total) => (
         {
@@ -228,10 +253,9 @@ function RegionalBreakdownCard(props: RegionalBreakdownCardProps) {
                         barSize={18}
                     >
                         <Tooltip
-                            content={(<CustomTooltip />)}
                             isAnimationActive={false}
                             cursor={false}
-                            allowEscapeViewBox={{ x: true, y: true }}
+                            content={(<CustomTotalTooltip />)}
                         />
                         <XAxis
                             dataKey="emergency"

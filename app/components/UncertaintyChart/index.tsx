@@ -78,7 +78,7 @@ function UncertaintyChart(props: Props) {
                         {isDefined(data[0].payload?.region)
                             ? `${data[0].payload?.region} - `
                             : null}
-                        {dateTickFormatter(data[0].payload?.date ?? '')}
+                        {`(${data[0].payload?.date})`}
                     </div>
                     <div className={styles.tooltipContent}>
                         {formatNumber(format as FormatType,
