@@ -207,7 +207,7 @@ function Filters(props: Props) {
 
     const isFilterEmpty = useMemo(() => {
         if (activeTab === 'country') {
-            return doesObjectHaveNoData(value, [value?.country]);
+            return doesObjectHaveNoData(value, [value?.country, value?.region]);
         }
         return doesObjectHaveNoData(value, ['']);
     }, [value, activeTab]);

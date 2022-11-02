@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
+import { BiLinkExternal } from 'react-icons/bi';
 import {
     _cs,
     listToGroupList,
@@ -362,6 +363,8 @@ function MapModal(props: ModalProps) {
                     name={undefined}
                     onClick={handleModalCountryNameClick}
                     variant="action"
+                    actions={<BiLinkExternal />}
+                    actionsContainerClassName={styles.countryLinkIcon}
                 >
                     {
                         // FIXME: here "idmc_short" should be replaced with some other name
