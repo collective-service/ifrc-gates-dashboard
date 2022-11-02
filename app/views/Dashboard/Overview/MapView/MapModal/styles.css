@@ -1,6 +1,10 @@
 .map-modal {
     min-height: 16rem;
 
+    .country-link-icon {
+        color: var(--color-text-title);
+    }
+
     .chart-container {
         width: 98%;
         height: 26rem;

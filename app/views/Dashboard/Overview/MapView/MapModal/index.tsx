@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
+import { BiLinkExternal } from 'react-icons/bi';
 import {
     _cs,
     listToGroupList,
@@ -58,6 +59,18 @@ interface TooltipProps {
             format: string;
         };
     }[];
+}
+interface EmergencyItems {
+    iso3: string;
+    emergency: string;
+    contextIndicatorValue?: number | null;
+    contextIndicatorId: string;
+    contextDate: string;
+    newDeaths?: number | null;
+    newCasesPerMillion?: number | null;
+}
+interface CountryWiseOutbreakCases extends EmergencyItems {
+    key: string;
 }
 
 const SUBVARIABLES = gql`
@@ -267,6 +280,46 @@ function MapModal(props: ModalProps) {
         })
     ), [countryResponse?.contextualData]);
 
+    const countryWiseOutbreakCases: CountryWiseOutbreakCases[] | undefined = useMemo(() => {
+        const casesGroupList = listToGroupList(
+            countryResponse?.contextualData ?? [],
+            (emergency) => emergency.emergency,
+        );
+
+        const getLatestDateItems = (items: EmergencyItems[]) => {
+            [...items].sort((a, b) => compareDate(a.contextDate, b.contextDate, -1));
+
+            return items[0];
+        };
+
+        const casesGroupArray = mapToList(
+            casesGroupList,
+            (items, key) => ({
+                key,
+                items,
+            }),
+        );
+
+        const cases = casesGroupArray?.map((item) => ({
+            ...getLatestDateItems(item.items),
+            key: item.key,
+        })).sort(
+            (a, b) => compareNumber(b.contextIndicatorValue, a.contextIndicatorValue),
+        );
+        return cases;
+    }, [
+        countryResponse?.contextualData,
+    ]);
+
+    const numberOfCases = useMemo(() => (
+        countryWiseOutbreakCases.find(
+            (item) => item.key === filterValues?.outbreak,
+        )
+    ), [
+        filterValues?.outbreak,
+        countryWiseOutbreakCases,
+    ]);
+
     const uncertaintyChart: UncertainData[] | undefined = useMemo(() => (
         countryResponse?.dataCountryLevel.map((country) => {
             const negativeRange = negativeToZero(country.indicatorValue, country.errorMargin);
@@ -362,6 +415,8 @@ function MapModal(props: ModalProps) {
                     name={undefined}
                     onClick={handleModalCountryNameClick}
                     variant="action"
+                    actions={<BiLinkExternal />}
+                    actionsContainerClassName={styles.countryLinkIcon}
                 >
                     {
                         // FIXME: here "idmc_short" should be replaced with some other name
@@ -381,7 +436,9 @@ function MapModal(props: ModalProps) {
                                     ? latestIndicatorValue?.indicatorValue
                                     : 0}%`
                                 : normalizedTickFormatter(
-                                    countryResponse?.countryProfile?.totalCases ?? 0,
+                                    filterValues?.outbreak
+                                        ? (numberOfCases?.contextIndicatorValue ?? 0)
+                                        : (countryResponse?.countryProfile?.totalCases ?? 0),
                                 )
                         }
                     </Heading>
