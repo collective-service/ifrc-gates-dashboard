@@ -10,9 +10,10 @@ import {
 import {
     ContainerCard,
 } from '@the-deep/deep-ui';
-import { isDefined, _cs } from '@togglecorp/fujs';
+import { isNotDefined, _cs } from '@togglecorp/fujs';
 
-import { formatNumber, FormatType, getShortMonth } from '#utils/common';
+import { FormatType, getShortMonth } from '#utils/common';
+import CustomTooltip from '#components/CustomTooltip';
 import ChartContainer from '#components/ChartContainer';
 
 import styles from './styles.css';
@@ -62,37 +63,25 @@ function UncertaintyChart(props: Props) {
         loading,
     } = props;
 
-    const customTooltip = (tooltipProps: TooltipProps) => {
+    const custom = (tooltipProps: TooltipProps) => {
         const {
             active,
             payload: data,
         } = tooltipProps;
-        if (active && data && data.length > 0) {
-            const format = data[0].payload?.format;
-            return (
-                <div className={styles.tooltipCard}>
-                    <div className={styles.tooltipHeading}>
-                        {data[0].payload?.indicatorName}
-                    </div>
-                    <div className={styles.tooltipContent}>
-                        {isDefined(data[0].payload?.region)
-                            ? `${data[0].payload?.region} - `
-                            : null}
-                        {`(${data[0].payload?.date})`}
-                    </div>
-                    <div className={styles.tooltipContent}>
-                        {formatNumber(format as FormatType,
-                            data[0].payload?.tooltipValue ?? 0)}
-                        {isDefined(data[0].payload?.minimumValue
-                            && isDefined(data[0].payload.maximumValue))
-                            ? ` [${data[0].payload?.minimumValue} - ${data[0].payload?.maximumValue}] `
-                            : null}
-                    </div>
-                </div>
-            );
+        if (!active || isNotDefined(data) || data.length < 1) {
+            return null;
         }
-
-        return null;
+        return (
+            <CustomTooltip
+                format={data[0].payload?.format ?? 'raw'}
+                heading={data[0].payload?.indicatorName ?? ''}
+                subHeadingLabel={data[0].payload?.region}
+                subHeading={`(${data[0].payload?.date})`}
+                value={data[0].payload?.tooltipValue ?? 0}
+                minValue={data[0].payload?.minimumValue ?? 0}
+                maxValue={data[0].payload?.maximumValue ?? 0}
+            />
+        );
     };
 
     return (
@@ -141,7 +130,7 @@ function UncertaintyChart(props: Props) {
                             strokeWidth: 2,
                         }}
                     />
-                    <Tooltip content={customTooltip} />
+                    <Tooltip content={custom} />
                 </ComposedChart>
             </ChartContainer>
         </ContainerCard>

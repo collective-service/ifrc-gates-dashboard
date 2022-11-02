@@ -11,7 +11,6 @@ import {
     ListView,
     useModalState,
     TextOutput,
-    NumberOutput,
 } from '@the-deep/deep-ui';
 import { gql, useQuery } from '@apollo/client';
 import Map, {
@@ -22,19 +21,17 @@ import Map, {
     MapState,
     MapTooltip,
 } from '@togglecorp/re-map';
+
 import ProgressBar from '#components/ProgressBar';
 import MapLabel from '#components/MapLabel';
 import { regionBounds } from '#utils/regionBounds';
 import {
-    MostRecentValuesQuery,
-    MostRecentValuesQueryVariables,
     MapDataQuery,
     MapDataQueryVariables,
-    HighestLowestCasesQuery,
-    HighestLowestCasesQueryVariables,
+    TopBottomCountriesRankingQuery,
+    TopBottomCountriesRankingQueryVariables,
 } from '#generated/types';
-import { FormatType } from '#utils/common';
-
+import { formatNumber, FormatType } from '#utils/common';
 import { TabTypes } from '#views/Dashboard';
 import { FilterType } from '#views/Dashboard/Filters';
 
@@ -65,121 +62,44 @@ const MAP_DATA = gql`
     }
 `;
 
-const HIGHEST_LOWEST_CASES = gql`
-    query HighestLowestCases(
+const TOP_BOTTOM_COUNTRIES_RANKING = gql`
+    query TopBottomCountriesRanking (
         $emergency: String,
-        $region: String,
-    ) {
-        descCountryEmergencyProfile: countryEmergencyProfile(
-            filters: {
-                contextIndicatorId: "new_cases_per_million",
-                region: $region,
-                emergency: $emergency,
-            }
-            pagination: {
-                limit: 5,
-                offset: 0,
-            }
-            order: {
-                contextIndicatorValue: DESC,
-            }
-        ) {
-            countryName
-            countryId
-            contextIndicatorValue
-            populationSize
-            format
-        }
-        ascCountryEmergencyProfile: countryEmergencyProfile(
-            filters: {
-                contextIndicatorId: "new_cases_per_million",
-                region: $region,
-                emergency: $emergency,
-            }
-            pagination: {
-                limit: 5,
-                offset: 0
-            }
-            order: {
-                contextIndicatorValue: ASC,
-            }
-        ) {
-            countryName
-            countryId
-            contextIndicatorValue
-            populationSize
-            format
-        }
-    }
-`;
-
-const MOST_RECENT_CASES = gql`
-    query MostRecentValues(
-        $emergency: String,
-        $region: String,
         $indicatorId: String,
+        $region: String,
     ) {
-        descMostRecentValues: dataCountryLevelMostRecent(
-            filters: {
-                category: "Global"
-                emergency: $emergency,
-                region: $region,
-                indicatorId: $indicatorId,
-            }
-            pagination: {
-                limit: 5,
-                offset: 0,
-            }
-            order: {
-                indicatorValue: DESC,
-            }
+        topCountriesRanking: overviewRanking(
+            emergency: $emergency,
+            indicatorId: $indicatorId,
+            region: $region,
+            isTop: true,
         ) {
-            id
+            countryId
             countryName
-            iso3
-            indicatorValue
-            populationSize
             format
+            indicatorValue
+            iso3
         }
-        ascMostRecentValues: dataCountryLevelMostRecent(
-            filters: {
-                category: "Global"
-                emergency: $emergency,
-                region: $region,
-                indicatorId: $indicatorId,
-            }
-            pagination: {
-                limit: 5,
-                offset: 0
-            }
-            order: {
-                indicatorValue: ASC,
-            }
+        bottomCountriesRanking: overviewRanking(
+            emergency: $emergency,
+            indicatorId: $indicatorId,
+            region: $region,
+            isTop: false,
         ) {
-            id
+            countryId
             countryName
-            iso3
-            indicatorValue
-            populationSize
             format
+            indicatorValue
+            iso3
         }
     }
 `;
 
 type OverviewMapDataType = NonNullable<MapDataQuery['overviewMap']>[number];
-type AscendingCountryProfileType = NonNullable<HighestLowestCasesQuery['ascCountryEmergencyProfile']>[number];
-type DescendingCountryProfileType = NonNullable<HighestLowestCasesQuery['descCountryEmergencyProfile']>[number];
+type TopCountryType = NonNullable<TopBottomCountriesRankingQuery['topCountriesRanking']>[number];
+type BottomCountryType = NonNullable<TopBottomCountriesRankingQuery['bottomCountriesRanking']>[number];
 
-type AscendingMostRecentIndicatorType = NonNullable<MostRecentValuesQuery['descMostRecentValues']>[number];
-type DescendingMostRecentIndicatorType = NonNullable<MostRecentValuesQuery['ascMostRecentValues']>[number];
-
-const progressBarKeySelector = (
-    d: AscendingCountryProfileType | DescendingCountryProfileType,
-) => d.countryId;
-
-const recentProgressBarKeySelector = (
-    d: AscendingMostRecentIndicatorType | DescendingMostRecentIndicatorType,
-) => d.id;
+const countriesRankingKeySelector = (d: TopCountryType | BottomCountryType) => d.countryId;
 
 interface MapViewProps {
     className?: string;
@@ -203,6 +123,7 @@ interface ClickedPoint {
 interface TooltipProps {
     countryName: string | undefined;
     indicatorData: OverviewMapDataType | undefined;
+    indicatorName: string | undefined;
     onHide: () => void;
     lngLat: mapboxgl.LngLatLike;
 }
@@ -240,22 +161,13 @@ const barHeight = 10;
     return comparison;
 } */
 
-function getTooltipValue(indicatorData: OverviewMapDataType | undefined) {
-    if (indicatorData?.format === 'percent') {
-        return (Math.round((indicatorData?.indicatorValue) * 1000) / 100) ?? 0;
-    }
-    if (indicatorData?.format === 'raw') {
-        return indicatorData?.indicatorValue;
-    }
-    return 0;
-}
-
 function Tooltip(props: TooltipProps) {
     const {
         countryName,
         lngLat,
         onHide,
         indicatorData,
+        indicatorName,
     } = props;
 
     return (
@@ -267,17 +179,25 @@ function Tooltip(props: TooltipProps) {
         >
             <TextOutput
                 block
-                label={countryName}
-                value={indicatorData ? (
-                    <NumberOutput
-                        suffix={indicatorData.format === 'percent' ? '%' : '(Outbreak)'}
-                        value={getTooltipValue(indicatorData)}
-                        normal={indicatorData.format === 'raw'}
-                        precision={1}
-                    />
-                ) : (
-                    'N/A'
+                labelContainerClassName={styles.label}
+                label={(
+                    <>
+                        {countryName}
+                        {/* TODO: Get outbreak from server */}
+                        <div className={styles.description}>
+                            {isDefined(indicatorName)
+                                ? indicatorName
+                                : 'New cases per million for COVID-19'}
+                        </div>
+                    </>
                 )}
+                value={
+                    formatNumber(
+                        (indicatorData?.format ?? 'raw') as FormatType,
+                        indicatorData?.indicatorValue,
+                    )
+                }
+                hideLabelColon
             />
         </MapTooltip>
     );
@@ -331,26 +251,24 @@ function MapView(props: MapViewProps) {
         },
     );
 
-    const highestLowestCasesVariables = useMemo((): HighestLowestCasesQueryVariables => ({
-        // indicatorId: filterValues?.indicator,
+    const countriesRankingVariables = useMemo(() => ({
         emergency: filterValues?.outbreak,
+        indicatorId: filterValues?.indicator,
         region: filterValues?.region,
-    }), [
-        filterValues,
-    ]);
+    }), [filterValues]);
+
     const {
-        data: highestLowestCasesData,
-        loading: highestLowestCasesLoading,
-    } = useQuery<HighestLowestCasesQuery, HighestLowestCasesQueryVariables>(
-        HIGHEST_LOWEST_CASES,
+        data: countriesRankingData,
+        loading: countriesRankingLoading,
+    } = useQuery<TopBottomCountriesRankingQuery, TopBottomCountriesRankingQueryVariables>(
+        TOP_BOTTOM_COUNTRIES_RANKING,
         {
-            skip: isDefined(filterValues?.indicator),
-            variables: highestLowestCasesVariables,
+            variables: countriesRankingVariables,
         },
     );
 
-    const highestValueWithoutIndicator = highestLowestCasesData
-        ?.descCountryEmergencyProfile[0]?.contextIndicatorValue;
+    const topCountriesList = countriesRankingData?.topCountriesRanking;
+    const bottomCountriesList = countriesRankingData?.bottomCountriesRanking;
 
     /*
     FIX ME: This might be required to find the highest value for indicatorValue
@@ -359,25 +277,6 @@ function MapView(props: MapViewProps) {
     const highestIndicatorValues = indicatorValues && Math.max(...indicatorValues.filter(
         (x): x is number => x !== null && x !== undefined));
     */
-
-    const mostRecentVariables = useMemo(() => ({
-        indicatorId: filterValues?.indicator,
-        emergency: filterValues?.outbreak,
-        region: filterValues?.region,
-    }), [filterValues]);
-
-    const {
-        data: mostRecentValues,
-        loading: mostRecentValuesLoading,
-    } = useQuery<MostRecentValuesQuery, MostRecentValuesQueryVariables>(
-        MOST_RECENT_CASES,
-        {
-            skip: !isDefined(filterValues?.indicator),
-            variables: mostRecentVariables,
-        },
-    );
-
-    const highestValueWithIndicator = mostRecentValues?.descMostRecentValues[0]?.indicatorValue;
 
     const mapIndicatorState = useMemo(() => {
         const countryIndicator = overviewMapData?.overviewMap?.map(
@@ -403,8 +302,8 @@ function MapView(props: MapViewProps) {
         [showMapModal],
     );
 
-    const recentHighValuesWithIndicator = mostRecentValues?.descMostRecentValues;
-    const recentLowValuesWithIndicator = mostRecentValues?.ascMostRecentValues;
+    const highestTopRankingValue = countriesRankingData?.topCountriesRanking[0]?.indicatorValue;
+
     // Note: This sorting logic maybe required in future
     // const sortedRecentLowValues = [...recentLowValuesWithIndicator ?? []]
     // .sort(compareLowestValues);
@@ -413,34 +312,21 @@ function MapView(props: MapViewProps) {
 
     const highestDataOnMap = formatOnMap === 'percent' ? 1 : mapIndicatorState[0]?.value;
 
-    const progressBarRendererParams = useCallback(
-        (_: string, data: AscendingCountryProfileType | DescendingCountryProfileType) => ({
-            barHeight,
-            barName: data.countryName ?? 'N/A',
-            title: data.countryName ?? 'N/A',
-            valueTitle: data.countryName ?? 'N/A',
-            value: data?.contextIndicatorValue,
-            totalValue: highestValueWithoutIndicator,
-            color: '#98A6B5',
-            format: data.format as FormatType,
-        }), [highestValueWithoutIndicator],
-    );
-
-    const recentProgressBarRendererParams = useCallback(
+    const countriesRankingRendererParams = useCallback(
         (
             _: string,
-            data: AscendingMostRecentIndicatorType | DescendingMostRecentIndicatorType,
+            data: TopCountryType | BottomCountryType,
         ) => ({
             barHeight,
             barName: data.countryName ?? 'N/A',
             title: data.countryName ?? 'N/A',
             valueTitle: data.countryName ?? 'N/A',
             value: data.indicatorValue,
-            totalValue: highestValueWithIndicator,
+            totalValue: highestTopRankingValue,
             color: '#98A6B5',
             format: data.format as FormatType,
         }),
-        [highestValueWithIndicator],
+        [highestTopRankingValue],
     );
 
     const handlePointHover = React.useCallback(
@@ -554,6 +440,7 @@ function MapView(props: MapViewProps) {
                                 countryName={mapClickProperties
                                     ?.feature?.properties?.idmc_short}
                                 indicatorData={selectedCountryIndicator}
+                                indicatorName={selectedIndicatorName}
                                 onHide={handleHoverClose}
                                 lngLat={mapClickProperties.lngLat}
                             />
@@ -565,90 +452,48 @@ function MapView(props: MapViewProps) {
                     maxValue={highestDataOnMap}
                     className={styles.mapLabelBox}
                     isPercent={formatOnMap === 'percent'}
+                    format={formatOnMap as FormatType}
                 />
             </ContainerCard>
             <ContainerCard
                 className={styles.progressBarContainer}
             >
-                {filterValues?.indicator ? (
-                    <>
-                        <div className={styles.highProgressBox}>
-                            <Heading size="extraSmall" className={styles.progressListHeader}>
-                                Top Ranking
-                            </Heading>
-                            <ListView
-                                className={styles.progressList}
-                                keySelector={recentProgressBarKeySelector}
-                                data={recentHighValuesWithIndicator}
-                                renderer={ProgressBar}
-                                rendererParams={recentProgressBarRendererParams}
-                                filtered={false}
-                                errored={false}
-                                pending={mostRecentValuesLoading}
-                                borderBetweenItem
-                                borderBetweenItemWidth="medium"
-                                borderBetweenItemClassName={styles.progressItemBorder}
-                            />
-                        </div>
-                        <div className={styles.lowProgressBox}>
-                            <Heading size="extraSmall" className={styles.progressListHeader}>
-                                Bottom Ranking
-                            </Heading>
-                            <ListView
-                                className={styles.progressList}
-                                keySelector={recentProgressBarKeySelector}
-                                data={recentLowValuesWithIndicator}
-                                renderer={ProgressBar}
-                                rendererParams={recentProgressBarRendererParams}
-                                filtered={false}
-                                errored={false}
-                                pending={mostRecentValuesLoading}
-                                borderBetweenItem
-                                borderBetweenItemWidth="medium"
-                                borderBetweenItemClassName={styles.progressItemBorder}
-                            />
-                        </div>
-                    </>
-                ) : (
-                    <>
-                        <div className={styles.highProgressBox}>
-                            <Heading size="extraSmall" className={styles.progressListHeader}>
-                                Top Ranking
-                            </Heading>
-                            <ListView
-                                className={styles.progressList}
-                                keySelector={progressBarKeySelector}
-                                data={highestLowestCasesData?.descCountryEmergencyProfile}
-                                renderer={ProgressBar}
-                                rendererParams={progressBarRendererParams}
-                                filtered={false}
-                                errored={false}
-                                pending={highestLowestCasesLoading}
-                                borderBetweenItem
-                                borderBetweenItemWidth="medium"
-                                borderBetweenItemClassName={styles.progressItemBorder}
-                            />
-                        </div>
-                        <div className={styles.lowProgressBox}>
-                            <Heading size="extraSmall" className={styles.progressListHeader}>
-                                Bottom Ranking
-                            </Heading>
-                            <ListView
-                                className={styles.progressList}
-                                keySelector={progressBarKeySelector}
-                                data={highestLowestCasesData?.ascCountryEmergencyProfile}
-                                renderer={ProgressBar}
-                                rendererParams={progressBarRendererParams}
-                                filtered={false}
-                                errored={false}
-                                pending={highestLowestCasesLoading}
-                                borderBetweenItem
-                                borderBetweenItemWidth="medium"
-                                borderBetweenItemClassName={styles.progressItemBorder}
-                            />
-                        </div>
-                    </>
-                )}
+                <div className={styles.highProgressBox}>
+                    <Heading size="extraSmall" className={styles.progressListHeader}>
+                        Top Ranking
+                    </Heading>
+                    <ListView
+                        className={styles.progressList}
+                        keySelector={countriesRankingKeySelector}
+                        data={topCountriesList}
+                        renderer={ProgressBar}
+                        rendererParams={countriesRankingRendererParams}
+                        filtered={false}
+                        errored={false}
+                        pending={countriesRankingLoading}
+                        borderBetweenItem
+                        borderBetweenItemWidth="medium"
+                        borderBetweenItemClassName={styles.progressItemBorder}
+                    />
+                </div>
+                <div className={styles.lowProgressBox}>
+                    <Heading size="extraSmall" className={styles.progressListHeader}>
+                        Bottom Ranking
+                    </Heading>
+                    <ListView
+                        className={styles.progressList}
+                        keySelector={countriesRankingKeySelector}
+                        data={bottomCountriesList}
+                        renderer={ProgressBar}
+                        rendererParams={countriesRankingRendererParams}
+                        filtered={false}
+                        errored={false}
+                        pending={countriesRankingLoading}
+                        borderBetweenItem
+                        borderBetweenItemWidth="medium"
+                        borderBetweenItemClassName={styles.progressItemBorder}
+                    />
+                </div>
                 {mapModalShown && (
                     <MapModal
                         onModalClose={hideMapModal}

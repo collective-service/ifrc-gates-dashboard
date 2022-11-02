@@ -1,6 +1,8 @@
 import React from 'react';
 import { _cs } from '@togglecorp/fujs';
 
+import { formatNumber, FormatType } from '#utils/common';
+
 import styles from './styles.css';
 
 export interface Props {
@@ -8,6 +10,7 @@ export interface Props {
     minValue?: number;
     maxValue?: number;
     isPercent?: boolean;
+    format?: FormatType;
 }
 
 function MapLabel(props: Props) {
@@ -16,6 +19,7 @@ function MapLabel(props: Props) {
         minValue,
         maxValue,
         isPercent,
+        format,
     } = props;
 
     return (
@@ -23,10 +27,14 @@ function MapLabel(props: Props) {
             <div className={styles.bar} />
             <div className={styles.labelContainer}>
                 <div>
-                    {isPercent ? '0%' : minValue}
+                    {isPercent
+                        ? '0%'
+                        : formatNumber(format ?? 'raw', minValue)}
                 </div>
                 <div>
-                    {isPercent ? '100%' : maxValue}
+                    {isPercent
+                        ? '100%'
+                        : formatNumber(format ?? 'raw', maxValue)}
                 </div>
             </div>
         </div>
