@@ -110,25 +110,30 @@ const COUNTRY_PROFILE = gql`
             iso3
             countryName
             populationSize
-            internetAccess
-            literacyRate
-            washAccessNational
-            medicalStaff
-            stringency
-            economicSupportIndex
+            region
             readiness
             vulnerability
             risk
             response
-            newCasesRegionShare
-            region
+            stringency
             stringencyRegion
-            washAccessNationalRegion
-            literacyRateRegion
-            internetAccessRegion
+            stringencyFormat
+            economicSupportIndex
             economicSupportIndexRegion
+            medicalStaff
             medicalStaffRegion
+            medicalStaffFormat
+            literacyRate
+            literacyRateRegion
+            literacyRateFormat
+            internetAccess
+            internetAccessRegion
+            internetAccessFormat
+            washAccessNational
+            washAccessNationalRegion
+            washAccessNationalFormat
             newCasesPerMillion
+            newCasesRegionShare
             newDeaths
         }
         disaggregation {
@@ -333,47 +338,166 @@ function Country(props: Props) {
     );
 
     const internetAccess = useMemo(() => (
-        decimalToPercentage(countryResponse?.countryProfile.internetAccess)
-    ), [countryResponse?.countryProfile.internetAccess]);
+        (isDefined(countryResponse?.countryProfile.internetAccess)
+        && countryResponse?.countryProfile.internetAccess !== null)
+            ? formatNumber(
+                (countryResponse?.countryProfile.internetAccessFormat ?? 'raw') as FormatType,
+                countryResponse?.countryProfile.internetAccess,
+            )
+            : undefined
+    ), [
+        countryResponse?.countryProfile.internetAccess,
+        countryResponse?.countryProfile.internetAccessFormat,
+    ]);
 
     const literacyRate = useMemo(() => (
-        decimalToPercentage(countryResponse?.countryProfile.literacyRate)
-    ), [countryResponse?.countryProfile.literacyRate]);
+        (isDefined(countryResponse?.countryProfile?.literacyRate)
+        && countryResponse?.countryProfile?.literacyRate !== null)
+            ? formatNumber(
+                (countryResponse?.countryProfile?.literacyRateFormat ?? 'raw') as FormatType,
+                countryResponse?.countryProfile.literacyRate,
+            )
+            : undefined
+    ), [
+        countryResponse?.countryProfile.literacyRate,
+        countryResponse?.countryProfile.literacyRateFormat,
+    ]);
 
     const washAccessNational = useMemo(() => (
-        decimalToPercentage(countryResponse?.countryProfile.washAccessNational)
-    ), [countryResponse?.countryProfile.washAccessNational]);
+        (isDefined(countryResponse?.countryProfile.washAccessNational)
+        && countryResponse?.countryProfile.washAccessNational !== null)
+            ? formatNumber(
+                (countryResponse?.countryProfile?.washAccessNationalFormat ?? 'raw') as FormatType,
+                countryResponse?.countryProfile.washAccessNational,
+            )
+            : undefined
+    ), [
+        countryResponse?.countryProfile.washAccessNational,
+        countryResponse?.countryProfile.washAccessNationalFormat,
+    ]);
 
     const stringency = useMemo(() => (
-        decimalToPercentage(countryResponse?.countryProfile.stringency)
-    ), [countryResponse?.countryProfile.stringency]);
+        (isDefined(countryResponse?.countryProfile.stringency)
+        && countryResponse?.countryProfile.stringency !== null)
+            ? formatNumber(
+                (countryResponse?.countryProfile?.stringencyFormat ?? 'raw') as FormatType,
+                countryResponse?.countryProfile.stringency,
+            )
+            : undefined
+    ), [
+        countryResponse?.countryProfile.stringency,
+        countryResponse?.countryProfile.stringencyFormat,
+    ]);
 
+    const medicalStaff = useMemo(() => (
+        (isDefined(countryResponse?.countryProfile?.medicalStaff)
+        && countryResponse?.countryProfile?.medicalStaff !== null)
+            ? formatNumber(
+                (countryResponse?.countryProfile?.medicalStaffFormat ?? 'raw') as FormatType,
+                countryResponse?.countryProfile?.medicalStaff,
+            )
+            : undefined
+    ), [
+        countryResponse?.countryProfile?.medicalStaff,
+        countryResponse?.countryProfile?.medicalStaffFormat,
+    ]);
+
+    const medicalStaffRegional = useMemo(() => (
+        (isDefined(countryResponse?.countryProfile?.medicalStaffRegion)
+        && countryResponse?.countryProfile?.medicalStaffRegion !== null)
+            ? formatNumber(
+                (countryResponse?.countryProfile?.medicalStaffFormat ?? 'raw') as FormatType,
+                countryResponse?.countryProfile?.medicalStaffRegion,
+            )
+            : undefined
+    ), [
+        countryResponse?.countryProfile?.medicalStaffRegion,
+        countryResponse?.countryProfile?.medicalStaffFormat,
+    ]);
+
+    // TODO: use format from server
     const economicSupportIndex = useMemo(() => (
-        decimalToPercentage(countryResponse?.countryProfile.economicSupportIndex)
+        (isDefined(countryResponse?.countryProfile?.economicSupportIndex)
+        && countryResponse?.countryProfile?.economicSupportIndex !== null)
+            ? formatNumber(
+                'percent',
+                countryResponse?.countryProfile?.economicSupportIndex,
+            )
+            : undefined
     ), [countryResponse?.countryProfile.economicSupportIndex]);
 
+    // TODO: use format from server
     const economicSupportIndexRegion = useMemo(() => (
-        decimalToPercentage(countryResponse?.countryProfile.economicSupportIndexRegion)
+        (isDefined(countryResponse?.countryProfile.economicSupportIndexRegion)
+        && countryResponse?.countryProfile.economicSupportIndexRegion !== null)
+            ? formatNumber(
+                'percent',
+                countryResponse?.countryProfile.economicSupportIndexRegion,
+            )
+            : undefined
     ), [countryResponse?.countryProfile.economicSupportIndexRegion]);
 
     const stringencyRegion = useMemo(() => (
-        decimalToPercentage(countryResponse?.countryProfile.stringencyRegion)
-    ), [countryResponse?.countryProfile.stringencyRegion]);
+        (isDefined(countryResponse?.countryProfile.stringencyRegion)
+        && countryResponse?.countryProfile.stringencyRegion !== null)
+            ? formatNumber(
+                (countryResponse?.countryProfile?.stringencyFormat ?? 'raw') as FormatType,
+                countryResponse?.countryProfile.stringencyRegion,
+            )
+            : undefined
+    ), [
+        countryResponse?.countryProfile.stringencyRegion,
+        countryResponse?.countryProfile.stringencyFormat,
+    ]);
 
     const washAccessNationalRegion = useMemo(() => (
-        decimalToPercentage(countryResponse?.countryProfile.washAccessNationalRegion)
-    ), [countryResponse?.countryProfile.washAccessNationalRegion]);
+        (isDefined(countryResponse?.countryProfile.washAccessNationalRegion)
+        && countryResponse?.countryProfile.washAccessNationalRegion !== null)
+            ? formatNumber(
+                (countryResponse?.countryProfile.washAccessNationalFormat ?? 'raw') as FormatType,
+                countryResponse?.countryProfile.washAccessNationalRegion,
+            )
+            : undefined
+    ), [
+        countryResponse?.countryProfile.washAccessNationalRegion,
+        countryResponse?.countryProfile.washAccessNationalFormat,
+    ]);
 
     const literacyRateRegion = useMemo(() => (
-        decimalToPercentage(countryResponse?.countryProfile.literacyRateRegion)
-    ), [countryResponse?.countryProfile.literacyRateRegion]);
+        (isDefined(countryResponse?.countryProfile.literacyRateRegion)
+        && countryResponse?.countryProfile.literacyRateRegion !== null)
+            ? formatNumber(
+                (countryResponse?.countryProfile?.literacyRateFormat) as FormatType,
+                countryResponse?.countryProfile.literacyRateRegion,
+            )
+            : undefined
+    ), [
+        countryResponse?.countryProfile.literacyRateRegion,
+        countryResponse?.countryProfile.literacyRateFormat,
+    ]);
 
     const internetAccessRegion = useMemo(() => (
-        decimalToPercentage(countryResponse?.countryProfile.internetAccessRegion)
-    ), [countryResponse?.countryProfile.internetAccessRegion]);
+        (isDefined(countryResponse?.countryProfile.internetAccessRegion)
+        && countryResponse?.countryProfile.internetAccessRegion !== null)
+            ? formatNumber(
+                (countryResponse?.countryProfile.internetAccessFormat ?? 'raw') as FormatType,
+                countryResponse?.countryProfile.internetAccessRegion,
+            )
+            : undefined
+    ), [
+        countryResponse?.countryProfile.internetAccessRegion,
+        countryResponse?.countryProfile.internetAccessFormat,
+    ]);
 
+    // TODO: Use format from server
     const regional = useMemo(() => (
-        decimalToPercentage(countryResponse?.countryProfile.newCasesRegionShare)
+        (isDefined(countryResponse?.countryProfile.newCasesRegionShare)
+        && countryResponse?.countryProfile.newCasesRegionShare !== null)
+            ? formatNumber(
+                'percent',
+                countryResponse?.countryProfile?.newCasesRegionShare,
+            )
+            : undefined
     ), [countryResponse?.countryProfile.newCasesRegionShare]);
 
     const countryWiseOutbreakCases: CountryWiseOutbreakCases[] | undefined = useMemo(() => {
@@ -744,6 +868,7 @@ function Country(props: Props) {
                                     contentClassName={styles.ageDisaggregationContent}
                                     heading="Age Disaggregation"
                                     headerDescription={selectedIndicatorName}
+                                    headingClassName={styles.heading}
                                     headingSize="extraSmall"
                                 >
                                     <div className={styles.ageDisaggregation}>
@@ -885,13 +1010,13 @@ function Country(props: Props) {
                             label="Internet access"
                             value={(
                                 <>
-                                    {`${internetAccess}%`}
+                                    {internetAccess}
                                     {isDefined(internetAccessRegion) && (
                                         <TextOutput
                                             labelContainerClassName={styles.regionalText}
                                             valueContainerClassName={styles.regionalText}
                                             label={countryResponse?.countryProfile.region}
-                                            value={`${internetAccessRegion}%`}
+                                            value={internetAccessRegion}
                                         />
                                     )}
                                 </>
@@ -907,13 +1032,13 @@ function Country(props: Props) {
                             label="Literacy rate"
                             value={(
                                 <>
-                                    {`${literacyRate}%`}
+                                    {literacyRate}
                                     {isDefined(literacyRateRegion) && (
                                         <TextOutput
                                             labelContainerClassName={styles.regionalText}
                                             valueContainerClassName={styles.regionalText}
                                             label={countryResponse?.countryProfile.region}
-                                            value={`${literacyRateRegion}%`}
+                                            value={literacyRateRegion}
                                         />
                                     )}
                                 </>
@@ -929,13 +1054,13 @@ function Country(props: Props) {
                             label="Access to basic washing facilities"
                             value={(
                                 <>
-                                    {`${washAccessNational}%`}
+                                    {washAccessNational}
                                     {isDefined(washAccessNationalRegion) && (
                                         <TextOutput
                                             labelContainerClassName={styles.regionalText}
                                             valueContainerClassName={styles.regionalText}
                                             label={countryResponse?.countryProfile.region}
-                                            value={`${washAccessNationalRegion}%`}
+                                            value={washAccessNationalRegion}
                                         />
                                     )}
                                 </>
@@ -951,16 +1076,14 @@ function Country(props: Props) {
                             label="Doctors and nurses per 1000 people"
                             value={(
                                 <>
-                                    {(countryResponse?.countryProfile.medicalStaff)?.toFixed(2)}
+                                    {medicalStaff}
                                     {isDefined(countryResponse?.countryProfile.medicalStaffRegion)
                                         && (
                                             <TextOutput
                                                 labelContainerClassName={styles.regionalText}
                                                 valueContainerClassName={styles.regionalText}
                                                 label={countryResponse?.countryProfile.region}
-                                                value={(countryResponse
-                                                    ?.countryProfile.medicalStaffRegion)
-                                                    ?.toFixed(2)}
+                                                value={medicalStaffRegional}
                                             />
                                         )}
                                 </>
@@ -976,13 +1099,13 @@ function Country(props: Props) {
                             label="Stringency"
                             value={(
                                 <>
-                                    {`${stringency}%`}
+                                    {stringency}
                                     {isDefined(stringencyRegion) && (
                                         <TextOutput
                                             labelContainerClassName={styles.regionalText}
                                             valueContainerClassName={styles.regionalText}
                                             label={countryResponse?.countryProfile.region}
-                                            value={`${stringencyRegion}%`}
+                                            value={stringencyRegion}
                                         />
                                     )}
                                 </>
@@ -996,7 +1119,7 @@ function Country(props: Props) {
                             labelContainerClassName={styles.labelText}
                             hideLabelColon
                             label="Regional cases %"
-                            value={`${regional}%`}
+                            value={regional}
                         />
                     )}
                     {isDefined(economicSupportIndex) && (
@@ -1008,13 +1131,13 @@ function Country(props: Props) {
                             label="Economic support index"
                             value={(
                                 <>
-                                    {`${economicSupportIndex}%`}
+                                    {economicSupportIndex}
                                     {isDefined(economicSupportIndexRegion) && (
                                         <TextOutput
                                             labelContainerClassName={styles.regionalText}
                                             valueContainerClassName={styles.regionalText}
                                             label={countryResponse?.countryProfile.region}
-                                            value={`${economicSupportIndexRegion}%`}
+                                            value={economicSupportIndexRegion}
                                         />
                                     )}
                                 </>
