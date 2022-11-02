@@ -253,6 +253,21 @@ const COUNTRY_PROFILE = gql`
             emergency
             format
         }
+        dataCountryLevelMostRecent (
+            filters: {
+                iso3: $iso3,
+                indicatorId: $indicatorId,
+                category: "Global",
+                emergency: $emergency,
+            }
+            order: {
+                indicatorMonth: DESC
+            }
+        ) {
+            indicatorDescription
+            indicatorMonth
+            indicatorValue
+        }
     }
 `;
 
@@ -594,15 +609,15 @@ function Country(props: Props) {
     ), [countryResponse?.dataCountryLevel]);
 
     const statusUncertainty = useMemo(() => {
-        const dataCountryLevel = countryResponse?.dataCountryLevel;
+        const dataCountryLevel = countryResponse?.dataCountryLevelMostRecent;
         if (!dataCountryLevel) {
             return undefined;
         }
         const getLatestUncertain = [...dataCountryLevel].sort(
-            (a, b) => compareDate(a.indicatorMonth, b.indicatorMonth),
+            (a, b) => compareDate(b.indicatorMonth, a.indicatorMonth),
         );
         return getLatestUncertain[0];
-    }, [countryResponse?.dataCountryLevel]);
+    }, [countryResponse?.dataCountryLevelMostRecent]);
 
     const ageDisaggregation = useMemo(() => countryResponse
         ?.disaggregation.ageDisaggregation.map((age) => (
