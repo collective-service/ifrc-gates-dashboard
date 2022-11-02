@@ -173,7 +173,7 @@ function IndicatorValue(props: IndicatorValueProps) {
         }
         return colorRange?.find(
             (range) => value > range.minValue
-            && value <= range.maxValue,
+                && value <= range.maxValue,
         )?.color;
     }, [
         colorRange,
@@ -245,7 +245,7 @@ function OverviewTable(props: Props) {
                 a.indicatorValue,
                 b.indicatorValue,
                 -1,
-            ))?.[0].indicatorValue;
+            ))?.[0]?.indicatorValue;
 
         return colors.map((color, index) => (
             {
@@ -348,7 +348,8 @@ function OverviewTable(props: Props) {
                 pending={tableValuesLoading}
                 filtered={false}
                 pendingMessage="Loading..."
-                emptyMessage="No projects to show."
+                emptyMessage="No data to show."
+                messageShown
             />
         </SortContext.Provider>
     );

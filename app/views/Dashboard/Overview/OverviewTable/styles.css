@@ -1,5 +1,4 @@
 .table-wrapper {
-    display: flex;
     height: 42rem;
 
     .each-table-cell {
