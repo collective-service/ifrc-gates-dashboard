@@ -99,7 +99,8 @@ const OVERVIEW_STATS = gql`
             filters: {
                 emergency: $emergency,
                 indicatorId: $indicatorId,
-                isTwelveMonth: true
+                isTwelveMonth: true,
+                category: "Global",
             }
             pagination: {
                 limit: 1,
@@ -163,6 +164,7 @@ const OVERVIEW_STATS = gql`
                 emergency: $emergency,
                 indicatorId: $indicatorId,
                 isRegionalChart: true,
+                category: "Global",
             }
             order: {
                 indicatorMonth: DESC
