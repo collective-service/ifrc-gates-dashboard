@@ -8,6 +8,7 @@ import {
     Button,
     ListView,
     useModalState,
+    PendingMessage,
 } from '@the-deep/deep-ui';
 import { _cs } from '@togglecorp/fujs';
 import {
@@ -89,6 +90,7 @@ function Sources(props: Props) {
 
     const {
         data: sourcesResponse,
+        loading: sourcesResponseLoading,
     } = useQuery<CombinedSourcesQuery, CombinedSourcesQueryVariables>(
         COMBINED_SOURCES,
         {
@@ -110,43 +112,49 @@ function Sources(props: Props) {
         organization: data?.organisation,
     }), []);
 
-    if ((sourcesResponse?.dataGranular?.length ?? 0) === 0) {
-        return null;
-    }
-
     return (
-        <Container
-            className={_cs(className, styles.sources)}
-            heading="Sources"
-            headingSize="extraSmall"
-            spacing="compact"
-            headerActions={(sourcesResponse?.dataGranular.length ?? 0) > 3 && (
-                <Button
-                    name={undefined}
-                    variant="transparent"
-                    onClick={showSourceModal}
-                    actions={<IoChevronDownOutline />}
-                >
-                    View all
-                </Button>
-            )}
-        >
-            <ListView
-                renderer={Source}
-                rendererParams={sourcesRendererParams}
-                keySelector={sourcesKeySelector}
-                data={sourcesList}
-                errored={false}
-                filtered={false}
-                pending={false}
-            />
-            {sourceModalShown && (
-                <SourcesModal
-                    onModalClose={hideSourceModal}
-                    sourcesList={sourcesResponse?.dataGranular}
-                />
-            )}
-        </Container>
+        <>
+            {sourcesResponseLoading && <PendingMessage />}
+            {(sourcesResponse?.dataGranular?.length ?? 0) === 0
+                ? (
+                    <div className={styles.noSources}>
+                        No Sources Available
+                    </div>
+                ) : (
+                    <Container
+                        className={_cs(className, styles.sources)}
+                        heading="Sources"
+                        headingSize="extraSmall"
+                        spacing="compact"
+                        headerActions={(sourcesResponse?.dataGranular.length ?? 0) > 3 && (
+                            <Button
+                                name={undefined}
+                                variant="transparent"
+                                onClick={showSourceModal}
+                                actions={<IoChevronDownOutline />}
+                            >
+                                View all
+                            </Button>
+                        )}
+                    >
+                        <ListView
+                            renderer={Source}
+                            rendererParams={sourcesRendererParams}
+                            keySelector={sourcesKeySelector}
+                            data={sourcesList}
+                            errored={false}
+                            filtered={false}
+                            pending={false}
+                        />
+                        {sourceModalShown && (
+                            <SourcesModal
+                                onModalClose={hideSourceModal}
+                                sourcesList={sourcesResponse?.dataGranular}
+                            />
+                        )}
+                    </Container>
+                )}
+        </>
     );
 }
 

@@ -5,3 +5,7 @@
     width: 40vw;
     gap: var(--dui-spacing-extra-small);
 }
+
+.no-sources {
+    color: var(--dui-color-text);
+}
