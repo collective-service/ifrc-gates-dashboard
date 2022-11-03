@@ -26,23 +26,42 @@
 
                 .status-container {
                     display: flex;
-                    flex-wrap: wrap-reverse;
                     gap: var(--dui-spacing-large);
+
+                    &.wrap-reversed {
+                        flex-wrap: wrap-reverse;
+                    }
 
                     .info-cards {
                         display: flex;
+                        flex-shrink: 0;
                         flex-wrap: wrap-reverse;
                         gap: var(--dui-spacing-large);
                     }
 
-                    .readiness-list-card {
+                    .score-card {
                         display: flex;
+                        flex-direction: column;
                         flex-grow: 1;
-                        flex-wrap: wrap;
                         box-shadow: 0px 0px 10px var(--dui-card-box-shadow);
                         background-color: var(--dui-color-foreground);
                         padding: var(--dui-spacing-medium);
-                        gap: var(--dui-spacing-medium);
+                        gap: var(--dui-spacing-large);
+
+                        .score-heading {
+                            flex-shrink: 0;
+                            font-size: var(--dui-font-size-large);
+                        }
+                        .score-footer {
+                            flex-shrink: 0;
+                            font-size: var(--dui-font-size-medium);
+                            overflow-wrap: break-word;
+                        }
+                        .readiness-list-card {
+                            display: flex;
+                            flex-wrap: wrap;
+                            gap: var(--dui-spacing-medium);
+                        }
                     }
                 }
             }

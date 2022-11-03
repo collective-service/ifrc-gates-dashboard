@@ -223,7 +223,10 @@ function MapModal(props: ModalProps) {
 
     const handleModalCountryNameClick = useCallback(() => {
         setActiveTab('country');
-        setFilterValues({ country: countryData?.properties?.iso3 });
+        setFilterValues((old) => ({
+            ...old,
+            country: countryData?.properties?.iso3,
+        }));
     }, [
         countryData,
         setActiveTab,

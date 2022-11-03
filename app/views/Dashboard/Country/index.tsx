@@ -771,7 +771,10 @@ function Country(props: Props) {
                 <div className={styles.countryDetailWrapper}>
                     <ContainerCard
                         className={styles.statusCardContainer}
-                        contentClassName={styles.statusContainer}
+                        contentClassName={_cs(
+                            styles.statusContainer,
+                            countryWiseOutbreakCases.length > 1 && styles.wrapReversed,
+                        )}
                     >
                         {countryWiseOutbreakCases.length > 0 && (
                             <ListView
@@ -785,16 +788,29 @@ function Country(props: Props) {
                                 pending={false}
                             />
                         )}
-                        <ListView
-                            className={styles.readinessListCard}
-                            renderer={ScoreCard}
-                            rendererParams={readinessRendererParams}
-                            data={scoreCardData}
-                            keySelector={readinessKeySelector}
-                            errored={false}
-                            filtered={false}
-                            pending={false}
-                        />
+                        <div className={styles.scoreCard}>
+                            <span className={styles.scoreHeading}>
+                                Global Health Security Index
+                            </span>
+                            <ListView
+                                className={styles.readinessListCard}
+                                renderer={ScoreCard}
+                                rendererParams={readinessRendererParams}
+                                data={scoreCardData}
+                                keySelector={readinessKeySelector}
+                                errored={false}
+                                filtered={false}
+                                pending={false}
+                            />
+                            <span className={styles.scoreFooter}>
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                                Nam posuere lorem nec elementum dapibus.
+                                Maecenas eu massa at sapien semper pharetra.
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                                Nam posuere lorem nec elementum dapibus.
+                                Maecenas eu massa at sapien semper pharetra.
+                            </span>
+                        </div>
                     </ContainerCard>
                     {filterValues?.indicator ? (
                         <div className={styles.indicatorWrapper}>
