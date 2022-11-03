@@ -212,6 +212,16 @@ function Filters(props: Props) {
         return doesObjectHaveNoData(value, ['']);
     }, [value, activeTab]);
 
+    const regionFilteredCountries = useMemo(() => (
+        (value?.region && activeTab === 'combinedIndicators')
+            ? countries.filter((country) => country.region === value?.region)
+            : countries
+    ), [
+        countries,
+        value?.region,
+        activeTab,
+    ]);
+
     return (
         <div className={styles.filtersWrapper}>
             <div className={styles.filters}>
@@ -256,7 +266,7 @@ function Filters(props: Props) {
                 {(activeTab === 'combinedIndicators') && (
                     <SelectInput
                         name="country"
-                        options={countries}
+                        options={regionFilteredCountries}
                         placeholder="Country"
                         keySelector={countriesKeySelector}
                         labelSelector={countriesLabelSelector}

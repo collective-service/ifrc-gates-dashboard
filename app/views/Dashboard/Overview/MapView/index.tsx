@@ -7,6 +7,7 @@ import {
 } from '@togglecorp/fujs';
 import {
     Heading,
+    PendingMessage,
     ContainerCard,
     ListView,
     useModalState,
@@ -244,6 +245,7 @@ function MapView(props: MapViewProps) {
 
     const {
         data: overviewMapData,
+        loading: mapDataLoading,
     } = useQuery<MapDataQuery, MapDataQueryVariables>(
         MAP_DATA,
         {
@@ -386,6 +388,7 @@ function MapView(props: MapViewProps) {
     return (
         <div className={_cs(className, styles.mapViewWrapper)}>
             <ContainerCard className={styles.mapContainer}>
+                {mapDataLoading && <PendingMessage />}
                 <Map
                     mapStyle={lightStyle}
                     mapOptions={{
