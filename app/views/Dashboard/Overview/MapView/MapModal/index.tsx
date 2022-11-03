@@ -213,6 +213,7 @@ function MapModal(props: ModalProps) {
 
     const {
         data: countryResponse,
+        loading: countryResponseLoading,
     } = useQuery<CountryModalQuery, CountryModalQueryVariables>(
         COUNTRY_PROFILE,
         {
@@ -455,6 +456,7 @@ function MapModal(props: ModalProps) {
                 <div className={styles.chartContainer}>
                     <ChartContainer
                         data={emergencyLineChart}
+                        loading={countryResponseLoading}
                     >
                         <LineChart
                             data={emergencyLineChart}
@@ -496,9 +498,10 @@ function MapModal(props: ModalProps) {
                     </ChartContainer>
                 </div>
             )}
-            {(uncertaintyChart?.length ?? 0) > 0 && filterValues?.indicator && (
+            {filterValues?.indicator && (
                 <UncertaintyChart
                     className={styles.chartContainer}
+                    loading={countryResponseLoading}
                     uncertainData={(uncertaintyChart && uncertaintyChart) ?? []}
                     emergencyFilterValue={filterValues?.outbreak}
                     heading="Indicator overview over the last 12 months"
