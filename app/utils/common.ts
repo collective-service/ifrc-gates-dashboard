@@ -161,7 +161,7 @@ export const negativeToZero = (
         const valueErr = isNotDefined(errorMarginValue) ? 0 : errorMarginValue;
         const difference = (valueInd - valueErr) < 0 ? 0 : valueInd - valueErr;
 
-        return (difference);
+        return decimalToPercentage(difference);
     }
 );
 
