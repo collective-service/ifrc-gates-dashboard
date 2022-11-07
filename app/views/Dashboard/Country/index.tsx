@@ -61,22 +61,20 @@ interface ScoreCardProps {
     value?: number;
     indicator?: 'red' | 'yellow' | 'orange' | 'green';
 }
-interface EmergencyItems {
-    iso3: string;
-    emergency: string;
-    contextIndicatorValue?: number | null;
-    contextIndicatorId: string;
-    contextDate: string;
-    newDeaths?: number | null;
-    newCasesPerMillion?: number | null;
-}
-interface CountryWiseOutbreakCases extends EmergencyItems {
-    key: string;
+interface CountryWiseOutbreakCases {
+    id: string;
+    emergency?: string;
+    totalCases?: number | null;
+    totalDeaths?: string | null;
+    newCases?: string | null;
+    newDeaths?: string | null;
+    newCasesPerMillion?: string | null;
+    newDeathsPerMillion?: string | null;
 }
 
 const dateTickFormatter = (d: string) => getShortMonth(d);
 const normalizedTickFormatter = (d: number) => normalFormatter().format(d);
-const percentageKeySelector = (d: CountryWiseOutbreakCases) => d.key;
+const percentageKeySelector = (d: CountryWiseOutbreakCases) => d.id;
 const readinessKeySelector = (d: ScoreCardProps) => d.title;
 const customLabel = (val: number | string | undefined) => (
     `${val}%`
@@ -215,43 +213,71 @@ const COUNTRY_PROFILE = gql`
               format
             }
         }
-        newDeaths: countryEmergencyProfile(
+        newDeaths: dataCountryLevelMostRecent(
             filters: {
-                contextIndicatorId: "new_deaths",
+                indicatorId: "new_deaths",
                 iso3: $iso3,
             }
-            pagination: {
-                limit: 5
-                offset: 0
-            }
-            order: {
-                contextDate: DESC
-            }
         ) {
-            id
-            contextIndicatorValue
-            contextDate
+            indicatorValue
             emergency
             format
+            id
         }
-        newCasesPerMillion: countryEmergencyProfile(
+        totalDeaths: dataCountryLevelMostRecent(
             filters: {
-                contextIndicatorId: "new_cases_per_million",
+                indicatorId: "total_deaths",
                 iso3: $iso3,
             }
-            pagination: {
-                limit: 5
-                offset: 0
-            }
-            order: {
-                contextDate: DESC
-            }
         ) {
-            id
-            contextIndicatorValue
-            contextDate
+            indicatorValue
             emergency
             format
+            id
+        }
+        newCases: dataCountryLevelMostRecent(
+            filters: {
+                indicatorId: "new_cases",
+                iso3: $iso3,
+            }
+        ) {
+            indicatorValue
+            emergency
+            format
+            id
+        }
+        newDeathsPerMillion: dataCountryLevelMostRecent(
+            filters: {
+                indicatorId: "new_deaths_per_million",
+                iso3: $iso3,
+            }
+        ) {
+            indicatorValue
+            emergency
+            format
+            id
+        }
+        newCasesPerMillion: dataCountryLevelMostRecent(
+            filters: {
+                indicatorId: "new_cases_per_million",
+                iso3: $iso3,
+            }
+        ) {
+            indicatorValue
+            emergency
+            format
+            id
+        }
+        totalCases: dataCountryLevelMostRecent(
+            filters: {
+                indicatorId: "total_cases",
+                iso3: $iso3,
+            }
+        ) {
+            indicatorValue
+            emergency
+            format
+            id
         }
         dataCountryLevelMostRecent (
             filters: {
@@ -354,7 +380,7 @@ function Country(props: Props) {
 
     const internetAccess = useMemo(() => (
         (isDefined(countryResponse?.countryProfile.internetAccess)
-        && countryResponse?.countryProfile.internetAccess !== null)
+            && countryResponse?.countryProfile.internetAccess !== null)
             ? formatNumber(
                 (countryResponse?.countryProfile.internetAccessFormat ?? 'raw') as FormatType,
                 countryResponse?.countryProfile.internetAccess,
@@ -367,7 +393,7 @@ function Country(props: Props) {
 
     const literacyRate = useMemo(() => (
         (isDefined(countryResponse?.countryProfile?.literacyRate)
-        && countryResponse?.countryProfile?.literacyRate !== null)
+            && countryResponse?.countryProfile?.literacyRate !== null)
             ? formatNumber(
                 (countryResponse?.countryProfile?.literacyRateFormat ?? 'raw') as FormatType,
                 countryResponse?.countryProfile.literacyRate,
@@ -380,7 +406,7 @@ function Country(props: Props) {
 
     const washAccessNational = useMemo(() => (
         (isDefined(countryResponse?.countryProfile.washAccessNational)
-        && countryResponse?.countryProfile.washAccessNational !== null)
+            && countryResponse?.countryProfile.washAccessNational !== null)
             ? formatNumber(
                 (countryResponse?.countryProfile?.washAccessNationalFormat ?? 'raw') as FormatType,
                 countryResponse?.countryProfile.washAccessNational,
@@ -393,7 +419,7 @@ function Country(props: Props) {
 
     const stringency = useMemo(() => (
         (isDefined(countryResponse?.countryProfile.stringency)
-        && countryResponse?.countryProfile.stringency !== null)
+            && countryResponse?.countryProfile.stringency !== null)
             ? formatNumber(
                 (countryResponse?.countryProfile?.stringencyFormat ?? 'raw') as FormatType,
                 countryResponse?.countryProfile.stringency,
@@ -406,7 +432,7 @@ function Country(props: Props) {
 
     const medicalStaff = useMemo(() => (
         (isDefined(countryResponse?.countryProfile?.medicalStaff)
-        && countryResponse?.countryProfile?.medicalStaff !== null)
+            && countryResponse?.countryProfile?.medicalStaff !== null)
             ? formatNumber(
                 (countryResponse?.countryProfile?.medicalStaffFormat ?? 'raw') as FormatType,
                 countryResponse?.countryProfile?.medicalStaff,
@@ -419,7 +445,7 @@ function Country(props: Props) {
 
     const medicalStaffRegional = useMemo(() => (
         (isDefined(countryResponse?.countryProfile?.medicalStaffRegion)
-        && countryResponse?.countryProfile?.medicalStaffRegion !== null)
+            && countryResponse?.countryProfile?.medicalStaffRegion !== null)
             ? formatNumber(
                 (countryResponse?.countryProfile?.medicalStaffFormat ?? 'raw') as FormatType,
                 countryResponse?.countryProfile?.medicalStaffRegion,
@@ -433,7 +459,7 @@ function Country(props: Props) {
     // TODO: use format from server
     const economicSupportIndex = useMemo(() => (
         (isDefined(countryResponse?.countryProfile?.economicSupportIndex)
-        && countryResponse?.countryProfile?.economicSupportIndex !== null)
+            && countryResponse?.countryProfile?.economicSupportIndex !== null)
             ? formatNumber(
                 'percent',
                 countryResponse?.countryProfile?.economicSupportIndex,
@@ -444,7 +470,7 @@ function Country(props: Props) {
     // TODO: use format from server
     const economicSupportIndexRegion = useMemo(() => (
         (isDefined(countryResponse?.countryProfile.economicSupportIndexRegion)
-        && countryResponse?.countryProfile.economicSupportIndexRegion !== null)
+            && countryResponse?.countryProfile.economicSupportIndexRegion !== null)
             ? formatNumber(
                 'percent',
                 countryResponse?.countryProfile.economicSupportIndexRegion,
@@ -454,7 +480,7 @@ function Country(props: Props) {
 
     const stringencyRegion = useMemo(() => (
         (isDefined(countryResponse?.countryProfile.stringencyRegion)
-        && countryResponse?.countryProfile.stringencyRegion !== null)
+            && countryResponse?.countryProfile.stringencyRegion !== null)
             ? formatNumber(
                 (countryResponse?.countryProfile?.stringencyFormat ?? 'raw') as FormatType,
                 countryResponse?.countryProfile.stringencyRegion,
@@ -467,7 +493,7 @@ function Country(props: Props) {
 
     const washAccessNationalRegion = useMemo(() => (
         (isDefined(countryResponse?.countryProfile.washAccessNationalRegion)
-        && countryResponse?.countryProfile.washAccessNationalRegion !== null)
+            && countryResponse?.countryProfile.washAccessNationalRegion !== null)
             ? formatNumber(
                 (countryResponse?.countryProfile.washAccessNationalFormat ?? 'raw') as FormatType,
                 countryResponse?.countryProfile.washAccessNationalRegion,
@@ -480,7 +506,7 @@ function Country(props: Props) {
 
     const literacyRateRegion = useMemo(() => (
         (isDefined(countryResponse?.countryProfile.literacyRateRegion)
-        && countryResponse?.countryProfile.literacyRateRegion !== null)
+            && countryResponse?.countryProfile.literacyRateRegion !== null)
             ? formatNumber(
                 (countryResponse?.countryProfile?.literacyRateFormat) as FormatType,
                 countryResponse?.countryProfile.literacyRateRegion,
@@ -493,7 +519,7 @@ function Country(props: Props) {
 
     const internetAccessRegion = useMemo(() => (
         (isDefined(countryResponse?.countryProfile.internetAccessRegion)
-        && countryResponse?.countryProfile.internetAccessRegion !== null)
+            && countryResponse?.countryProfile.internetAccessRegion !== null)
             ? formatNumber(
                 (countryResponse?.countryProfile.internetAccessFormat ?? 'raw') as FormatType,
                 countryResponse?.countryProfile.internetAccessRegion,
@@ -507,7 +533,7 @@ function Country(props: Props) {
     // TODO: Use format from server
     const regional = useMemo(() => (
         (isDefined(countryResponse?.countryProfile.newCasesRegionShare)
-        && countryResponse?.countryProfile.newCasesRegionShare !== null)
+            && countryResponse?.countryProfile.newCasesRegionShare !== null)
             ? formatNumber(
                 'percent',
                 countryResponse?.countryProfile?.newCasesRegionShare,
@@ -515,51 +541,55 @@ function Country(props: Props) {
             : undefined
     ), [countryResponse?.countryProfile.newCasesRegionShare]);
 
-    const countryWiseOutbreakCases: CountryWiseOutbreakCases[] | undefined = useMemo(() => {
-        const casesGroupList = listToGroupList(
-            countryResponse?.contextualData ?? [],
-            (emergency) => emergency.emergency,
-        );
-
-        const getLatestDateItems = (items: EmergencyItems[]) => {
-            [...items].sort((a, b) => compareDate(a.contextDate, b.contextDate, -1));
-
-            return items[0];
-        };
-
-        const casesGroupArray = mapToList(
-            casesGroupList,
-            (items, key) => ({
-                key,
-                items,
-            }),
-        );
-
-        const cases = casesGroupArray?.map((item) => {
-            const newDeaths = countryResponse?.newDeaths.find(
-                (deaths) => deaths.emergency === item.key,
-            );
-            const newCasesPerMillion = countryResponse?.newCasesPerMillion.find(
-                (million) => million.emergency === item.key,
+    const countryWiseOutbreakCases: CountryWiseOutbreakCases[] | undefined = useMemo(() => (
+        countryResponse?.totalCases.map((total) => {
+            const totalDeaths = countryResponse.totalDeaths.find(
+                (deaths) => deaths.emergency === total.emergency,
             );
 
-            const valueToReturn = {
-                ...getLatestDateItems(item.items),
-                key: item.key,
-                newDeaths: newDeaths?.contextIndicatorValue,
-                newCasesPerMillion: newCasesPerMillion?.contextIndicatorValue,
+            const newCases = countryResponse.newCases.find(
+                (cases) => cases.emergency === total.emergency,
+            );
+
+            const newDeaths = countryResponse.newDeaths.find(
+                (death) => death.emergency === total.emergency,
+            );
+
+            const newCasesPerMillion = countryResponse.newCasesPerMillion.find(
+                (million) => million.emergency === total.emergency,
+            );
+
+            const newDeathsPerMillion = countryResponse.newDeathsPerMillion.find(
+                (million) => million.emergency === total.emergency,
+            );
+
+            return {
+                id: total.id,
+                emergency: total.emergency,
+                totalCases: total.indicatorValue,
+                totalDeaths: formatNumber(
+                    totalDeaths?.format as FormatType,
+                    totalDeaths?.indicatorValue,
+                ),
+                newCases: formatNumber(
+                    newCases?.format as FormatType,
+                    newCases?.indicatorValue,
+                ),
+                newDeaths: formatNumber(
+                    newDeaths?.format as FormatType,
+                    newDeaths?.indicatorValue,
+                ),
+                newCasesPerMillion: formatNumber(
+                    newCasesPerMillion?.format as FormatType,
+                    newCasesPerMillion?.indicatorValue,
+                ),
+                newDeathsPerMillion: formatNumber(
+                    newDeathsPerMillion?.format as FormatType,
+                    newDeathsPerMillion?.indicatorValue,
+                ),
             };
-
-            return valueToReturn;
-        }).sort(
-            (a, b) => compareNumber(b.contextIndicatorValue, a.contextIndicatorValue),
-        );
-        return cases;
-    }, [
-        countryResponse?.contextualData,
-        countryResponse?.newCasesPerMillion,
-        countryResponse?.newDeaths,
-    ]);
+        })
+    ), [countryResponse]);
 
     const uncertaintyChart: UncertainData[] | undefined = useMemo(() => (
         countryResponse?.dataCountryLevel.map((country) => {
@@ -712,10 +742,13 @@ function Country(props: Props) {
     const statusRendererParams = useCallback((_, data: CountryWiseOutbreakCases) => ({
         heading: data.emergency,
         // TODO: fetch format from server
-        statValue: formatNumber('raw', data.contextIndicatorValue ?? 0),
+        statValue: formatNumber('raw', data.totalCases ?? 0),
         subHeading: 'Number of cases',
         newDeaths: data.newDeaths,
         newCasesPerMillion: data.newCasesPerMillion,
+        totalDeaths: data.totalDeaths,
+        newCases: data.newCases,
+        newDeathsPerMillion: data.newDeathsPerMillion,
     }), []);
 
     const readinessRendererParams = useCallback((_, data: ScoreCardProps) => ({
@@ -773,21 +806,26 @@ function Country(props: Props) {
                         className={styles.statusCardContainer}
                         contentClassName={_cs(
                             styles.statusContainer,
-                            countryWiseOutbreakCases.length > 1 && styles.wrapReversed,
+                            (
+                                countryWiseOutbreakCases
+                                && countryWiseOutbreakCases.length > 1
+                            ) && styles.wrapReversed,
                         )}
                     >
-                        {countryWiseOutbreakCases.length > 0 && (
-                            <ListView
-                                className={styles.infoCards}
-                                renderer={PercentageStats}
-                                rendererParams={statusRendererParams}
-                                data={countryWiseOutbreakCases}
-                                keySelector={percentageKeySelector}
-                                errored={false}
-                                filtered={false}
-                                pending={false}
-                            />
-                        )}
+                        {(countryWiseOutbreakCases
+                            && countryWiseOutbreakCases.length > 0)
+                            && (
+                                <ListView
+                                    className={styles.infoCards}
+                                    renderer={PercentageStats}
+                                    rendererParams={statusRendererParams}
+                                    data={countryWiseOutbreakCases}
+                                    keySelector={percentageKeySelector}
+                                    errored={false}
+                                    filtered={false}
+                                    pending={false}
+                                />
+                            )}
                         <div className={styles.scoreCard}>
                             <span className={styles.scoreHeading}>
                                 Global Health Security Index
