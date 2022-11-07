@@ -6,6 +6,7 @@
     .progress-title {
         display: flex;
         align-items: center;
+        text-align: left;
         gap: var(--dui-spacing-small);
 
         .title-button {

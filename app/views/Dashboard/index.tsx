@@ -322,6 +322,9 @@ function Dashboard() {
                                 variant="tertiary"
                                 icons={<IoDownloadOutline />}
                                 hideDropdownIcon
+                                // NOTE: This button has been disabled till export is functional.
+                                // (For deployment purposes)
+                                disabled
                             >
                                 <DropdownMenuItem
                                     name={undefined}

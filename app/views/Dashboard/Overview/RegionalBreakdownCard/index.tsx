@@ -63,41 +63,35 @@ interface TooltipProps {
 
 const REGIONAL_BREAKDOWN_TOTAL = gql`
     query RegionalAndTotal(
-        $region: String,
-        $isGlobal: Boolean,
+        $indicatorId: String,
     ) {
-        total: epiDataGlobal(
-        filters: {
-            mostRecent: true,
-            region: $region,
-            contextIndicatorId: "total_cases",
-            isGlobal: $isGlobal,
-        }
+        total: globalLevel(
+            filters: {
+                indicatorId: $indicatorId
+                category: "Global",
+                isMostRecent: true,
+            }
         ) {
-            contextDate
-            region
-            contextIndicatorValue
-            mostRecent
             emergency
-            format
             id
             format
+            indicatorValueGlobal
+            indicatorMonth
         }
-        regional: epiDataGlobal(
-        filters: {
-            mostRecent: true,
-            isGlobal: false,
-            contextIndicatorId: "total_cases"
-        }
+
+        regional: regionLevel(
+            filters: {
+                indicatorId: $indicatorId,
+                category: "Global",
+                isMostRecent: true
+            }
         ) {
-            contextDate
-            region
-            contextIndicatorValue
-            mostRecent
             emergency
-            format
             id
             format
+            indicatorValueRegional
+            indicatorMonth
+            region
         }
     }
 `;
@@ -139,8 +133,8 @@ function CustomTotalTooltip(tooltipProps: TooltipProps) {
             <CustomTooltip
                 format="raw"
                 heading={label}
-                subHeading={`(${totalCases[0].payload?.contextDate})`}
-                value={totalCases[0].payload?.contextIndicatorValue}
+                subHeading={`(${totalCases[0].payload?.indicatorMonth})`}
+                value={totalCases[0].payload?.indicatorValueGlobal}
 
             />
         );
@@ -160,9 +154,8 @@ function RegionalBreakdownCard(props: Props) {
     } = props;
 
     const regionalTotalVariable = useMemo((): RegionalAndTotalQueryVariables => ({
-        region: filterValues?.region,
-        isGlobal: !filterValues?.region,
-    }), [filterValues?.region]);
+        indicatorId: filterValues?.indicator ?? 'new_cases_per_million',
+    }), [filterValues?.indicator]);
 
     const {
         loading,
@@ -182,8 +175,8 @@ function RegionalBreakdownCard(props: Props) {
             (item) => ({
                 emergency: item.emergency,
                 fill: item.emergency === 'Monkeypox' ? '#ACA28E' : '#FFDD98',
-                contextIndicatorValue: item.contextIndicatorValue,
-                contextDate: item.contextDate,
+                contextIndicatorValue: item.indicatorValueRegional,
+                contextDate: item.indicatorMonth,
                 format: item.format as FormatType,
                 region: item.region,
             }),
@@ -210,10 +203,10 @@ function RegionalBreakdownCard(props: Props) {
     const totalBarChart = regionalTotalResponse?.total.map((total) => (
         {
             ...total,
-            indicatorValue: Number(normalCommaFormatter().format(total.contextIndicatorValue ?? 0)),
+            indicatorValue: Number(normalCommaFormatter().format(total.indicatorValueGlobal ?? 0)),
             normalizedValue: formatNumber(
                 (total?.format ?? 'raw') as FormatType,
-                total?.contextIndicatorValue ?? 0,
+                total?.indicatorValueGlobal ?? 0,
             ),
             fill: total.emergency === 'Monkeypox' ? '#ACA28E' : '#FFDD98',
         }
@@ -274,7 +267,7 @@ function RegionalBreakdownCard(props: Props) {
                             hide
                         />
                         <Bar
-                            dataKey="contextIndicatorValue"
+                            dataKey="indicatorValueGlobal"
                             name="Number of Cases"
                             isAnimationActive={false}
                             radius={[10, 10, 0, 0]}
