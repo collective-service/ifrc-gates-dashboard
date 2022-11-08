@@ -652,13 +652,13 @@ function PercentageCardGroup(props: Props) {
                     ? `Number of cases for ${selectedIndicatorName}`
                     : `Number of cases for ${selectedOutbreakName}`}
             >
-                <ChartContainer
-                    data={regionalBreakdownRegion}
-                    loading={loading}
-                    className={styles.responsiveContainer}
-                >
-                    {(filterValues?.indicator)
-                        ? (
+                {(filterValues?.indicator)
+                    ? (
+                        <ChartContainer
+                            data={regionalBreakdownRegion}
+                            loading={loading}
+                            className={styles.responsiveContainer}
+                        >
                             <BarChart
                                 data={regionalBreakdownRegion}
                                 barSize={18}
@@ -698,7 +698,13 @@ function PercentageCardGroup(props: Props) {
                                     />
                                 </Bar>
                             </BarChart>
-                        ) : (
+                        </ChartContainer>
+                    ) : (
+                        <ChartContainer
+                            data={regionalBreakdownGlobal}
+                            loading={loading}
+                            className={styles.responsiveContainer}
+                        >
                             <BarChart
                                 data={regionalBreakdownGlobal}
                                 barSize={18}
@@ -738,8 +744,8 @@ function PercentageCardGroup(props: Props) {
                                     />
                                 </Bar>
                             </BarChart>
-                        )}
-                </ChartContainer>
+                        </ChartContainer>
+                    )}
             </ContainerCard>
         </div>
     );
