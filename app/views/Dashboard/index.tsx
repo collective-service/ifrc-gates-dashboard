@@ -80,6 +80,7 @@ const INDICATORS_FOR_COUNTRY = gql`
             countryIndicators(
                 iso3: $iso3,
                 outbreak: $outbreak,
+                type: "Social Behavioural Indicators",
             ) {
                 indicatorId
                 indicatorDescription
