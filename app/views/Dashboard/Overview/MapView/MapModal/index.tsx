@@ -25,6 +25,7 @@ import {
 } from 'recharts';
 import {
     decimalToPercentage,
+    FormatType,
     getShortMonth,
     negativeToZero,
     normalCommaFormatter,
@@ -153,6 +154,7 @@ const COUNTRY_PROFILE = gql`
             subvariable
             interpolated
             emergency
+            format
         }
     }
 `;
@@ -336,6 +338,7 @@ function MapModal(props: ModalProps) {
                     tooltipValue: country.indicatorValue,
                     date: country.indicatorMonth,
                     indicatorName: country.indicatorName,
+                    format: country.format as FormatType,
                 };
             }
 
@@ -350,6 +353,7 @@ function MapModal(props: ModalProps) {
                     minimumValue: negativeRange,
                     maximumValue: positiveRange,
                     indicatorName: country.indicatorName,
+                    format: country.format as FormatType,
                 };
             }
             return {
@@ -364,6 +368,7 @@ function MapModal(props: ModalProps) {
                 minimumValue: negativeRange,
                 maximumValue: positiveRange,
                 indicatorName: country.indicatorName,
+                format: country.format as FormatType,
             };
         }).sort((a, b) => compareDate(a.date, b.date))
     ), [countryResponse?.dataCountryLevel]);

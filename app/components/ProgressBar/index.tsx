@@ -2,7 +2,10 @@ import React, { useMemo, useCallback } from 'react';
 import {
     _cs,
 } from '@togglecorp/fujs';
-import { Button } from '@the-deep/deep-ui';
+import {
+    Button,
+    Tooltip,
+} from '@the-deep/deep-ui';
 import {
     formatNumber,
     FormatType,
@@ -69,7 +72,7 @@ function ProgressBar(props: Props) {
 
     const valueTooltip = useMemo(() => {
         if (format === 'percent') {
-            return (`${valueTitle}: ${formatNumber(format, value ?? 0)}` ?? undefined);
+            return (`${valueTitle}: ${(value ?? 0) * 100}%` ?? undefined);
         }
         return (`${valueTitle}: ${formatNumber('raw', value ?? 0)}`);
     }, [
@@ -103,7 +106,6 @@ function ProgressBar(props: Props) {
                 <div
                     className={styles.progressBarWrapper}
                     style={{ height: `${barHeight}px` }}
-                    title={valueTooltip as string}
                 >
                     <div
                         className={styles.progressBarStyle}
@@ -114,6 +116,12 @@ function ProgressBar(props: Props) {
                         }}
                     />
                 </div>
+                <Tooltip
+                    className={styles.tooltip}
+                    trackMousePosition
+                >
+                    {valueTooltip}
+                </Tooltip>
                 <div
                     className={styles.progressValue}
                     title={valueTooltip as string}
