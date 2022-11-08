@@ -157,7 +157,7 @@ const COUNTRY_PROFILE = gql`
         contextualData(
             filters: {
                 iso3: $iso3,
-                contextIndicatorId: "total_cases",
+                contextIndicatorId: "new_cases_per_million",
                 emergency: $emergency,
                 isTwelveMonth: true,
             }
@@ -203,6 +203,7 @@ const COUNTRY_PROFILE = gql`
         }
         contextualDataWithMultipleEmergency(
             iso3: $iso3,
+            contextIndicatorId: "new_cases_per_million",
         ) {
             emergency
             data {
