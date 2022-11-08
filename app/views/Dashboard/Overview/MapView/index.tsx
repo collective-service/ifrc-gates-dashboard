@@ -127,6 +127,7 @@ interface TooltipProps {
     indicatorName: string | undefined;
     onHide: () => void;
     lngLat: mapboxgl.LngLatLike;
+    filterValues?: FilterType | undefined;
 }
 
 const lightStyle = 'mapbox://styles/mapbox/light-v10';
@@ -169,6 +170,7 @@ function Tooltip(props: TooltipProps) {
         onHide,
         indicatorData,
         indicatorName,
+        filterValues,
     } = props;
 
     return (
@@ -188,7 +190,7 @@ function Tooltip(props: TooltipProps) {
                         <div className={styles.description}>
                             {isDefined(indicatorName)
                                 ? indicatorName
-                                : 'New cases per million for COVID-19'}
+                                : `New cases per million for ${filterValues?.outbreak ?? 'outbreak'}`}
                         </div>
                     </>
                 )}
@@ -446,6 +448,7 @@ function MapView(props: MapViewProps) {
                                 indicatorName={selectedIndicatorName}
                                 onHide={handleHoverClose}
                                 lngLat={mapClickProperties.lngLat}
+                                filterValues={filterValues}
                             />
                         )}
                 </Map>

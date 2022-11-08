@@ -132,6 +132,7 @@ function Overview(props: Props) {
                                 setActiveTab={setActiveTab}
                                 setFilterValues={setFilterValues}
                                 selectedIndicatorName={selectedIndicatorName ?? undefined}
+                                selectedOutbreakName={selectedOutbreakName}
                             />
                         </TabPanel>
                         <TabPanel name="tableMode">
