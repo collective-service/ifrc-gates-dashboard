@@ -102,14 +102,6 @@ type BottomCountryType = NonNullable<TopBottomCountriesRankingQuery['bottomCount
 
 const countriesRankingKeySelector = (d: TopCountryType | BottomCountryType) => d.countryId;
 
-interface MapViewProps {
-    className?: string;
-    setActiveTab: React.Dispatch<React.SetStateAction<TabTypes | undefined>>;
-    filterValues?: FilterType | undefined;
-    setFilterValues: React.Dispatch<React.SetStateAction<FilterType | undefined>>;
-    selectedIndicatorName: string | undefined;
-}
-
 interface GeoJsonProps {
     id: number;
     // eslint-disable-next-line camelcase
@@ -206,7 +198,15 @@ function Tooltip(props: TooltipProps) {
     );
 }
 
-function MapView(props: MapViewProps) {
+interface Props{
+    className?: string;
+    setActiveTab: React.Dispatch<React.SetStateAction<TabTypes | undefined>>;
+    filterValues?: FilterType | undefined;
+    setFilterValues: React.Dispatch<React.SetStateAction<FilterType | undefined>>;
+    selectedIndicatorName: string | undefined;
+}
+
+function MapView(props: Props) {
     const {
         className,
         setActiveTab,
