@@ -24,7 +24,6 @@ import {
     RegionalAndTotalQuery,
     RegionalAndTotalQueryVariables,
 } from '#generated/types';
-
 import {
     formatNumber,
     normalCommaFormatter,
@@ -305,28 +304,36 @@ function RegionalBreakdownCard(props: Props) {
                 headingSize="extraSmall"
                 headerDescription={`Repartition of cases by ${filterValues?.region ?? 'region'}`}
             >
-                <ListView
-                    className={styles.pieChartCollection}
-                    keySelector={pieChartInfoKeySelector}
+                <ChartContainer
                     data={regionalPieChart}
-                    renderer={PieChartInfo}
-                    rendererParams={pieChartInfoRendererParams}
-                    filtered={false}
-                    errored={false}
-                    compactPendingMessage
-                    pending={loading}
-                />
-                <ListView
-                    className={styles.breakdownLabelWrapper}
-                    keySelector={regionalLabelKeySelector}
-                    data={regionalLabel}
-                    renderer={RegionalBreakdownLabel}
-                    rendererParams={regionalLabelRendererParams}
-                    filtered={false}
-                    errored={false}
-                    pending={false}
-                    compactPendingMessage
-                />
+                    loading={loading}
+                    className={styles.responsiveContainer}
+                >
+                    <>
+                        <ListView
+                            className={styles.pieChartCollection}
+                            keySelector={pieChartInfoKeySelector}
+                            data={regionalPieChart}
+                            renderer={PieChartInfo}
+                            rendererParams={pieChartInfoRendererParams}
+                            filtered={false}
+                            errored={false}
+                            compactPendingMessage
+                            pending={loading}
+                        />
+                        <ListView
+                            className={styles.breakdownLabelWrapper}
+                            keySelector={regionalLabelKeySelector}
+                            data={regionalLabel}
+                            renderer={RegionalBreakdownLabel}
+                            rendererParams={regionalLabelRendererParams}
+                            filtered={false}
+                            errored={false}
+                            pending={false}
+                            compactPendingMessage
+                        />
+                    </>
+                </ChartContainer>
             </ContainerCard>
         </div>
     );

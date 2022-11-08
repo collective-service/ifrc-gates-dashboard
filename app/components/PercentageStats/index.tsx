@@ -6,7 +6,6 @@ import {
     Tooltip,
     Message,
 } from '@the-deep/deep-ui';
-import { ResponsiveContainer } from 'recharts';
 import { _cs } from '@togglecorp/fujs';
 import { IoFileTraySharp } from 'react-icons/io5';
 
@@ -89,16 +88,13 @@ function PercentageStats(props: Props) {
             headerDescription={headerDescription}
             headerIconsContainerClassName={styles.iconContainer}
             headerIcons={icon}
-            footerContentClassName={styles.valueAndSubValue}
+            footerContentClassName={empty ? styles.message : styles.valueAndSubValue}
             footerContent={(
                 <>
                     {(empty ? (
                         <Message
-                            className={styles.message}
                             empty={empty}
                             emptyIcon={<IoFileTraySharp />}
-                        // pending={loading}
-                        // pendingContainerClassName={styles.pendingMessage}
                         />
                     ) : (
                         <>
