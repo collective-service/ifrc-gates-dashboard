@@ -343,6 +343,7 @@ function PercentageCardGroup(props: Props) {
         overviewStatsResponse?.regionalBreakdownRegion,
         filterValues?.region,
     ]);
+    console.log('Check Regional breakdown data::>>', regionalBreakdownRegion);
 
     const regionalBreakdownGlobal = useMemo(() => (
         overviewStatsResponse?.regionalBreakdownGlobal.map((region) => (

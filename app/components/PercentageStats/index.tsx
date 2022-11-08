@@ -4,8 +4,11 @@ import {
     NumberOutput,
     ContainerCardProps,
     Tooltip,
+    Message,
 } from '@the-deep/deep-ui';
+import { ResponsiveContainer } from 'recharts';
 import { _cs } from '@togglecorp/fujs';
+import { IoFileTraySharp } from 'react-icons/io5';
 
 import styles from './styles.css';
 
@@ -42,6 +45,8 @@ function PercentageStats(props: Props) {
         newCases,
         newDeathsPerMillion,
     } = props;
+
+    const empty = statValue === '0';
 
     return (
         <ContainerCard
@@ -87,15 +92,27 @@ function PercentageStats(props: Props) {
             footerContentClassName={styles.valueAndSubValue}
             footerContent={(
                 <>
-                    <div className={styles.valueText}>
-                        {statValue}
-                    </div>
-                    {subValue && (
-                        <NumberOutput
-                            className={styles.subValueText}
-                            value={subValue}
+                    {(empty ? (
+                        <Message
+                            className={styles.message}
+                            empty={empty}
+                            emptyIcon={<IoFileTraySharp />}
+                        // pending={loading}
+                        // pendingContainerClassName={styles.pendingMessage}
                         />
-                    )}
+                    ) : (
+                        <>
+                            <div className={styles.valueText}>
+                                {statValue}
+                            </div>
+                            {subValue && (
+                                <NumberOutput
+                                    className={styles.subValueText}
+                                    value={subValue}
+                                />
+                            )}
+                        </>
+                    ))}
                 </>
             )}
         />
