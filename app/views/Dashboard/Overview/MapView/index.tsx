@@ -102,14 +102,6 @@ type BottomCountryType = NonNullable<TopBottomCountriesRankingQuery['bottomCount
 
 const countriesRankingKeySelector = (d: TopCountryType | BottomCountryType) => d.countryId;
 
-interface MapViewProps {
-    className?: string;
-    setActiveTab: React.Dispatch<React.SetStateAction<TabTypes | undefined>>;
-    filterValues?: FilterType | undefined;
-    setFilterValues: React.Dispatch<React.SetStateAction<FilterType | undefined>>;
-    selectedIndicatorName: string | undefined;
-}
-
 interface GeoJsonProps {
     id: number;
     // eslint-disable-next-line camelcase
@@ -127,6 +119,7 @@ interface TooltipProps {
     indicatorName: string | undefined;
     onHide: () => void;
     lngLat: mapboxgl.LngLatLike;
+    filterValues?: FilterType | undefined;
 }
 
 const lightStyle = 'mapbox://styles/mapbox/light-v10';
@@ -169,6 +162,7 @@ function Tooltip(props: TooltipProps) {
         onHide,
         indicatorData,
         indicatorName,
+        filterValues,
     } = props;
 
     return (
@@ -188,7 +182,7 @@ function Tooltip(props: TooltipProps) {
                         <div className={styles.description}>
                             {isDefined(indicatorName)
                                 ? indicatorName
-                                : 'New cases per million for COVID-19'}
+                                : `New cases per million for ${filterValues?.outbreak ?? 'outbreak'}`}
                         </div>
                     </>
                 )}
@@ -204,7 +198,15 @@ function Tooltip(props: TooltipProps) {
     );
 }
 
-function MapView(props: MapViewProps) {
+interface Props{
+    className?: string;
+    setActiveTab: React.Dispatch<React.SetStateAction<TabTypes | undefined>>;
+    filterValues?: FilterType | undefined;
+    setFilterValues: React.Dispatch<React.SetStateAction<FilterType | undefined>>;
+    selectedIndicatorName: string | undefined;
+}
+
+function MapView(props: Props) {
     const {
         className,
         setActiveTab,
@@ -446,6 +448,7 @@ function MapView(props: MapViewProps) {
                                 indicatorName={selectedIndicatorName}
                                 onHide={handleHoverClose}
                                 lngLat={mapClickProperties.lngLat}
+                                filterValues={filterValues}
                             />
                         )}
                 </Map>

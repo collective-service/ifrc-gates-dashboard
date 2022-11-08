@@ -649,7 +649,7 @@ function PercentageCardGroup(props: Props) {
                 heading={filterValues?.indicator ? 'Regional Percentage' : 'Regional Breakdown'}
                 headingSize="extraSmall"
                 headerDescription={filterValues?.indicator
-                    ? `Number of cases for ${selectedIndicatorName}`
+                    ? `${selectedIndicatorName ?? '-'}`
                     : `Number of cases for ${selectedOutbreakName}`}
             >
                 {(filterValues?.indicator)
