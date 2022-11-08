@@ -64,8 +64,9 @@ function ProgressBar(props: Props) {
     ]);
 
     const subValuePercentage = useMemo(() => (
-        `${region}: ${formatNumber('percent', subValue ?? 0)}`
+        `${region}: ${formatNumber(format ?? 'raw', subValue ?? 0)}`
     ), [
+        format,
         subValue,
         region,
     ]);

@@ -80,6 +80,7 @@ const INDICATORS_FOR_COUNTRY = gql`
             countryIndicators(
                 iso3: $iso3,
                 outbreak: $outbreak,
+                type: "Social Behavioural Indicators",
             ) {
                 indicatorId
                 indicatorDescription
@@ -322,6 +323,9 @@ function Dashboard() {
                                 variant="tertiary"
                                 icons={<IoDownloadOutline />}
                                 hideDropdownIcon
+                                // NOTE: This button has been disabled till export is functional.
+                                // (For deployment purposes)
+                                disabled
                             >
                                 <DropdownMenuItem
                                     name={undefined}
