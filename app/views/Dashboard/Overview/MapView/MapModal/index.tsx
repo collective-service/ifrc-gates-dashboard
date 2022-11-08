@@ -25,6 +25,7 @@ import {
 } from 'recharts';
 import {
     decimalToPercentage,
+    formatNumber,
     FormatType,
     getShortMonth,
     negativeToZero,
@@ -61,17 +62,11 @@ interface TooltipProps {
         };
     }[];
 }
-interface EmergencyItems {
-    iso3: string;
-    emergency: string;
-    contextIndicatorValue?: number | null;
-    contextIndicatorId: string;
-    contextDate: string;
-    newDeaths?: number | null;
-    newCasesPerMillion?: number | null;
-}
-interface CountryWiseOutbreakCases extends EmergencyItems {
-    key: string;
+interface CountryWiseOutbreakCases {
+    id: string;
+    emergency?: string;
+    indicatorMonth?: string;
+    totalCases?: string | null;
 }
 
 const SUBVARIABLES = gql`
@@ -130,6 +125,18 @@ const COUNTRY_PROFILE = gql`
               contextIndicatorId
               format
             }
+        }
+        totalCases: dataCountryLevelMostRecent(
+            filters: {
+                indicatorId: "total_cases",
+                iso3: $iso3,
+            }
+        ) {
+            indicatorValue
+            indicatorMonth
+            emergency
+            format
+            id
         }
         dataCountryLevel(
             filters: {
@@ -286,42 +293,28 @@ function MapModal(props: ModalProps) {
         })
     ), [countryResponse?.contextualData]);
 
-    const countryWiseOutbreakCases: CountryWiseOutbreakCases[] | undefined = useMemo(() => {
-        const casesGroupList = listToGroupList(
-            countryResponse?.contextualData ?? [],
-            (emergency) => emergency.emergency,
+    const countryWiseOutbreakCases: CountryWiseOutbreakCases[] | undefined = useMemo(() => (
+        countryResponse?.totalCases.map((total) => (
+            {
+                id: total.id,
+                emergency: total.emergency,
+                indicatorMonth: total.indicatorMonth,
+                totalCases: formatNumber(
+                    total.format as FormatType,
+                    total.indicatorValue,
+                ),
+            }
+        ))
+    ), [countryResponse]);
+
+    const numberOfCases = useMemo(() => {
+        if (isNotDefined(countryWiseOutbreakCases)) {
+            return undefined;
+        }
+        return countryWiseOutbreakCases.find(
+            (item) => item.emergency === filterValues?.outbreak,
         );
-
-        const getLatestDateItems = (items: EmergencyItems[]) => {
-            [...items].sort((a, b) => compareDate(a.contextDate, b.contextDate, -1));
-
-            return items[0];
-        };
-
-        const casesGroupArray = mapToList(
-            casesGroupList,
-            (items, key) => ({
-                key,
-                items,
-            }),
-        );
-
-        const cases = casesGroupArray?.map((item) => ({
-            ...getLatestDateItems(item.items),
-            key: item.key,
-        })).sort(
-            (a, b) => compareNumber(b.contextIndicatorValue, a.contextIndicatorValue),
-        );
-        return cases;
     }, [
-        countryResponse?.contextualData,
-    ]);
-
-    const numberOfCases = useMemo(() => (
-        countryWiseOutbreakCases.find(
-            (item) => item.key === filterValues?.outbreak,
-        )
-    ), [
         filterValues?.outbreak,
         countryWiseOutbreakCases,
     ]);
@@ -380,7 +373,44 @@ function MapModal(props: ModalProps) {
         return uncertaintyChart[uncertaintyChart?.length - 1];
     }, [uncertaintyChart]);
 
-    const date = filterValues?.indicator ? latestIndicatorValue?.date : latestDate?.date;
+    const date = useMemo(() => {
+        if (filterValues?.indicator) {
+            return latestIndicatorValue?.date;
+        }
+
+        if (!filterValues?.indicator && filterValues?.outbreak) {
+            return numberOfCases?.indicatorMonth;
+        }
+        return latestDate?.date;
+    }, [
+        filterValues?.indicator,
+        filterValues?.outbreak,
+        latestIndicatorValue?.date,
+        numberOfCases?.indicatorMonth,
+        latestDate,
+    ]);
+
+    const heading = useMemo(() => {
+        if (filterValues?.indicator) {
+            return (`${latestIndicatorValue?.indicatorValue
+                ? latestIndicatorValue?.indicatorValue
+                : 0}%`);
+        }
+
+        if (!filterValues?.indicator && filterValues?.outbreak) {
+            return numberOfCases?.totalCases;
+        }
+        return normalizedTickFormatter(
+            countryResponse?.countryProfile?.totalCases ?? 0,
+        );
+    }, [
+        countryResponse?.countryProfile?.totalCases,
+        numberOfCases?.totalCases,
+        filterValues?.indicator,
+        filterValues?.outbreak,
+        latestIndicatorValue?.indicatorValue,
+    ]);
+
     const customOutbreakTooltip = (tooltipProps: TooltipProps) => {
         const {
             active,
@@ -439,17 +469,7 @@ function MapModal(props: ModalProps) {
                         size="extraLarge"
                         className={styles.countryCaseData}
                     >
-                        {
-                            filterValues?.indicator
-                                ? `${latestIndicatorValue?.indicatorValue
-                                    ? latestIndicatorValue?.indicatorValue
-                                    : 0}%`
-                                : normalizedTickFormatter(
-                                    filterValues?.outbreak
-                                        ? (numberOfCases?.contextIndicatorValue ?? 0)
-                                        : (countryResponse?.countryProfile?.totalCases ?? 0),
-                                )
-                        }
+                        {heading}
                     </Heading>
                     <Heading
                         className={styles.countrySurveyDate}

@@ -19,8 +19,11 @@ export interface Props {
     headingSize?: headingSizeType;
     statValue: string | undefined;
     subValue?: number;
-    newDeaths?: number | null;
-    newCasesPerMillion?: number | null;
+    newDeaths?: string | null;
+    newCasesPerMillion?: string | null;
+    totalDeaths?: string | null;
+    newCases?: string | null;
+    newDeathsPerMillion?: string | null;
 }
 
 function PercentageStats(props: Props) {
@@ -35,6 +38,9 @@ function PercentageStats(props: Props) {
         subValue,
         newDeaths,
         newCasesPerMillion,
+        totalDeaths,
+        newCases,
+        newDeathsPerMillion,
     } = props;
 
     return (
@@ -54,10 +60,19 @@ function PercentageStats(props: Props) {
                             {(newDeaths || newCasesPerMillion) && (
                                 <Tooltip>
                                     <div>
-                                        {`Deaths: ${newDeaths ?? 0}`}
+                                        {`New Cases: ${newCases ?? 0}`}
+                                    </div>
+                                    <div>
+                                        {`New Deaths: ${newDeaths ?? 0}`}
+                                    </div>
+                                    <div>
+                                        {`Total Deaths: ${totalDeaths ?? 0}`}
                                     </div>
                                     <div>
                                         {`Cases Per Million: ${newCasesPerMillion ?? 0}`}
+                                    </div>
+                                    <div>
+                                        {`Deaths Per Million: ${newDeathsPerMillion ?? 0}`}
                                     </div>
                                 </Tooltip>
                             )}
