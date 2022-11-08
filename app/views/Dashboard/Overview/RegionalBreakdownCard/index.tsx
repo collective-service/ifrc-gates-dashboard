@@ -303,7 +303,7 @@ function RegionalBreakdownCard(props: Props) {
                 headingClassName={styles.headingContent}
                 heading="Regional Breakdown"
                 headingSize="extraSmall"
-                headerDescription="Repartition of cases by region"
+                headerDescription={`Repartition of cases by ${filterValues?.region ?? 'region'}`}
             >
                 <ListView
                     className={styles.pieChartCollection}

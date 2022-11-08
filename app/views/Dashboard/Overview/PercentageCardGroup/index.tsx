@@ -284,6 +284,23 @@ function PercentageCardGroup(props: Props) {
         return color;
     }, []);
 
+    const cardHeader = useMemo(() => {
+        if (selectedIndicatorName && filterValues?.region && selectedOutbreakName) {
+            return `Total percentage for ${filterValues?.region}`;
+        }
+        if ((selectedIndicatorName && selectedOutbreakName) && !filterValues?.region) {
+            return 'Global';
+        }
+        if ((!selectedIndicatorName && !filterValues?.region) && selectedOutbreakName) {
+            return `Total Number of ${selectedOutbreakName} cases`;
+        }
+        return 'Total percentage';
+    }, [
+        filterValues,
+        selectedIndicatorName,
+        selectedOutbreakName,
+    ]);
+
     const overviewStatsVariables = useMemo((): OverviewStatsQueryVariables => ({
         emergency: filterValues?.outbreak,
         indicatorId: filterValues?.indicator,
@@ -558,8 +575,8 @@ function PercentageCardGroup(props: Props) {
         <div className={_cs(className, styles.cardInfo)}>
             <PercentageStats
                 className={styles.globalStatCard}
-                heading={!filterValues?.indicator ? totalCase?.emergency : 'Total Percentage'}
-                subHeading={!filterValues?.indicator && 'Total nubmer of cases'}
+                heading={cardHeader}
+                subHeading={selectedIndicatorName ?? filterValues?.indicator}
                 headingSize="extraSmall"
                 statValue={totalCaseValue}
             />
@@ -632,8 +649,8 @@ function PercentageCardGroup(props: Props) {
                 heading={filterValues?.indicator ? 'Regional Percentage' : 'Regional Breakdown'}
                 headingSize="extraSmall"
                 headerDescription={filterValues?.indicator
-                    ? selectedIndicatorName ?? filterValues.indicator
-                    : selectedOutbreakName ?? filterValues?.outbreak}
+                    ? `Number of cases for ${selectedIndicatorName}`
+                    : `Number of cases for ${selectedOutbreakName}`}
             >
                 <ChartContainer
                     data={regionalBreakdownRegion}
