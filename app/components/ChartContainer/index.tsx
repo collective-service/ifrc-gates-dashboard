@@ -10,6 +10,7 @@ interface Props<T> {
     children: ReactElement;
     className?: string;
     loading?: boolean;
+    hasFilteredData?: boolean;
     data?: T[];
 }
 
@@ -19,11 +20,12 @@ function ChartContainer<T>(props: Props<T>) {
         className,
         loading,
         data,
+        hasFilteredData,
         ...otherProps
     } = props;
     const empty = isNotDefined(data) || (data.length < 1);
 
-    if (empty || loading) {
+    if (empty || loading || !hasFilteredData) {
         return (
             <ResponsiveContainer
                 className={className}
@@ -31,7 +33,7 @@ function ChartContainer<T>(props: Props<T>) {
             >
                 <Message
                     className={styles.message}
-                    empty={empty}
+                    empty={empty || !hasFilteredData}
                     emptyIcon={<IoFileTraySharp />}
                     pending={loading}
                     pendingContainerClassName={styles.pendingMessage}
