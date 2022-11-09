@@ -26,7 +26,6 @@ import {
 } from '#generated/types';
 import {
     formatNumber,
-    normalCommaFormatter,
     FormatType,
 } from '#utils/common';
 import ChartContainer from '#components/ChartContainer';
@@ -47,12 +46,18 @@ export interface RegionalLabelRendererProps {
     fill: string;
 }
 
-type EpiDataGlobal = NonNullable<RegionalAndTotalQuery>['total'][number];
+interface TotalGlobal {
+    id: string;
+    format: string;
+    indicatorValue?: number | null;
+    indicatorMonth: string;
+    emergency: string;
+}
 
 interface Payload {
     name?: string;
     value?: number;
-    payload?: EpiDataGlobal;
+    payload?: TotalGlobal;
 }
 
 interface TooltipProps {
@@ -64,6 +69,7 @@ interface TooltipProps {
 const REGIONAL_BREAKDOWN_TOTAL = gql`
     query RegionalAndTotal(
         $indicatorId: String,
+        $region: String,
     ) {
         total: globalLevel(
             filters: {
@@ -72,13 +78,26 @@ const REGIONAL_BREAKDOWN_TOTAL = gql`
                 isMostRecent: true,
             }
         ) {
-            emergency
             id
             format
             indicatorValueGlobal
             indicatorMonth
+            emergency
         }
-
+        totalRegional : regionLevel(
+            filters: {
+                category: "Global",
+                isMostRecent: true,
+                region: $region,
+                indicatorId: "new_cases_per_million"
+              }
+        ){
+            id
+            format
+            indicatorValueRegional
+            indicatorMonth
+            emergency
+        }
         regional: regionLevel(
             filters: {
                 indicatorId: $indicatorId,
@@ -134,7 +153,7 @@ function CustomTotalTooltip(tooltipProps: TooltipProps) {
                 format="raw"
                 heading={label}
                 subHeading={`(${totalCases[0].payload?.indicatorMonth})`}
-                value={totalCases[0].payload?.indicatorValueGlobal}
+                value={totalCases[0].payload?.indicatorValue}
 
             />
         );
@@ -155,7 +174,11 @@ function RegionalBreakdownCard(props: Props) {
 
     const regionalTotalVariable = useMemo((): RegionalAndTotalQueryVariables => ({
         indicatorId: filterValues?.indicator ?? 'new_cases_per_million',
-    }), [filterValues?.indicator]);
+        region: filterValues?.region,
+    }), [
+        filterValues?.indicator,
+        filterValues?.region,
+    ]);
 
     const {
         loading,
@@ -194,16 +217,16 @@ function RegionalBreakdownCard(props: Props) {
 
     const regionalLabel = unique(
         regionalTotalResponse?.regional ?? [],
-        (item: EpiDataGlobal) => item.emergency,
+        (item: TotalGlobal) => item.emergency,
     ).map((entry) => ({
         emergency: entry.emergency,
         fill: entry.emergency === 'Monkeypox' ? '#ACA28E' : '#FFDD98',
     }));
 
-    const totalBarChart = regionalTotalResponse?.total.map((total) => (
+    const totalGlobalBarChart = regionalTotalResponse?.total.map((total) => (
         {
             ...total,
-            indicatorValue: Number(normalCommaFormatter().format(total.indicatorValueGlobal ?? 0)),
+            indicatorValue: total.indicatorValueGlobal,
             normalizedValue: formatNumber(
                 (total?.format ?? 'raw') as FormatType,
                 total?.indicatorValueGlobal ?? 0,
@@ -211,6 +234,29 @@ function RegionalBreakdownCard(props: Props) {
             fill: total.emergency === 'Monkeypox' ? '#ACA28E' : '#FFDD98',
         }
     ));
+
+    const totalRegionBarChart = regionalTotalResponse?.totalRegional.map((region) => (
+        {
+            ...region,
+            indicatorValue: region.indicatorValueRegional,
+            normalizedValue: formatNumber(
+                (region.format ?? 'raw') as FormatType,
+                region.indicatorValueRegional ?? 0,
+            ),
+            fill: region.emergency === 'Monkeypox' ? '#ACA28E' : '#FFDD98',
+        }
+    ));
+
+    const totalBarChart = useMemo(() => {
+        if (filterValues?.region) {
+            return totalRegionBarChart;
+        }
+        return totalGlobalBarChart;
+    }, [
+        filterValues?.region,
+        totalRegionBarChart,
+        totalGlobalBarChart,
+    ]);
 
     const pieChartInfoRendererParams = useCallback(
         (_: string, data: PieChartInfoRendererProps) => ({
@@ -267,7 +313,7 @@ function RegionalBreakdownCard(props: Props) {
                             hide
                         />
                         <Bar
-                            dataKey="indicatorValueGlobal"
+                            dataKey="indicatorValue"
                             name="Number of Cases"
                             isAnimationActive={false}
                             radius={[10, 10, 0, 0]}

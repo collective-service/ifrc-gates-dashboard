@@ -345,7 +345,8 @@ function MapModal(props: ModalProps) {
                         negativeRange ?? 0,
                         positiveRange ?? 0,
                     ],
-                    minimumValue: negativeRange,
+                    // FIXME : solve in common ts
+                    minimumValue: negativeRange ?? 0,
                     maximumValue: positiveRange,
                     indicatorName: country.indicatorName,
                     format: country.format as FormatType,
@@ -362,7 +363,8 @@ function MapModal(props: ModalProps) {
                     negativeRange ?? 0,
                     positiveRange ?? 0,
                 ],
-                minimumValue: negativeRange,
+                // FIXME : solve in common ts
+                minimumValue: negativeRange ?? 0,
                 maximumValue: positiveRange,
                 indicatorName: country.indicatorName,
                 format: country.format as FormatType,
