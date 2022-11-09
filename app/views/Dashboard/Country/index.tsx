@@ -59,6 +59,8 @@ import styles from './styles.css';
 interface ScoreCardProps {
     title: string;
     value?: number;
+    date?: string;
+    source?: string;
     indicator?: 'red' | 'yellow' | 'orange' | 'green';
 }
 interface CountryWiseOutbreakCases {
@@ -110,9 +112,17 @@ const COUNTRY_PROFILE = gql`
             populationSize
             region
             readiness
+            readinessDate
+            readinessSource
             vulnerability
+            vulnerabilityDate
+            vulnerabilitySource
             risk
+            riskDate
+            riskSource
             response
+            responseDate
+            responseSource
             stringency
             stringencyRegion
             stringencyFormat
@@ -723,18 +733,26 @@ function Country(props: Props) {
         {
             title: 'Readiness',
             value: countryResponse?.countryProfile.readiness ?? undefined,
+            date: countryResponse?.countryProfile.readinessDate ?? undefined,
+            source: countryResponse?.countryProfile.readinessSource ?? undefined,
         },
         {
             title: 'Vulnerability',
             value: countryResponse?.countryProfile.vulnerability ?? undefined,
+            date: countryResponse?.countryProfile.vulnerabilityDate ?? undefined,
+            source: countryResponse?.countryProfile.vulnerabilitySource ?? undefined,
         },
         {
             title: 'Risk',
             value: countryResponse?.countryProfile.risk ?? undefined,
+            date: countryResponse?.countryProfile.riskDate ?? undefined,
+            source: countryResponse?.countryProfile.riskSource ?? undefined,
         },
         {
             title: 'Response',
             value: countryResponse?.countryProfile.response ?? undefined,
+            date: countryResponse?.countryProfile.responseDate ?? undefined,
+            source: countryResponse?.countryProfile.responseSource ?? undefined,
         },
     ]), [
         countryResponse?.countryProfile,
@@ -755,6 +773,8 @@ function Country(props: Props) {
     const readinessRendererParams = useCallback((_, data: ScoreCardProps) => ({
         title: data.title,
         value: data.value,
+        date: data.date,
+        source: data.source,
         indicator: metricTypeForColor(data),
     }), []);
 

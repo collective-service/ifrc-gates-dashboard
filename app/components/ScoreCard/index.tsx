@@ -1,12 +1,18 @@
 import React from 'react';
 import { _cs } from '@togglecorp/fujs';
 
+import {
+    Tooltip,
+} from '@the-deep/deep-ui';
+
 import styles from './styles.css';
 
 interface Props {
     className?: string;
     title: string;
     value?: number;
+    date?: string;
+    source?: string;
     indicator?: 'red' | 'yellow' | 'orange' | 'green';
 }
 
@@ -15,6 +21,8 @@ function ScoreCard(props: Props) {
         className,
         title,
         value,
+        date,
+        source,
         indicator,
     } = props;
 
@@ -36,6 +44,13 @@ function ScoreCard(props: Props) {
             >
                 {(value ? `${Math.round(value)}%` : 'N/A')}
             </div>
+
+            {(date || source) && (
+                <Tooltip trackMousePosition>
+                    {source && `${source}`}
+                    {date && ` - ${date}`}
+                </Tooltip>
+            )}
         </div>
     );
 }
