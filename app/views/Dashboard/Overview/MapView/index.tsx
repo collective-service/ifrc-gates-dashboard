@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
+import { IoFileTraySharp } from 'react-icons/io5';
 import {
     _cs,
     doesObjectHaveNoData,
@@ -12,6 +13,7 @@ import {
     ListView,
     useModalState,
     TextOutput,
+    Message,
 } from '@the-deep/deep-ui';
 import { gql, useQuery } from '@apollo/client';
 import Map, {
@@ -468,37 +470,52 @@ function MapView(props: Props) {
                     <Heading size="extraSmall" className={styles.progressListHeader}>
                         Top Ranking
                     </Heading>
-                    <ListView
-                        className={styles.progressList}
-                        keySelector={countriesRankingKeySelector}
-                        data={topCountriesList}
-                        renderer={ProgressBar}
-                        rendererParams={countriesRankingRendererParams}
-                        filtered={false}
-                        errored={false}
-                        pending={countriesRankingLoading}
-                        borderBetweenItem
-                        borderBetweenItemWidth="medium"
-                        borderBetweenItemClassName={styles.progressItemBorder}
-                    />
+                    {(isDefined(bottomCountriesList) && (bottomCountriesList?.length > 0)) ? (
+                        <ListView
+                            className={styles.progressList}
+                            keySelector={countriesRankingKeySelector}
+                            data={topCountriesList}
+                            renderer={ProgressBar}
+                            rendererParams={countriesRankingRendererParams}
+                            emptyMessage="No country data to show"
+                            filtered={false}
+                            errored={false}
+                            pending={countriesRankingLoading}
+                            borderBetweenItem
+                            borderBetweenItemWidth="medium"
+                            borderBetweenItemClassName={styles.progressItemBorder}
+                        />
+                    ) : (
+                        <Message
+                            emptyIcon={<IoFileTraySharp />}
+                            empty
+                        />
+                    )}
                 </div>
                 <div className={styles.lowProgressBox}>
                     <Heading size="extraSmall" className={styles.progressListHeader}>
                         Bottom Ranking
                     </Heading>
-                    <ListView
-                        className={styles.progressList}
-                        keySelector={countriesRankingKeySelector}
-                        data={bottomCountriesList}
-                        renderer={ProgressBar}
-                        rendererParams={countriesRankingRendererParams}
-                        filtered={false}
-                        errored={false}
-                        pending={countriesRankingLoading}
-                        borderBetweenItem
-                        borderBetweenItemWidth="medium"
-                        borderBetweenItemClassName={styles.progressItemBorder}
-                    />
+                    {(isDefined(bottomCountriesList) && (bottomCountriesList?.length > 0)) ? (
+                        <ListView
+                            className={styles.progressList}
+                            keySelector={countriesRankingKeySelector}
+                            data={bottomCountriesList}
+                            renderer={ProgressBar}
+                            rendererParams={countriesRankingRendererParams}
+                            filtered={false}
+                            errored={false}
+                            pending={countriesRankingLoading}
+                            borderBetweenItem
+                            borderBetweenItemWidth="medium"
+                            borderBetweenItemClassName={styles.progressItemBorder}
+                        />
+                    ) : (
+                        <Message
+                            emptyIcon={<IoFileTraySharp />}
+                            empty
+                        />
+                    )}
                 </div>
                 {mapModalShown && (
                     <MapModal

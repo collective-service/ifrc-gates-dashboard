@@ -9,6 +9,7 @@ import {
 import {
     formatNumber,
     FormatType,
+    normalCommaFormatter,
 } from '#utils/common';
 
 import styles from './styles.css';
@@ -75,7 +76,7 @@ function ProgressBar(props: Props) {
         if (format === 'percent') {
             return (`${valueTitle}: ${(value ?? 0) * 100}%` ?? undefined);
         }
-        return (`${valueTitle}: ${formatNumber('raw', value ?? 0)}`);
+        return (`${valueTitle}: ${normalCommaFormatter().format(value ?? 0)}`);
     }, [
         value,
         valueTitle,

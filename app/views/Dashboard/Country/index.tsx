@@ -42,7 +42,6 @@ import {
     FormatType,
     getShortMonth,
     negativeToZero,
-    normalCommaFormatter,
     normalFormatter,
     positiveToZero,
 } from '#utils/common';
@@ -830,7 +829,7 @@ function Country(props: Props) {
                                 {`(${item.payload?.date})`}
                             </div>
                             <div className={styles.tooltipContent}>
-                                {normalCommaFormatter().format(item.value ?? 0)}
+                                {formatNumber('raw' as FormatType, item.value ?? 0)}
                             </div>
                         </div>
                     ))}
@@ -1036,7 +1035,7 @@ function Country(props: Props) {
                         <ContainerCard
                             className={styles.countryTrend}
                             heading="Outbreaks overview over the last 12 months"
-                            headingDescription={`Number of cases for ${currentOutbreak}`}
+                            headingDescription={`New cases per million for ${currentOutbreak}`}
                             headingSize="extraSmall"
                             headingClassName={styles.heading}
                             contentClassName={styles.responsiveContent}
