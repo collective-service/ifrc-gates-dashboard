@@ -20,7 +20,7 @@ function ChartContainer<T>(props: Props<T>) {
         className,
         loading,
         data,
-        hasFilteredData,
+        hasFilteredData = true,
         ...otherProps
     } = props;
     const empty = isNotDefined(data) || (data.length < 1);
