@@ -552,8 +552,8 @@ function Country(props: Props) {
             : undefined
     ), [countryResponse?.countryProfile.newCasesRegionShare]);
 
-    const countryWiseOutbreakCases: CountryWiseOutbreakCases[] | undefined = useMemo(() => (
-        countryResponse?.totalCases.map((total) => {
+    const totalNumberOfCases: CountryWiseOutbreakCases[] | undefined = useMemo(() => {
+        const countryWiseOutbreakCases = countryResponse?.totalCases.map((total) => {
             const totalDeaths = countryResponse.totalDeaths.find(
                 (deaths) => deaths.emergency === total.emergency,
             );
@@ -599,8 +599,26 @@ function Country(props: Props) {
                     newDeathsPerMillion?.indicatorValue,
                 ),
             };
-        })
-    ), [countryResponse]);
+        });
+
+        if (filterValues?.outbreak) {
+            if (!countryWiseOutbreakCases) {
+                return undefined;
+            }
+            const outbreakWiseTotalCase = countryWiseOutbreakCases?.find(
+                (cases) => cases.emergency === filterValues?.outbreak,
+            );
+            if (!outbreakWiseTotalCase) {
+                return undefined;
+            }
+            return [outbreakWiseTotalCase];
+        }
+
+        return countryWiseOutbreakCases;
+    }, [
+        countryResponse,
+        filterValues?.outbreak,
+    ]);
 
     const uncertaintyChart: UncertainData[] | undefined = useMemo(() => (
         countryResponse?.dataCountryLevel.map((country) => {
@@ -610,7 +628,9 @@ function Country(props: Props) {
             if (isNotDefined(country.errorMargin)) {
                 return {
                     emergency: country.emergency,
-                    indicatorValue: decimalToPercentage(country.indicatorValue),
+                    indicatorValue: country.format === 'percent'
+                        ? decimalToPercentage(country.indicatorValue)
+                        : country.indicatorValue,
                     tooltipValue: country.indicatorValue,
                     date: country.indicatorMonth,
                     indicatorName: country.indicatorName,
@@ -634,7 +654,9 @@ function Country(props: Props) {
             }
             return {
                 emergency: country.emergency,
-                indicatorValue: decimalToPercentage(country.indicatorValue),
+                indicatorValue: country.format === 'percent'
+                    ? decimalToPercentage(country.indicatorValue)
+                    : country.indicatorValue,
                 tooltipValue: country.indicatorValue,
                 date: country.indicatorMonth,
                 uncertainRange: [
@@ -828,19 +850,19 @@ function Country(props: Props) {
                         contentClassName={_cs(
                             styles.statusContainer,
                             (
-                                countryWiseOutbreakCases
-                                && countryWiseOutbreakCases.length > 1
+                                totalNumberOfCases
+                                && totalNumberOfCases.length > 1
                             ) && styles.wrapReversed,
                         )}
                     >
-                        {(countryWiseOutbreakCases
-                            && countryWiseOutbreakCases.length > 0)
+                        {(totalNumberOfCases
+                            && totalNumberOfCases.length > 0)
                             && (
                                 <ListView
                                     className={styles.infoCards}
                                     renderer={PercentageStats}
                                     rendererParams={statusRendererParams}
-                                    data={countryWiseOutbreakCases}
+                                    data={totalNumberOfCases}
                                     keySelector={percentageKeySelector}
                                     errored={false}
                                     filtered={false}

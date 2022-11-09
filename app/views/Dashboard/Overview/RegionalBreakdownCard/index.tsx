@@ -233,9 +233,9 @@ function RegionalBreakdownCard(props: Props) {
                 className={_cs(styles.globalStatCard)}
                 contentClassName={styles.responsiveContent}
                 headingClassName={styles.headingContent}
-                heading="Total number of cases"
+                heading="New case per million"
                 headingSize="extraSmall"
-                headerDescription="Total number of cases by outbreak"
+                headerDescription="New case per million by outbreak"
             >
                 <ChartContainer
                     data={totalBarChart}

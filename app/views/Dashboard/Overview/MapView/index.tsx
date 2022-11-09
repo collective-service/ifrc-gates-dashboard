@@ -238,7 +238,7 @@ function MapView(props: Props) {
     ] = useState<mapboxgl.MapboxGeoJSONFeature | undefined>();
 
     const mapVariables = useMemo((): MapDataQueryVariables => ({
-        indicatorId: filterValues?.indicator,
+        indicatorId: filterValues?.indicator ?? 'new_cases_per_million',
         emergency: filterValues?.outbreak,
         region: filterValues?.region,
     }), [
@@ -257,7 +257,7 @@ function MapView(props: Props) {
 
     const countriesRankingVariables = useMemo(() => ({
         emergency: filterValues?.outbreak,
-        indicatorId: filterValues?.indicator,
+        indicatorId: filterValues?.indicator ?? 'new_cases_per_million',
         region: filterValues?.region,
     }), [filterValues]);
 
@@ -397,7 +397,7 @@ function MapView(props: Props) {
                         logoPosition: 'bottom-left',
                         zoom: 1,
                         minZoom: 0,
-                        maxZoom: 3,
+                        maxZoom: 3.5,
                     }}
                     scaleControlShown
                     navControlShown
