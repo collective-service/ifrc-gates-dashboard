@@ -29,7 +29,6 @@ import {
     FormatType,
     getShortMonth,
     negativeToZero,
-    normalCommaFormatter,
     normalFormatter,
     positiveToZero,
 } from '#utils/common';
@@ -90,7 +89,7 @@ const COUNTRY_PROFILE = gql`
         countryProfile(iso3: $iso3) {
             iso3
             countryName
-            totalCases
+            newCasesPerMillion
         }
         contextualData(
             filters: {
@@ -129,7 +128,7 @@ const COUNTRY_PROFILE = gql`
         }
         totalCases: dataCountryLevelMostRecent(
             filters: {
-                indicatorId: "total_cases",
+                indicatorId: "new_cases_per_million",
                 iso3: $iso3,
             }
         ) {
@@ -406,11 +405,12 @@ function MapModal(props: ModalProps) {
         if (!filterValues?.indicator && filterValues?.outbreak) {
             return numberOfCases?.totalCases;
         }
-        return normalizedTickFormatter(
-            countryResponse?.countryProfile?.totalCases ?? 0,
+        return formatNumber(
+            'raw' as FormatType,
+            countryResponse?.countryProfile?.newCasesPerMillion ?? 0,
         );
     }, [
-        countryResponse?.countryProfile?.totalCases,
+        countryResponse?.countryProfile?.newCasesPerMillion,
         numberOfCases?.totalCases,
         filterValues?.indicator,
         filterValues?.outbreak,
@@ -441,7 +441,7 @@ function MapModal(props: ModalProps) {
                                 {`(${item.payload?.date})`}
                             </div>
                             <div className={styles.tooltipContent}>
-                                {normalCommaFormatter().format(item.value ?? 0)}
+                                {formatNumber('raw' as FormatType, item.value ?? 0)}
                             </div>
                         </div>
                     ))}
