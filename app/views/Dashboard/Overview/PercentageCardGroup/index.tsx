@@ -101,7 +101,7 @@ const OVERVIEW_STATS = gql`
                 category: "Global",
                 emergency: $emergency,
                 isTwelveMonth: true,
-                indicatorId: "total_cases",
+                indicatorId: $indicatorId,
             }
             order: {
                 indicatorMonth: DESC
@@ -250,7 +250,7 @@ function PercentageCardGroup(props: Props) {
             return 'Global';
         }
         if ((!selectedIndicatorName && !filterValues?.region) && selectedOutbreakName) {
-            return `Total Number of ${selectedOutbreakName} cases`;
+            return `New cases per million for ${selectedOutbreakName}`;
         }
         return 'Total percentage';
     }, [
@@ -261,7 +261,7 @@ function PercentageCardGroup(props: Props) {
 
     const overviewStatsVariables = useMemo((): OverviewStatsQueryVariables => ({
         emergency: filterValues?.outbreak,
-        indicatorId: filterValues?.indicator ?? 'total_cases',
+        indicatorId: filterValues?.indicator ?? 'new_cases_per_million',
         region: filterValues?.region,
     }), [
         filterValues?.indicator,
@@ -339,11 +339,11 @@ function PercentageCardGroup(props: Props) {
             if (isNotDefined(global.errorMargin)) {
                 return {
                     emergency: global.emergency,
-                    indicatorValue: decimalToPercentage(global.indicatorValueGlobal),
+                    indicatorValue: global.format === 'percent'
+                        ? decimalToPercentage(global.indicatorValueGlobal)
+                        : global.indicatorValueGlobal,
                     tooltipValue: global.indicatorValueGlobal,
                     date: global.indicatorMonth,
-                    minimumValue: negativeRange,
-                    maximumValue: positiveRange,
                     indicatorName: global.indicatorName,
                     id: global.id,
                     format: global.format as FormatType,
@@ -352,7 +352,9 @@ function PercentageCardGroup(props: Props) {
 
             return {
                 emergency: global.emergency,
-                indicatorValue: decimalToPercentage(global.indicatorValueGlobal),
+                indicatorValue: global.format === 'percent'
+                    ? decimalToPercentage(global.indicatorValueGlobal)
+                    : global.indicatorValueGlobal,
                 tooltipValue: global.indicatorValueGlobal,
                 date: global.indicatorMonth,
                 uncertainRange: [
@@ -376,11 +378,11 @@ function PercentageCardGroup(props: Props) {
             if (isNotDefined(region.errorMargin)) {
                 return {
                     emergency: region.emergency,
-                    indicatorValue: decimalToPercentage(region.indicatorValueRegional),
+                    indicatorValue: region.format === 'percent'
+                        ? decimalToPercentage(region.indicatorValueRegional)
+                        : region.indicatorValueRegional,
                     tooltipValue: region.indicatorValueRegional,
                     date: region.indicatorMonth,
-                    minimumValue: negativeRange,
-                    maximumValue: positiveRange,
                     region: region.region,
                     indicatorName: region.indicatorName,
                     id: region.id,
@@ -390,7 +392,9 @@ function PercentageCardGroup(props: Props) {
 
             return {
                 emergency: region.emergency,
-                indicatorValue: decimalToPercentage(region.indicatorValueRegional),
+                indicatorValue: region.format === 'percent'
+                    ? decimalToPercentage(region.indicatorValueRegional)
+                    : region.indicatorValueRegional,
                 tooltipValue: region.indicatorValueRegional,
                 date: region.indicatorMonth,
                 uncertainRange: [
@@ -560,7 +564,7 @@ function PercentageCardGroup(props: Props) {
                 headingSize="extraSmall"
                 headerDescription={filterValues?.indicator
                     ? `${selectedIndicatorName ?? '-'}`
-                    : `Number of cases for ${selectedOutbreakName}`}
+                    : `New cases per million for ${selectedOutbreakName}`}
             >
                 <ChartContainer
                     data={regionalBreakdownRegion}

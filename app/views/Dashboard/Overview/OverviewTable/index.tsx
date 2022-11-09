@@ -219,7 +219,7 @@ function OverviewTable(props: Props) {
     const validSorting = sorting ?? defaultSorting;
 
     const tableVariables = useMemo((): TableValuesQueryVariables => ({
-        indicatorId: filterValues?.indicator,
+        indicatorId: filterValues?.indicator ?? 'new_cases_per_million',
         emergency: filterValues?.outbreak,
         region: filterValues?.region,
     }), [

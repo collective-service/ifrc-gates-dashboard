@@ -211,7 +211,7 @@ function MapModal(props: ModalProps) {
     const countryVariables = useMemo((): CountryModalQueryVariables => ({
         iso3: countryData?.properties?.iso3 ?? 'AFG',
         emergency: filterValues?.outbreak,
-        indicatorId: filterValues?.indicator,
+        indicatorId: filterValues?.indicator ?? 'new_cases_per_million',
         subvariable: subVariableList?.filterOptions.subvariables[0],
     }
     ), [
@@ -328,7 +328,9 @@ function MapModal(props: ModalProps) {
             if (isNotDefined(country.errorMargin)) {
                 return {
                     emergency: country.emergency,
-                    indicatorValue: decimalToPercentage(country.indicatorValue),
+                    indicatorValue: country.format === 'percent'
+                        ? decimalToPercentage(country.indicatorValue)
+                        : country.indicatorValue,
                     tooltipValue: country.indicatorValue,
                     date: country.indicatorMonth,
                     indicatorName: country.indicatorName,
@@ -352,7 +354,9 @@ function MapModal(props: ModalProps) {
             }
             return {
                 emergency: country.emergency,
-                indicatorValue: decimalToPercentage(country.indicatorValue),
+                indicatorValue: country.format === 'percent'
+                    ? decimalToPercentage(country.indicatorValue)
+                    : country.indicatorValue,
                 tooltipValue: country.indicatorValue,
                 date: country.indicatorMonth,
                 uncertainRange: [
@@ -393,9 +397,10 @@ function MapModal(props: ModalProps) {
 
     const heading = useMemo(() => {
         if (filterValues?.indicator) {
-            return (`${latestIndicatorValue?.indicatorValue
-                ? latestIndicatorValue?.indicatorValue
-                : 0}%`);
+            return (formatNumber(
+                latestIndicatorValue?.format as FormatType,
+                latestIndicatorValue?.tooltipValue,
+            ));
         }
 
         if (!filterValues?.indicator && filterValues?.outbreak) {
@@ -409,7 +414,8 @@ function MapModal(props: ModalProps) {
         numberOfCases?.totalCases,
         filterValues?.indicator,
         filterValues?.outbreak,
-        latestIndicatorValue?.indicatorValue,
+        latestIndicatorValue?.format,
+        latestIndicatorValue?.tooltipValue,
     ]);
 
     const customOutbreakTooltip = (tooltipProps: TooltipProps) => {

@@ -628,7 +628,9 @@ function Country(props: Props) {
             if (isNotDefined(country.errorMargin)) {
                 return {
                     emergency: country.emergency,
-                    indicatorValue: decimalToPercentage(country.indicatorValue),
+                    indicatorValue: country.format === 'percent'
+                        ? decimalToPercentage(country.indicatorValue)
+                        : country.indicatorValue,
                     tooltipValue: country.indicatorValue,
                     date: country.indicatorMonth,
                     indicatorName: country.indicatorName,
@@ -652,7 +654,9 @@ function Country(props: Props) {
             }
             return {
                 emergency: country.emergency,
-                indicatorValue: decimalToPercentage(country.indicatorValue),
+                indicatorValue: country.format === 'percent'
+                    ? decimalToPercentage(country.indicatorValue)
+                    : country.indicatorValue,
                 tooltipValue: country.indicatorValue,
                 date: country.indicatorMonth,
                 uncertainRange: [

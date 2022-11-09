@@ -78,8 +78,8 @@ function UncertaintyChart(props: Props) {
                 subHeadingLabel={data[0].payload?.region}
                 subHeading={`(${data[0].payload?.date})`}
                 value={data[0].payload?.tooltipValue ?? 0}
-                minValue={data[0].payload?.minimumValue ?? 0}
-                maxValue={data[0].payload?.maximumValue ?? 0}
+                minValue={data[0].payload?.minimumValue}
+                maxValue={data[0].payload?.maximumValue}
             />
         );
     };
