@@ -55,11 +55,13 @@
                             flex-shrink: 0;
                             font-size: var(--dui-font-size-large);
                         }
+
                         .score-footer {
                             flex-shrink: 0;
                             font-size: var(--dui-font-size-medium);
                             overflow-wrap: break-word;
                         }
+
                         .readiness-list-card {
                             display: flex;
                             flex-wrap: wrap;
@@ -86,6 +88,7 @@
                     .responsive-container {
                         display: flex;
                         flex-grow: 1;
+                        justify-content: center;
                         overflow: hidden;
 
                         .tooltip-card {

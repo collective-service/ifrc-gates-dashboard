@@ -841,6 +841,9 @@ function Country(props: Props) {
         return null;
     };
 
+    const hasOutbreakFilterData = outbreaks.find(((o) => o.emergency === filterValues?.outbreak));
+    const showLineChart = isNotDefined(filterValues?.outbreak) ? true : !!hasOutbreakFilterData;
+
     return (
         <div className={_cs(className, styles.countryWrapper)}>
             {countryResponseLoading && <PendingMessage />}
@@ -1045,6 +1048,7 @@ function Country(props: Props) {
                             <ChartContainer
                                 className={styles.responsiveContainer}
                                 data={emergencyLineChart}
+                                hasFilteredData={showLineChart}
                             >
                                 <LineChart
                                     data={emergencyLineChart}
