@@ -48,11 +48,10 @@ import { FilterType } from '../../Filters';
 import styles from './styles.css';
 
 export interface RegionalTooltipData {
-    contextIndicatorValue?: number;
+    indicatorValue?: number;
     fill?: number;
     id: string;
     indicatorMonth?: string;
-    contextDate?: string;
     region?: string;
     format?: FormatType;
 }
@@ -448,6 +447,7 @@ function PercentageCardGroup(props: Props) {
             active,
             payload: regionalData,
         } = tooltipProps;
+
         if (active && regionalData && regionalData.length > 0) {
             const format = regionalData[0]?.payload?.format as FormatType;
 
@@ -455,10 +455,8 @@ function PercentageCardGroup(props: Props) {
                 <CustomTooltip
                     format={filterValues?.indicator ? format : 'raw'}
                     heading={regionalData[0].payload?.region}
-                    subHeading={filterValues?.indicator
-                        ? (`(${regionalData[0].payload?.indicatorMonth})`)
-                        : (`(${regionalData[0].payload?.contextDate})`)}
-                    value={regionalData[0].payload?.contextIndicatorValue}
+                    subHeading={`(${regionalData[0].payload?.indicatorMonth})`}
+                    value={regionalData[0].payload?.indicatorValue}
                 />
             );
         }

@@ -615,7 +615,10 @@ function Country(props: Props) {
         }
 
         return countryWiseOutbreakCases;
-    }, [countryResponse]);
+    }, [
+        countryResponse,
+        filterValues?.outbreak,
+    ]);
 
     const uncertaintyChart: UncertainData[] | undefined = useMemo(() => (
         countryResponse?.dataCountryLevel.map((country) => {
