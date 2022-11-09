@@ -361,7 +361,8 @@ function PercentageCardGroup(props: Props) {
                     negativeRange,
                     positiveRange,
                 ],
-                minimumValue: negativeRange,
+                // FIXME : solve in common ts
+                minimumValue: negativeRange ?? 0,
                 maximumValue: positiveRange,
                 indicatorName: global.indicatorName,
                 id: global.id,
@@ -401,7 +402,8 @@ function PercentageCardGroup(props: Props) {
                     negativeRange,
                     positiveRange,
                 ],
-                minimumValue: negativeRange,
+                // FIXME : solve in common ts
+                minimumValue: negativeRange ?? 0,
                 maximumValue: positiveRange,
                 region: region.region,
                 indicatorName: region.indicatorName,

@@ -248,12 +248,6 @@ function RegionalBreakdownCard(props: Props) {
     ));
 
     const totalBarChart = useMemo(() => {
-        if (!totalGlobalBarChart) {
-            return undefined;
-        }
-        if (!totalRegionBarChart) {
-            return undefined;
-        }
         if (filterValues?.region) {
             return totalRegionBarChart;
         }
