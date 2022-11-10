@@ -26,6 +26,7 @@ export interface Props {
     totalDeaths?: string | null;
     newCases?: string | null;
     newDeathsPerMillion?: string | null;
+    statValueLoading?: boolean;
 }
 
 function PercentageStats(props: Props) {
@@ -43,6 +44,7 @@ function PercentageStats(props: Props) {
         totalDeaths,
         newCases,
         newDeathsPerMillion,
+        statValueLoading,
     } = props;
 
     const empty = statValue === '0';
@@ -95,6 +97,8 @@ function PercentageStats(props: Props) {
                         <Message
                             empty={empty}
                             emptyIcon={<IoFileTraySharp />}
+                            pending={statValueLoading}
+                            pendingContainerClassName={styles.pendingMessage}
                         />
                     ) : (
                         <>

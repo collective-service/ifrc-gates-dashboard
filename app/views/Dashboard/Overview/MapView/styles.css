@@ -28,6 +28,14 @@
             padding-top: none;
         }
 
+        .pending-message {
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            justify-content: center;
+            height: 100%;
+        }
+
         .progress-list-header {
             padding-bottom: var(--dui-spacing-medium);
         }

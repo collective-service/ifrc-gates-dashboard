@@ -396,7 +396,7 @@ function MapModal(props: ModalProps) {
         latestDate,
     ]);
 
-    const heading = useMemo(() => {
+    const totalCasesHeading = useMemo(() => {
         if (filterValues?.indicator) {
             return (formatNumber(
                 latestIndicatorValue?.format as FormatType,
@@ -478,7 +478,7 @@ function MapModal(props: ModalProps) {
                         size="extraLarge"
                         className={styles.countryCaseData}
                     >
-                        {heading}
+                        {totalCasesHeading}
                     </Heading>
                     <Heading
                         className={styles.countrySurveyDate}
