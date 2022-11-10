@@ -50,7 +50,7 @@ function CustomTooltip(props: Props) {
             <div className={styles.tooltipContent}>
                 {isDefined(valueLabel) && `${valueLabel} : `}
                 {(isDefined(value) && value !== null) && formatNumber(
-                    format ?? 'raw',
+                    format === 'million' ? 'raw' : format,
                     value,
                 )}
                 {(isDefined(minValue) && isDefined(maxValue))

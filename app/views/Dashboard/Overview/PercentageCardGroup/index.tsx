@@ -117,6 +117,28 @@ const OVERVIEW_STATS = gql`
             format
             emergency
         }
+        outbreakRegion: regionLevel (
+            filters: {
+                category: "Global",
+                emergency: $emergency,
+                isTwelveMonth: true,
+                indicatorId: $indicatorId,
+                region: $region,
+            }
+            order: {
+                indicatorMonth: DESC
+            }
+            pagination: {
+                limit: 12
+            }
+        ) {
+            id
+            indicatorId
+            indicatorMonth
+            indicatorValueRegional
+            format
+            emergency
+        }
         regionalBreakdownRegion: regionLevel (
             filters: {
                 emergency: $emergency,
@@ -428,16 +450,33 @@ function PercentageCardGroup(props: Props) {
         }).sort((a, b) => compareDate(a.date, b.date))
     ), [overviewStatsResponse?.uncertaintyRegion]);
 
-    const outbreakLineChart = useMemo(() => (
-        overviewStatsResponse?.outbreak.map((outbreak) => (
+    const outbreakLineChart = useMemo(() => {
+        const outbreakGlobal = overviewStatsResponse?.outbreak.map((outbreak) => (
             {
                 id: outbreak.id,
                 emergency: outbreak.emergency,
                 contextDate: outbreak.indicatorMonth,
                 [outbreak.emergency]: outbreak.indicatorValueGlobal,
             }
-        ))
-    ), [overviewStatsResponse?.outbreak]);
+        ));
+
+        const outbreakRegion = overviewStatsResponse?.outbreakRegion.map((region) => (
+            {
+                id: region.id,
+                emergency: region.emergency,
+                contextDate: region.indicatorMonth,
+                [region.emergency]: region.indicatorValueRegional,
+            }
+        ));
+        if (filterValues?.region) {
+            return outbreakRegion;
+        }
+        return outbreakGlobal;
+    }, [
+        overviewStatsResponse?.outbreak,
+        overviewStatsResponse?.outbreakRegion,
+        filterValues?.region,
+    ]);
 
     const renderLegend = useCallback((legendProps: LegendProps) => {
         const { payload } = legendProps;
