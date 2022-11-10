@@ -138,6 +138,7 @@ const OVERVIEW_STATS = gql`
         }
         uncertaintyGlobal: globalLevel (
             filters: {
+                emergency: $emergency,
                 isTwelveMonth: true,
                 indicatorId: $indicatorId,
                 category: "Global",
@@ -161,6 +162,7 @@ const OVERVIEW_STATS = gql`
         }
         uncertaintyRegion: regionLevel (
             filters: {
+                emergency: $emergency,
                 indicatorId: $indicatorId,
                 isTwelveMonth: true,
                 region: $region,
@@ -252,11 +254,24 @@ function PercentageCardGroup(props: Props) {
         if ((!selectedIndicatorName && !filterValues?.region) && selectedOutbreakName) {
             return `New cases per million for ${selectedOutbreakName}`;
         }
+        if (selectedOutbreakName && filterValues?.region) {
+            return `New cases per million for ${selectedOutbreakName}`;
+        }
         return 'Total percentage';
     }, [
         filterValues,
         selectedIndicatorName,
         selectedOutbreakName,
+    ]);
+
+    const cardSubHeader = useMemo(() => {
+        if (selectedIndicatorName) {
+            return selectedIndicatorName;
+        }
+        return filterValues?.indicator;
+    }, [
+        filterValues,
+        selectedIndicatorName,
     ]);
 
     const overviewStatsVariables = useMemo((): OverviewStatsQueryVariables => ({
@@ -430,7 +445,7 @@ function PercentageCardGroup(props: Props) {
             <>
                 {payload?.map((entry) => (
                     <Element
-                        key={`item-${entry.id}`}
+                        key={`item - ${entry.id} `}
                         actions={(
                             <>
                                 <IoSquare color={getLineChartColor(filterValues?.outbreak)} />
@@ -492,9 +507,10 @@ function PercentageCardGroup(props: Props) {
             <PercentageStats
                 className={styles.globalStatCard}
                 heading={cardHeader}
-                subHeading={selectedIndicatorName ?? filterValues?.indicator}
+                subHeading={cardSubHeader}
                 headingSize="extraSmall"
                 statValue={totalCaseValue}
+                statValueLoading={loading}
             />
             {uncertaintyChartActive
                 ? (
@@ -507,7 +523,7 @@ function PercentageCardGroup(props: Props) {
                         loading={loading}
                         emergencyFilterValue={filterValues?.outbreak}
                         heading="Indicator overview over the last 12 months"
-                        headingDescription={`Trend chart for ${selectedIndicatorName ?? filterValues?.indicator}`}
+                        headingDescription={`Trend chart for ${selectedIndicatorName ?? filterValues?.indicator} `}
                     />
                 ) : (
                     <ContainerCard
@@ -565,7 +581,7 @@ function PercentageCardGroup(props: Props) {
                 heading={filterValues?.indicator ? 'Regional Percentage' : 'Regional Breakdown'}
                 headingSize="extraSmall"
                 headerDescription={filterValues?.indicator
-                    ? `${selectedIndicatorName ?? '-'}`
+                    ? `${selectedIndicatorName ?? '-'} `
                     : `New cases per million for ${selectedOutbreakName}`}
             >
                 <ChartContainer
@@ -596,7 +612,7 @@ function PercentageCardGroup(props: Props) {
                         >
                             {regionalBreakdownRegion?.map((entry) => (
                                 <Cell
-                                    key={`Cell -${entry.id}`}
+                                    key={`Cell - ${entry.id} `}
                                     fill="#8DD2B1"
                                     opacity={entry.fill}
                                 />

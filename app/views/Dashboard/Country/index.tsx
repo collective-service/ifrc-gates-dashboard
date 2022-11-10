@@ -910,6 +910,7 @@ function Country(props: Props) {
                                         'percent',
                                         statusUncertainty?.indicatorValue ?? 0,
                                     )}
+                                    statValueLoading={countryResponseLoading}
                                     icon={null}
                                 />
                             )}

@@ -200,7 +200,7 @@ function Tooltip(props: TooltipProps) {
     );
 }
 
-interface Props{
+interface Props {
     className?: string;
     setActiveTab: React.Dispatch<React.SetStateAction<TabTypes | undefined>>;
     filterValues?: FilterType | undefined;
@@ -489,6 +489,8 @@ function MapView(props: Props) {
                         <Message
                             emptyIcon={<IoFileTraySharp />}
                             empty
+                            pending={countriesRankingLoading}
+                            pendingContainerClassName={styles.pendingMessage}
                         />
                     )}
                 </div>
@@ -514,6 +516,8 @@ function MapView(props: Props) {
                         <Message
                             emptyIcon={<IoFileTraySharp />}
                             empty
+                            pending={countriesRankingLoading}
+                            pendingContainerClassName={styles.pendingMessage}
                         />
                     )}
                 </div>
