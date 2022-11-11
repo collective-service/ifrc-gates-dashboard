@@ -173,7 +173,6 @@ interface ModalProps {
     setFilterValues: React.Dispatch<React.SetStateAction<FilterType | undefined>>;
     countryData: mapboxgl.MapboxGeoJSONFeature | undefined;
     filterValues: FilterType | undefined;
-    selectedIndicatorName: string | undefined;
 }
 
 function MapModal(props: ModalProps) {
@@ -184,7 +183,6 @@ function MapModal(props: ModalProps) {
         setFilterValues,
         countryData,
         filterValues,
-        selectedIndicatorName,
     } = props;
 
     const subvariablesVariables = useMemo(() => (
