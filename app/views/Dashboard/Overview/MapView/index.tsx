@@ -61,6 +61,7 @@ const MAP_DATA = gql`
             indicatorValue
             countryId
             format
+            emergency
         }
     }
 `;
@@ -122,6 +123,7 @@ interface TooltipProps {
     onHide: () => void;
     lngLat: mapboxgl.LngLatLike;
     filterValues?: FilterType | undefined;
+    outbreakName?: string | undefined;
 }
 
 const lightStyle = 'mapbox://styles/mapbox/light-v10';
@@ -165,6 +167,7 @@ function Tooltip(props: TooltipProps) {
         indicatorData,
         indicatorName,
         filterValues,
+        outbreakName,
     } = props;
 
     return (
@@ -184,7 +187,7 @@ function Tooltip(props: TooltipProps) {
                         <div className={styles.description}>
                             {isDefined(indicatorName)
                                 ? indicatorName
-                                : `New cases per million for ${filterValues?.outbreak ?? 'outbreak'}`}
+                                : `New cases per million for ${filterValues?.outbreak ?? outbreakName}`}
                         </div>
                     </>
                 )}
@@ -448,6 +451,7 @@ function MapView(props: Props) {
                                     ?.feature?.properties?.idmc_short}
                                 indicatorData={selectedCountryIndicator}
                                 indicatorName={selectedIndicatorName}
+                                outbreakName={selectedCountryIndicator?.emergency ?? 'outbreak'}
                                 onHide={handleHoverClose}
                                 lngLat={mapClickProperties.lngLat}
                                 filterValues={filterValues}
