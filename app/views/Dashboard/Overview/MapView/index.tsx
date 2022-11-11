@@ -532,7 +532,6 @@ function MapView(props: Props) {
                         setFilterValues={setFilterValues}
                         countryData={countryData}
                         filterValues={filterValues}
-                        selectedIndicatorName={selectedIndicatorName ?? undefined}
                     />
                 )}
             </ContainerCard>

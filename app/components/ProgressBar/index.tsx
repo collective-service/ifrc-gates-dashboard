@@ -126,7 +126,6 @@ function ProgressBar(props: Props) {
                 </Tooltip>
                 <div
                     className={styles.progressValue}
-                    title={valueTooltip as string}
                 >
                     {format === 'percent'
                         ? formatNumber('percent', value ?? 0)

@@ -634,24 +634,10 @@ function Country(props: Props) {
                     date: country.indicatorMonth,
                     indicatorName: country.indicatorName,
                     format: country.format as FormatType,
+                    interpolated: country.interpolated,
                 };
             }
 
-            if (country.interpolated) {
-                return {
-                    emergency: country.emergency,
-                    date: country.indicatorMonth,
-                    uncertainRange: [
-                        negativeRange ?? 0,
-                        positiveRange ?? 0,
-                    ],
-                    // FIXME : solve in common ts
-                    minimumValue: negativeRange ?? 0,
-                    maximumValue: positiveRange,
-                    indicatorName: country.indicatorName,
-                    format: country.format as FormatType,
-                };
-            }
             return {
                 emergency: country.emergency,
                 indicatorValue: country.format === 'percent'
@@ -668,6 +654,7 @@ function Country(props: Props) {
                 maximumValue: positiveRange,
                 indicatorName: country.indicatorName,
                 format: country.format as FormatType,
+                interpolated: country.interpolated,
             };
         }).sort((a, b) => compareDate(a.date, b.date))
     ), [countryResponse?.dataCountryLevel]);

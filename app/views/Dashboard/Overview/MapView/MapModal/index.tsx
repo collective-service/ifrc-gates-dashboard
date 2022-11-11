@@ -173,7 +173,6 @@ interface ModalProps {
     setFilterValues: React.Dispatch<React.SetStateAction<FilterType | undefined>>;
     countryData: mapboxgl.MapboxGeoJSONFeature | undefined;
     filterValues: FilterType | undefined;
-    selectedIndicatorName: string | undefined;
 }
 
 function MapModal(props: ModalProps) {
@@ -184,7 +183,6 @@ function MapModal(props: ModalProps) {
         setFilterValues,
         countryData,
         filterValues,
-        selectedIndicatorName,
     } = props;
 
     const subvariablesVariables = useMemo(() => (
@@ -334,24 +332,10 @@ function MapModal(props: ModalProps) {
                     date: country.indicatorMonth,
                     indicatorName: country.indicatorName,
                     format: country.format as FormatType,
+                    interpolated: country.interpolated,
                 };
             }
 
-            if (country.interpolated) {
-                return {
-                    emergency: country.emergency,
-                    date: country.indicatorMonth,
-                    uncertainRange: [
-                        negativeRange ?? 0,
-                        positiveRange ?? 0,
-                    ],
-                    // FIXME : solve in common ts
-                    minimumValue: negativeRange ?? 0,
-                    maximumValue: positiveRange,
-                    indicatorName: country.indicatorName,
-                    format: country.format as FormatType,
-                };
-            }
             return {
                 emergency: country.emergency,
                 indicatorValue: country.format === 'percent'
@@ -368,6 +352,7 @@ function MapModal(props: ModalProps) {
                 maximumValue: positiveRange,
                 indicatorName: country.indicatorName,
                 format: country.format as FormatType,
+                interpolated: country.interpolated,
             };
         }).sort((a, b) => compareDate(a.date, b.date))
     ), [countryResponse?.dataCountryLevel]);
@@ -542,7 +527,6 @@ function MapModal(props: ModalProps) {
                     uncertainData={(uncertaintyChart && uncertaintyChart) ?? []}
                     emergencyFilterValue={filterValues?.outbreak}
                     heading="Indicator overview over the last 12 months"
-                    headingDescription={`Trend chart for ${selectedIndicatorName ?? filterValues?.indicator}`}
                 />
             )}
             <Sources

@@ -51,6 +51,18 @@ interface TooltipProps {
     payload?: Payload[];
 }
 
+interface CustomDotsProps {
+    cx?: number;
+    cy?: number;
+    r?: number;
+    stroke?: string;
+    strokeWidth?: number;
+    fill?: string;
+    payload?: {
+        interpolated?: number;
+    };
+}
+
 const dateTickFormatter = (d: string) => getShortMonth(d);
 
 function UncertaintyChart(props: Props) {
@@ -83,6 +95,31 @@ function UncertaintyChart(props: Props) {
             />
         );
     };
+
+    function CustomDots(dotsProps: CustomDotsProps) {
+        const {
+            cx,
+            cy,
+            r,
+            stroke,
+            payload,
+            strokeWidth,
+            fill,
+        } = dotsProps;
+        if (payload?.interpolated) {
+            return null;
+        }
+        return (
+            <circle
+                strokeWidth={strokeWidth}
+                stroke={stroke}
+                fill={fill}
+                cx={cx}
+                cy={cy}
+                r={r}
+            />
+        );
+    }
 
     return (
         <ContainerCard
@@ -125,10 +162,7 @@ function UncertaintyChart(props: Props) {
                         name={emergencyFilterValue}
                         stroke="#2F9C67"
                         strokeWidth={2}
-                        dot={{
-                            stroke: '#2F9C67',
-                            strokeWidth: 2,
-                        }}
+                        dot={<CustomDots />}
                     />
                     <Tooltip content={custom} />
                 </ComposedChart>
