@@ -366,7 +366,7 @@ function Dashboard() {
                                     className={styles.defaultTabMode}
                                     activeClassName={styles.activeTab}
                                 >
-                                    Combined Indicators
+                                    Browse Indicators
                                 </Tab>
                             </TabList>
                         </div>

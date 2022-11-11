@@ -266,26 +266,6 @@ function PercentageCardGroup(props: Props) {
         return color;
     }, []);
 
-    const cardHeader = useMemo(() => {
-        if (selectedIndicatorName && filterValues?.region && selectedOutbreakName) {
-            return `Total percentage for ${filterValues?.region}`;
-        }
-        if ((selectedIndicatorName && selectedOutbreakName) && !filterValues?.region) {
-            return 'Global';
-        }
-        if ((!selectedIndicatorName && !filterValues?.region) && selectedOutbreakName) {
-            return `New cases per million for ${selectedOutbreakName}`;
-        }
-        if (selectedOutbreakName && filterValues?.region) {
-            return `New cases per million for ${selectedOutbreakName}`;
-        }
-        return 'Total percentage';
-    }, [
-        filterValues,
-        selectedIndicatorName,
-        selectedOutbreakName,
-    ]);
-
     const cardSubHeader = useMemo(() => {
         if (selectedIndicatorName) {
             return selectedIndicatorName;
@@ -347,6 +327,31 @@ function PercentageCardGroup(props: Props) {
     ), [
         regionalBreakdownRegion,
         filterValues?.region,
+    ]);
+
+    const cardHeader = useMemo(() => {
+        if ((selectedIndicatorName && filterValues?.region && selectedOutbreakName)
+            && regionTotalCase?.format === 'percent') {
+            return `Total percentage for ${filterValues?.region}`;
+        }
+        if (selectedIndicatorName && filterValues?.region && selectedOutbreakName) {
+            return `Total number for ${filterValues?.region}`;
+        }
+        if ((selectedIndicatorName && selectedOutbreakName) && !filterValues?.region) {
+            return 'Global';
+        }
+        if ((!selectedIndicatorName && !filterValues?.region) && selectedOutbreakName) {
+            return `New cases per million for ${selectedOutbreakName}`;
+        }
+        if (selectedOutbreakName && filterValues?.region) {
+            return `New cases per million for ${selectedOutbreakName}`;
+        }
+        return 'Total percentage';
+    }, [
+        filterValues,
+        selectedIndicatorName,
+        selectedOutbreakName,
+        regionTotalCase?.format,
     ]);
 
     const totalCaseValue = useMemo(() => {
@@ -546,7 +551,7 @@ function PercentageCardGroup(props: Props) {
             <PercentageStats
                 className={styles.globalStatCard}
                 heading={cardHeader}
-                subHeading={cardSubHeader}
+                headerDescription={cardSubHeader}
                 headingSize="extraSmall"
                 statValue={totalCaseValue}
                 statValueLoading={loading}
@@ -571,7 +576,7 @@ function PercentageCardGroup(props: Props) {
                         heading="Outbreak over last 12 months"
                         headingSize="extraSmall"
                         contentClassName={styles.responsiveContent}
-                        headerDescription={`Number of cases for ${filterValues?.outbreak}`}
+                        headerDescription={`New cases per million for ${filterValues?.outbreak}`}
                     >
                         <ChartContainer
                             className={styles.responsiveContainer}
@@ -617,7 +622,7 @@ function PercentageCardGroup(props: Props) {
                 className={styles.regionsCard}
                 contentClassName={styles.responsiveContent}
                 headingClassName={styles.headingContent}
-                heading={filterValues?.indicator ? 'Regional Percentage' : 'Regional Breakdown'}
+                heading={regionTotalCase?.format === 'percent' ? 'Regional Percentage' : 'Regional Breakdown'}
                 headingSize="extraSmall"
                 headerDescription={filterValues?.indicator
                     ? `${selectedIndicatorName ?? '-'} `
