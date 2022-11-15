@@ -41,11 +41,6 @@
             }
         }
 
-        .tooltip {
-            background-color: var(--dui-color-background);
-            color:var(--color-text-title);
-        }
-
         .progress-value {
             font-size: var(--dui-font-size-medium);
         }

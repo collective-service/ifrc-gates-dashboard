@@ -1,0 +1,30 @@
+.stat-item-container {
+    display: flex;
+    justify-content: stretch;
+
+    .stat-item{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        height: 4rem;
+        font-size: var(--dui-font-size-medium);
+
+        .labelText {
+            width: 10rem;
+        }
+
+        .value-text {
+            display: flex;
+            align-items: flex-end;
+            flex-direction: column;
+            font-weight: var(--dui-font-weight-light);
+
+            .regional-text {
+                color: var(--color-text-secondary);
+                font-size: var(--dui-font-size-small);
+                font-weight: var(--dui-font-weight-light);
+            }
+        }
+    }
+}

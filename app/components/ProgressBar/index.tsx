@@ -119,7 +119,6 @@ function ProgressBar(props: Props) {
                     />
                 </div>
                 <Tooltip
-                    className={styles.tooltip}
                     trackMousePosition
                 >
                     {valueTooltip}
