@@ -33,6 +33,7 @@ export interface UncertainData {
     region?: string;
     indicatorName?: string | null;
     format?: FormatType;
+    subvariable?: string;
 }
 
 interface Props {
@@ -94,6 +95,7 @@ function UncertaintyChart(props: Props) {
                 heading={data[0].payload?.indicatorName ?? ''}
                 subHeadingLabel={data[0].payload?.region}
                 subHeading={`(${data[0].payload?.date})`}
+                subvariable={data[0].payload?.subvariable}
                 value={data[0].payload?.tooltipValue}
                 minValue={data[0].payload?.minimumValue}
                 maxValue={data[0].payload?.maximumValue}

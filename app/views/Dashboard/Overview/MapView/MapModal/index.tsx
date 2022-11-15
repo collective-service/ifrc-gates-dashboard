@@ -293,6 +293,7 @@ function MapModal(props: ModalProps) {
                     indicatorName: country.indicatorName,
                     format: country.format as FormatType,
                     interpolated: country.interpolated,
+                    subvariable: country.subvariable,
                 };
             }
 
@@ -313,6 +314,7 @@ function MapModal(props: ModalProps) {
                 indicatorName: country.indicatorName,
                 format: country.format as FormatType,
                 interpolated: country.interpolated,
+                subvariable: country.subvariable,
             };
         }).sort((a, b) => compareDate(a.date, b.date))
     ), [countryResponse?.dataCountryLevel]);

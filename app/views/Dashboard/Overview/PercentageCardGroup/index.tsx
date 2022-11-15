@@ -146,9 +146,6 @@ const OVERVIEW_STATS = gql`
                 isRegionalChart: true,
                 category: "Global",
             }
-            order: {
-                indicatorMonth: DESC
-            }
         ) {
             id
             region
@@ -181,6 +178,7 @@ const OVERVIEW_STATS = gql`
             indicatorName
             indicatorValueGlobal
             format
+            subvariable
         }
         uncertaintyRegion: regionLevel (
             filters: {
@@ -207,6 +205,7 @@ const OVERVIEW_STATS = gql`
             indicatorValueRegional
             region
             format
+            subvariable
         }
     }
 `;
@@ -389,6 +388,7 @@ function PercentageCardGroup(props: Props) {
                     indicatorName: global.indicatorName,
                     id: global.id,
                     format: global.format as FormatType,
+                    subvariable: global.subvariable,
                 };
             }
 
@@ -409,6 +409,7 @@ function PercentageCardGroup(props: Props) {
                 indicatorName: global.indicatorName,
                 id: global.id,
                 format: global.format as FormatType,
+                subvariable: global.subvariable,
             };
         }).sort((a, b) => compareDate(a.date, b.date))
     ), [overviewStatsResponse?.uncertaintyGlobal]);
@@ -430,6 +431,7 @@ function PercentageCardGroup(props: Props) {
                     indicatorName: region.indicatorName,
                     id: region.id,
                     format: region.format as FormatType,
+                    subvariable: region.subvariable,
                 };
             }
 
@@ -451,6 +453,7 @@ function PercentageCardGroup(props: Props) {
                 indicatorName: region.indicatorName,
                 id: region.id,
                 format: region.format as FormatType,
+                subvariable: region.subvariable,
             };
         }).sort((a, b) => compareDate(a.date, b.date))
     ), [overviewStatsResponse?.uncertaintyRegion]);
