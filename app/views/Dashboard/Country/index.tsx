@@ -23,9 +23,7 @@ import {
 } from 'recharts';
 import {
     ContainerCard,
-    TextOutput,
     ListView,
-    NumberOutput,
     PendingMessage,
 } from '@the-deep/deep-ui';
 import { useQuery, gql } from '@apollo/client';
@@ -52,6 +50,7 @@ import {
 import Sources from '#components/Sources';
 
 import { FilterType } from '../Filters';
+import CountryStatItem from './CountryStatItem';
 import { IndicatorType } from '..';
 
 import styles from './styles.css';
@@ -63,6 +62,7 @@ interface ScoreCardProps {
     source?: string;
     indicator?: 'red' | 'yellow' | 'orange' | 'green';
 }
+
 interface CountryWiseOutbreakCases {
     id: string;
     emergency?: string;
@@ -111,6 +111,7 @@ const COUNTRY_PROFILE = gql`
             iso3
             countryName
             populationSize
+            populationComment
             region
             readiness
             readinessDate
@@ -127,20 +128,31 @@ const COUNTRY_PROFILE = gql`
             stringency
             stringencyRegion
             stringencyFormat
+            stringencyDate
             economicSupportIndex
             economicSupportIndexRegion
+            economicSupportIndexDate
+            economicSupportIndexSource
             medicalStaff
             medicalStaffRegion
             medicalStaffFormat
+            medicalStaffSource
+            medicalStaffComment
             literacyRate
             literacyRateRegion
             literacyRateFormat
+            literacyRateComment
+            literacyRateSource
             internetAccess
             internetAccessRegion
             internetAccessFormat
+            internetAccessComment
+            internetAccessSource
             washAccessNational
             washAccessNationalRegion
             washAccessNationalFormat
+            washAccessNationalComment
+            washAccessNationalSource
             newCasesPerMillion
             newCasesRegionShare
             newDeaths
@@ -1115,160 +1127,94 @@ function Country(props: Props) {
                     contentClassName={styles.countryDetails}
                 >
                     {isDefined(countryResponse?.countryProfile.populationSize) && (
-                        <TextOutput
-                            className={styles.countryTextOutput}
-                            valueContainerClassName={styles.valueText}
-                            labelContainerClassName={styles.labelText}
-                            hideLabelColon
+                        <CountryStatItem
                             label="Population"
-                            value={(
-                                <NumberOutput
-                                    value={countryResponse?.countryProfile.populationSize}
-                                />
+                            value={formatNumber(
+                                'raw',
+                                countryResponse?.countryProfile.populationSize,
                             )}
+                            source={countryResponse?.countryProfile.populationComment ?? undefined}
                         />
                     )}
                     {isDefined(internetAccess) && (
-                        <TextOutput
-                            className={styles.countryTextOutput}
-                            valueContainerClassName={styles.valueText}
-                            labelContainerClassName={styles.labelText}
-                            hideLabelColon
+                        <CountryStatItem
                             label="Internet access"
-                            value={(
-                                <>
-                                    {internetAccess}
-                                    {isDefined(internetAccessRegion) && (
-                                        <TextOutput
-                                            labelContainerClassName={styles.regionalText}
-                                            valueContainerClassName={styles.regionalText}
-                                            label={countryResponse?.countryProfile.region}
-                                            value={internetAccessRegion}
-                                        />
-                                    )}
-                                </>
-                            )}
+                            value={internetAccess}
+                            showRegionalValue
+                            region={countryResponse?.countryProfile.region ?? undefined}
+                            regionalValue={internetAccessRegion}
+                            source={countryResponse?.countryProfile?.internetAccessSource
+                                ?? undefined}
+                            date={countryResponse?.countryProfile?.internetAccessComment
+                                ?? undefined}
                         />
                     )}
                     {isDefined(literacyRate) && (
-                        <TextOutput
-                            className={styles.countryTextOutput}
-                            valueContainerClassName={styles.valueText}
-                            labelContainerClassName={styles.labelText}
-                            hideLabelColon
+                        <CountryStatItem
                             label="Literacy rate"
-                            value={(
-                                <>
-                                    {literacyRate}
-                                    {isDefined(literacyRateRegion) && (
-                                        <TextOutput
-                                            labelContainerClassName={styles.regionalText}
-                                            valueContainerClassName={styles.regionalText}
-                                            label={countryResponse?.countryProfile.region}
-                                            value={literacyRateRegion}
-                                        />
-                                    )}
-                                </>
-                            )}
+                            value={literacyRate}
+                            showRegionalValue
+                            region={countryResponse?.countryProfile.region ?? undefined}
+                            regionalValue={literacyRateRegion}
+                            source={countryResponse?.countryProfile?.literacyRateSource
+                                ?? undefined}
+                            date={countryResponse?.countryProfile?.literacyRateComment
+                                ?? undefined}
                         />
                     )}
                     {isDefined(washAccessNational) && (
-                        <TextOutput
-                            className={styles.countryTextOutput}
-                            valueContainerClassName={styles.valueText}
-                            labelContainerClassName={styles.labelText}
-                            hideLabelColon
+                        <CountryStatItem
                             label="Access to basic washing facilities"
-                            value={(
-                                <>
-                                    {washAccessNational}
-                                    {isDefined(washAccessNationalRegion) && (
-                                        <TextOutput
-                                            labelContainerClassName={styles.regionalText}
-                                            valueContainerClassName={styles.regionalText}
-                                            label={countryResponse?.countryProfile.region}
-                                            value={washAccessNationalRegion}
-                                        />
-                                    )}
-                                </>
-                            )}
+                            value={washAccessNational}
+                            showRegionalValue
+                            region={countryResponse?.countryProfile.region ?? undefined}
+                            regionalValue={washAccessNationalRegion}
+                            source={countryResponse?.countryProfile?.washAccessNationalSource
+                                ?? undefined}
+                            date={countryResponse?.countryProfile?.washAccessNationalComment
+                                ?? undefined}
                         />
                     )}
                     {isDefined(countryResponse?.countryProfile.medicalStaff) && (
-                        <TextOutput
-                            className={styles.countryTextOutput}
-                            valueContainerClassName={styles.valueText}
-                            labelContainerClassName={styles.labelText}
-                            hideLabelColon
+                        <CountryStatItem
                             label="Doctors and nurses per 1000 people"
-                            value={(
-                                <>
-                                    {medicalStaff}
-                                    {isDefined(countryResponse?.countryProfile.medicalStaffRegion)
-                                        && (
-                                            <TextOutput
-                                                labelContainerClassName={styles.regionalText}
-                                                valueContainerClassName={styles.regionalText}
-                                                label={countryResponse?.countryProfile.region}
-                                                value={medicalStaffRegional}
-                                            />
-                                        )}
-                                </>
-                            )}
+                            value={medicalStaff}
+                            showRegionalValue
+                            region={countryResponse?.countryProfile.region ?? undefined}
+                            regionalValue={medicalStaffRegional}
+                            source={countryResponse?.countryProfile?.medicalStaffSource
+                                ?? undefined}
+                            date={countryResponse?.countryProfile?.medicalStaffComment
+                                ?? undefined}
                         />
                     )}
                     {isDefined(stringency) && (
-                        <TextOutput
-                            className={styles.countryTextOutput}
-                            valueContainerClassName={styles.valueText}
-                            labelContainerClassName={styles.labelText}
-                            hideLabelColon
+                        <CountryStatItem
                             label="Stringency"
-                            value={(
-                                <>
-                                    {stringency}
-                                    {isDefined(stringencyRegion) && (
-                                        <TextOutput
-                                            labelContainerClassName={styles.regionalText}
-                                            valueContainerClassName={styles.regionalText}
-                                            label={countryResponse?.countryProfile.region}
-                                            value={stringencyRegion}
-                                        />
-                                    )}
-                                </>
-                            )}
+                            value={stringency}
+                            showRegionalValue
+                            region={countryResponse?.countryProfile.region ?? undefined}
+                            regionalValue={stringencyRegion}
+                            date={countryResponse?.countryProfile?.stringencyDate ?? undefined}
                         />
                     )}
                     {isDefined(regional) && (
-                        <TextOutput
-                            className={styles.countryTextOutput}
-                            valueContainerClassName={styles.valueText}
-                            labelContainerClassName={styles.labelText}
-                            hideLabelColon
+                        <CountryStatItem
                             label="Regional cases %"
                             value={regional}
                         />
                     )}
                     {isDefined(economicSupportIndex) && (
-                        <TextOutput
-                            className={styles.countryTextOutput}
-                            valueContainerClassName={styles.valueText}
-                            labelContainerClassName={styles.labelText}
-                            hideLabelColon
+                        <CountryStatItem
                             label="Economic support index"
-                            value={(
-                                <>
-                                    {economicSupportIndex}
-                                    {isDefined(economicSupportIndexRegion) && (
-                                        <TextOutput
-                                            labelContainerClassName={styles.regionalText}
-                                            valueContainerClassName={styles.regionalText}
-                                            label={countryResponse?.countryProfile.region}
-                                            value={economicSupportIndexRegion}
-                                        />
-                                    )}
-                                </>
-                            )}
+                            value={economicSupportIndex}
+                            showRegionalValue
+                            region={countryResponse?.countryProfile.region ?? undefined}
+                            regionalValue={economicSupportIndexRegion}
+                            source={countryResponse?.countryProfile?.economicSupportIndexSource
+                                ?? undefined}
+                            date={countryResponse?.countryProfile?.economicSupportIndexDate
+                                ?? undefined}
                         />
                     )}
                 </ContainerCard>
