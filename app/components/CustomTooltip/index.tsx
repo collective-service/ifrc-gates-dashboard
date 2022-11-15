@@ -12,6 +12,7 @@ interface Props {
     heading?: string;
     subHeading?: string;
     subHeadingLabel?: string;
+    subvariable?: string;
     value?: number | null | undefined;
     valueLabel?: string;
     minValue?: number;
@@ -28,6 +29,7 @@ function CustomTooltip(props: Props) {
         value,
         minValue,
         maxValue,
+        subvariable,
     } = props;
 
     const uncertaintyRange = format === 'percent'
@@ -39,6 +41,11 @@ function CustomTooltip(props: Props) {
             {heading && (
                 <div className={styles.tooltipHeading}>
                     {heading}
+                </div>
+            )}
+            {subvariable && (
+                <div className={styles.tooltipContent}>
+                    {subvariable}
                 </div>
             )}
             <div className={styles.tooltipContent}>

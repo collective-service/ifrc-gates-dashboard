@@ -27,6 +27,7 @@ export interface Props {
     newCases?: string | null;
     newDeathsPerMillion?: string | null;
     statValueLoading?: boolean;
+    indicatorMonth?: string | null;
 }
 
 function PercentageStats(props: Props) {
@@ -45,6 +46,7 @@ function PercentageStats(props: Props) {
         newCases,
         newDeathsPerMillion,
         statValueLoading,
+        indicatorMonth,
     } = props;
 
     const empty = statValue === '0';
@@ -79,6 +81,9 @@ function PercentageStats(props: Props) {
                                     </div>
                                     <div>
                                         {`Deaths Per Million: ${newDeathsPerMillion ?? 0}`}
+                                    </div>
+                                    <div>
+                                        {`Date: ${indicatorMonth}`}
                                     </div>
                                 </Tooltip>
                             )}
