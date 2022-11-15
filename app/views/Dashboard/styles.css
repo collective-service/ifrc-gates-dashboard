@@ -44,8 +44,7 @@
                 color: var(--dui-tab-background-color);
                 font-weight: normal;
 
-                &:nth-child(1),
-                &:nth-child(2) {
+                &:not(:last-child) {
                     border-right: var(--width-separator-thin) solid var(--dui-tab-background-color);
                 }
             }
