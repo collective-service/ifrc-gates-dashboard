@@ -129,14 +129,14 @@ interface TooltipProps {
 
 const lightStyle = 'mapbox://styles/mapbox/light-v10';
 const colors = [
-    '#fff7fb',
-    '#ece7f2',
-    '#d0d1e6',
-    '#a6bddb',
-    '#74a9cf',
-    '#3690c0',
-    '#0570b0',
-    '#045a8d',
+    '#ffffff',
+    '#e0e4e9',
+    '#c1c9d3',
+    '#a3aebd',
+    '#8595a8',
+    '#687c93',
+    '#4b647f',
+    '#2d4e6b',
     '#023858',
 ];
 
@@ -320,6 +320,7 @@ function MapView(props: Props) {
 
     const formatOnMap = mapIndicatorState[0]?.format ?? 'percent';
 
+    const lowestDataOnMap = formatOnMap === 'percent' ? 0 : mapIndicatorState[mapIndicatorState.length - 1]?.value;
     const highestDataOnMap = formatOnMap === 'percent' ? 1 : mapIndicatorState[0]?.value;
 
     const countriesRankingRendererParams = useCallback(
@@ -391,7 +392,7 @@ function MapView(props: Props) {
         'fill-color': [
             'interpolate',
             ['linear'],
-            ['coalesce', ['feature-state', 'indicatorValue'], 0],
+            ['coalesce', ['feature-state', 'indicatorValue'], lowestDataOnMap],
             ...(colors.map((color, index) => (
                 [
                     (highestDataOnMap / (colors.length - 1)) * index,
@@ -399,8 +400,11 @@ function MapView(props: Props) {
                 ]
             )).flat()),
         ],
-        'fill-opacity': 0.7,
-    }), [highestDataOnMap]);
+        'fill-opacity': 0.9,
+    }), [
+        highestDataOnMap,
+        lowestDataOnMap,
+    ]);
 
     return (
         <div className={_cs(className, styles.mapViewWrapper)}>
@@ -470,7 +474,7 @@ function MapView(props: Props) {
                 </Map>
                 <MapLabel
                     /* NOTE: All values are indicator so minValue is always 0 */
-                    minValue={0}
+                    minValue={lowestDataOnMap}
                     maxValue={highestDataOnMap}
                     className={styles.mapLabelBox}
                     isPercent={formatOnMap === 'percent'}

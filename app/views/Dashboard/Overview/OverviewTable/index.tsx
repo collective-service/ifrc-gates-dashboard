@@ -31,14 +31,14 @@ import { FilterType } from '#views/Dashboard/Filters';
 import styles from './styles.css';
 
 const colors = [
-    '#fff7fb',
-    '#ece7f2',
-    '#d0d1e6',
-    '#a6bddb',
-    '#74a9cf',
-    '#3690c0',
-    '#0570b0',
-    '#045a8d',
+    '#ffffff',
+    '#e0e4e9',
+    '#c1c9d3',
+    '#a3aebd',
+    '#8595a8',
+    '#687c93',
+    '#4b647f',
+    '#2d4e6b',
     '#023858',
 ];
 
@@ -279,8 +279,8 @@ function OverviewTable(props: Props) {
             return filteredData;
         }
         return [...filteredData].sort((a, b) => compareNumber(
-            a.data[validSorting?.name],
-            b.data[validSorting?.name],
+            a.data[validSorting?.name] ?? 0,
+            b.data[validSorting?.name] ?? 0,
             validSorting?.direction === 'Ascending' ? 1 : -1,
         ));
     }, [tableValues?.overviewTable, validSorting, searchText]);
@@ -341,6 +341,7 @@ function OverviewTable(props: Props) {
             <TableView
                 className={_cs(className, styles.tableWrapper)}
                 headerCellClassName={styles.headerRowStyle}
+                overflowContainerClassName={styles.overflowContainer}
                 cellClassName={styles.eachTableCell}
                 columns={columns}
                 keySelector={tableKeySelector}

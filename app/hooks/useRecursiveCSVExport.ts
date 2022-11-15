@@ -66,7 +66,7 @@ async function fetchRecursive({
     if (response.status >= 200 && response.status <= 299) {
         onPartialSuccess(response.data);
         if ((offset + limit) <= totalCount) {
-            await wait((noOfRetries ** 2) * 500);
+            await wait((noOfRetries ** 2) * 500 + Math.random() * 200);
             await fetchRecursive({
                 url,
                 urlParams,
@@ -82,7 +82,7 @@ async function fetchRecursive({
             onSuccess();
         }
     } else if (response.status === 429) {
-        await wait((noOfRetries ** 2) * 1000);
+        await wait((noOfRetries ** 2) * 1000 + Math.random() * 1000);
         await fetchRecursive({
             url,
             urlParams,

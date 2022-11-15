@@ -9,7 +9,6 @@ import {
     // IoCloseSharp,
 } from 'react-icons/io5';
 import { saveAs } from 'file-saver';
-// import stringify from 'csv-stringify/lib/sync.js';
 import {
     Tabs,
     TabList,
@@ -327,8 +326,6 @@ function Dashboard() {
         }
     };
 
-    const disableExportButton = isNotDefined(filterValueCountry || filterValues?.indicator);
-
     const handleRawDataExportClick = useCallback(() => {
         if (exportMetaCount?.exportMeta?.totalRawDataCount) {
             triggerExportStart(
@@ -420,7 +417,7 @@ function Dashboard() {
                         [exportFullString],
                         { type: 'text/csv' },
                     );
-                    saveAs(blob, 'Final');
+                    saveAs(blob, 'Data Export');
                 } else {
                     // eslint-disable-next-line no-console
                     console.error('CSV num rows mismatch', `expected: ${exportTotal}`, `got: ${exportData.length}`);
@@ -428,8 +425,6 @@ function Dashboard() {
             }
         }
     }, [pendingExport, exportData, exportTotal, exportFullString]);
-
-    const isExportPending = exportMetaLoading || pendingExport;
 
     const progress = useMemo(() => {
         if (!exportTotal) {
@@ -441,6 +436,15 @@ function Dashboard() {
         exportData,
         exportTotal,
     ]);
+
+    const disableExportButton = exportMetaLoading
+        || pendingExport
+        || isNotDefined(filterValueCountry || filterValues?.indicator)
+        || (
+            (exportMetaCount?.exportMeta?.totalRawDataCount ?? 0) === 0
+            && (exportMetaCount?.exportMeta?.totalSummaryCount ?? 0) === 0
+            && (exportMetaCount?.exportMeta?.totalCountryContextualDataCount ?? 0) === 0
+        );
 
     return (
         <div className={styles.dashboardNavigation}>
@@ -467,15 +471,11 @@ function Dashboard() {
                         <div className={styles.dashboardButtons}>
                             <DropdownMenu
                                 className={styles.button}
-                                label={isExportPending ? `Preparing Export (${progress * 100}%)` : 'Export'}
+                                label={pendingExport ? `Preparing Export (${progress * 100}%)` : 'Export'}
                                 variant="tertiary"
                                 icons={<IoDownloadOutline />}
                                 hideDropdownIcon
-                                disabled={
-                                    exportMetaLoading
-                                    || pendingExport
-                                    || disableExportButton
-                                }
+                                disabled={disableExportButton}
                             >
                                 {(exportMetaCount?.exportMeta?.totalRawDataCount ?? 0) > 0 && (
                                     <DropdownMenuItem
@@ -581,7 +581,7 @@ function Dashboard() {
                     </TabPanel>
                 </div>
             </Tabs>
-            {isExportPending && (
+            {pendingExport && (
                 <div className={styles.exportProgressBar}>
                     <div className={styles.topContainer}>
                         Preparing Export...
