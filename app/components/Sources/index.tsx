@@ -115,12 +115,8 @@ function Sources(props: Props) {
     return (
         <>
             {sourcesResponseLoading && <PendingMessage />}
-            {(sourcesResponse?.dataGranular?.length ?? 0) === 0
-                ? (
-                    <div className={styles.noSources}>
-                        No Sources Available
-                    </div>
-                ) : (
+            {((sourcesResponse?.dataGranular?.length ?? 0) > 0)
+                && (
                     <Container
                         className={_cs(className, styles.sources)}
                         heading="Sources"

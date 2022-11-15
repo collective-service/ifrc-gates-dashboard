@@ -42,6 +42,7 @@ import { AdvancedOptionType } from './AdvancedFilters';
 import styles from './styles.css';
 
 export type TabTypes = 'country' | 'overview' | 'combinedIndicators';
+export type IndicatorType = 'Contextual Indicators' | 'Social Behavioural Indicators';
 
 export const COUNTRIES_AND_OUTBREAKS = gql`
     query CountriesAndOutbreaks {
@@ -80,10 +81,10 @@ const INDICATORS_FOR_COUNTRY = gql`
             countryIndicators(
                 iso3: $iso3,
                 outbreak: $outbreak,
-                type: "Social Behavioural Indicators",
             ) {
                 indicatorId
                 indicatorDescription
+                type
             }
         }
     }
@@ -101,6 +102,7 @@ const INDICATORS = gql`
             ) {
                 indicatorId
                 indicatorDescription
+                type
             }
         }
     }
@@ -285,13 +287,27 @@ function Dashboard() {
         narrativeResponse?.naratives,
     ]);
 
-    const selectedIndicatorName = useMemo(() => (
-        globalIndicatorList?.filterOptions?.overviewIndicators
+    const selectedIndicatorList = (activeTab === 'country')
+        ? indicatorList?.filterOptions?.countryIndicators
+        : globalIndicatorList?.filterOptions?.overviewIndicators;
+
+    const selectedIndicatorName = useMemo(() => {
+        const name = selectedIndicatorList
             ?.find((indicator) => indicator.indicatorId === filterValues?.indicator)
-            ?.indicatorDescription
-    ), [
-        globalIndicatorList,
+            ?.indicatorDescription;
+        return name;
+    }, [
         filterValues?.indicator,
+        selectedIndicatorList,
+    ]);
+
+    const selectedIndicatorType = useMemo(() => (
+        indicatorList?.filterOptions?.countryIndicators
+            ?.find((ind) => ind.indicatorId === filterValues?.indicator)
+            ?.type as IndicatorType
+    ), [
+        filterValues?.indicator,
+        indicatorList,
     ]);
 
     return (
@@ -409,6 +425,7 @@ function Dashboard() {
                         <Country
                             filterValues={filterValues}
                             selectedIndicatorName={selectedIndicatorName ?? undefined}
+                            selectedIndicatorType={selectedIndicatorType ?? undefined}
                         />
                     </TabPanel>
                     <TabPanel name="combinedIndicators">

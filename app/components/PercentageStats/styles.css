@@ -4,6 +4,7 @@
     border-radius: 0;
     /* By default, ContainerCard has border-radius */
     box-shadow: 0px 0px 10px var(--dui-card-box-shadow);
+    max-width: 20vw;
 
     .percentage-heading {
         font-weight: var(--dui-font-weight-bold);
@@ -39,6 +40,7 @@
     .outbreak-card {
         display: flex;
         flex-direction: column;
+        flex-wrap: wrap;
     }
 
     .message {

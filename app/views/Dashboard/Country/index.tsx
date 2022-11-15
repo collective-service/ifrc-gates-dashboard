@@ -52,6 +52,7 @@ import {
 import Sources from '#components/Sources';
 
 import { FilterType } from '../Filters';
+import { IndicatorType } from '..';
 
 import styles from './styles.css';
 
@@ -104,6 +105,7 @@ const COUNTRY_PROFILE = gql`
         $emergency: String,
         $subvariable: String,
         $indicatorId: String,
+        $contextualIndicatorId: String,
     ) {
         countryProfile(iso3: $iso3) {
             iso3
@@ -166,7 +168,7 @@ const COUNTRY_PROFILE = gql`
         contextualData(
             filters: {
                 iso3: $iso3,
-                contextIndicatorId: "new_cases_per_million",
+                contextIndicatorId: $indicatorId,
                 emergency: $emergency,
                 isTwelveMonth: true,
             }
@@ -212,7 +214,7 @@ const COUNTRY_PROFILE = gql`
         }
         contextualDataWithMultipleEmergency(
             iso3: $iso3,
-            contextIndicatorId: "new_cases_per_million",
+            contextIndicatorId: $indicatorId,
         ) {
             emergency
             data {
@@ -280,7 +282,7 @@ const COUNTRY_PROFILE = gql`
         }
         totalCases: dataCountryLevelMostRecent(
             filters: {
-                indicatorId: "total_cases",
+                indicatorId: $contextualIndicatorId,
                 iso3: $iso3,
             }
         ) {
@@ -356,6 +358,7 @@ interface Props {
     className?: string;
     filterValues?: FilterType | undefined;
     selectedIndicatorName: string | undefined;
+    selectedIndicatorType: IndicatorType | undefined;
 }
 
 function Country(props: Props) {
@@ -363,6 +366,7 @@ function Country(props: Props) {
         filterValues,
         className,
         selectedIndicatorName,
+        selectedIndicatorType,
     } = props;
 
     const countryVariables = useMemo((): CountryQueryVariables => ({
@@ -370,12 +374,16 @@ function Country(props: Props) {
         requiredIso3: filterValues?.country ?? 'AFG',
         emergency: filterValues?.outbreak,
         subvariable: filterValues?.subvariable,
-        indicatorId: filterValues?.indicator,
+        indicatorId: filterValues?.indicator ?? 'new_cases_per_million',
+        contextualIndicatorId: (selectedIndicatorType === 'Contextual Indicators')
+            ? filterValues?.indicator
+            : 'total_cases',
     }), [
         filterValues?.country,
         filterValues?.outbreak,
         filterValues?.indicator,
         filterValues?.subvariable,
+        selectedIndicatorType,
     ]);
 
     const {
@@ -619,8 +627,11 @@ function Country(props: Props) {
         filterValues?.outbreak,
     ]);
 
-    const uncertaintyChart: UncertainData[] | undefined = useMemo(() => (
-        countryResponse?.dataCountryLevel.map((country) => {
+    const uncertaintyChart: UncertainData[] | undefined = useMemo(() => {
+        if (selectedIndicatorType === 'Contextual Indicators') {
+            return undefined;
+        }
+        const uncertaintyData = countryResponse?.dataCountryLevel.map((country) => {
             const negativeRange = negativeToZero(country.indicatorValue, country.errorMargin);
             const positiveRange = positiveToZero(country.indicatorValue, country.errorMargin);
 
@@ -656,8 +667,12 @@ function Country(props: Props) {
                 format: country.format as FormatType,
                 interpolated: country.interpolated,
             };
-        }).sort((a, b) => compareDate(a.date, b.date))
-    ), [countryResponse?.dataCountryLevel]);
+        }).sort((a, b) => compareDate(a.date, b.date));
+        return uncertaintyData;
+    }, [
+        countryResponse?.dataCountryLevel,
+        selectedIndicatorType,
+    ]);
 
     const statusUncertainty = useMemo(() => {
         const dataCountryLevel = countryResponse?.dataCountryLevelMostRecent;
@@ -772,13 +787,18 @@ function Country(props: Props) {
         heading: data.emergency,
         // TODO: fetch format from server
         statValue: formatNumber('raw', data.totalCases ?? 0),
-        subHeading: 'Number of cases',
+        subHeading: selectedIndicatorType === 'Contextual Indicators'
+            ? selectedIndicatorName
+            : 'Number of cases',
         newDeaths: data.newDeaths,
         newCasesPerMillion: data.newCasesPerMillion,
         totalDeaths: data.totalDeaths,
         newCases: data.newCases,
         newDeathsPerMillion: data.newDeathsPerMillion,
-    }), []);
+    }), [
+        selectedIndicatorType,
+        selectedIndicatorName,
+    ]);
 
     const readinessRendererParams = useCallback((_, data: ScoreCardProps) => ({
         title: data.title,
@@ -884,7 +904,7 @@ function Country(props: Props) {
                             </span>
                         </div>
                     </ContainerCard>
-                    {filterValues?.indicator ? (
+                    {(selectedIndicatorType === 'Social Behavioural Indicators') ? (
                         <div className={styles.indicatorWrapper}>
                             {((statusUncertainty?.indicatorValue ?? 0) > 0) && (
                                 <PercentageStats
@@ -905,7 +925,7 @@ function Country(props: Props) {
                                 <UncertaintyChart
                                     className={styles.indicatorsChart}
                                     uncertainData={(uncertaintyChart && uncertaintyChart) ?? []}
-                                    emergencyFilterValue={filterValues.outbreak}
+                                    emergencyFilterValue={filterValues?.outbreak}
                                     heading="Indicator overview over the last 12 months"
                                     headingDescription={`Trend chart for ${selectedIndicatorName ?? filterValues?.indicator}`}
                                 />
@@ -1028,7 +1048,9 @@ function Country(props: Props) {
                         <ContainerCard
                             className={styles.countryTrend}
                             heading="Outbreaks overview over the last 12 months"
-                            headingDescription={`New cases per million for ${currentOutbreak}`}
+                            headingDescription={`${filterValues?.indicator
+                                ? selectedIndicatorName ?? ''
+                                : 'New cases per million'} for ${currentOutbreak}`}
                             headingSize="extraSmall"
                             headingClassName={styles.heading}
                             contentClassName={styles.responsiveContent}
