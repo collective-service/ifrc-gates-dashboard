@@ -56,12 +56,14 @@ function PieChartInfo(props: Props) {
             active,
             payload: pieData,
         } = tooltipProps;
+
         if (active && pieData) {
             return (
                 <CustomTooltip
                     format="raw"
                     heading={pieData[0].payload?.region}
                     subHeading={`(${pieData[0].payload?.contextDate})`}
+                    customTooltipData={regionalData}
                     valueLabel={pieData[0].payload?.emergency}
                     value={pieData[0].payload?.contextIndicatorValue}
                 />
@@ -72,10 +74,8 @@ function PieChartInfo(props: Props) {
 
     return (
         <div
-            className={_cs(
-                className, styles.pieChartWrapper,
-                isRegionSelected && styles.lessOpacity,
-            )}
+            className={_cs(className, styles.pieChartWrapper,
+                isRegionSelected && styles.lessOpacity)}
             style={{ opacity: (selectedRegion || !isRegionSelected) ? 1 : 0.2 }}
         >
             <div className={styles.pieChartHeader}>
@@ -109,7 +109,7 @@ function PieChartInfo(props: Props) {
                         <Tooltip
                             allowEscapeViewBox={{
                                 x: false,
-                                y: true,
+                                y: false,
                             }}
                             content={customPieChartTooltip}
                         />

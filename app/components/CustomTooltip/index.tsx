@@ -7,6 +7,15 @@ import {
 
 import styles from './styles.css';
 
+type RegionalDataType = {
+    fill: string;
+    emergency: string;
+    contextIndicatorValue?: number | null;
+    format?: FormatType;
+    region?: string;
+    contextDate?: string;
+}
+
 interface Props {
     format: FormatType;
     heading?: string;
@@ -16,6 +25,7 @@ interface Props {
     valueLabel?: string;
     minValue?: number;
     maxValue?: number;
+    customTooltipData?: RegionalDataType[];
 }
 
 function CustomTooltip(props: Props) {
@@ -28,6 +38,7 @@ function CustomTooltip(props: Props) {
         value,
         minValue,
         maxValue,
+        customTooltipData,
     } = props;
 
     const uncertaintyRange = format === 'percent'
@@ -47,16 +58,33 @@ function CustomTooltip(props: Props) {
                     : null}
                 {subHeading}
             </div>
-            <div className={styles.tooltipContent}>
-                {isDefined(valueLabel) && `${valueLabel} : `}
-                {(isDefined(value) && value !== null) && formatNumber(
-                    format === 'million' ? 'raw' : format,
-                    value,
-                )}
-                {(isDefined(minValue) && isDefined(maxValue))
-                    ? uncertaintyRange
-                    : null}
-            </div>
+            {customTooltipData ? (
+                customTooltipData?.map((item) => (
+                    <div className={styles.tooltipContent}>
+                        {isDefined(item.emergency) && `${item.emergency} : `}
+                        {(isDefined(item.contextIndicatorValue)
+                            && item.contextIndicatorValue !== null)
+                            && formatNumber(
+                                format === 'million' ? 'raw' : format,
+                                item.contextIndicatorValue,
+                            )}
+                        {(isDefined(minValue) && isDefined(maxValue))
+                            ? uncertaintyRange
+                            : null}
+                    </div>
+                ))
+            ) : (
+                <div className={styles.tooltipContent}>
+                    {isDefined(valueLabel) && `${valueLabel} : `}
+                    {(isDefined(value) && value !== null) && formatNumber(
+                        format === 'million' ? 'raw' : format,
+                        value,
+                    )}
+                    {(isDefined(minValue) && isDefined(maxValue))
+                        ? uncertaintyRange
+                        : null}
+                </div>
+            )}
         </div>
     );
 }
