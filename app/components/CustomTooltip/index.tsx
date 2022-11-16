@@ -45,6 +45,10 @@ function CustomTooltip(props: Props) {
         ? ` [${minValue}% - ${maxValue}%]`
         : ` [${formatNumber(format, minValue)} - ${formatNumber(format, maxValue)}]`;
 
+    const calculatedTotal = customTooltipData?.reduce(
+        (acc, obj) => (acc + (obj?.contextIndicatorValue ?? 1)),
+        0) ?? 1;
+
     return (
         <div className={styles.tooltipCard}>
             {heading && (
@@ -67,6 +71,7 @@ function CustomTooltip(props: Props) {
                             && formatNumber(
                                 format === 'million' ? 'raw' : format,
                                 item.contextIndicatorValue,
+                                calculatedTotal,
                             )}
                         {(isDefined(minValue) && isDefined(maxValue))
                             ? uncertaintyRange

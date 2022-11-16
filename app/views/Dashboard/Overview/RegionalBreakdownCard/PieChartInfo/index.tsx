@@ -60,7 +60,7 @@ function PieChartInfo(props: Props) {
         if (active && pieData) {
             return (
                 <CustomTooltip
-                    format="raw"
+                    format="percent"
                     heading={pieData[0].payload?.region}
                     subHeading={`(${pieData[0].payload?.contextDate})`}
                     customTooltipData={regionalData}
@@ -109,7 +109,7 @@ function PieChartInfo(props: Props) {
                         <Tooltip
                             allowEscapeViewBox={{
                                 x: false,
-                                y: false,
+                                y: true,
                             }}
                             content={customPieChartTooltip}
                         />
