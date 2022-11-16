@@ -59,6 +59,7 @@ const MAP_DATA = gql`
         ) {
             iso3
             indicatorValue
+            indicatorMonth
             countryId
             format
             emergency
@@ -376,6 +377,15 @@ function MapView(props: Props) {
         filterValues,
     ]);
 
+    const totalCasesHeading = useMemo(() => (
+        overviewMapData?.overviewMap.find(
+            (country) => country.iso3 === countryData?.properties?.iso3,
+        )
+    ), [
+        overviewMapData?.overviewMap,
+        countryData?.properties?.iso3,
+    ]);
+
     const countryFillPaint: mapboxgl.FillPaint = useMemo(() => ({
         // Color each country on the basis of outbreak
         'fill-color': [
@@ -532,6 +542,9 @@ function MapView(props: Props) {
                         setFilterValues={setFilterValues}
                         countryData={countryData}
                         filterValues={filterValues}
+                        indicatorMonth={totalCasesHeading?.indicatorMonth}
+                        format={totalCasesHeading?.format as FormatType}
+                        indicatorValue={totalCasesHeading?.indicatorValue}
                     />
                 )}
             </ContainerCard>

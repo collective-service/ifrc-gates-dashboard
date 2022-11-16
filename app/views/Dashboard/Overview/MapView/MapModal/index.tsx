@@ -79,7 +79,6 @@ const COUNTRY_PROFILE = gql`
         $emergency: String,
         $subvariable: String,
         $indicatorId: String,
-        $region: String,
     ) {
         countryProfile(iso3: $iso3) {
             iso3
@@ -146,18 +145,6 @@ const COUNTRY_PROFILE = gql`
             emergency
             format
         }
-        overviewMap(
-            indicatorId: $indicatorId,
-            emergency: $emergency,
-            region: $region,
-        ) {
-            iso3
-            indicatorValue
-            indicatorMonth
-            countryId
-            format
-            emergency
-        }
     }
 `;
 
@@ -168,6 +155,9 @@ interface ModalProps {
     setFilterValues: React.Dispatch<React.SetStateAction<FilterType | undefined>>;
     countryData: mapboxgl.MapboxGeoJSONFeature | undefined;
     filterValues: FilterType | undefined;
+    indicatorMonth?: string;
+    format?: FormatType;
+    indicatorValue?: number;
 }
 
 function MapModal(props: ModalProps) {
@@ -178,6 +168,9 @@ function MapModal(props: ModalProps) {
         setFilterValues,
         countryData,
         filterValues,
+        indicatorMonth,
+        format,
+        indicatorValue,
     } = props;
 
     const subvariablesVariables = useMemo(() => (
@@ -205,14 +198,12 @@ function MapModal(props: ModalProps) {
         emergency: filterValues?.outbreak,
         indicatorId: filterValues?.indicator ?? 'new_cases_per_million',
         subvariable: subVariableList?.filterOptions.subvariables[0],
-        region: filterValues?.region,
     }
     ), [
         countryData,
         subVariableList,
         filterValues?.outbreak,
         filterValues?.indicator,
-        filterValues?.region,
     ]);
 
     const {
@@ -326,15 +317,6 @@ function MapModal(props: ModalProps) {
         }).sort((a, b) => compareDate(a.date, b.date))
     ), [countryResponse?.dataCountryLevel]);
 
-    const totalCasesHeading = useMemo(() => (
-        countryResponse?.overviewMap.find(
-            (country) => country.iso3 === countryData?.properties?.iso3,
-        )
-    ), [
-        countryResponse?.overviewMap,
-        countryData?.properties?.iso3,
-    ]);
-
     const customOutbreakTooltip = (tooltipProps: TooltipProps) => {
         const {
             active,
@@ -394,15 +376,15 @@ function MapModal(props: ModalProps) {
                         className={styles.countryCaseData}
                     >
                         {formatNumber(
-                            totalCasesHeading?.format as FormatType,
-                            totalCasesHeading?.indicatorValue,
+                            format as FormatType,
+                            indicatorValue,
                         )}
                     </Heading>
                     <Heading
                         className={styles.countrySurveyDate}
                     >
-                        {totalCasesHeading?.indicatorMonth
-                            ? dateTickFormatter(totalCasesHeading?.indicatorMonth)
+                        {indicatorMonth
+                            ? dateTickFormatter(indicatorMonth)
                             : undefined}
                     </Heading>
                 </div>
