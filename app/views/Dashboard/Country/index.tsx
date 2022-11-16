@@ -61,6 +61,7 @@ interface ScoreCardProps {
     date?: string;
     source?: string;
     indicator?: 'red' | 'yellow' | 'orange' | 'green';
+    tooltipDescription?: string;
 }
 
 interface CountryWiseOutbreakCases {
@@ -346,6 +347,11 @@ interface DisaggregationTooltipProps {
         };
     }[];
 }
+
+const readinessDescription = 'The GHS Index benchmarks health security in the context of other factors critical to fighting outbreaks, such as political and security risks, the broader strength of the health system, and country adherence to global norms. The 2021 Global Health Security Index assesses countries across 6 categories, 37 indicators, and 171 questions using publicly available information.';
+const responseDescription = 'Overall Rapid response to and mitigation of the spread of an epidemic. Indicators in this category assess emergency preparedness and response planning, exercising response plans, emergency response operation, linking public health and security authorities, risk communication, access to communications infrastructure, and trade and travel restrictions';
+const riskDescription = 'Overall risk environment and country vulnerability to biological threats. Indicators in this category assess political and security risks; socio-economic resilience; infrastructure adequacy; environmental risks; and public health vulnerabilities that may affect the ability of a country to prevent, detect, or respond to an epidemic or pandemic and increase the likelihood that disease outbreaks will spill across national borders.';
+const vulnerabilityDescription = 'Subset of Risk Environment measuring Public health vulnerabilities through i) Access to quality healthcare, ii) Access to potable water and sanitation, iii) Public healthcare spending levels per capita and iv) Trust in medical and health advice.';
 
 function CustomDisaggregationTooltip(disaggregationTooltipProps: DisaggregationTooltipProps) {
     const {
@@ -768,28 +774,32 @@ function Country(props: Props) {
 
     const scoreCardData: ScoreCardProps[] = useMemo(() => ([
         {
-            title: 'Readiness',
+            title: 'Overall',
             value: countryResponse?.countryProfile.readiness ?? undefined,
             date: countryResponse?.countryProfile.readinessDate ?? undefined,
             source: countryResponse?.countryProfile.readinessSource ?? undefined,
+            tooltipDescription: readinessDescription,
         },
         {
-            title: 'Vulnerability',
+            title: 'Public Health Vulnerabilities',
             value: countryResponse?.countryProfile.vulnerability ?? undefined,
             date: countryResponse?.countryProfile.vulnerabilityDate ?? undefined,
             source: countryResponse?.countryProfile.vulnerabilitySource ?? undefined,
+            tooltipDescription: vulnerabilityDescription,
         },
         {
-            title: 'Risk',
+            title: 'Risk Environment',
             value: countryResponse?.countryProfile.risk ?? undefined,
             date: countryResponse?.countryProfile.riskDate ?? undefined,
             source: countryResponse?.countryProfile.riskSource ?? undefined,
+            tooltipDescription: riskDescription,
         },
         {
-            title: 'Response',
+            title: 'Rapid Response',
             value: countryResponse?.countryProfile.response ?? undefined,
             date: countryResponse?.countryProfile.responseDate ?? undefined,
             source: countryResponse?.countryProfile.responseSource ?? undefined,
+            tooltipDescription: responseDescription,
         },
     ]), [
         countryResponse?.countryProfile,
@@ -818,6 +828,7 @@ function Country(props: Props) {
         date: data.date,
         source: data.source,
         indicator: metricTypeForColor(data),
+        tooltipDescription: data.tooltipDescription,
     }), []);
 
     const currentOutbreak = useMemo(() => {
@@ -907,12 +918,14 @@ function Country(props: Props) {
                                 pending={false}
                             />
                             <span className={styles.scoreFooter}>
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                                Nam posuere lorem nec elementum dapibus.
-                                Maecenas eu massa at sapien semper pharetra.
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                                Nam posuere lorem nec elementum dapibus.
-                                Maecenas eu massa at sapien semper pharetra.
+                                The GHS Index is a project of the Nuclear Threat
+                                Initiative (NTI) and the Johns Hopkins Center for
+                                Health Security and was developed with Economist Impact.
+                                Link:
+                                &nbsp;
+                                <a href="https://www.ghsindex.org/">
+                                    https://www.ghsindex.org/
+                                </a>
                             </span>
                         </div>
                     </ContainerCard>

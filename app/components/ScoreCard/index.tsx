@@ -14,6 +14,7 @@ interface Props {
     date?: string;
     source?: string;
     indicator?: 'red' | 'yellow' | 'orange' | 'green';
+    tooltipDescription?: string;
 }
 
 function ScoreCard(props: Props) {
@@ -24,6 +25,7 @@ function ScoreCard(props: Props) {
         date,
         source,
         indicator,
+        tooltipDescription,
     } = props;
 
     return (
@@ -46,7 +48,11 @@ function ScoreCard(props: Props) {
             </div>
 
             {(date || source) && (
-                <Tooltip trackMousePosition>
+                <Tooltip
+                    trackMousePosition
+                >
+                    {tooltipDescription}
+                    <br />
                     {source && `${source}`}
                     {date && ` - ${date}`}
                 </Tooltip>
