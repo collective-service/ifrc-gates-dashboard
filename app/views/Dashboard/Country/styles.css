@@ -4,7 +4,7 @@
     gap: var(--dui-spacing-large);
 
     .heading {
-        font-weight: var(--dui-font-weight-normal);
+        font-weight: bold;
     }
 
     .country-main {
@@ -54,6 +54,7 @@
                         .score-heading {
                             flex-shrink: 0;
                             font-size: var(--dui-font-size-large);
+                            font-weight: bold;
                         }
 
                         .score-footer {

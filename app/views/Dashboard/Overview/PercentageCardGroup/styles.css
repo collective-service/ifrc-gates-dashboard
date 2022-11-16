@@ -3,7 +3,7 @@
     gap: var(--dui-spacing-large);
 
     .heading-content {
-        font-weight: normal;
+        font-weight: bold;
     }
 
     .global-stat-card {

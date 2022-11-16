@@ -324,13 +324,13 @@ function Dashboard() {
                             heading="Behavioural dashboard"
                             headingSize="large"
                         >
-                            This dashboard measures and tracks key social
+                            {/* This dashboard measures and tracks key social
                             behavioural data on COVID-19 from multiple research
                             projects conducted in the field or at the global level
                             by partners and academic communities. Its
                             aim is to help the RCCE community,
                             Collective Service partners and the coordination
-                            team to analyse the situation at global, regional and country level.
+                            team to analyse the situation at global, regional and country level. */}
                         </ContainerCard>
                         <div className={styles.dashboardButtons}>
                             <DropdownMenu
