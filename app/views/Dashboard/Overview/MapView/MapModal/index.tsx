@@ -61,12 +61,6 @@ interface TooltipProps {
         };
     }[];
 }
-interface CountryWiseOutbreakCases {
-    id: string;
-    emergency?: string;
-    indicatorMonth?: string;
-    totalCases?: string | null;
-}
 
 const SUBVARIABLES = gql`
     query Subvariables(
@@ -85,6 +79,7 @@ const COUNTRY_PROFILE = gql`
         $emergency: String,
         $subvariable: String,
         $indicatorId: String,
+        $region: String,
     ) {
         countryProfile(iso3: $iso3) {
             iso3
@@ -126,18 +121,6 @@ const COUNTRY_PROFILE = gql`
               format
             }
         }
-        totalCases: dataCountryLevelMostRecent(
-            filters: {
-                indicatorId: "new_cases_per_million",
-                iso3: $iso3,
-            }
-        ) {
-            indicatorValue
-            indicatorMonth
-            emergency
-            format
-            id
-        }
         dataCountryLevel(
             filters: {
                 isTwelveMonth: true
@@ -162,6 +145,18 @@ const COUNTRY_PROFILE = gql`
             interpolated
             emergency
             format
+        }
+        overviewMap(
+            indicatorId: $indicatorId,
+            emergency: $emergency,
+            region: $region,
+        ) {
+            iso3
+            indicatorValue
+            indicatorMonth
+            countryId
+            format
+            emergency
         }
     }
 `;
@@ -210,12 +205,14 @@ function MapModal(props: ModalProps) {
         emergency: filterValues?.outbreak,
         indicatorId: filterValues?.indicator ?? 'new_cases_per_million',
         subvariable: subVariableList?.filterOptions.subvariables[0],
+        region: filterValues?.region,
     }
     ), [
         countryData,
         subVariableList,
         filterValues?.outbreak,
         filterValues?.indicator,
+        filterValues?.region,
     ]);
 
     const {
@@ -272,8 +269,6 @@ function MapModal(props: ModalProps) {
         );
     }, [countryResponse?.contextualDataWithMultipleEmergency]);
 
-    const latestDate: { date?: string } = emergencyLineChart[emergencyLineChart.length - 1];
-
     const outbreaks = useMemo(() => (
         unique(
             countryResponse?.contextualData ?? [],
@@ -290,32 +285,6 @@ function MapModal(props: ModalProps) {
             });
         })
     ), [countryResponse?.contextualData]);
-
-    const countryWiseOutbreakCases: CountryWiseOutbreakCases[] | undefined = useMemo(() => (
-        countryResponse?.totalCases.map((total) => (
-            {
-                id: total.id,
-                emergency: total.emergency,
-                indicatorMonth: total.indicatorMonth,
-                totalCases: formatNumber(
-                    total.format as FormatType,
-                    total.indicatorValue,
-                ),
-            }
-        ))
-    ), [countryResponse]);
-
-    const numberOfCases = useMemo(() => {
-        if (isNotDefined(countryWiseOutbreakCases)) {
-            return undefined;
-        }
-        return countryWiseOutbreakCases.find(
-            (item) => item.emergency === filterValues?.outbreak,
-        );
-    }, [
-        filterValues?.outbreak,
-        countryWiseOutbreakCases,
-    ]);
 
     const uncertaintyChart: UncertainData[] | undefined = useMemo(() => (
         countryResponse?.dataCountryLevel.map((country) => {
@@ -357,52 +326,13 @@ function MapModal(props: ModalProps) {
         }).sort((a, b) => compareDate(a.date, b.date))
     ), [countryResponse?.dataCountryLevel]);
 
-    const latestIndicatorValue = useMemo(() => {
-        if (!uncertaintyChart) {
-            return undefined;
-        }
-        return uncertaintyChart[uncertaintyChart?.length - 1];
-    }, [uncertaintyChart]);
-
-    const date = useMemo(() => {
-        if (filterValues?.indicator) {
-            return latestIndicatorValue?.date;
-        }
-
-        if (!filterValues?.indicator && filterValues?.outbreak) {
-            return numberOfCases?.indicatorMonth;
-        }
-        return latestDate?.date;
-    }, [
-        filterValues?.indicator,
-        filterValues?.outbreak,
-        latestIndicatorValue?.date,
-        numberOfCases?.indicatorMonth,
-        latestDate,
-    ]);
-
-    const totalCasesHeading = useMemo(() => {
-        if (filterValues?.indicator) {
-            return (formatNumber(
-                latestIndicatorValue?.format as FormatType,
-                latestIndicatorValue?.tooltipValue,
-            ));
-        }
-
-        if (!filterValues?.indicator && filterValues?.outbreak) {
-            return numberOfCases?.totalCases;
-        }
-        return formatNumber(
-            'raw' as FormatType,
-            countryResponse?.countryProfile?.newCasesPerMillion ?? 0,
-        );
-    }, [
-        countryResponse?.countryProfile?.newCasesPerMillion,
-        numberOfCases?.totalCases,
-        filterValues?.indicator,
-        filterValues?.outbreak,
-        latestIndicatorValue?.format,
-        latestIndicatorValue?.tooltipValue,
+    const totalCasesHeading = useMemo(() => (
+        countryResponse?.overviewMap.find(
+            (country) => country.iso3 === countryData?.properties?.iso3,
+        )
+    ), [
+        countryResponse?.overviewMap,
+        countryData?.properties?.iso3,
     ]);
 
     const customOutbreakTooltip = (tooltipProps: TooltipProps) => {
@@ -463,12 +393,17 @@ function MapModal(props: ModalProps) {
                         size="extraLarge"
                         className={styles.countryCaseData}
                     >
-                        {totalCasesHeading}
+                        {formatNumber(
+                            totalCasesHeading?.format as FormatType,
+                            totalCasesHeading?.indicatorValue,
+                        )}
                     </Heading>
                     <Heading
                         className={styles.countrySurveyDate}
                     >
-                        {date ? dateTickFormatter(date) : undefined}
+                        {totalCasesHeading?.indicatorMonth
+                            ? dateTickFormatter(totalCasesHeading?.indicatorMonth)
+                            : undefined}
                     </Heading>
                 </div>
             )}
