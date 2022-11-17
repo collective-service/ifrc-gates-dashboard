@@ -48,6 +48,7 @@ import {
     CountryQueryVariables,
 } from '#generated/types';
 import Sources from '#components/Sources';
+import ProgressBar from '#components/ProgressBar';
 
 import { FilterType } from '../Filters';
 import CountryStatItem from './CountryStatItem';
@@ -76,6 +77,9 @@ interface CountryWiseOutbreakCases {
     indicatorMonth?: string | null;
 }
 
+type GlobalCard = NonNullable<CountryQuery['dataCountryLevelMostRecent']>[number]
+
+const globalCardKeySelector = (d: GlobalCard) => d.id;
 const dateTickFormatter = (d: string) => getShortMonth(d);
 const normalizedTickFormatter = (d: number) => normalFormatter().format(d);
 const percentageKeySelector = (d: CountryWiseOutbreakCases) => d.id;
@@ -318,9 +322,12 @@ const COUNTRY_PROFILE = gql`
                 indicatorMonth: DESC
             }
         ) {
+            id
             indicatorDescription
             indicatorMonth
             indicatorValue
+            format
+            subvariable
         }
     }
 `;
@@ -709,6 +716,17 @@ function Country(props: Props) {
         return getLatestUncertain[0];
     }, [countryResponse?.dataCountryLevelMostRecent]);
 
+    const selectedSubvariableGlobal = useMemo(() => (
+        countryResponse?.dataCountryLevelMostRecent.find((sub) => (
+            sub.subvariable === filterValues?.subvariable
+        ))
+    ), [
+        countryResponse?.dataCountryLevelMostRecent,
+        filterValues?.subvariable,
+    ]);
+
+    console.log(selectedSubvariableGlobal);
+
     const ageDisaggregation = useMemo(() => countryResponse
         ?.disaggregation.ageDisaggregation.map((age) => (
             {
@@ -838,6 +856,14 @@ function Country(props: Props) {
         tooltipDescription: data.tooltipDescription,
     }), []);
 
+    const globalCardRendererParams = useCallback((_, data: GlobalCard) => ({
+        barName: data.subvariable,
+        value: data.indicatorValue,
+        format: data.format as FormatType,
+        totalValue: 1,
+        color: '#98A6B5',
+    }), []);
+
     const currentOutbreak = useMemo(() => {
         if (filterValues?.outbreak) {
             return filterValues.outbreak;
@@ -942,20 +968,32 @@ function Country(props: Props) {
                     </ContainerCard>
                     {(selectedIndicatorType === 'Social Behavioural Indicators') ? (
                         <div className={styles.indicatorWrapper}>
-                            {((statusUncertainty?.indicatorValue ?? 0) > 0) && (
-                                <PercentageStats
+                            {(countryResponse?.dataCountryLevelMostRecent) && (
+                                <ContainerCard
                                     className={styles.percentageCard}
                                     heading="Global"
-                                    headerDescription={statusUncertainty?.indicatorDescription}
                                     headingSize="extraSmall"
-                                    // TODO: fetch format from server
-                                    statValue={formatNumber(
-                                        'percent',
-                                        statusUncertainty?.indicatorValue ?? 0,
-                                    )}
-                                    statValueLoading={countryResponseLoading}
-                                    icon={null}
-                                />
+                                    headerDescription={countryResponse
+                                        ?.dataCountryLevelMostRecent[0].indicatorDescription}
+                                    contentClassName={styles.globalDetails}
+                                >
+                                    <div className={styles.globalValue}>
+                                        {formatNumber(
+                                            selectedSubvariableGlobal?.format as FormatType,
+                                            selectedSubvariableGlobal?.indicatorValue,
+                                        )}
+                                    </div>
+                                    <ListView
+                                        className={styles.globalProgressBar}
+                                        renderer={ProgressBar}
+                                        keySelector={globalCardKeySelector}
+                                        rendererParams={globalCardRendererParams}
+                                        data={countryResponse?.dataCountryLevelMostRecent}
+                                        pending={countryResponseLoading}
+                                        errored={false}
+                                        filtered={false}
+                                    />
+                                </ContainerCard>
                             )}
                             {((uncertaintyChart?.length ?? 0) > 0) && (
                                 <UncertaintyChart
