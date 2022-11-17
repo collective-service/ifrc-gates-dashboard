@@ -109,7 +109,7 @@ function PieChartInfo(props: Props) {
                         <Tooltip
                             allowEscapeViewBox={{
                                 x: false,
-                                y: true,
+                                y: false,
                             }}
                             content={customPieChartTooltip}
                         />

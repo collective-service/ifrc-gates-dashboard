@@ -55,13 +55,10 @@ function PercentageStats(props: Props) {
             headingClassName={styles.percentageHeading}
             heading={(
                 <>
-                    {(heading || subHeading) && (
+                    {heading && (
                         <>
                             <div className={styles.outbreakCard}>
-                                <span>
-                                    {heading}
-                                </span>
-                                {subHeading}
+                                {heading}
                             </div>
                             {(newDeaths || newCasesPerMillion) && (
                                 <Tooltip>
@@ -87,7 +84,7 @@ function PercentageStats(props: Props) {
                 </>
             )}
             headingSize={headingSize}
-            headerDescription={headerDescription}
+            headerDescription={headerDescription || subHeading}
             headerIconsContainerClassName={styles.iconContainer}
             headerIcons={icon}
             footerContentClassName={empty ? styles.message : styles.valueAndSubValue}

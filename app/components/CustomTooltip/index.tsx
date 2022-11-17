@@ -46,8 +46,8 @@ function CustomTooltip(props: Props) {
         : ` [${formatNumber(format, minValue)} - ${formatNumber(format, maxValue)}]`;
 
     const calculatedTotal = customTooltipData?.reduce(
-        (acc, obj) => (acc + (obj?.contextIndicatorValue ?? 1)),
-        0) ?? 1;
+        (acc, obj) => (acc + (obj?.contextIndicatorValue ?? 1)), 0,
+    ) ?? 1;
 
     return (
         <div className={styles.tooltipCard}>
@@ -65,14 +65,17 @@ function CustomTooltip(props: Props) {
             {customTooltipData ? (
                 customTooltipData?.map((item) => (
                     <div className={styles.tooltipContent}>
-                        {isDefined(item.emergency) && `${item.emergency} : `}
+                        {isDefined(item.emergency) && `${item.emergency} - `}
                         {(isDefined(item.contextIndicatorValue)
                             && item.contextIndicatorValue !== null)
-                            && formatNumber(
-                                format === 'million' ? 'raw' : format,
+                            && (`${formatNumber(
+                                'raw',
+                                item.contextIndicatorValue,
+                            )} (${formatNumber(
+                                'percent',
                                 item.contextIndicatorValue,
                                 calculatedTotal,
-                            )}
+                            )})`)}
                         {(isDefined(minValue) && isDefined(maxValue))
                             ? uncertaintyRange
                             : null}

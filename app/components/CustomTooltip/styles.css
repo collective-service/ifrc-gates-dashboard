@@ -13,6 +13,6 @@
     }
     .tooltip-content {
         color: var(--dui-color-description);
-        font-size: var(--dui-font-size-small);
+        font-size: var(--dui-font-size-extra-small);
     }
 }

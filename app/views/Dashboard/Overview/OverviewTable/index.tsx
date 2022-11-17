@@ -190,7 +190,6 @@ function IndicatorValue(props: IndicatorValueProps) {
                 backgroundColor: color,
                 color: getTextColorForHex(color ?? colors[0]),
             }}
-            title={`Value: ${value ? formatNumber(format as FormatType, value) : '-'}`}
         >
             {value ? formatNumber(format as FormatType, value) : '-'}
         </div>
