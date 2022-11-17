@@ -16,7 +16,6 @@ export interface Props {
     className?: string;
     icon?: React.ReactNode;
     heading?: React.ReactNode;
-    subHeading?: React.ReactNode;
     headerDescription?: React.ReactNode;
     headingSize?: headingSizeType;
     statValue: string | undefined;
@@ -34,7 +33,6 @@ function PercentageStats(props: Props) {
         className,
         icon,
         heading,
-        subHeading,
         headingSize = 'extraSmall',
         headerDescription,
         statValue,
@@ -84,7 +82,7 @@ function PercentageStats(props: Props) {
                 </>
             )}
             headingSize={headingSize}
-            headerDescription={headerDescription || subHeading}
+            headerDescription={headerDescription}
             headerIconsContainerClassName={styles.iconContainer}
             headerIcons={icon}
             footerContentClassName={empty ? styles.message : styles.valueAndSubValue}

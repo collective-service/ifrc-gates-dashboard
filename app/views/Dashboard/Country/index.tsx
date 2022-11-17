@@ -310,6 +310,7 @@ const COUNTRY_PROFILE = gql`
                 indicatorId: $indicatorId,
                 category: "Global",
                 emergency: $emergency,
+                subvariable: $subvariable,
             }
             order: {
                 indicatorMonth: DESC
@@ -809,7 +810,7 @@ function Country(props: Props) {
         heading: data.emergency,
         // TODO: fetch format from server
         statValue: formatNumber('raw', data.totalCases ?? 0),
-        subHeading: selectedIndicatorType === 'Contextual Indicators'
+        headerDescription: selectedIndicatorType === 'Contextual Indicators'
             ? selectedIndicatorName
             : 'Number of cases',
         newDeaths: data.newDeaths,
@@ -923,7 +924,11 @@ function Country(props: Props) {
                                 Health Security and was developed with Economist Impact.
                                 Link:
                                 &nbsp;
-                                <a href="https://www.ghsindex.org/">
+                                <a
+                                    href="https://www.ghsindex.org/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
                                     https://www.ghsindex.org/
                                 </a>
                             </span>

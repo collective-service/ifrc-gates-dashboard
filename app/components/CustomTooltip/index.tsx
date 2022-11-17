@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { isDefined } from '@togglecorp/fujs';
 import {
     formatNumber,
@@ -41,30 +41,32 @@ function CustomTooltip(props: Props) {
         customTooltipData,
     } = props;
 
-    const uncertaintyRange = format === 'percent'
-        ? ` [${minValue}% - ${maxValue}%]`
-        : ` [${formatNumber(format, minValue)} - ${formatNumber(format, maxValue)}]`;
+    const uncertaintyRange = useMemo(() => (
+        format === 'percent'
+            ? `[${minValue}% - ${maxValue}%]`
+            : `[${formatNumber(format, minValue)} - ${formatNumber(format, maxValue)}]`
+    ), [
+        minValue,
+        maxValue,
+        format,
+    ]);
 
-    const calculatedTotal = customTooltipData?.reduce(
-        (acc, obj) => (acc + (obj?.contextIndicatorValue ?? 1)), 0,
-    ) ?? 1;
+    const calculatedTotal = useMemo(() => (
+        customTooltipData?.reduce(
+            (acc, obj) => (acc + (obj?.contextIndicatorValue ?? 1)), 0,
+        )
+    ), [
+        customTooltipData,
+    ]);
 
-    return (
-        <div className={styles.tooltipCard}>
-            {heading && (
-                <div className={styles.tooltipHeading}>
-                    {heading}
-                </div>
-            )}
-            <div className={styles.tooltipContent}>
-                {isDefined(subHeadingLabel)
-                    ? `${subHeadingLabel} - `
-                    : null}
-                {subHeading}
-            </div>
-            {customTooltipData ? (
+    const tooltipRender = useMemo(() => {
+        if (customTooltipData) {
+            return (
                 customTooltipData?.map((item) => (
-                    <div className={styles.tooltipContent}>
+                    <div
+                        key={`${item.emergency}-${item.region}-${item.contextDate}`}
+                        className={styles.tooltipContent}
+                    >
                         {isDefined(item.emergency) && `${item.emergency} - `}
                         {(isDefined(item.contextIndicatorValue)
                             && item.contextIndicatorValue !== null)
@@ -81,18 +83,45 @@ function CustomTooltip(props: Props) {
                             : null}
                     </div>
                 ))
-            ) : (
-                <div className={styles.tooltipContent}>
-                    {isDefined(valueLabel) && `${valueLabel} : `}
-                    {(isDefined(value) && value !== null) && formatNumber(
-                        format === 'million' ? 'raw' : format,
-                        value,
-                    )}
-                    {(isDefined(minValue) && isDefined(maxValue))
-                        ? uncertaintyRange
-                        : null}
+            );
+        }
+        return (
+            <div className={styles.tooltipContent}>
+                {isDefined(valueLabel) && `${valueLabel} : `}
+                {(isDefined(value) && value !== null) && formatNumber(
+                    format === 'million' ? 'raw' : format,
+                    value,
+                )}
+                {(isDefined(minValue) && isDefined(maxValue))
+                    ? uncertaintyRange
+                    : null}
+            </div>
+        );
+    }, [
+        customTooltipData,
+        calculatedTotal,
+        uncertaintyRange,
+        minValue,
+        maxValue,
+        valueLabel,
+        format,
+        value,
+    ]);
+
+    return (
+        <div className={styles.tooltipCard}>
+            {heading && (
+                <div className={styles.tooltipHeading}>
+                    {heading}
                 </div>
             )}
+            <div className={styles.tooltipContent}>
+                {isDefined(subHeadingLabel)
+                    ? `${subHeadingLabel} - `
+                    : null}
+                {subHeading}
+            </div>
+            {tooltipRender}
         </div>
     );
 }
