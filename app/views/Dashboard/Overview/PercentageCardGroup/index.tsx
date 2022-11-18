@@ -593,13 +593,21 @@ function PercentageCardGroup(props: Props) {
                                     dataKey="contextDate"
                                     reversed
                                     tickLine={false}
-                                    padding={{ left: 20 }}
+                                    tickMargin={10}
+                                    padding={{
+                                        right: 30,
+                                        left: 20,
+                                    }}
+                                    fontSize={12}
+                                    interval={0}
                                     tickFormatter={dateTickFormatter}
+                                    angle={-30}
                                 />
                                 <YAxis
                                     axisLine={false}
                                     tickLine={false}
                                     padding={{ top: 12 }}
+                                    fontSize={12}
                                     tickFormatter={normalizedTickFormatter}
                                 />
                                 <Tooltip

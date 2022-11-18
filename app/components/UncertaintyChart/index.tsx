@@ -12,7 +12,7 @@ import {
 } from '@the-deep/deep-ui';
 import { isNotDefined, _cs } from '@togglecorp/fujs';
 
-import { FormatType, getShortMonth } from '#utils/common';
+import { FormatType, getShortMonth, normalFormatter } from '#utils/common';
 import CustomTooltip from '#components/CustomTooltip';
 import ChartContainer from '#components/ChartContainer';
 
@@ -64,6 +64,7 @@ interface CustomDotsProps {
 }
 
 const dateTickFormatter = (d: string) => getShortMonth(d);
+const normalizedTickFormatter = (d: number) => normalFormatter().format(d);
 
 function UncertaintyChart(props: Props) {
     const {
@@ -141,15 +142,22 @@ function UncertaintyChart(props: Props) {
                     <XAxis
                         dataKey="date"
                         padding={{
-                            left: 30,
                             right: 30,
+                            left: 20,
                         }}
+                        tickLine={false}
+                        fontSize={12}
+                        interval={0}
+                        angle={-30}
                         tickFormatter={dateTickFormatter}
+                        tickMargin={10}
                     />
                     <YAxis
                         axisLine={false}
                         tickLine={false}
                         allowDecimals={false}
+                        fontSize={12}
+                        tickFormatter={normalizedTickFormatter}
                     />
                     <Area
                         dataKey="uncertainRange"
