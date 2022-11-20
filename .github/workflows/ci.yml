@@ -130,7 +130,7 @@ jobs:
 
       - name: Get Terraform outputs
         id: op-distid
-        run: echo "distid=$(terraform output -raw website_cdn_id)" >> GITHUB_OUTPUT
+        run: echo "distid=$(terraform output -raw website_cdn_id)" >> $GITHUB_OUTPUT
     outputs:
       s3-bucket-name: ${{ steps.op-bucket-name.outputs.bucket_name }}
       dist-id: ${{ steps.op-distid.outputs.distid }}
