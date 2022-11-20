@@ -1,6 +1,6 @@
-# IFRC Gates Dashboard
+# RCCE Collective Service Dashboard
 
-React components for IFRC Gates Dashboard
+Client side React components for RCCE Collective Service Project
 
 ## Development
 
