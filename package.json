@@ -55,6 +55,7 @@
         "react-slider": "^2.0.0",
         "react-transition-group": "^4.4.5",
         "recharts": "^2.1.9",
+        "requestidlecallback-polyfill": "^1.0.2",
         "sanitize-html": "^2.7.0"
     },
     "devDependencies": {
