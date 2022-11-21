@@ -3,28 +3,28 @@ export const regionBounds = [
     {
         region: 'Europe',
         bounding_box: [
-            -180,
             27.63882,
-            180,
+            -25.53273,
+            83.62742,
             83.62742,
         ],
     },
     {
         region: 'Americas',
         bounding_box: [
-            -179.14891,
+            -54.77829,
             -59.48429,
-            179.77847,
+            83.62742,
             83.13753,
         ],
     },
     {
         region: 'AsiaPacific',
         bounding_box: [
-            -180,
             -54.77829,
-            180.00003,
+            34.10764,
             53.5585,
+            -117,
         ],
     },
     {

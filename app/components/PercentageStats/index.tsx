@@ -16,7 +16,6 @@ export interface Props {
     className?: string;
     icon?: React.ReactNode;
     heading?: React.ReactNode;
-    subHeading?: React.ReactNode;
     headerDescription?: React.ReactNode;
     headingSize?: headingSizeType;
     statValue: string | undefined;
@@ -34,7 +33,6 @@ function PercentageStats(props: Props) {
         className,
         icon,
         heading,
-        subHeading,
         headingSize = 'extraSmall',
         headerDescription,
         statValue,
@@ -55,13 +53,10 @@ function PercentageStats(props: Props) {
             headingClassName={styles.percentageHeading}
             heading={(
                 <>
-                    {(heading || subHeading) && (
+                    {heading && (
                         <>
                             <div className={styles.outbreakCard}>
-                                <span>
-                                    {heading}
-                                </span>
-                                {subHeading}
+                                {heading}
                             </div>
                             {(newDeaths || newCasesPerMillion) && (
                                 <Tooltip>
