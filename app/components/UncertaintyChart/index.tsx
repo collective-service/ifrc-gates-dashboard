@@ -12,7 +12,11 @@ import {
 } from '@the-deep/deep-ui';
 import { isNotDefined, _cs } from '@togglecorp/fujs';
 
-import { FormatType, getShortMonth, normalFormatter } from '#utils/common';
+import {
+    FormatType,
+    getShortMonth,
+    normalFormatter,
+} from '#utils/common';
 import CustomTooltip from '#components/CustomTooltip';
 import ChartContainer from '#components/ChartContainer';
 
