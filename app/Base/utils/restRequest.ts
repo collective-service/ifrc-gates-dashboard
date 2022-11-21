@@ -7,13 +7,7 @@ import {
     wsEndpoint,
 } from '#base/configs/restRequest';
 
-function getVersionedUrl(endpoint: string, url: string) {
-    return `${endpoint}${url}`;
-}
-
-const serverPrefix = 'server://';
-
-export type Maybe<T> = T | null | undefined;
+type Maybe<T> = T | null | undefined;
 
 export interface UrlParams {
     [key: string]: Maybe<string | number | boolean | (string | number | boolean)[]>;
@@ -41,12 +35,13 @@ export function prepareUrlParams(params: UrlParams): string {
         .join('&');
 }
 
+const serverPrefix = 'server://';
+
 export const prepareUrl = (url: string) => {
     if (url.startsWith(serverPrefix)) {
         // NOTE: -1 to leave out the starting slash
         const cleanedUrl = url.slice(serverPrefix.length - 1);
-        const a = getVersionedUrl(wsEndpoint, cleanedUrl);
-        return a;
+        return `${wsEndpoint}${cleanedUrl}`;
     }
     if (/^https?:\/\//i.test(url)) {
         return url;

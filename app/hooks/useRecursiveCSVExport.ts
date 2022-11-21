@@ -7,7 +7,8 @@ import {
     prepareUrl,
 } from '#base/utils/restRequest';
 
-const PAGE_SIZE = 3000;
+// NOTE: we can use upto 4000
+const PAGE_SIZE = 100;
 
 async function wait(time: number) {
     return new Promise((resolve) => {
@@ -40,7 +41,7 @@ async function fetchRecursive({
     onPartialSuccess,
     onSuccess,
     offset,
-    limit,
+    pageLimit,
     onFailure,
     totalCount,
     noOfRetries = 0,
@@ -50,7 +51,7 @@ async function fetchRecursive({
     onPartialSuccess: (data: string) => void,
     onSuccess: () => void,
     offset: number,
-    limit: number,
+    pageLimit: number,
     onFailure: (error: unknown) => void,
     totalCount: number,
     noOfRetries?: number,
@@ -60,19 +61,22 @@ async function fetchRecursive({
         {
             ...urlParams,
             offset,
-            limit,
+            limit: pageLimit,
         },
     );
     if (response.status >= 200 && response.status <= 299) {
         onPartialSuccess(response.data);
-        if ((offset + limit) <= totalCount) {
+
+        const newOffset = offset + pageLimit;
+
+        if (newOffset < totalCount) {
             await wait((noOfRetries ** 2) * 500 + Math.random() * 200);
             await fetchRecursive({
                 url,
                 urlParams,
                 onPartialSuccess,
-                offset: offset + limit,
-                limit,
+                offset: newOffset,
+                pageLimit,
                 onSuccess,
                 onFailure,
                 totalCount,
@@ -88,7 +92,7 @@ async function fetchRecursive({
             urlParams,
             onPartialSuccess,
             offset,
-            limit,
+            pageLimit,
             onSuccess,
             onFailure,
             totalCount,
@@ -101,53 +105,88 @@ async function fetchRecursive({
 
 function useRecursiveCSVRequest<D>({
     onFailure,
+    onSuccess,
 } : {
     onFailure: (error: unknown) => void;
+    onSuccess: (data: D[], total: number) => void;
 }) {
     const [pending, setPending] = useState(false);
-    const [data, setData] = useState<D[]>([]);
-    const [fullCsvString, setFullCsvString] = useState<string>('');
+    const [progress, setProgress] = useState(0);
 
+    const dataRef = useRef<D[]>([]);
     const totalRef = useRef(0);
 
     const handleFailure = useCallback((error: unknown) => {
-        setData([]);
-        setFullCsvString('');
+        dataRef.current = [];
         totalRef.current = 0;
+
         setPending(false);
+        setProgress(0);
+
         onFailure(error);
     }, [onFailure]);
 
     const handleSuccess = useCallback(() => {
+        const data = dataRef.current;
+        const total = totalRef.current;
+
+        dataRef.current = [];
+        totalRef.current = 0;
+
         setPending(false);
-    }, []);
+        setProgress(0);
+
+        if (total !== data.length - 1) {
+            // eslint-disable-next-line no-console
+            console.error(`Length mismatch. Expected ${total} but got ${data.length - 1}`);
+            onFailure(undefined);
+        } else {
+            onSuccess(data, total);
+        }
+    }, [onSuccess, onFailure, setPending, setProgress]);
 
     const handlePartialSuccess = useCallback((newResponse: string) => {
-        Papa.parse(newResponse, {
-            complete: (test: { data: D[] }) => {
-                const items = [...test.data];
-                items.pop();
-                setData((prevData) => [...prevData, ...items]);
-                setFullCsvString((prevString) => (
-                    prevString.length > 0
-                        ? `${prevString},${newResponse}`
-                        : newResponse
-                ));
+        Papa.parse(
+            newResponse,
+            {
+                skipEmptyLines: true,
+                complete: (test: { data: D[] }) => {
+                    const items = [...test.data];
+
+                    // NOTE: meaning this is not the first request
+                    if (dataRef.current.length > 0) {
+                        // NOTE: remove the headers
+                        items.shift();
+                    }
+
+                    dataRef.current = [
+                        ...dataRef.current,
+                        ...items,
+                    ];
+
+                    if (totalRef.current === 0 || dataRef.current.length === 0) {
+                        setProgress(0);
+                    } else {
+                        // NOTE: we are negating one because we have a header as well
+                        setProgress((dataRef.current.length - 1) / totalRef.current);
+                    }
+                },
             },
-        });
+        );
     }, []);
 
     const trigger = useCallback((url: string, total: number, newUrlParams: UrlParams) => {
-        // NOTE: Clearing data during trigger as data and total are preserved outputs
-        setData([]);
+        dataRef.current = [];
         totalRef.current = total;
-        setFullCsvString('');
+
         setPending(true);
+        setProgress(0);
+
         fetchRecursive({
             url,
             urlParams: newUrlParams,
             offset: 0,
-            limit: PAGE_SIZE,
+            pageLimit: PAGE_SIZE,
             onPartialSuccess: handlePartialSuccess,
             onSuccess: handleSuccess,
             onFailure: handleFailure,
@@ -159,14 +198,7 @@ function useRecursiveCSVRequest<D>({
         handleFailure,
     ]);
 
-    const cancel = useCallback(() => {
-        setData([]);
-        setFullCsvString('');
-        totalRef.current = 0;
-        setPending(false);
-    }, []);
-
-    return [pending, data, fullCsvString, totalRef.current, trigger, cancel] as const;
+    return [pending, progress, trigger] as const;
 }
 
 export default useRecursiveCSVRequest;

@@ -3,14 +3,11 @@ import {
     apiHttps,
 } from '#base/configs/env';
 
-export const reactAppApiHttps = location.protocol === 'https:' // eslint-disable-line no-restricted-globals
+const reactAppApiHttps = location.protocol === 'https:' // eslint-disable-line no-restricted-globals
     ? 'https'
     : apiHttps;
 
+// eslint-disable-next-line import/prefer-default-export
 export const wsEndpoint = !apiEndpoint
     ? 'http://localhost:7020/api/v1'
     : `${reactAppApiHttps}://${apiEndpoint}/api/v1`;
-
-export const adminEndpoint = !apiEndpoint
-    ? 'http://localhost:7020/admin/'
-    : `${reactAppApiHttps}://${apiEndpoint}/admin/`;

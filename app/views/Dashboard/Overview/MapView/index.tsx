@@ -297,10 +297,9 @@ function MapView(props: Props) {
                 format: indicatorValue.format,
             }),
         )
-            .filter((item) => item.value > 0);
-        const sortedData = [...(countryIndicator ?? [])]
-            .sort((a, b) => compareNumber(a.value, b.value, -1));
-        return sortedData;
+            .filter((item) => item.value > 0)
+            .sort((a, b) => compareNumber(a.value, b.value, -1)) ?? [];
+        return countryIndicator;
     }, [overviewMapData?.overviewMap]);
 
     const handleCountryClick = useCallback(
@@ -320,8 +319,12 @@ function MapView(props: Props) {
 
     const formatOnMap = mapIndicatorState[0]?.format ?? 'percent';
 
-    const lowestDataOnMap = formatOnMap === 'percent' ? 0 : mapIndicatorState[mapIndicatorState.length - 1]?.value;
-    const highestDataOnMap = formatOnMap === 'percent' ? 1 : mapIndicatorState[0]?.value;
+    const lowestDataOnMap = formatOnMap === 'percent'
+        ? 0
+        : (mapIndicatorState[mapIndicatorState.length - 1]?.value ?? 0);
+    const highestDataOnMap = formatOnMap === 'percent'
+        ? 1
+        : (mapIndicatorState[0]?.value ?? 1);
 
     const countriesRankingRendererParams = useCallback(
         (

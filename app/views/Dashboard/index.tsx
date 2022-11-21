@@ -4,6 +4,7 @@ import React, {
     useEffect,
     useState,
 } from 'react';
+import Papa from 'papaparse';
 import {
     IoDownloadOutline,
     // IoCloseSharp,
@@ -37,7 +38,10 @@ import {
     ExportMetaQuery,
     ExportMetaQueryVariables,
 } from '#generated/types';
-import { getRegionForCountry } from '#utils/common';
+import {
+    getRegionForCountry,
+    formatNumber,
+} from '#utils/common';
 import useRecursiveCsvExport from '#hooks/useRecursiveCSVExport';
 import ProgressBar from '#components/ProgressBar';
 
@@ -178,6 +182,7 @@ function Dashboard() {
             return {
                 iso3: filterValueCountry,
                 outbreak: filterValues?.outbreak,
+                // FIXME: what is this?
                 include_header: false,
             };
         }
@@ -239,7 +244,7 @@ function Dashboard() {
             return {
                 iso3: filterValueCountry,
                 indicator_id: filterValues?.indicator,
-                include_header: false,
+                include_header: true,
             };
         }
         return {};
@@ -250,15 +255,20 @@ function Dashboard() {
 
     const [
         pendingExport,
-        exportData,
-        exportFullString,
-        exportTotal,
+        progress,
         triggerExportStart,
-        // handleCancelExport,
     ] = useRecursiveCsvExport({
-        onFailure: () => {
+        onFailure: (err) => {
             // eslint-disable-next-line no-console
-            console.error('failed to download');
+            console.error('Failed to download!', err);
+        },
+        onSuccess: (data) => {
+            const unparseData = Papa.unparse(data);
+            const blob = new Blob(
+                [unparseData],
+                { type: 'text/csv' },
+            );
+            saveAs(blob, 'Data Export');
         },
     });
 
@@ -404,39 +414,6 @@ function Dashboard() {
         indicatorList,
     ]);
 
-    useEffect(() => {
-        if (!pendingExport) {
-            if (exportData?.length > 0) {
-                if (exportData.length === exportTotal) {
-                    /*
-                    const dataString = stringify(exportData, {
-                        columns: headers,
-                    });
-                    */
-                    const blob = new Blob(
-                        [exportFullString],
-                        { type: 'text/csv' },
-                    );
-                    saveAs(blob, 'Data Export');
-                } else {
-                    // eslint-disable-next-line no-console
-                    console.error('CSV num rows mismatch', `expected: ${exportTotal}`, `got: ${exportData.length}`);
-                }
-            }
-        }
-    }, [pendingExport, exportData, exportTotal, exportFullString]);
-
-    const progress = useMemo(() => {
-        if (!exportTotal) {
-            return 0;
-        }
-
-        return Math.round(100 * (exportData?.length / exportTotal) ?? 0) / 100;
-    }, [
-        exportData,
-        exportTotal,
-    ]);
-
     const disableExportButton = exportMetaLoading
         || pendingExport
         || isNotDefined(filterValueCountry || filterValues?.indicator)
@@ -471,7 +448,9 @@ function Dashboard() {
                         <div className={styles.dashboardButtons}>
                             <DropdownMenu
                                 className={styles.button}
-                                label={pendingExport ? `Preparing Export (${progress * 100}%)` : 'Export'}
+                                label={pendingExport
+                                    ? `Preparing Export (${formatNumber('percent', progress)})`
+                                    : 'Export'}
                                 variant="tertiary"
                                 icons={<IoDownloadOutline />}
                                 hideDropdownIcon

@@ -5843,20 +5843,10 @@ csstype@^3.0.2:
   resolved "https://registry.npmjs.org/csstype/-/csstype-3.0.10.tgz"
   integrity sha512-2u44ZG2OcNUO9HDp/Jl8C07x6pU/eTR3ncV91SiK3dhG9TWvRVsCoJw14Ckx5DgWkzGA3waZWO3d7pgqpUI/XA==
 
-csv-parse@^5.3.1:
-  version "5.3.1"
-  resolved "https://registry.yarnpkg.com/csv-parse/-/csv-parse-5.3.1.tgz#78b028eb2d2a3e16e62ee8abe710ff7a0b1f8b3b"
-  integrity sha512-R4Hv6eGJNzgcKdThZ6XORbSQ873HVcNke74QIq+LbwpT90LaZ8Xzl7KKiuIP16xq/P7ofzRt0h7S0xm+fVScsw==
-
 csv-stringify@*:
   version "6.0.5"
   resolved "https://registry.npmjs.org/csv-stringify/-/csv-stringify-6.0.5.tgz"
   integrity sha512-7xpV3uweJCFF/Ssn56l3xsR/k2r3UqszwjEhej9qEn2cCPzyK1WyHCgoUVzBA792x8HbwonNX7CU9XM2K5s5yw==
-
-csv-stringify@^6.2.0:
-  version "6.2.0"
-  resolved "https://registry.yarnpkg.com/csv-stringify/-/csv-stringify-6.2.0.tgz#f89881e8f61293bf5af11f421266b5da7b744030"
-  integrity sha512-dcUbQLRTTDcgQxgEU8V9IctkaCwHZjZfzUZ5ZB3RY8Y+pXtdtl5iVQHfGzANytFFkRKanYzBXrkfpNdGR7eviA==
 
 d3-array@2, d3-array@^2.3.0:
   version "2.12.1"
