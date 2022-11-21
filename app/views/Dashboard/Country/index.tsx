@@ -73,6 +73,7 @@ interface CountryWiseOutbreakCases {
     newDeaths?: string | null;
     newCasesPerMillion?: string | null;
     newDeathsPerMillion?: string | null;
+    indicatorMonth?: string | null;
 }
 
 const dateTickFormatter = (d: string) => getShortMonth(d);
@@ -300,6 +301,7 @@ const COUNTRY_PROFILE = gql`
             }
         ) {
             indicatorValue
+            indicatorMonth
             emergency
             format
             id
@@ -604,6 +606,7 @@ function Country(props: Props) {
                 id: total.id,
                 emergency: total.emergency,
                 totalCases: total.indicatorValue,
+                indicatorMonth: total.indicatorMonth,
                 totalDeaths: formatNumber(
                     totalDeaths?.format as FormatType,
                     totalDeaths?.indicatorValue,
@@ -665,6 +668,7 @@ function Country(props: Props) {
                     indicatorName: country.indicatorName,
                     format: country.format as FormatType,
                     interpolated: country.interpolated,
+                    subvariable: country.subvariable,
                 };
             }
 
@@ -685,6 +689,7 @@ function Country(props: Props) {
                 indicatorName: country.indicatorName,
                 format: country.format as FormatType,
                 interpolated: country.interpolated,
+                subvariable: country.subvariable,
             };
         }).sort((a, b) => compareDate(a.date, b.date));
         return uncertaintyData;
@@ -818,6 +823,7 @@ function Country(props: Props) {
         totalDeaths: data.totalDeaths,
         newCases: data.newCases,
         newDeathsPerMillion: data.newDeathsPerMillion,
+        indicatorMonth: data.indicatorMonth,
     }), [
         selectedIndicatorType,
         selectedIndicatorName,
