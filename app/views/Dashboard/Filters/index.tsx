@@ -17,6 +17,7 @@ import {
     IndicatorsForCountryQuery,
     SubvariablesQuery,
     CountriesAndOutbreaksQuery,
+    OverviewSubindicatorsQuery,
 } from '#generated/types';
 import { getRegionForCountry } from '#utils/common';
 
@@ -57,12 +58,19 @@ type GlobalIndicator = NonNullable<NonNullable<IndicatorsQuery['filterOptions']>
 const globalIndicatorKeySelector = (d: GlobalIndicator) => d.indicatorId ?? '';
 const globalIndicatorLabelSelector = (d: GlobalIndicator) => d.indicatorDescription ?? '';
 
+const indicatorGroupKeySelector = (indicator: Indicator | GlobalIndicator) => indicator.type || 'Unnamed';
+const indicatorGroupLabelSelector = (indicator: Indicator | GlobalIndicator) => indicator.type || 'Unnamed';
+
 interface Subvariable {
     key: string;
     label: string;
 }
+
 const subvariableKeySelector = (d: Subvariable) => d.key;
 const subvariableLabelSelector = (d: Subvariable) => d.label;
+
+const overviewSubindicatorKeySelector = (d: Subvariable) => d.key;
+const overviewSubindicatorLabelSelector = (d: Subvariable) => d.label;
 
 export interface FilterType {
     outbreak?: string;
@@ -71,6 +79,8 @@ export interface FilterType {
     country?: string;
     subvariable?: string;
 }
+
+type OverviewSubindicators = NonNullable<NonNullable<OverviewSubindicatorsQuery['filterOptions']>['overviewIndicators']>;
 
 interface Props {
     value: FilterType | undefined;
@@ -84,6 +94,8 @@ interface Props {
     indicatorList: IndicatorsForCountryQuery | undefined;
     globalIndicatorList: IndicatorsQuery | undefined;
     subvariableList: SubvariablesQuery | undefined;
+    overviewSubindicatorsList: OverviewSubindicators | undefined;
+    overviewSubindicatorsLoading: boolean | undefined;
     emergenciesLoading: boolean | undefined;
     subvariablesLoading: boolean | undefined;
     globalIndicatorsLoading: boolean | undefined;
@@ -103,6 +115,8 @@ function Filters(props: Props) {
         indicatorList,
         globalIndicatorList,
         subvariableList,
+        overviewSubindicatorsList,
+        overviewSubindicatorsLoading,
         emergenciesLoading,
         subvariablesLoading,
         globalIndicatorsLoading,
@@ -118,6 +132,9 @@ function Filters(props: Props) {
             onChange({});
         }
     }, [onChange, value?.country, activeTab]);
+
+    const indicators = indicatorList?.filterOptions?.countryIndicators;
+    const globalIndicators = globalIndicatorList?.filterOptions?.overviewIndicators;
 
     const handleInputChange = useCallback(
         (newValue: string | undefined, name: keyof FilterType) => {
@@ -143,9 +160,13 @@ function Filters(props: Props) {
                         return newValueForRegion;
                     });
                 } else if (name === 'indicator') {
+                    const emergencyFromIndicator = (
+                        activeTab === 'overview' ? globalIndicators : indicators
+                    )?.find((i) => i.indicatorId === newValue)?.emergencies[0];
+
                     onChange((oldValue) => ({
                         ...oldValue,
-                        outbreak: oldValue?.outbreak ?? 'COVID-19',
+                        outbreak: oldValue?.outbreak ?? emergencyFromIndicator,
                         indicator: newValue,
                         // FIXME: Add a handler to select a default subvariable on indicator change
                     }));
@@ -170,13 +191,13 @@ function Filters(props: Props) {
             }
         },
         [
+            activeTab,
+            globalIndicators,
+            indicators,
             onChange,
             countriesFromProps,
         ],
     );
-
-    const indicators = indicatorList?.filterOptions?.countryIndicators;
-    const globalIndicators = globalIndicatorList?.filterOptions?.overviewIndicators;
 
     const subvariables = useMemo(() => (
         subvariableList?.filterOptions?.subvariables.map((sub) => ({
@@ -184,6 +205,18 @@ function Filters(props: Props) {
             label: sub,
         }))
     ), [subvariableList]);
+
+    const overviewSubindicators = useMemo(() => {
+        const val = overviewSubindicatorsList
+            ?.map((subindicator) => subindicator.subvariable)
+            ?.filter(isDefined)
+            ?.map((subvariable) => ({
+                key: subvariable,
+                label: subvariable,
+            })) ?? [];
+
+        return val;
+    }, [overviewSubindicatorsList]);
 
     const countriesWithNull = countriesFromProps ?? [];
     const countries = countriesWithNull.filter((country) => !doesObjectHaveAnyEmptyValue(country));
@@ -291,6 +324,9 @@ function Filters(props: Props) {
                         onChange={handleInputChange}
                         variant="general"
                         disabled={globalIndicatorsLoading}
+                        grouped
+                        groupKeySelector={indicatorGroupKeySelector}
+                        groupLabelSelector={indicatorGroupLabelSelector}
                     />
                 )}
                 {(activeTab === 'country') && (
@@ -305,9 +341,13 @@ function Filters(props: Props) {
                         onChange={handleInputChange}
                         variant="general"
                         disabled={indicatorsLoading}
+                        grouped
+                        groupKeySelector={indicatorGroupKeySelector}
+                        groupLabelSelector={indicatorGroupLabelSelector}
                     />
                 )}
-                {(activeTab === 'country' && value?.indicator) && (
+                {((activeTab === 'country')
+                && value?.indicator) && (
                     <SelectInput
                         name="subvariable"
                         options={subvariables}
@@ -318,6 +358,20 @@ function Filters(props: Props) {
                         onChange={handleInputChange}
                         variant="general"
                         disabled={subvariablesLoading}
+                    />
+                )}
+                {((activeTab === 'overview')
+                && value?.indicator) && (
+                    <SelectInput
+                        name="subvariable"
+                        options={overviewSubindicators}
+                        placeholder="Sub-indicator"
+                        keySelector={overviewSubindicatorKeySelector}
+                        labelSelector={overviewSubindicatorLabelSelector}
+                        value={value?.subvariable}
+                        onChange={handleInputChange}
+                        variant="general"
+                        disabled={overviewSubindicatorsLoading}
                     />
                 )}
                 <Button

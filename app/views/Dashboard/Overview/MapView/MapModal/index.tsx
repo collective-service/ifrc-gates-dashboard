@@ -40,8 +40,8 @@ import ChartContainer from '#components/ChartContainer';
 import {
     CountryModalQuery,
     CountryModalQueryVariables,
-    SubvariablesQuery,
-    SubvariablesQueryVariables,
+    CountrySubvariablesQuery,
+    CountrySubvariablesQueryVariables,
 } from '#generated/types';
 
 import styles from './styles.css';
@@ -62,13 +62,16 @@ interface TooltipProps {
     }[];
 }
 
-const SUBVARIABLES = gql`
-    query Subvariables(
+const COUNTRY_SUBVARIABLES = gql`
+    query CountrySubvariables(
         $iso3: String!,
-        $indicatorId:String
+        $indicatorId: String,
     ) {
         filterOptions {
-            subvariables(iso3: $iso3, indicatorId: $indicatorId)
+            subvariables(
+                iso3: $iso3,
+                indicatorId: $indicatorId,
+            )
         }
     }
 `;
@@ -185,8 +188,8 @@ function MapModal(props: ModalProps) {
 
     const {
         data: subVariableList,
-    } = useQuery<SubvariablesQuery, SubvariablesQueryVariables>(
-        SUBVARIABLES,
+    } = useQuery<CountrySubvariablesQuery, CountrySubvariablesQueryVariables>(
+        COUNTRY_SUBVARIABLES,
         {
             skip: !filterValues?.indicator,
             variables: subvariablesVariables,
