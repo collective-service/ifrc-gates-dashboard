@@ -1,5 +1,10 @@
 .table-wrapper {
     height: 42rem;
+    overflow-x: auto;
+
+    .overflow-container {
+        height: 100%;
+    }
 
     .each-table-cell {
         border-right: 1px solid var(--dui-color-line-separator);

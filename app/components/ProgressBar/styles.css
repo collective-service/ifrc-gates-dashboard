@@ -29,6 +29,8 @@
             background-color: var(--dui-color-background-progress-bar-light);
 
             .progress-bar-style {
+                transition: 200ms width ease-in-out;
+
                 &:first-of-type {
                     border-top-left-radius: 4px;
                     border-bottom-left-radius: 4px;
