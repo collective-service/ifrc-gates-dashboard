@@ -3,6 +3,7 @@ import React, { useMemo } from 'react';
 import { init, ErrorBoundary } from '@sentry/react';
 import { ApolloClient, ApolloProvider } from '@apollo/client';
 import ReactGA from 'react-ga';
+import 'requestidlecallback-polyfill';
 
 import 'mapbox-gl/dist/mapbox-gl.css';
 import '@the-deep/deep-ui/build/index.css';
