@@ -19,6 +19,9 @@ import {
     DropdownMenu,
     DropdownMenuItem,
     ContainerCard,
+    useModalState,
+    Modal,
+    Button,
 } from '@the-deep/deep-ui';
 import { isDefined, isNotDefined } from '@togglecorp/fujs';
 import { gql, useQuery } from '@apollo/client';
@@ -55,6 +58,7 @@ import styles from './styles.css';
 
 export type TabTypes = 'country' | 'overview' | 'combinedIndicators';
 export type IndicatorType = 'Contextual Indicators' | 'Social Behavioural Indicators';
+type ExportTypes = 'raw' | 'summarized' | 'contextual';
 
 export const COUNTRIES_AND_OUTBREAKS = gql`
     query CountriesAndOutbreaks {
@@ -161,6 +165,12 @@ function Dashboard() {
         advancedFilterValues,
         setAdvancedFilterValues,
     ] = useState<AdvancedOptionType | undefined>();
+
+    const [
+        confirmExportModalShown,
+        showExportConfirm,
+        hideExportConfirm,
+    ] = useModalState(false);
 
     const {
         data: countriesAndOutbreaks,
@@ -336,39 +346,49 @@ function Dashboard() {
         }
     };
 
-    const handleRawDataExportClick = useCallback(() => {
-        if (exportMetaCount?.exportMeta?.totalRawDataCount) {
+    const [selectedExport, setSelectedExport] = useState<ExportTypes | undefined>(undefined);
+
+    const handleExportClick = useCallback((name: ExportTypes) => {
+        setSelectedExport(name);
+        showExportConfirm();
+    }, [
+        showExportConfirm,
+    ]);
+
+    const handleExportCancel = useCallback(() => {
+        setSelectedExport(undefined);
+        hideExportConfirm();
+    }, [
+        hideExportConfirm,
+    ]);
+
+    const handleExportConfirm = useCallback(() => {
+        if (selectedExport === 'raw' && exportMetaCount?.exportMeta?.totalRawDataCount) {
             triggerExportStart(
                 'server://export-raw-data/',
                 exportMetaCount?.exportMeta?.totalRawDataCount,
                 exportParams,
             );
-        }
-    }, [
-        exportParams,
-        exportMetaCount,
-        triggerExportStart,
-    ]);
-
-    const handleSummarizedDataExportClick = () => {
-        if (exportMetaCount?.exportMeta?.totalSummaryCount) {
+        } else if (selectedExport === 'summarized' && exportMetaCount?.exportMeta?.totalSummaryCount) {
             triggerExportStart(
                 'server://export-summary/',
                 exportMetaCount?.exportMeta?.totalSummaryCount,
                 exportParams,
             );
-        }
-    };
-
-    const handleContextualCountryDataExportClick = () => {
-        if (exportMetaCount?.exportMeta?.totalCountryContextualDataCount) {
+        } else if (selectedExport === 'contextual' && exportMetaCount?.exportMeta?.totalCountryContextualDataCount) {
             triggerExportStart(
                 'server://export-country-contextual-data/',
                 exportMetaCount?.exportMeta?.totalCountryContextualDataCount,
                 exportParams,
             );
         }
-    };
+        setSelectedExport(undefined);
+    }, [
+        exportParams,
+        triggerExportStart,
+        selectedExport,
+        exportMetaCount,
+    ]);
 
     const narrativeVariables = useMemo((): NarrativeQueryVariables => ({
         iso3: filterValues?.country,
@@ -458,16 +478,16 @@ function Dashboard() {
                             >
                                 {(exportMetaCount?.exportMeta?.totalRawDataCount ?? 0) > 0 && (
                                     <DropdownMenuItem
-                                        name={undefined}
-                                        onClick={handleRawDataExportClick}
+                                        name="raw"
+                                        onClick={handleExportClick}
                                     >
                                         Export Raw Data as CSV
                                     </DropdownMenuItem>
                                 )}
                                 {(exportMetaCount?.exportMeta?.totalSummaryCount ?? 0) > 0 && (
                                     <DropdownMenuItem
-                                        name={undefined}
-                                        onClick={handleSummarizedDataExportClick}
+                                        name="summarized"
+                                        onClick={handleExportClick}
                                     >
                                         Export Summarized Data
                                     </DropdownMenuItem>
@@ -477,8 +497,8 @@ function Dashboard() {
                                     ?.totalCountryContextualDataCount ?? 0) > 0
                                 && (
                                     <DropdownMenuItem
-                                        name={undefined}
-                                        onClick={handleContextualCountryDataExportClick}
+                                        name="contextual"
+                                        onClick={handleExportClick}
                                     >
                                         Export Contextual Country Data
                                     </DropdownMenuItem>
@@ -586,6 +606,34 @@ function Dashboard() {
                         format="percent"
                     />
                 </div>
+            )}
+            {confirmExportModalShown && (
+                <Modal
+                    heading="Export Confirmation"
+                    onCloseButtonClick={handleExportCancel}
+                    freeHeight
+                    footerActions={(
+                        <>
+                            <Button
+                                name={undefined}
+                                onClick={handleExportCancel}
+                                variant="secondary"
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                name={undefined}
+                                onClick={handleExportConfirm}
+                            >
+                                Continue
+                            </Button>
+                        </>
+                    )}
+                >
+                    Exporting data for your current selection
+                    might take a bit of time due to its size.
+                    Are you sure you want to continue?
+                </Modal>
             )}
         </div>
     );
