@@ -1,0 +1,26 @@
+.sub-indicator-item {
+    display: flex;
+    flex-direction: column;
+
+    .heading {
+        color: var(--dui-color-text-label);
+    }
+
+    .indicator-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--dui-spacing-large);
+
+        .progress-bar {
+            flex-basis: 30%;
+        }
+    }
+
+    &:not(:last-child) {
+        border-bottom: var(--dui-width-separator-thin) solid var(--dui-color-separator);
+
+        .indicator-list {
+            padding-bottom: var(--dui-spacing-medium);
+        }
+    }
+}

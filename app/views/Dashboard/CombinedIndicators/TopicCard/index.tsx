@@ -1,25 +1,22 @@
-import React, { useCallback } from 'react';
-import { IoInformationCircleOutline } from 'react-icons/io5';
+import React, { useCallback, useMemo } from 'react';
 import {
     isDefined,
+    listToGroupList,
 } from '@togglecorp/fujs';
 import {
     ContainerCard,
     List,
 } from '@the-deep/deep-ui';
 
-import ProgressBar from '#components/ProgressBar';
 import { FilterType } from '#views/Dashboard/Filters';
 import { TabTypes } from '#views/Dashboard';
-import { FormatType } from '#utils/common';
 
+import OutbreakIndicators from './OutbreakIndicators';
 import { IndicatorType } from '..';
 
 import styles from './styles.css';
 
-const barHeight = 8;
-
-const indicatorKeySelector = (d: IndicatorType) => d.subvariable ?? '';
+const subvariableKeySelector = (d: { emergency: string }) => d.emergency;
 
 interface Props {
     topicName: string;
@@ -42,7 +39,11 @@ function TopicCard(props: Props) {
         setActiveTab,
     } = props;
 
-    const handleIndicatorClick = useCallback((indicatorId?: string, subVariable?: string) => {
+    const handleIndicatorClick = useCallback((
+        indicatorId?: string,
+        subVariable?: string,
+        emergency?: string,
+    ) => {
         if (isDefined(filterValues?.country)) {
             setActiveTab('country');
 
@@ -51,6 +52,7 @@ function TopicCard(props: Props) {
                     ...old,
                     indicator: indicatorId,
                     subvariable: subVariable,
+                    outbreak: emergency,
                 }));
             }
         } else {
@@ -60,6 +62,7 @@ function TopicCard(props: Props) {
                 setFilterValues((old) => ({
                     ...old,
                     indicator: indicatorId,
+                    outbreak: emergency,
                 }));
             }
         }
@@ -69,42 +72,47 @@ function TopicCard(props: Props) {
         setFilterValues,
     ]);
 
-    const indicatorRendererParams = useCallback((_: string, data: IndicatorType) => ({
-        className: styles.indicatorItem,
-        barHeight,
-        barName: `${data.indicatorName} - ${data.subvariable}`,
-        title: data.indicatorDescription ?? undefined,
-        valueTitle: data.indicatorName ?? undefined,
-        value: data.indicatorValue ?? undefined,
-        subValue: data.indicatorValueRegional ?? undefined,
-        totalValue: 1,
-        indicatorId: data.indicatorId ?? undefined,
-        subVariable: data.subvariable ?? undefined,
-        icon: <IoInformationCircleOutline />,
-        color: '#98a6b5',
-        region: data.region ?? undefined,
+    const groupedIndicatorsRendererParams = useCallback((
+        emergency: string,
+        data: { emergency: string; list: IndicatorType[] },
+    ) => ({
+        list: data.list,
+        emergency,
         showRegionalValue,
-        onTitleClick: handleIndicatorClick,
-        format: (data.format ?? 'raw') as FormatType,
+        handleIndicatorClick,
     }), [
         showRegionalValue,
         handleIndicatorClick,
     ]);
 
+    const groupedList = useMemo(() => (
+        Object.values(listToGroupList(
+            indicators,
+            (indicator) => indicator.emergency,
+        ) ?? {}).map((list) => ({
+            emergency: list[0].emergency,
+            list,
+        }))
+    ), [indicators]);
+
     return (
         <ContainerCard
             className={styles.topicCard}
-            contentClassName={styles.topicContainer}
             heading={topicName}
             headingSize="small"
-            headerDescription={topicDescription}
             spacing="loose"
+            headingContainerClassName={styles.heading}
+            headingDescriptionClassName={styles.topicDescription}
+            headingDescription={topicDescription}
+            contentClassName={styles.emergencies}
+            borderBelowHeader
+            borderBelowHeaderWidth="thin"
         >
             <List
-                keySelector={indicatorKeySelector}
-                data={indicators}
-                rendererParams={indicatorRendererParams}
-                renderer={ProgressBar}
+                keySelector={subvariableKeySelector}
+                data={groupedList}
+                rendererParams={groupedIndicatorsRendererParams}
+                renderer={OutbreakIndicators}
             />
         </ContainerCard>
     );

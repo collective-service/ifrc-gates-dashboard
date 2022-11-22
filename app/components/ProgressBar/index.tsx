@@ -1,11 +1,8 @@
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo } from 'react';
 import {
     _cs,
 } from '@togglecorp/fujs';
-import {
-    Button,
-    Tooltip,
-} from '@the-deep/deep-ui';
+import { Tooltip } from '@the-deep/deep-ui';
 import {
     formatNumber,
     FormatType,
@@ -17,20 +14,15 @@ import styles from './styles.css';
 export interface Props {
     className?: string | undefined;
     barHeight?: number;
-    barName: string | undefined;
+    barName: React.ReactNode | undefined;
     title: string | undefined;
     valueTitle?: string | undefined;
     color?: string;
     value: number | null | undefined;
-    subValue?: number;
     totalValue: number | null | undefined;
     icon?: React.ReactNode;
-    region?: string;
-    showRegionalValue?: boolean;
-    indicatorId?: string;
-    subVariable?: string;
-    onTitleClick?: (indicatorId?: string, subVariable?: string) => void;
     format: FormatType;
+    footer?: React.ReactNode;
 }
 
 function ProgressBar(props: Props) {
@@ -42,39 +34,15 @@ function ProgressBar(props: Props) {
         valueTitle,
         color,
         value,
-        subValue,
         totalValue,
         icon,
-        region,
-        showRegionalValue = false,
-        onTitleClick,
-        indicatorId,
-        subVariable,
         format,
+        footer,
     } = props;
-
-    const handleTitleClick = useCallback(() => {
-        if (!onTitleClick) {
-            return;
-        }
-        onTitleClick(indicatorId, subVariable);
-    }, [
-        onTitleClick,
-        indicatorId,
-        subVariable,
-    ]);
-
-    const subValuePercentage = useMemo(() => (
-        `${region}: ${formatNumber(format ?? 'raw', subValue ?? 0)}`
-    ), [
-        format,
-        subValue,
-        region,
-    ]);
 
     const valueTooltip = useMemo(() => {
         if (format === 'percent') {
-            return (`${valueTitle}: ${(value ?? 0) * 100}%` ?? undefined);
+            return (`${valueTitle}: ${Math.round((value ?? 0) * 10000) / 100}%` ?? undefined);
         }
         return (`${valueTitle}: ${normalCommaFormatter().format(value ?? 0)}`);
     }, [
@@ -88,18 +56,7 @@ function ProgressBar(props: Props) {
     return (
         <div className={_cs(className, styles.progressInfo)}>
             <div className={styles.progressTitle}>
-                {indicatorId
-                    ? (
-                        <Button
-                            className={styles.titleButton}
-                            name={undefined}
-                            onClick={handleTitleClick}
-                            variant="transparent"
-                        >
-                            {barName}
-                        </Button>
-                    )
-                    : barName}
+                {barName}
                 <div title={title}>
                     {icon}
                 </div>
@@ -131,12 +88,9 @@ function ProgressBar(props: Props) {
                         : formatNumber(format, value ?? 0, totalValue ?? 0)}
                 </div>
             </div>
-            {showRegionalValue && subValuePercentage && (
-                <div className={styles.subValue}>
-                    {subValuePercentage}
-                </div>
-            )}
+            {footer}
         </div>
     );
 }
+
 export default ProgressBar;

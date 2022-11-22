@@ -78,7 +78,7 @@ const NARRATIVES = gql`
     query Narrative(
         $iso3: String,
     ) {
-        naratives (
+        narratives (
             filters: {
                 iso3: $iso3,
             }
@@ -406,9 +406,9 @@ function Dashboard() {
     );
 
     const narrativeStatement = useMemo(() => (
-        narrativeResponse?.naratives[0]?.narrative
+        narrativeResponse?.narratives[0]?.narrative
     ), [
-        narrativeResponse?.naratives,
+        narrativeResponse?.narratives,
     ]);
 
     const selectedIndicatorList = (activeTab === 'country')

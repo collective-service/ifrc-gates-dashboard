@@ -8,12 +8,6 @@
         align-items: center;
         text-align: left;
         gap: var(--dui-spacing-small);
-
-        .title-button {
-            padding: 0;
-            text-align: center;
-            font-weight: var(--dui-font-weight-normal);
-        }
     }
 
     .progress-value-wrapper {
@@ -47,11 +41,4 @@
             font-size: var(--dui-font-size-medium);
         }
     }
-
-    .sub-value {
-        align-self: end;
-        color: var(--color-text-title);
-        font-size: var(--dui-font-size-small);
-    }
-
 }

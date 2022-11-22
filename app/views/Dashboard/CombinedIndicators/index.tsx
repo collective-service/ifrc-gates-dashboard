@@ -51,6 +51,7 @@ const COUNTRY_COMBINED_INDICATORS = gql`
             thematicDescription
             topics {
                 indicators {
+                    emergency
                     indicatorId
                     indicatorName
                     indicatorDescription
@@ -89,6 +90,7 @@ const REGIONAL_COMBINED_INDICATORS = gql`
             thematicDescription
             topics {
                 indicators {
+                    emergency
                     indicatorId
                     indicatorName
                     indicatorDescription
@@ -125,6 +127,7 @@ const GLOBAL_COMBINED_INDICATORS = gql`
             thematicDescription
             topics {
                 indicators {
+                    emergency
                     indicatorId
                     indicatorName
                     indicatorDescription
@@ -153,7 +156,7 @@ export type IndicatorType = NonNullable<TopicIndicatorType['indicators']>[number
 
 interface ThematicProps {
     thematicName: string;
-    thematicDescription: string;
+    thematicDescription?: string;
     indicators: TopicIndicatorType[] | undefined;
     showRegionalValue: boolean;
     filterValues: FilterType | undefined;
@@ -176,7 +179,8 @@ function ThematicRenderer(props: ThematicProps) {
 
     const topicRendererParams = useCallback((_: string, data: TopicIndicatorType) => ({
         topicName: data.topicName,
-        topicDescription: data.topicDescription ?? '',
+        topicDescription: (data.topicName !== data.topicDescription)
+            ? (data.topicDescription ?? undefined) : undefined,
         indicators: data.indicators ?? undefined,
         showRegionalValue,
         filterValues,
@@ -190,9 +194,7 @@ function ThematicRenderer(props: ThematicProps) {
     ]);
 
     return (
-        <div
-            className={styles.thematicContainer}
-        >
+        <div className={styles.thematicContainer}>
             <ContainerCard
                 className={styles.thematicHeader}
                 heading={thematicName}
@@ -298,7 +300,8 @@ function CombinedIndicators(props: Props) {
         item: RegionalIndicatorType | CountryIndicatorType | GlobalIndicatorType,
     ) => ({
         thematicName: item.thematic,
-        thematicDescription: item.thematicDescription ?? '',
+        thematicDescription: (item.thematic !== item.thematicDescription)
+            ? (item.thematicDescription ?? undefined) : undefined,
         indicators: item.topics ?? undefined,
         showRegionalValue: isDefined(filterValues?.country),
         setFilterValues,
