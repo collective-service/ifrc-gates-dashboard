@@ -316,7 +316,6 @@ const COUNTRY_PROFILE = gql`
                 indicatorId: $indicatorId,
                 category: "Global",
                 emergency: $emergency,
-                subvariable: $subvariable,
             }
             order: {
                 indicatorMonth: DESC
@@ -705,27 +704,25 @@ function Country(props: Props) {
         selectedIndicatorType,
     ]);
 
-    const statusUncertainty = useMemo(() => {
-        const dataCountryLevel = countryResponse?.dataCountryLevelMostRecent;
-        if (!dataCountryLevel) {
-            return undefined;
-        }
-        const getLatestUncertain = [...dataCountryLevel].sort(
-            (a, b) => compareDate(b.indicatorMonth, a.indicatorMonth),
-        );
-        return getLatestUncertain[0];
-    }, [countryResponse?.dataCountryLevelMostRecent]);
+    const globalCardList = useMemo(() => (
+        countryResponse?.dataCountryLevelMostRecent?.filter(
+            (item) => item.subvariable !== filterValues?.subvariable,
+        ).sort(
+            (a, b) => compareNumber(b.indicatorValue, a.indicatorValue),
+        )
+    ), [
+        countryResponse?.dataCountryLevelMostRecent,
+        filterValues?.subvariable,
+    ]);
 
     const selectedSubvariableGlobal = useMemo(() => (
-        countryResponse?.dataCountryLevelMostRecent.find((sub) => (
+        countryResponse?.dataCountryLevelMostRecent?.find((sub) => (
             sub.subvariable === filterValues?.subvariable
         ))
     ), [
         countryResponse?.dataCountryLevelMostRecent,
         filterValues?.subvariable,
     ]);
-
-    console.log(selectedSubvariableGlobal);
 
     const ageDisaggregation = useMemo(() => countryResponse
         ?.disaggregation.ageDisaggregation.map((age) => (
@@ -862,6 +859,7 @@ function Country(props: Props) {
         format: data.format as FormatType,
         totalValue: 1,
         color: '#98A6B5',
+        valueTitle: data.subvariable,
     }), []);
 
     const currentOutbreak = useMemo(() => {
@@ -968,13 +966,13 @@ function Country(props: Props) {
                     </ContainerCard>
                     {(selectedIndicatorType === 'Social Behavioural Indicators') ? (
                         <div className={styles.indicatorWrapper}>
-                            {(countryResponse?.dataCountryLevelMostRecent) && (
+                            {(globalCardList) && (
                                 <ContainerCard
                                     className={styles.percentageCard}
                                     heading="Global"
                                     headingSize="extraSmall"
-                                    headerDescription={countryResponse
-                                        ?.dataCountryLevelMostRecent[0].indicatorDescription}
+                                    headerDescription={`${countryResponse
+                                        ?.dataCountryLevelMostRecent[0].indicatorDescription} - ${filterValues?.subvariable}`}
                                     contentClassName={styles.globalDetails}
                                 >
                                     <div className={styles.globalValue}>
@@ -988,7 +986,7 @@ function Country(props: Props) {
                                         renderer={ProgressBar}
                                         keySelector={globalCardKeySelector}
                                         rendererParams={globalCardRendererParams}
-                                        data={countryResponse?.dataCountryLevelMostRecent}
+                                        data={globalCardList}
                                         pending={countryResponseLoading}
                                         errored={false}
                                         filtered={false}
