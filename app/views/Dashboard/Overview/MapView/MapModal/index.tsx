@@ -411,12 +411,20 @@ function MapModal(props: ModalProps) {
                             <XAxis
                                 dataKey="date"
                                 tickLine={false}
-                                padding={{ left: 28 }}
+                                padding={{
+                                    right: 30,
+                                    left: 20,
+                                }}
+                                fontSize={12}
+                                interval={0}
+                                angle={-30}
+                                tickMargin={10}
                                 tickFormatter={dateTickFormatter}
                             />
                             <YAxis
                                 axisLine={false}
                                 tickLine={false}
+                                fontSize={12}
                                 padding={{ top: 5 }}
                                 tickFormatter={normalizedTickFormatter}
                             />

@@ -1135,12 +1135,21 @@ function Country(props: Props) {
                                 >
                                     <XAxis
                                         dataKey="date"
+                                        padding={{
+                                            right: 30,
+                                            left: 20,
+                                        }}
                                         tickLine={false}
+                                        fontSize={12}
+                                        interval={0}
+                                        angle={-30}
                                         tickFormatter={dateTickFormatter}
+                                        tickMargin={10}
                                     />
                                     <YAxis
                                         axisLine={false}
                                         tickLine={false}
+                                        fontSize={12}
                                         padding={{ top: 30 }}
                                         tickFormatter={normalizedTickFormatter}
                                     />
