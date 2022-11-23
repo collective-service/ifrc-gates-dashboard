@@ -340,7 +340,13 @@ function Dashboard() {
             skip: !subvariablesVariables,
             variables: subvariablesVariables,
             onCompleted: (response) => {
-                if (response?.filterOptions?.subvariables?.[0]) {
+                const isSelectedValInList = (
+                    response?.filterOptions?.subvariables?.findIndex(
+                        (sv) => sv === filterValues?.subvariable,
+                    ) ?? -1
+                ) !== -1;
+
+                if (!isSelectedValInList) {
                     setFilterValues((oldValue) => ({
                         ...oldValue,
                         subvariable: response?.filterOptions?.subvariables?.[0],
@@ -376,10 +382,13 @@ function Dashboard() {
             skip: !overviewSubindicatorVariables,
             variables: overviewSubindicatorVariables,
             onCompleted: (response) => {
-                if (
-                    isDefined(response?.filterOptions?.overviewIndicators[0]?.subvariable)
-                    && (response?.filterOptions?.overviewIndicators[0]?.subvariable !== null)
-                ) {
+                const isSelectedValInList = (
+                    response?.filterOptions?.overviewIndicators?.findIndex(
+                        (sv) => sv.subvariable === filterValues?.subvariable,
+                    ) ?? -1
+                ) !== -1;
+
+                if (!isSelectedValInList) {
                     setFilterValues((oldValue) => ({
                         ...oldValue,
                         subvariable: response?.filterOptions?.overviewIndicators[0]?.subvariable

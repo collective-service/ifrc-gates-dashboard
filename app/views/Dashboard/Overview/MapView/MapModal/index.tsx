@@ -468,8 +468,8 @@ function MapModal(props: ModalProps) {
                 className={styles.sources}
                 country={countryData.iso3}
                 emergency={outbreakId}
-                indicatorId={indicatorId}
-                subvariable={subvariableId}
+                indicatorId={indicatorExplicitlySet ? indicatorId : undefined}
+                subvariable={indicatorExplicitlySet ? subvariableId : undefined}
             />
         </Modal>
     );

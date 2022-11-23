@@ -21,6 +21,7 @@ export interface Props extends Omit<ProgressBarProps, 'barName' | 'barHeight'> {
     subvariableName?: string;
     title?: string;
     indicatorId?: string;
+    indicatorMonth?: string;
     subVariable?: string;
     onTitleClick?: (indicatorId?: string, subVariable?: string, emergency?: string) => void;
     showRegionalValue: boolean;
@@ -42,6 +43,7 @@ function ModifiedProgressBar(props: Props) {
         format,
         showRegionalValue,
         indicatorValueRegional,
+        indicatorMonth,
         title,
         ...otherProps
     } = props;
@@ -92,6 +94,7 @@ function ModifiedProgressBar(props: Props) {
                             trackMousePosition
                         >
                             {title}
+                            {indicatorMonth ? ` - ${indicatorMonth}` : undefined}
                             <Sources
                                 country={country}
                                 emergency={emergency}

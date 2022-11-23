@@ -62,6 +62,7 @@ function TopicCard(props: Props) {
                 setFilterValues((old) => ({
                     ...old,
                     indicator: indicatorId,
+                    subvariable: subVariable,
                     outbreak: emergency,
                 }));
             }

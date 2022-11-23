@@ -8,7 +8,7 @@ import {
 } from '#base/utils/restRequest';
 
 // NOTE: we can use upto 4000
-const PAGE_SIZE = 100;
+const PAGE_SIZE = 2000;
 
 async function wait(time: number) {
     return new Promise((resolve) => {
