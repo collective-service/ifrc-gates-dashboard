@@ -604,6 +604,7 @@ function Dashboard() {
                         value={progress}
                         totalValue={1}
                         format="percent"
+                        hideTooltip
                     />
                 </div>
             )}

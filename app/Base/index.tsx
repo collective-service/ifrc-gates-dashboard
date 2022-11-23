@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 // import { Router } from 'react-router-dom';
 import { init, ErrorBoundary } from '@sentry/react';
 import { ApolloClient, ApolloProvider } from '@apollo/client';
@@ -7,13 +7,7 @@ import 'requestidlecallback-polyfill';
 
 import 'mapbox-gl/dist/mapbox-gl.css';
 import '@the-deep/deep-ui/build/index.css';
-
 import { setMapboxToken } from '@togglecorp/re-map';
-
-import {
-    getDashboardLink,
-    parseQueryString,
-} from '#utils/common';
 
 import PreloadMessage from '#base/components/PreloadMessage';
 import browserHistory from '#base/configs/history';
@@ -23,8 +17,19 @@ import { trackingId, gaConfig } from '#base/configs/googleAnalytics';
 import { mapboxToken } from '#base/configs/env';
 
 import Dashboard from '#views/Dashboard';
+import goarnLogo from '#resources/icons/goarn.png';
+import ifrcLogo from '#resources/icons/ifrc.png';
+import unicefLogo from '#resources/icons/unicef.png';
+import logo from '#resources/icons/cs_logo.png';
+import whoLogo from '#resources/icons/who.png';
+import {
+    wsEndpoint,
+    adminEndpoint,
+} from '#base/configs/restRequest';
 
 import styles from './styles.css';
+
+const footerDescription = 'Developed by the Collective Service – partnership between the International Federation of Red Cross and Red Crescent Societies (IFRC), United Nations Children\'s Fund (UNICEF), the World Health Organization (WHO) and the Global Outbreak Alert and Response Network (GOARN).';
 
 if (mapboxToken) {
     setMapboxToken(mapboxToken);
@@ -45,43 +50,7 @@ if (trackingId) {
 
 const apolloClient = new ApolloClient(apolloConfig);
 
-interface Win {
-    standaloneMode?: boolean;
-
-    page?: 'dashboard';
-}
-
-const standaloneMode = (window as Win).standaloneMode ?? false;
-
-const query: Win = parseQueryString(window.location.search);
-
-const currentPage = (window as Win).page || query.page;
-
 function Base() {
-    const page = useMemo(
-        () => {
-            if (currentPage === 'dashboard') {
-                return (
-                    <div className={styles.view}>
-                        <Dashboard />
-                    </div>
-                );
-            }
-
-            if (standaloneMode) {
-                return (
-                    <>
-                        <a href={getDashboardLink()}>
-                            Dashboard
-                        </a>
-                    </>
-                );
-            }
-            return null;
-        },
-        [],
-    );
-
     return (
         <div className={styles.base}>
             <ErrorBoundary
@@ -94,7 +63,87 @@ function Base() {
                 )}
             >
                 <ApolloProvider client={apolloClient}>
-                    {page}
+                    <div className={styles.header}>
+                        <div className={styles.headerContent}>
+                            <div className={styles.leftContainer}>
+                                <img
+                                    className={styles.logo}
+                                    src={logo}
+                                    alt=""
+                                />
+                            </div>
+                            <div className={styles.rightContainer}>
+                                <a
+                                    className={styles.navItem}
+                                    href={wsEndpoint}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    API
+                                </a>
+                                <a
+                                    className={styles.navItem}
+                                    href={adminEndpoint}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    Admin
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div className={styles.view}>
+                        <Dashboard />
+                    </div>
+                    <div className={styles.footer}>
+                        <p className={styles.footerDescription}>
+                            {footerDescription}
+                        </p>
+                        <div className={styles.logoContainer}>
+                            <img
+                                className={styles.logo}
+                                src={ifrcLogo}
+                                alt=""
+                            />
+                            <img
+                                className={styles.logo}
+                                src={unicefLogo}
+                                alt=""
+                            />
+                            <img
+                                className={styles.logo}
+                                src={whoLogo}
+                                alt=""
+                            />
+                            <img
+                                className={styles.logo}
+                                src={goarnLogo}
+                                alt=""
+                            />
+                        </div>
+                        <div className={styles.copyright}>
+                            <div className={styles.links}>
+                                <a
+                                    rel="license"
+                                    href="http://creativecommons.org/licenses/by-sa/4.0/"
+                                >
+                                    <img
+                                        alt="Creative Commons License"
+                                        src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png"
+                                    />
+                                </a>
+                                This work is licensed under a
+                                <a
+                                    rel="license"
+                                    href="http://creativecommons.org/licenses/by-sa/4.0/"
+                                    className={styles.link}
+                                >
+                                    Creative Commons Attribution
+                                    -ShareAlike 4.0 International License
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </ApolloProvider>
             </ErrorBoundary>
         </div>

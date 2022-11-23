@@ -40,7 +40,6 @@ const COUNTRY_COMBINED_INDICATORS = gql`
         $type: String
     ) {
         countryCombinedIndicators (filters: {
-            category: "Global",
             emergency: $emergency,
             iso3: $iso3,
             topic: $topic,
@@ -79,7 +78,6 @@ const REGIONAL_COMBINED_INDICATORS = gql`
         $type: String
     ) {
         regionCombinedIndicators (filters: {
-            category: "Global",
             emergency: $emergency,
             region: $region,
             topic: $topic,
@@ -117,7 +115,6 @@ const GLOBAL_COMBINED_INDICATORS = gql`
         $topic: String,
     ) {
         globalCombinedIndicators(filters: {
-            category: "Global",
             topic: $topic,
             thematic: $thematic,
             type: $type,
