@@ -7,6 +7,10 @@
         text-align: left;
         font-weight: var(--dui-font-weight-normal);
 
+        .children {
+            display: inline;
+        }
+
         .indicator-name,
         .separator,
         .subvariable-name {

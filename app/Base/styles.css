@@ -87,6 +87,7 @@
     --dui-color-accent: rgb(65, 131, 196);
     --dui-color-brand: rgb(25, 50, 86);
     --dui-color-brand-hover: #06179E;
+    --dui-color-background-navbar: #08284B;
     --dui-tab-background-color: #08284B;
 
     --dui-color-text: rgb(100, 99, 99);
@@ -179,6 +180,85 @@
     flex-direction: column;
     line-height: 1.5;
     color: var(--color-text);
+
+    .header {
+        background-color: var(--dui-color-background-navbar);
+
+        .header-content {
+            display: flex;
+            margin: auto;
+            padding: var(--dui-spacing-medium) var(--dui-spacing-extra-large);
+            max-width: 100rem;
+        }
+
+        .left-container {
+            flex-grow: 1;
+            color: #ffffff;
+
+            .logo {
+                height: 2.5rem;
+            }
+        }
+
+        .right-container {
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+            gap: var(--dui-spacing-large);
+
+            .nav-item {
+                color: #ffffff;
+
+                &:hover {
+                    text-decoration: underline;
+                }
+            }
+        }
+    }
+
+    .footer {
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        background-color: #000000;
+        padding: var(--dui-spacing-large);
+        gap: var(--dui-spacing-large);
+        color: #ffffff;
+
+        .footer-description {
+            max-width: 60rem;
+            font-size: var(--dui-font-size-medium);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: var(--dui-spacing-medium);
+
+            .logo {
+                max-height: 2rem;
+            }
+        }
+
+        .copyright {
+            max-width: 60rem;
+            font-size: var(--dui-font-size-medium);
+
+            .links {
+                display: inline-flex;
+                align-items: center;
+                gap: var(--dui-spacing-small);
+
+                .link {
+                    color: #ffffff;
+
+                    &:hover {
+                        text-decoration: underline;
+                    }
+                }
+            }
+        }
+    }
 
     .view {
         flex-grow: 1;

@@ -23,6 +23,7 @@ export interface Props {
     icon?: React.ReactNode;
     format: FormatType;
     footer?: React.ReactNode;
+    hideTooltip?: boolean;
 }
 
 function ProgressBar(props: Props) {
@@ -38,6 +39,7 @@ function ProgressBar(props: Props) {
         icon,
         format,
         footer,
+        hideTooltip = false,
     } = props;
 
     const valueTooltip = useMemo(() => {
@@ -75,11 +77,13 @@ function ProgressBar(props: Props) {
                         }}
                     />
                 </div>
-                <Tooltip
-                    trackMousePosition
-                >
-                    {valueTooltip}
-                </Tooltip>
+                {!hideTooltip && (
+                    <Tooltip
+                        trackMousePosition
+                    >
+                        {valueTooltip}
+                    </Tooltip>
+                )}
                 <div
                     className={styles.progressValue}
                 >

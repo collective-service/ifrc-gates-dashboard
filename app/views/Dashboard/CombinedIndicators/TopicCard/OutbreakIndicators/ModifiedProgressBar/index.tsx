@@ -63,6 +63,7 @@ function ModifiedProgressBar(props: Props) {
             barName={(
                 <Button
                     className={styles.barName}
+                    childrenContainerClassName={styles.children}
                     name={undefined}
                     onClick={handleTitleClick}
                     variant="transparent"
@@ -70,7 +71,7 @@ function ModifiedProgressBar(props: Props) {
                     <div className={styles.indicatorName}>
                         {indicatorName}
                     </div>
-                    <div className={styles.separator}>-</div>
+                    <div className={styles.separator}>{'>'}</div>
                     <div className={styles.subvariableName}>
                         {subvariableName}
                     </div>
