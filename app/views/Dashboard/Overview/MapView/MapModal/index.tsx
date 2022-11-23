@@ -8,6 +8,8 @@ import {
     compareDate,
     isNotDefined,
     compareNumber,
+    bound,
+    isDefined,
 } from '@togglecorp/fujs';
 import {
     Modal,
@@ -28,9 +30,7 @@ import {
     formatNumber,
     FormatType,
     getShortMonth,
-    negativeToZero,
     normalFormatter,
-    positiveToZero,
 } from '#utils/common';
 import { FilterType } from '#views/Dashboard/Filters';
 import { TabTypes } from '#views/Dashboard';
@@ -91,7 +91,7 @@ const COUNTRY_PROFILE = gql`
         contextualData(
             filters: {
                 iso3: $iso3,
-                contextIndicatorId:"new_cases_per_million",
+                contextIndicatorId: "new_cases_per_million",
                 emergency: $emergency,
                 isTwelveMonth: true,
             }
@@ -156,11 +156,15 @@ interface ModalProps {
     onModalClose: () => void;
     setActiveTab: React.Dispatch<React.SetStateAction<TabTypes | undefined>>;
     setFilterValues: React.Dispatch<React.SetStateAction<FilterType | undefined>>;
-    countryData: mapboxgl.MapboxGeoJSONFeature | undefined;
-    filterValues: FilterType | undefined;
+    countryData: { iso3: string; name: string };
     indicatorMonth?: string;
     format?: FormatType;
+
     indicatorValue?: number;
+    indicatorId: string;
+    outbreakId: string | undefined;
+
+    indicatorExplicitlySet: boolean;
 }
 
 function MapModal(props: ModalProps) {
@@ -170,43 +174,45 @@ function MapModal(props: ModalProps) {
         setActiveTab,
         setFilterValues,
         countryData,
-        filterValues,
         indicatorMonth,
         format,
         indicatorValue,
+        indicatorId,
+        outbreakId,
+
+        indicatorExplicitlySet,
     } = props;
 
     const subvariablesVariables = useMemo(() => (
         {
-            iso3: countryData?.properties?.iso3 ?? 'AFG',
-            indicatorId: filterValues?.indicator,
+            iso3: countryData.iso3,
+            indicatorId,
         }
-    ), [
-        countryData?.properties?.iso3,
-        filterValues?.indicator,
-    ]);
+    ), [countryData, indicatorId]);
 
     const {
         data: subVariableList,
     } = useQuery<CountrySubvariablesQuery, CountrySubvariablesQueryVariables>(
         COUNTRY_SUBVARIABLES,
         {
-            skip: !filterValues?.indicator,
             variables: subvariablesVariables,
         },
     );
 
+    // FIXME: why use the first one only
+    const subvariableId = subVariableList?.filterOptions.subvariables[0];
+
     const countryVariables = useMemo((): CountryModalQueryVariables => ({
-        iso3: countryData?.properties?.iso3 ?? 'AFG',
-        emergency: filterValues?.outbreak,
-        indicatorId: filterValues?.indicator ?? 'new_cases_per_million',
-        subvariable: subVariableList?.filterOptions.subvariables[0],
+        iso3: countryData.iso3,
+        emergency: outbreakId,
+        indicatorId,
+        subvariable: subvariableId,
     }
     ), [
         countryData,
-        subVariableList,
-        filterValues?.outbreak,
-        filterValues?.indicator,
+        outbreakId,
+        indicatorId,
+        subvariableId,
     ]);
 
     const {
@@ -219,24 +225,13 @@ function MapModal(props: ModalProps) {
         },
     );
 
-    const handleModalCountryNameClick = useCallback(() => {
-        setActiveTab('country');
-        setFilterValues((old) => ({
-            ...old,
-            country: countryData?.properties?.iso3,
-        }));
-    }, [
-        countryData,
-        setActiveTab,
-        setFilterValues,
-    ]);
-
+    // FIXME: this looks too complicated
     const emergencyLineChart = useMemo(() => {
         const emergencyMapList = countryResponse?.contextualDataWithMultipleEmergency.map(
             (emergency) => {
                 const emergencyGroupList = listToGroupList(
                     emergency.data,
-                    (date) => date.contextDate ?? '',
+                    (data) => data.contextDate,
                 );
                 return mapToList(
                     emergencyGroupList,
@@ -247,7 +242,8 @@ function MapModal(props: ModalProps) {
                             date: item.contextDate,
                             format: item.format,
                             id: item.id,
-                        }), { date: key },
+                        }),
+                        { date: key },
                     ),
                 ).sort((a, b) => compareDate(a.date, b.date));
             },
@@ -255,7 +251,7 @@ function MapModal(props: ModalProps) {
 
         const emergencyGroupedList = listToGroupList(
             emergencyMapList,
-            (month) => month.date,
+            (data) => data.date,
         );
 
         return Object.values(emergencyGroupedList ?? {}).map(
@@ -268,6 +264,7 @@ function MapModal(props: ModalProps) {
             countryResponse?.contextualData ?? [],
             (d) => d.emergency,
         ).map((item) => {
+            // FIXME: where are the other outbreaks?
             const colors: Record<string, string> = {
                 'COVID-19': '#FFDD98',
                 Monkeypox: '#ACA28E',
@@ -282,47 +279,43 @@ function MapModal(props: ModalProps) {
 
     const uncertaintyChart: UncertainData[] | undefined = useMemo(() => (
         countryResponse?.dataCountryLevel.map((country) => {
-            const negativeRange = negativeToZero(country.indicatorValue, country.errorMargin);
-            const positiveRange = positiveToZero(country.indicatorValue, country.errorMargin);
-
-            if (isNotDefined(country.errorMargin)) {
-                return {
-                    emergency: country.emergency,
-                    indicatorValue: country.format === 'percent'
-                        ? decimalToPercentage(country.indicatorValue)
-                        : country.indicatorValue,
-                    tooltipValue: country.indicatorValue,
-                    date: country.indicatorMonth,
-                    indicatorName: country.indicatorName,
-                    format: country.format as FormatType,
-                    interpolated: country.interpolated,
-                    subvariable: country.subvariable,
-                };
+            if (isNotDefined(country.indicatorValue)) {
+                return undefined;
             }
+
+            let negativeRange;
+            let positiveRange;
+            let uncertainRange;
+
+            if (country.errorMargin) {
+                negativeRange = bound(country.indicatorValue - country.errorMargin, 0, 1);
+                positiveRange = bound(country.indicatorValue + country.errorMargin, 0, 1);
+                uncertainRange = [negativeRange, positiveRange];
+            }
+
+            const numFormat = country.format as FormatType;
 
             return {
                 emergency: country.emergency,
-                indicatorValue: country.format === 'percent'
+                indicatorValue: numFormat === 'percent'
                     ? decimalToPercentage(country.indicatorValue)
                     : country.indicatorValue,
                 tooltipValue: country.indicatorValue,
                 date: country.indicatorMonth,
-                uncertainRange: [
-                    negativeRange ?? 0,
-                    positiveRange ?? 0,
-                ],
-                // FIXME : solve in common ts
-                minimumValue: negativeRange ?? 0,
+
+                uncertainRange,
+                minimumValue: negativeRange,
                 maximumValue: positiveRange,
+
                 indicatorName: country.indicatorName,
-                format: country.format as FormatType,
+                format: numFormat,
                 interpolated: country.interpolated,
                 subvariable: country.subvariable,
             };
-        }).sort((a, b) => compareDate(a.date, b.date))
+        }).filter(isDefined).sort((a, b) => compareDate(a.date, b.date))
     ), [countryResponse?.dataCountryLevel]);
 
-    const customOutbreakTooltip = (tooltipProps: TooltipProps) => {
+    const customOutbreakTooltip = useCallback((tooltipProps: TooltipProps) => {
         const {
             active,
             payload,
@@ -333,27 +326,42 @@ function MapModal(props: ModalProps) {
             id: `${load.payload?.id}-${load.value}`,
         })).sort((a, b) => compareNumber(b.value, a.value));
 
-        if (active && outbreakData) {
-            return (
-                <div className={styles.tooltipCard}>
-                    {outbreakData.map((item) => (
-                        <div key={item.id}>
-                            <div className={styles.tooltipHeading}>
-                                {item.name}
-                            </div>
-                            <div className={styles.tooltipContent}>
-                                {`(${item.payload?.date})`}
-                            </div>
-                            <div className={styles.tooltipContent}>
-                                {formatNumber('raw' as FormatType, item.value ?? 0)}
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            );
+        if (!active || !outbreakData) {
+            return null;
         }
-        return null;
-    };
+
+        return (
+            <div className={styles.tooltipCard}>
+                {outbreakData.map((item) => (
+                    <div key={item.id}>
+                        <div className={styles.tooltipHeading}>
+                            {item.name}
+                        </div>
+                        {item.payload?.date && (
+                            <div className={styles.tooltipContent}>
+                                {`(${item.payload.date})`}
+                            </div>
+                        )}
+                        <div className={styles.tooltipContent}>
+                            {formatNumber('raw', item.value ?? 0)}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        );
+    }, []);
+
+    const handleModalCountryNameClick = useCallback(() => {
+        setActiveTab('country');
+        setFilterValues((old) => ({
+            ...old,
+            country: countryData.iso3,
+        }));
+    }, [
+        countryData,
+        setActiveTab,
+        setFilterValues,
+    ]);
 
     return (
         <Modal
@@ -368,10 +376,7 @@ function MapModal(props: ModalProps) {
                     actions={<BiLinkExternal />}
                     actionsContainerClassName={styles.countryLinkIcon}
                 >
-                    {
-                        // FIXME: here "idmc_short" should be replaced with some other name
-                        countryData?.properties?.idmc_short
-                    }
+                    {countryData.name}
                 </Button>
             )}
             headingDescription={(
@@ -396,7 +401,7 @@ function MapModal(props: ModalProps) {
             )}
             freeHeight
         >
-            {!filterValues?.indicator && (
+            {!indicatorExplicitlySet && (
                 <div className={styles.chartContainer}>
                     <ChartContainer
                         data={emergencyLineChart}
@@ -450,21 +455,21 @@ function MapModal(props: ModalProps) {
                     </ChartContainer>
                 </div>
             )}
-            {filterValues?.indicator && (
+            {indicatorExplicitlySet && (
                 <UncertaintyChart
                     className={styles.chartContainer}
                     loading={countryResponseLoading}
-                    uncertainData={(uncertaintyChart && uncertaintyChart) ?? []}
-                    emergencyFilterValue={filterValues?.outbreak}
+                    uncertainData={uncertaintyChart}
+                    emergencyFilterValue={outbreakId}
                     heading="Indicator overview over the last 12 months"
                 />
             )}
             <Sources
                 className={styles.sources}
-                country={countryData?.properties?.iso3 ?? 'AFG'}
-                emergency={filterValues?.outbreak}
-                indicatorId={filterValues?.indicator}
-                subvariable={subVariableList?.filterOptions.subvariables[0]}
+                country={countryData.iso3}
+                emergency={outbreakId}
+                indicatorId={indicatorExplicitlySet ? indicatorId : undefined}
+                subvariable={indicatorExplicitlySet ? subvariableId : undefined}
             />
         </Modal>
     );

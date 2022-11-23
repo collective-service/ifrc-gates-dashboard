@@ -7,10 +7,9 @@ import styles from './styles.css';
 
 export interface Props {
     className?: string | undefined;
-    minValue?: number;
-    maxValue?: number;
-    isPercent?: boolean;
-    format?: FormatType;
+    minValue: number;
+    maxValue: number;
+    format: FormatType;
 }
 
 function MapLabel(props: Props) {
@@ -18,7 +17,6 @@ function MapLabel(props: Props) {
         className,
         minValue,
         maxValue,
-        isPercent,
         format,
     } = props;
 
@@ -27,14 +25,10 @@ function MapLabel(props: Props) {
             <div className={styles.bar} />
             <div className={styles.labelContainer}>
                 <div>
-                    {isPercent
-                        ? '0%'
-                        : formatNumber(format ?? 'raw', minValue)}
+                    {formatNumber(format, minValue)}
                 </div>
                 <div>
-                    {isPercent
-                        ? '100%'
-                        : formatNumber(format ?? 'raw', maxValue)}
+                    {formatNumber(format, maxValue)}
                 </div>
             </div>
         </div>

@@ -81,24 +81,22 @@ export function removeNull<T>(
 }
 
 export function decimalToPercentage(value: number | null | undefined) {
-    return (
-        isDefined(value) ? Math.round((value * 1000)) / 10 : undefined
-    );
+    return isDefined(value)
+        ? Math.round((value * 1000)) / 10
+        : undefined;
 }
 
 export function getShortMonth(date: string, format?: '2-digit' | 'numeric') {
     return (
-        new Date(date)
-            .toLocaleString('default', { month: 'short', year: format ?? '2-digit' })
+        new Date(date).toLocaleString(
+            'default',
+            { month: 'short', year: format ?? '2-digit' },
+        )
     );
 }
 
 export function normalFormatter() {
-    return (
-        new Intl.NumberFormat(
-            'en', { notation: 'compact' },
-        )
-    );
+    return new Intl.NumberFormat('en', { notation: 'compact' });
 }
 
 export function normalCommaFormatter() {
@@ -109,6 +107,7 @@ export function normalCommaFormatter() {
     );
 }
 
+// FIXME: remove this util
 export function getRegionForCountry(country: string | undefined, list: CountryListType[]) {
     return list?.find((c) => c.iso3 === country)?.region;
 }
@@ -156,21 +155,26 @@ export function formatNumber(
 }
 
 export const negativeToZero = (
-    (indicatorValue?: number | null, errorMarginValue?: number | null) => {
-        const valueInd = isNotDefined(indicatorValue) ? 0 : indicatorValue;
-        const valueErr = isNotDefined(errorMarginValue) ? 0 : errorMarginValue;
-        const difference = (valueInd - valueErr) < 0 ? 0 : valueInd - valueErr;
+    indicatorValue: number | null | undefined,
+    errorMarginValue: number | null | undefined,
+) => {
+    const valueInd = isNotDefined(indicatorValue) ? 0 : indicatorValue;
+    const valueErr = isNotDefined(errorMarginValue) ? 0 : errorMarginValue;
+    // FIXME: just use bounds
+    const difference = (valueInd - valueErr) < 0 ? 0 : valueInd - valueErr;
 
-        return decimalToPercentage(difference);
-    }
-);
+    return decimalToPercentage(difference);
+};
 
 export const positiveToZero = (
-    (indicatorValue?: number | null, errorMarginValue?: number | null) => {
-        const valueInd = isNotDefined(indicatorValue) ? 0 : indicatorValue;
-        const valueErr = isNotDefined(errorMarginValue) ? 0 : errorMarginValue;
-        const sum = (valueInd + valueErr) > 1 ? 1 : valueInd + valueErr;
+    indicatorValue: number | null | undefined,
+    errorMarginValue: number | null | undefined,
+) => {
+    const valueInd = isNotDefined(indicatorValue) ? 0 : indicatorValue;
+    const valueErr = isNotDefined(errorMarginValue) ? 0 : errorMarginValue;
 
-        return decimalToPercentage(sum);
-    }
-);
+    // FIXME: just use bounds
+    const sum = (valueInd + valueErr) > 1 ? 1 : valueInd + valueErr;
+
+    return decimalToPercentage(sum);
+};

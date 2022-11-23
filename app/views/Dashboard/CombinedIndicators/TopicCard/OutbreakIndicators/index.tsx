@@ -38,6 +38,7 @@ function OutbreakIndicators(props: Props) {
             className: styles.progressBar,
             indicatorName: data.indicatorName,
             subvariableName: data.subvariable ?? undefined,
+            indicatorMonth: data.indicatorMonth ?? undefined,
             title: data.indicatorDescription ?? undefined,
             country,
             valueTitle: data.indicatorName ?? undefined,

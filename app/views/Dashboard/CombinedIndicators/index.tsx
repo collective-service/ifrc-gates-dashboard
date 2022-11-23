@@ -54,6 +54,7 @@ const COUNTRY_COMBINED_INDICATORS = gql`
                     indicatorName
                     indicatorDescription
                     indicatorValueRegional
+                    indicatorMonth
                     indicatorValue
                     region
                     subvariable
@@ -90,6 +91,7 @@ const REGIONAL_COMBINED_INDICATORS = gql`
                     emergency
                     indicatorId
                     indicatorName
+                    indicatorMonth
                     indicatorDescription
                     indicatorValueRegional
                     indicatorValue
@@ -130,6 +132,7 @@ const GLOBAL_COMBINED_INDICATORS = gql`
                     indicatorValueRegional
                     indicatorValue
                     region
+                    indicatorMonth
                     subvariable
                     format
                 }

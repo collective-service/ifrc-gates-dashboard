@@ -2,9 +2,9 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { IoFileTraySharp } from 'react-icons/io5';
 import {
     _cs,
-    doesObjectHaveNoData,
     compareNumber,
     isDefined,
+    isNotDefined,
 } from '@togglecorp/fujs';
 import {
     Heading,
@@ -111,25 +111,10 @@ type BottomCountryType = NonNullable<TopBottomCountriesRankingQuery['bottomCount
 
 const countriesRankingKeySelector = (d: TopCountryType | BottomCountryType) => d.countryId;
 
-interface GeoJsonProps {
-    id: number;
-    // eslint-disable-next-line camelcase
-    idmc_short: string;
-}
-
 interface ClickedPoint {
-    feature: GeoJSON.Feature<GeoJSON.Point, GeoJsonProps>;
+    indicatorData: OverviewMapDataType,
+    name: string,
     lngLat: mapboxgl.LngLatLike;
-}
-
-interface TooltipProps {
-    countryName: string | undefined;
-    indicatorData: OverviewMapDataType | undefined;
-    indicatorName: string | undefined;
-    onHide: () => void;
-    lngLat: mapboxgl.LngLatLike;
-    filterValues?: FilterType | undefined;
-    outbreakName?: string | undefined;
 }
 
 const lightStyle = 'mapbox://styles/mapbox/light-v10';
@@ -151,19 +136,14 @@ const countryLinePaint: mapboxgl.LinePaint = {
 };
 
 const barHeight = 10;
-// NOTE: This sorting logic maybe required in future
-/* function compareLowestValues(a, b) {
-    const indicatorOne = a.indicatorValue;
-    const indicatorTwo = b.indicatorValue;
 
-    let comparison = 0;
-    if (indicatorOne < indicatorTwo) {
-        comparison = 1;
-    } else if (indicatorOne > indicatorTwo) {
-        comparison = -1;
-    }
-    return comparison;
-} */
+interface TooltipProps {
+    countryName: string | undefined;
+    indicatorData: OverviewMapDataType | undefined;
+    indicatorName: string;
+    lngLat: mapboxgl.LngLatLike;
+    onHide: () => void;
+}
 
 function Tooltip(props: TooltipProps) {
     const {
@@ -172,8 +152,6 @@ function Tooltip(props: TooltipProps) {
         onHide,
         indicatorData,
         indicatorName,
-        filterValues,
-        outbreakName,
     } = props;
 
     return (
@@ -191,9 +169,7 @@ function Tooltip(props: TooltipProps) {
                         {countryName}
                         {/* TODO: Get outbreak from server */}
                         <div className={styles.description}>
-                            {isDefined(indicatorName)
-                                ? indicatorName
-                                : `New cases per million for ${filterValues?.outbreak ?? outbreakName}`}
+                            {indicatorName}
                         </div>
                     </>
                 )}
@@ -211,22 +187,34 @@ function Tooltip(props: TooltipProps) {
 
 interface Props {
     className?: string;
+
     setActiveTab: React.Dispatch<React.SetStateAction<TabTypes | undefined>>;
-    filterValues?: FilterType | undefined;
     setFilterValues: React.Dispatch<React.SetStateAction<FilterType | undefined>>;
-    selectedIndicatorName: string | undefined;
+
+    selectedIndicatorName: string;
+    indicatorId: string;
+    regionId: string | undefined;
+    outbreakId: string | undefined;
+    subvariableId: string | undefined;
+
+    indicatorExplicitlySet: boolean;
 }
 
 function MapView(props: Props) {
     const {
         className,
         setActiveTab,
-        filterValues,
         setFilterValues,
+
         selectedIndicatorName,
+        indicatorId,
+        regionId,
+        outbreakId,
+        subvariableId,
+
+        indicatorExplicitlySet,
     } = props;
 
-    // TODO: Map modal to be included in the mapbox.
     const [
         mapModalShown,
         showMapModal,
@@ -236,25 +224,20 @@ function MapView(props: Props) {
     const [
         mapClickProperties,
         setMapClickProperties,
-    ] = React.useState<ClickedPoint | undefined>();
-
-    const [
-        selectedCountryIndicator,
-        setSelectedCountryIndicator,
-    ] = React.useState<OverviewMapDataType | undefined>();
+    ] = useState<ClickedPoint | undefined>();
 
     const [
         countryData,
         setCountryData,
-    ] = useState<mapboxgl.MapboxGeoJSONFeature | undefined>();
+    ] = useState<{ iso3: string, name: string } | undefined>();
 
     const mapVariables = useMemo((): MapDataQueryVariables => ({
-        indicatorId: filterValues?.indicator ?? 'new_cases_per_million',
-        emergency: filterValues?.outbreak,
-        region: filterValues?.region,
-        subvariable: filterValues?.subvariable,
+        indicatorId,
+        emergency: outbreakId,
+        region: regionId,
+        subvariable: subvariableId,
     }), [
-        filterValues,
+        indicatorId, outbreakId, regionId, subvariableId,
     ]);
 
     const {
@@ -267,12 +250,12 @@ function MapView(props: Props) {
         },
     );
 
-    const countriesRankingVariables = useMemo(() => ({
-        emergency: filterValues?.outbreak,
-        indicatorId: filterValues?.indicator ?? 'new_cases_per_million',
-        region: filterValues?.region,
-        subvariable: filterValues?.subvariable,
-    }), [filterValues]);
+    const countriesRankingVariables = useMemo((): TopBottomCountriesRankingQueryVariables => ({
+        emergency: outbreakId,
+        indicatorId,
+        region: regionId,
+        subvariable: subvariableId,
+    }), [indicatorId, outbreakId, regionId, subvariableId]);
 
     const {
         data: countriesRankingData,
@@ -287,61 +270,131 @@ function MapView(props: Props) {
     const topCountriesList = countriesRankingData?.topCountriesRanking;
     const bottomCountriesList = countriesRankingData?.bottomCountriesRanking;
 
-    /*
-    FIX ME: This might be required to find the highest value for indicatorValue
-    const indicatorValues = highestLowestValues?.descCountryEmergencyProfile?.map(
-        (highCases) => (highCases?.contextIndicatorValue));
-    const highestIndicatorValues = indicatorValues && Math.max(...indicatorValues.filter(
-        (x): x is number => x !== null && x !== undefined));
-    */
-
-    const mapIndicatorState = useMemo(() => {
-        const countryIndicator = overviewMapData?.overviewMap?.map(
-            (indicatorValue) => ({
-                id: +indicatorValue.countryId,
-                value: indicatorValue.indicatorValue ?? 0,
-                iso: indicatorValue.iso3,
-                format: indicatorValue.format,
-            }),
-        )
-            .filter((item) => item.value > 0)
-            .sort((a, b) => compareNumber(a.value, b.value, -1)) ?? [];
-        return countryIndicator;
-    }, [overviewMapData?.overviewMap]);
-
-    const handleCountryClick = useCallback(
-        (feature: mapboxgl.MapboxGeoJSONFeature) => {
-            setCountryData(feature);
-            showMapModal();
-            return true;
-        },
-        [showMapModal],
-    );
-
+    // NOTE: Assuming first item has the maximum value
     const highestTopRankingValue = countriesRankingData?.topCountriesRanking[0]?.indicatorValue;
 
-    // Note: This sorting logic maybe required in future
-    // const sortedRecentLowValues = [...recentLowValuesWithIndicator ?? []]
-    // .sort(compareLowestValues);
+    const [
+        mapIndicatorState,
+        formatOnMap,
+        lowestDataOnMap,
+        highestDataOnMap,
+        originalLowestDataOnMap,
+        originalHighestDataOnMap,
+    ] = useMemo(() => {
+        const countryIndicator = overviewMapData?.overviewMap?.map(
+            (indicatorValue) => {
+                const val = indicatorValue.indicatorValue ?? 0;
+                if (val <= 0) {
+                    return undefined;
+                }
+                const format = indicatorValue.format as FormatType;
 
-    const formatOnMap = mapIndicatorState[0]?.format ?? 'percent';
+                let sanitizedValue = val;
+                if (format === 'thousand' || format === 'million' || format === 'raw') {
+                    sanitizedValue = Math.log10(val);
+                }
 
-    const lowestDataOnMap = formatOnMap === 'percent'
-        ? 0
-        : (mapIndicatorState[mapIndicatorState.length - 1]?.value ?? 0);
-    const highestDataOnMap = formatOnMap === 'percent'
-        ? 1
-        : (mapIndicatorState[0]?.value ?? 1);
+                const value = {
+                    id: Number(indicatorValue.countryId),
+                    originalValue: val,
+                    value: sanitizedValue,
+                    iso: indicatorValue.iso3,
+                    format: indicatorValue.format as FormatType,
+                };
+                return value;
+            },
+        )
+            .filter(isDefined)
+            .sort((a, b) => compareNumber(a.value, b.value, -1)) ?? [];
+
+        if (countryIndicator.length <= 0) {
+            return [
+                [],
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+            ];
+        }
+
+        // NOTE: we will always have a min and max item
+        const maxItem = countryIndicator[0];
+        const minItem = countryIndicator[countryIndicator.length - 1];
+
+        const format = (maxItem?.format as FormatType | undefined) ?? 'percent';
+
+        return [
+            countryIndicator,
+            format,
+            format === 'percent'
+                ? 0
+                : minItem.value,
+            format === 'percent'
+                ? 1
+                : maxItem.value,
+            format === 'percent'
+                ? 0
+                : minItem.originalValue,
+            format === 'percent'
+                ? 1
+                : maxItem.originalValue,
+        ];
+    }, [overviewMapData?.overviewMap]);
+
+    const selectedRegionBounds = useMemo((): [number, number, number, number] => {
+        const defaultBounds: [number, number, number, number] = [90, -55, -90, 80];
+        if (isNotDefined(regionId)) {
+            return defaultBounds;
+        }
+        const regionData = regionBounds?.find(
+            (region) => region.region === regionId,
+        );
+        const regionBbox = regionData?.bounding_box as (
+            [number, number, number, number] | undefined
+        );
+        return regionBbox ?? defaultBounds;
+    }, [regionId]);
+
+    const mapDataForSelectedCountry = useMemo(() => (
+        overviewMapData?.overviewMap.find((country) => (
+            country.iso3 === countryData?.iso3
+        ))
+    ), [
+        overviewMapData?.overviewMap,
+        countryData?.iso3,
+    ]);
+
+    const countryFillPaint: mapboxgl.FillPaint = useMemo(() => {
+        if (isNotDefined(lowestDataOnMap) || isNotDefined(highestDataOnMap)) {
+            return {};
+        }
+        return {
+            // Color each country on the basis of outbreak
+            'fill-color': [
+                'interpolate',
+                ['linear'],
+                ['coalesce', ['feature-state', 'indicatorValue'], lowestDataOnMap],
+                ...(colors.map((color, index) => (
+                    [
+                        (highestDataOnMap / (colors.length - 1)) * index,
+                        color,
+                    ]
+                )).flat()),
+            ],
+            'fill-opacity': 0.9,
+        };
+    }, [
+        highestDataOnMap,
+        lowestDataOnMap,
+    ]);
 
     const countriesRankingRendererParams = useCallback(
-        (
-            _: string,
-            data: TopCountryType | BottomCountryType,
-        ) => ({
+        (_: string, data: TopCountryType | BottomCountryType) => ({
             barHeight,
-            barName: data.countryName ?? 'N/A',
-            title: data.countryName ?? 'N/A',
-            valueTitle: data.countryName ?? 'N/A',
+            barName: data.countryName,
+            title: data.countryName,
+            valueTitle: data.countryName,
             value: data.indicatorValue,
             totalValue: highestTopRankingValue,
             color: '#98A6B5',
@@ -350,71 +403,47 @@ function MapView(props: Props) {
         [highestTopRankingValue],
     );
 
-    const handlePointHover = React.useCallback(
+    const handleClick = useCallback(
+        (feature: mapboxgl.MapboxGeoJSONFeature) => {
+            const iso3 = feature?.properties?.iso3;
+            // FIXME: here "idmc_short" should be replaced with some other name
+            const name = feature?.properties?.idmc_short;
+
+            if (isDefined(name)) {
+                setCountryData({
+                    iso3,
+                    name: name ?? iso3,
+                });
+                showMapModal();
+            }
+            return true;
+        },
+        [showMapModal],
+    );
+
+    const handleHoverIn = React.useCallback(
         (feature: mapboxgl.MapboxGeoJSONFeature, lngLat: mapboxgl.LngLat) => {
             const indicatorData = overviewMapData?.overviewMap?.find(
                 (country) => country.iso3 === feature?.properties?.iso3,
             );
-
-            setMapClickProperties({
-                feature: feature as unknown as ClickedPoint['feature'],
-                lngLat,
-            });
-            setSelectedCountryIndicator(indicatorData);
+            if (indicatorData) {
+                setMapClickProperties({
+                    indicatorData,
+                    name: feature?.properties?.idmc_short ?? indicatorData?.iso3,
+                    lngLat,
+                });
+            }
             return true;
         },
         [setMapClickProperties, overviewMapData],
     );
 
-    const handleHoverClose = React.useCallback(
+    const handleHoverOut = React.useCallback(
         () => {
             setMapClickProperties(undefined);
-            setSelectedCountryIndicator(undefined);
         },
         [setMapClickProperties],
     );
-
-    const selectedRegionBounds = useMemo(() => {
-        if (doesObjectHaveNoData(filterValues)) {
-            return (
-                [90, -55, -90, 80] as [number, number, number, number]
-            );
-        }
-        const regionData = regionBounds?.find(
-            (region) => region.region === filterValues?.region,
-        );
-        return regionData?.bounding_box as [number, number, number, number];
-    }, [
-        filterValues,
-    ]);
-
-    const totalCasesHeading = useMemo(() => (
-        overviewMapData?.overviewMap.find(
-            (country) => country.iso3 === countryData?.properties?.iso3,
-        )
-    ), [
-        overviewMapData?.overviewMap,
-        countryData?.properties?.iso3,
-    ]);
-
-    const countryFillPaint: mapboxgl.FillPaint = useMemo(() => ({
-        // Color each country on the basis of outbreak
-        'fill-color': [
-            'interpolate',
-            ['linear'],
-            ['coalesce', ['feature-state', 'indicatorValue'], lowestDataOnMap],
-            ...(colors.map((color, index) => (
-                [
-                    (highestDataOnMap / (colors.length - 1)) * index,
-                    color,
-                ]
-            )).flat()),
-        ],
-        'fill-opacity': 0.9,
-    }), [
-        highestDataOnMap,
-        lowestDataOnMap,
-    ]);
 
     return (
         <div className={_cs(className, styles.mapViewWrapper)}>
@@ -452,9 +481,9 @@ function MapView(props: Props) {
                                 type: 'fill',
                                 paint: countryFillPaint,
                             }}
-                            onClick={handleCountryClick}
-                            onMouseEnter={handlePointHover}
-                            onMouseLeave={handleHoverClose}
+                            onClick={handleClick}
+                            onMouseEnter={handleHoverIn}
+                            onMouseLeave={handleHoverOut}
                         />
                         <MapLayer
                             layerKey="country-line"
@@ -468,28 +497,29 @@ function MapView(props: Props) {
                             attributes={mapIndicatorState}
                         />
                     </MapSource>
-                    {mapClickProperties?.lngLat && mapClickProperties?.feature?.id
-                        && (
-                            <Tooltip
-                                countryName={mapClickProperties
-                                    ?.feature?.properties?.idmc_short}
-                                indicatorData={selectedCountryIndicator}
-                                indicatorName={selectedIndicatorName}
-                                outbreakName={selectedCountryIndicator?.emergency ?? 'outbreak'}
-                                onHide={handleHoverClose}
-                                lngLat={mapClickProperties.lngLat}
-                                filterValues={filterValues}
-                            />
-                        )}
+                    {mapClickProperties && (
+                        <Tooltip
+                            countryName={mapClickProperties.name}
+                            indicatorData={mapClickProperties.indicatorData}
+                            indicatorName={selectedIndicatorName}
+                            onHide={handleHoverOut}
+                            lngLat={mapClickProperties.lngLat}
+                        />
+                    )}
                 </Map>
-                <MapLabel
-                    /* NOTE: All values are indicator so minValue is always 0 */
-                    minValue={lowestDataOnMap}
-                    maxValue={highestDataOnMap}
-                    className={styles.mapLabelBox}
-                    isPercent={formatOnMap === 'percent'}
-                    format={formatOnMap as FormatType}
-                />
+                {(
+                    isDefined(originalLowestDataOnMap)
+                    && isDefined(originalHighestDataOnMap)
+                    && isDefined(formatOnMap)
+                ) && (
+                    <MapLabel
+                        /* NOTE: All values are indicator so minValue is always 0 */
+                        minValue={originalLowestDataOnMap}
+                        maxValue={originalHighestDataOnMap}
+                        className={styles.mapLabelBox}
+                        format={formatOnMap}
+                    />
+                )}
             </ContainerCard>
             <ContainerCard
                 className={styles.progressBarContainer}
@@ -549,16 +579,18 @@ function MapView(props: Props) {
                         />
                     )}
                 </div>
-                {mapModalShown && (
+                {mapModalShown && countryData && (
                     <MapModal
                         onModalClose={hideMapModal}
                         setActiveTab={setActiveTab}
                         setFilterValues={setFilterValues}
+                        indicatorId={indicatorId}
+                        outbreakId={outbreakId}
                         countryData={countryData}
-                        filterValues={filterValues}
-                        indicatorMonth={totalCasesHeading?.indicatorMonth}
-                        format={totalCasesHeading?.format as FormatType}
-                        indicatorValue={totalCasesHeading?.indicatorValue}
+                        indicatorMonth={mapDataForSelectedCountry?.indicatorMonth}
+                        format={mapDataForSelectedCountry?.format as (FormatType | undefined)}
+                        indicatorValue={mapDataForSelectedCountry?.indicatorValue}
+                        indicatorExplicitlySet={indicatorExplicitlySet}
                     />
                 )}
             </ContainerCard>
