@@ -70,12 +70,14 @@ const REGIONAL_BREAKDOWN_TOTAL = gql`
     query RegionalAndTotal(
         $indicatorId: String,
         $region: String,
+        $subvariable: String,
     ) {
         total: globalLevel(
             filters: {
                 indicatorId: $indicatorId
                 category: "Global",
                 isMostRecent: true,
+                subvariable: $subvariable,
             }
         ) {
             id
@@ -89,7 +91,8 @@ const REGIONAL_BREAKDOWN_TOTAL = gql`
                 category: "Global",
                 isMostRecent: true,
                 region: $region,
-                indicatorId: "new_cases_per_million"
+                indicatorId: "new_cases_per_million",
+                subvariable: $subvariable,
               }
         ){
             id
@@ -102,7 +105,8 @@ const REGIONAL_BREAKDOWN_TOTAL = gql`
             filters: {
                 indicatorId: $indicatorId,
                 category: "Global",
-                isMostRecent: true
+                isMostRecent: true,
+                subvariable: $subvariable,
             }
         ) {
             emergency
@@ -175,9 +179,11 @@ function RegionalBreakdownCard(props: Props) {
     const regionalTotalVariable = useMemo((): RegionalAndTotalQueryVariables => ({
         indicatorId: filterValues?.indicator ?? 'new_cases_per_million',
         region: filterValues?.region,
+        subvariable: filterValues?.subvariable,
     }), [
         filterValues?.indicator,
         filterValues?.region,
+        filterValues?.subvariable,
     ]);
 
     const {

@@ -18,7 +18,7 @@ import {
     // Button,
     DropdownMenu,
     DropdownMenuItem,
-    ContainerCard,
+    Header,
     useModalState,
     Modal,
     Button,
@@ -37,6 +37,8 @@ import {
     IndicatorsForCountryQueryVariables,
     SubvariablesQuery,
     SubvariablesQueryVariables,
+    OverviewSubindicatorsQuery,
+    OverviewSubindicatorsQueryVariables,
     IndicatorsQueryVariables,
     ExportMetaQuery,
     ExportMetaQueryVariables,
@@ -98,6 +100,7 @@ const INDICATORS_FOR_COUNTRY = gql`
                 iso3: $iso3,
                 outbreak: $outbreak,
             ) {
+                emergencies
                 indicatorId
                 indicatorDescription
                 type
@@ -116,6 +119,7 @@ const INDICATORS = gql`
                 outBreak: $outbreak,
                 region: $region
             ) {
+                emergencies
                 indicatorId
                 indicatorDescription
                 type
@@ -127,10 +131,13 @@ const INDICATORS = gql`
 const SUBVARIABLES = gql`
     query Subvariables(
         $iso3: String!,
-        $indicatorId:String
+        $indicatorId: String
     ) {
         filterOptions {
-            subvariables(iso3: $iso3, indicatorId: $indicatorId)
+            subvariables(
+                iso3: $iso3,
+                indicatorId: $indicatorId,
+            )
         }
     }
 `;
@@ -149,6 +156,25 @@ const EXPORT_META = gql`
             totalRawDataCount
             totalSummaryCount
         }
+    }
+`;
+
+const OVERVIEW_SUBINDICATORS = gql`
+    query OverviewSubindicators (
+        $indicatorId: String,
+        $outbreak: String,
+        $region: String,
+    ) {
+        filterOptions {
+            overviewIndicators(
+                indicatorId: $indicatorId,
+                outBreak: $outbreak,
+                region: $region,
+            ) {
+                subvariable
+            }
+        }
+
     }
 `;
 
@@ -325,6 +351,46 @@ function Dashboard() {
         },
     );
 
+    const overviewSubindicatorVariables = useMemo(() => {
+        if ((activeTab === 'overview') && isDefined(filterValues?.indicator)) {
+            return {
+                indicatorId: filterValues?.indicator,
+                outbreak: filterValues?.outbreak,
+                region: filterValues?.region,
+            };
+        }
+
+        return undefined;
+    }, [
+        filterValues?.indicator,
+        filterValues?.outbreak,
+        filterValues?.region,
+        activeTab,
+    ]);
+
+    const {
+        data: overviewSubindicators,
+        loading: overviewSubindicatorsLoading,
+    } = useQuery<OverviewSubindicatorsQuery, OverviewSubindicatorsQueryVariables>(
+        OVERVIEW_SUBINDICATORS,
+        {
+            skip: !overviewSubindicatorVariables,
+            variables: overviewSubindicatorVariables,
+            onCompleted: (response) => {
+                if (
+                    isDefined(response?.filterOptions?.overviewIndicators[0]?.subvariable)
+                    && (response?.filterOptions?.overviewIndicators[0]?.subvariable !== null)
+                ) {
+                    setFilterValues((oldValue) => ({
+                        ...oldValue,
+                        subvariable: response?.filterOptions?.overviewIndicators[0]?.subvariable
+                            ?? undefined,
+                    }));
+                }
+            },
+        },
+    );
+
     const handleActiveTabChange = (newActiveTab: TabTypes | undefined) => {
         setActiveTab(newActiveTab);
         if (newActiveTab === 'country') {
@@ -452,19 +518,11 @@ function Dashboard() {
             >
                 <div className={styles.headerWrapper}>
                     <div className={styles.headerContainer}>
-                        <ContainerCard
+                        <Header
                             className={styles.headerText}
-                            heading="Behavioural dashboard"
-                            headingSize="large"
-                        >
-                            {/* This dashboard measures and tracks key social
-                            behavioural data on COVID-19 from multiple research
-                            projects conducted in the field or at the global level
-                            by partners and academic communities. Its
-                            aim is to help the RCCE community,
-                            Collective Service partners and the coordination
-                            team to analyse the situation at global, regional and country level. */}
-                        </ContainerCard>
+                            heading="Social Behaviour Dashboard on Public Health Emergency"
+                            headingSize="extraLarge"
+                        />
                         <div className={styles.dashboardButtons}>
                             <DropdownMenu
                                 className={styles.button}
@@ -545,6 +603,9 @@ function Dashboard() {
                             subvariableList={subvariableList}
                             globalIndicatorList={globalIndicatorList}
                             indicatorList={indicatorList}
+                            overviewSubindicatorsList={overviewSubindicators
+                                ?.filterOptions?.overviewIndicators}
+                            overviewSubindicatorsLoading={overviewSubindicatorsLoading}
                             emergenciesLoading={countriesAndOutbreaksLoading}
                             countriesLoading={countriesAndOutbreaksLoading}
                             subvariablesLoading={subvariablesLoading}

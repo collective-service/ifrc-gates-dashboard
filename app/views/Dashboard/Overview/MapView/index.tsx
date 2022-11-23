@@ -51,11 +51,13 @@ const MAP_DATA = gql`
         $emergency: String,
         $indicatorId: String,
         $region: String,
+        $subvariable: String,
     ) {
         overviewMap(
             indicatorId: $indicatorId,
             emergency: $emergency,
             region: $region,
+            subvariable: $subvariable,
         ) {
             iso3
             indicatorValue
@@ -72,12 +74,14 @@ const TOP_BOTTOM_COUNTRIES_RANKING = gql`
         $emergency: String,
         $indicatorId: String,
         $region: String,
+        $subvariable: String,
     ) {
         topCountriesRanking: overviewRanking(
             emergency: $emergency,
             indicatorId: $indicatorId,
             region: $region,
             isTop: true,
+            subvariable: $subvariable,
         ) {
             countryId
             countryName
@@ -90,6 +94,7 @@ const TOP_BOTTOM_COUNTRIES_RANKING = gql`
             indicatorId: $indicatorId,
             region: $region,
             isTop: false,
+            subvariable: $subvariable,
         ) {
             countryId
             countryName
@@ -247,6 +252,7 @@ function MapView(props: Props) {
         indicatorId: filterValues?.indicator ?? 'new_cases_per_million',
         emergency: filterValues?.outbreak,
         region: filterValues?.region,
+        subvariable: filterValues?.subvariable,
     }), [
         filterValues,
     ]);
@@ -265,6 +271,7 @@ function MapView(props: Props) {
         emergency: filterValues?.outbreak,
         indicatorId: filterValues?.indicator ?? 'new_cases_per_million',
         region: filterValues?.region,
+        subvariable: filterValues?.subvariable,
     }), [filterValues]);
 
     const {

@@ -75,11 +75,13 @@ const TABLE_DATA = gql`
         $emergency: String,
         $indicatorId: String,
         $region: String,
+        $subvariable: String,
     ) {
         overviewTable(
             indicatorId: $indicatorId,
             emergency: $emergency,
             region: $region,
+            subvariable: $subvariable,
             ) {
                 countryName
                 countryId
@@ -222,6 +224,7 @@ function OverviewTable(props: Props) {
         indicatorId: filterValues?.indicator ?? 'new_cases_per_million',
         emergency: filterValues?.outbreak,
         region: filterValues?.region,
+        subvariable: filterValues?.subvariable,
     }), [
         filterValues,
     ]);

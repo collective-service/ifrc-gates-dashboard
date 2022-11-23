@@ -72,6 +72,7 @@ const OVERVIEW_STATS = gql`
         $emergency: String,
         $indicatorId: String,
         $region: String,
+        $subvariable: String,
     ) {
         totalCasesGlobal: globalLevel (
             filters: {
@@ -79,6 +80,7 @@ const OVERVIEW_STATS = gql`
                 indicatorId: $indicatorId,
                 isTwelveMonth: true,
                 category: "Global",
+                subvariable: $subvariable,
             }
             pagination: {
                 limit: 1,
@@ -102,6 +104,7 @@ const OVERVIEW_STATS = gql`
                 emergency: $emergency,
                 isTwelveMonth: true,
                 indicatorId: $indicatorId,
+                subvariable: $subvariable,
             }
             order: {
                 indicatorMonth: DESC
@@ -124,6 +127,7 @@ const OVERVIEW_STATS = gql`
                 isTwelveMonth: true,
                 indicatorId: $indicatorId,
                 region: $region,
+                subvariable: $subvariable,
             }
             order: {
                 indicatorMonth: DESC
@@ -145,6 +149,7 @@ const OVERVIEW_STATS = gql`
                 indicatorId: $indicatorId,
                 isRegionalChart: true,
                 category: "Global",
+                subvariable: $subvariable
             }
         ) {
             id
@@ -161,6 +166,7 @@ const OVERVIEW_STATS = gql`
                 isTwelveMonth: true,
                 indicatorId: $indicatorId,
                 category: "Global",
+                subvariable: $subvariable,
             }
             order: {
                 indicatorMonth: DESC
@@ -186,7 +192,8 @@ const OVERVIEW_STATS = gql`
                 indicatorId: $indicatorId,
                 isTwelveMonth: true,
                 region: $region,
-                category: "Global"
+                category: "Global",
+                subvariable: $subvariable
             }
             order: {
                 indicatorMonth: DESC
@@ -279,10 +286,12 @@ function PercentageCardGroup(props: Props) {
         emergency: filterValues?.outbreak,
         indicatorId: filterValues?.indicator ?? 'new_cases_per_million',
         region: filterValues?.region,
+        subvariable: filterValues?.subvariable,
     }), [
         filterValues?.indicator,
         filterValues?.outbreak,
         filterValues?.region,
+        filterValues?.subvariable,
     ]);
 
     const {
