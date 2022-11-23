@@ -69,7 +69,7 @@
     }
 }
 
-.export-progress-bar {
+.export-progress-popup {
     position: fixed;
     right: var(--dui-spacing-large);
     bottom: var(--dui-spacing-large);
@@ -82,13 +82,6 @@
     .top-container {
         display: flex;
         justify-content: space-between;
-
-        /*
-        .cancel-export-button {
-            padding: var(--dui-spacing-extra-small) var(--dui-spacing-small);
-            font-size: var(--dui-font-size-small);
-        }
-        */
     }
 
     .progress-bar {

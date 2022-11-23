@@ -36,24 +36,10 @@ export interface UncertainData {
     subvariable?: string;
 }
 
-interface Props {
-    className?: string;
-    uncertainData: UncertainData[] | undefined;
-    emergencyFilterValue?: string;
-    headingDescription?: React.ReactNode;
-    heading?: React.ReactNode;
-    loading?: boolean;
-}
-
 interface Payload {
     name?: string;
     value?: number;
     payload?: UncertainData;
-}
-
-interface TooltipProps {
-    active?: boolean;
-    payload?: Payload[];
 }
 
 interface CustomDotsProps {
@@ -67,9 +53,70 @@ interface CustomDotsProps {
         interpolated?: number;
     };
 }
+function CustomDots(dotsProps: CustomDotsProps) {
+    const {
+        cx,
+        cy,
+        r,
+        stroke,
+        payload,
+        strokeWidth,
+        fill,
+    } = dotsProps;
+    if (payload?.interpolated) {
+        return null;
+    }
+    return (
+        <circle
+            strokeWidth={strokeWidth}
+            stroke={stroke}
+            fill={fill}
+            cx={cx}
+            cy={cy}
+            r={r}
+        />
+    );
+}
+
+interface TooltipProps {
+    active?: boolean;
+    payload?: Payload[];
+}
+function TooltipContent(props: TooltipProps) {
+    const {
+        active,
+        payload: data,
+    } = props;
+    if (!active || isNotDefined(data) || data.length < 1) {
+        return null;
+    }
+    const { payload } = data[0];
+
+    return (
+        <CustomTooltip
+            format={payload?.format ?? 'raw'}
+            heading={payload?.indicatorName ?? ''}
+            subHeadingLabel={payload?.region}
+            subHeading={payload?.date ? `(${payload.date})` : undefined}
+            subvariable={payload?.subvariable}
+            value={payload?.tooltipValue}
+            minValue={payload?.minimumValue}
+            maxValue={payload?.maximumValue}
+        />
+    );
+}
 
 const dateTickFormatter = (d: string) => getShortMonth(d);
 const normalizedTickFormatter = (d: number) => normalFormatter().format(d);
+
+interface Props {
+    className?: string;
+    uncertainData: UncertainData[] | undefined;
+    emergencyFilterValue?: string;
+    headingDescription?: React.ReactNode;
+    heading?: React.ReactNode;
+    loading?: boolean;
+}
 
 function UncertaintyChart(props: Props) {
     const {
@@ -80,53 +127,6 @@ function UncertaintyChart(props: Props) {
         heading,
         loading,
     } = props;
-
-    const custom = (tooltipProps: TooltipProps) => {
-        const {
-            active,
-            payload: data,
-        } = tooltipProps;
-        if (!active || isNotDefined(data) || data.length < 1) {
-            return null;
-        }
-        return (
-            <CustomTooltip
-                format={data[0].payload?.format ?? 'raw'}
-                heading={data[0].payload?.indicatorName ?? ''}
-                subHeadingLabel={data[0].payload?.region}
-                subHeading={`(${data[0].payload?.date})`}
-                subvariable={data[0].payload?.subvariable}
-                value={data[0].payload?.tooltipValue}
-                minValue={data[0].payload?.minimumValue}
-                maxValue={data[0].payload?.maximumValue}
-            />
-        );
-    };
-
-    function CustomDots(dotsProps: CustomDotsProps) {
-        const {
-            cx,
-            cy,
-            r,
-            stroke,
-            payload,
-            strokeWidth,
-            fill,
-        } = dotsProps;
-        if (payload?.interpolated) {
-            return null;
-        }
-        return (
-            <circle
-                strokeWidth={strokeWidth}
-                stroke={stroke}
-                fill={fill}
-                cx={cx}
-                cy={cy}
-                r={r}
-            />
-        );
-    }
 
     return (
         <ContainerCard
@@ -178,7 +178,7 @@ function UncertaintyChart(props: Props) {
                         strokeWidth={2}
                         dot={<CustomDots />}
                     />
-                    <Tooltip content={custom} />
+                    <Tooltip content={TooltipContent} />
                 </ComposedChart>
             </ChartContainer>
         </ContainerCard>

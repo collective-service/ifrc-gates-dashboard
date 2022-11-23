@@ -7,7 +7,6 @@ import React, {
 import Papa from 'papaparse';
 import {
     IoDownloadOutline,
-    // IoCloseSharp,
 } from 'react-icons/io5';
 import { saveAs } from 'file-saver';
 import {
@@ -15,7 +14,6 @@ import {
     TabList,
     Tab,
     TabPanel,
-    // Button,
     DropdownMenu,
     DropdownMenuItem,
     Header,
@@ -53,6 +51,7 @@ import ProgressBar from '#components/ProgressBar';
 import Overview from './Overview';
 import Country from './Country';
 import CombinedIndicators from './CombinedIndicators';
+
 import Filters, { FilterType } from './Filters';
 import { AdvancedOptionType } from './AdvancedFilters';
 
@@ -642,20 +641,9 @@ function Dashboard() {
                 </div>
             </Tabs>
             {pendingExport && (
-                <div className={styles.exportProgressBar}>
+                <div className={styles.exportProgressPopup}>
                     <div className={styles.topContainer}>
                         Preparing Export...
-                        {/*
-                            <Button
-                                name={undefined}
-                                icons={<IoCloseSharp />}
-                                className={styles.cancelExportButton}
-                                onClick={handleCancelExport}
-                                variant="transparent"
-                            >
-                                Cancel
-                            </Button>
-                        */}
                     </div>
                     <ProgressBar
                         className={styles.progressBar}

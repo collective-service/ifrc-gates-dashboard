@@ -106,6 +106,7 @@ function AdvancedFilters(props: Props) {
         }))
     ), [advancedFilterOptions?.filterOptions?.topics]);
 
+    // FIXME: any reason not to have 3 different handlers?
     const handleInputChange = useCallback(
         (newValue: string | string[] | undefined, name: keyof AdvancedOptionType) => {
             if (onChange) {

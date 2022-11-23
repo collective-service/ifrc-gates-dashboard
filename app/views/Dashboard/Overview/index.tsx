@@ -16,21 +16,16 @@ import { FilterType } from '../Filters';
 import { TabTypes } from '..';
 import styles from './styles.css';
 
-function MapSubHeader(
-    filterValues?: FilterType | undefined,
-    selectedIndicatorName?: string | undefined,
-    selectedOutbreakName?: string | undefined,
+function getMapSubHeader(
+    indicatorId: string,
+    selectedIndicatorName: string,
+    outbreakId: string | undefined,
+    selectedOutbreakName: string | undefined,
 ) {
-    if (filterValues?.indicator && filterValues?.outbreak) {
-        return `${selectedIndicatorName ?? filterValues?.indicator} for ${selectedOutbreakName ?? filterValues?.outbreak} - Latest available data`;
+    if (outbreakId) {
+        return `${selectedIndicatorName ?? indicatorId} for ${selectedOutbreakName ?? outbreakId} - Latest available data`;
     }
-    if (filterValues?.indicator) {
-        return `${selectedIndicatorName ?? filterValues?.indicator} - Latest available data`;
-    }
-    if (filterValues?.outbreak) {
-        return `New cases per million by country for ${selectedOutbreakName ?? filterValues?.outbreak}`;
-    }
-    return 'New cases per million by country';
+    return `${selectedIndicatorName ?? indicatorId} - Latest available data`;
 }
 
 interface Props {
@@ -38,6 +33,7 @@ interface Props {
     filterValues?: FilterType | undefined;
     setActiveTab: React.Dispatch<React.SetStateAction<TabTypes | undefined>>;
     setFilterValues: React.Dispatch<React.SetStateAction<FilterType | undefined>>;
+
     selectedIndicatorName: string | undefined;
     selectedOutbreakName: string | undefined;
 }
@@ -48,39 +44,43 @@ function Overview(props: Props) {
         filterValues,
         setActiveTab,
         setFilterValues,
+
         selectedIndicatorName,
         selectedOutbreakName,
     } = props;
 
-    // TODO: Rename this to better suit the behavior
-    // TODO: define strict type mapMode and tableMode instead of string
-    const [currentTab, setCurrentTab] = useState<string | undefined>('mapMode');
+    const [currentTab, setCurrentTab] = useState<
+        'mapMode' | 'tableMode' | undefined
+    >('mapMode');
 
-    const noFiltersSelected = !filterValues?.region
-        && !filterValues?.outbreak && !filterValues?.indicator;
+    const regionId = filterValues?.region;
+    const indicatorId = filterValues?.indicator;
+    const outbreakId = filterValues?.outbreak;
+    const subvariableId = filterValues?.subvariable;
 
-    const onlyRegionSelected = !!filterValues?.region && (
-        !filterValues?.indicator && !filterValues?.outbreak);
+    const noFiltersSelected = !regionId && !outbreakId && !indicatorId;
 
-    const onlyOutbreakSelected = !!filterValues?.outbreak && (
-        !filterValues?.indicator && !filterValues?.region);
+    const onlyRegionSelected = !!regionId && !indicatorId && !outbreakId;
+    const onlyOutbreakSelected = !!outbreakId && !indicatorId && !regionId;
+    const onlyIndicatorSelected = !!indicatorId && !outbreakId && !regionId;
 
-    const onlyIndicatorSelected = !!filterValues?.indicator && (
-        !filterValues?.outbreak && !filterValues?.region);
+    // FIXME: this can be simplified
+    const moreThanTwoFilterSelected = (!!regionId && !!indicatorId)
+        || (!!outbreakId && !!indicatorId)
+        || (!!regionId && !!outbreakId);
 
-    const isIndicatorSelected = !!filterValues?.indicator;
+    const isIndicatorSelected = !!indicatorId;
 
-    const moreThanTwoFilterSelected = (!!filterValues?.region && !!filterValues?.indicator)
-        || (!!filterValues?.outbreak && !!filterValues?.indicator)
-        || (!!filterValues?.region && !!filterValues?.outbreak);
-
-    const uncertaintyChartActive = isIndicatorSelected;
+    const indicatorIdForOverviewMapAndTable = indicatorId ?? 'new_cases_per_million';
+    const indicatorNameForOverviewMapAndTable = indicatorId
+        ? (selectedIndicatorName ?? indicatorId)
+        : 'New cases for per million by country';
 
     return (
         <div className={_cs(className, styles.overviewMain)}>
             {((onlyIndicatorSelected || onlyOutbreakSelected || moreThanTwoFilterSelected) && (
                 <PercentageCardGroup
-                    uncertaintyChartActive={uncertaintyChartActive}
+                    uncertaintyChartActive={isIndicatorSelected}
                     filterValues={filterValues}
                     selectedIndicatorName={selectedIndicatorName}
                     selectedOutbreakName={selectedOutbreakName}
@@ -99,13 +99,19 @@ function Overview(props: Props) {
                 >
                     <ContainerCard
                         spacing="none"
-                        heading={currentTab === 'mapMode' ? 'Overview map' : 'Overview Table'}
+                        heading={
+                            currentTab === 'mapMode'
+                                ? 'Overview map'
+                                : 'Overview Table'
+                        }
                         headingSize="small"
                         headingContainerClassName={styles.mapHeaderContainer}
-                        headingDescription={currentTab === 'mapMode'
-                            && MapSubHeader(
-                                filterValues, selectedIndicatorName, selectedOutbreakName,
-                            )}
+                        headingDescription={getMapSubHeader(
+                            indicatorIdForOverviewMapAndTable,
+                            indicatorNameForOverviewMapAndTable,
+                            outbreakId,
+                            selectedOutbreakName,
+                        )}
                         headerActionsContainerClassName={styles.mapActionTabs}
                         headerActions={(
                             <TabList className={styles.dashboardTabList}>
@@ -128,15 +134,22 @@ function Overview(props: Props) {
                     >
                         <TabPanel name="mapMode">
                             <MapView
-                                filterValues={filterValues}
+                                selectedIndicatorName={indicatorNameForOverviewMapAndTable}
+                                indicatorId={indicatorIdForOverviewMapAndTable}
+                                regionId={regionId}
+                                outbreakId={outbreakId}
+                                subvariableId={subvariableId}
                                 setActiveTab={setActiveTab}
                                 setFilterValues={setFilterValues}
-                                selectedIndicatorName={selectedIndicatorName ?? undefined}
+                                indicatorExplicitlySet={!!indicatorId}
                             />
                         </TabPanel>
                         <TabPanel name="tableMode">
                             <OverviewTable
-                                filterValues={filterValues}
+                                indicatorId={indicatorIdForOverviewMapAndTable}
+                                outbreakId={outbreakId}
+                                regionId={regionId}
+                                subvariableId={subvariableId}
                             />
                         </TabPanel>
                     </ContainerCard>

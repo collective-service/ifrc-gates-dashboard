@@ -60,8 +60,8 @@ interface Props {
     country?: string;
     emergency?: string;
     subvariable?: string;
-    indicatorId?: string;
     variant?: 'regular' | 'mini';
+    indicatorId?: string;
 }
 
 function Sources(props: Props) {
@@ -102,7 +102,9 @@ function Sources(props: Props) {
     );
 
     const sourcesList = useMemo(() => (
-        variant === 'mini' ? sourcesResponse?.dataGranular : sourcesResponse?.dataGranular.slice(0, 3)
+        variant === 'mini'
+            ? sourcesResponse?.dataGranular
+            : sourcesResponse?.dataGranular.slice(0, 3)
     ), [
         variant,
         sourcesResponse?.dataGranular,
