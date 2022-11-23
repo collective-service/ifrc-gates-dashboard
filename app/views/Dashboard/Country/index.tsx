@@ -705,15 +705,10 @@ function Country(props: Props) {
     ]);
 
     const globalCardList = useMemo(() => (
-        countryResponse?.dataCountryLevelMostRecent?.filter(
-            (item) => item.subvariable !== filterValues?.subvariable,
-        ).sort(
+        [...(countryResponse?.dataCountryLevelMostRecent ?? [])].sort(
             (a, b) => compareNumber(b.indicatorValue, a.indicatorValue),
         )
-    ), [
-        countryResponse?.dataCountryLevelMostRecent,
-        filterValues?.subvariable,
-    ]);
+    ), [countryResponse?.dataCountryLevelMostRecent]);
 
     const selectedSubvariableGlobal = useMemo(() => (
         countryResponse?.dataCountryLevelMostRecent?.find((sub) => (
@@ -854,13 +849,16 @@ function Country(props: Props) {
     }), []);
 
     const globalCardRendererParams = useCallback((_, data: GlobalCard) => ({
-        barName: data.subvariable,
+        barName: filterValues?.subvariable === data.subvariable
+            ? (<b>{data.subvariable}</b>) : data.subvariable,
         value: data.indicatorValue,
         format: data.format as FormatType,
         totalValue: 1,
         color: '#98A6B5',
         valueTitle: data.subvariable,
-    }), []);
+    }), [
+        filterValues?.subvariable,
+    ]);
 
     const currentOutbreak = useMemo(() => {
         if (filterValues?.outbreak) {
