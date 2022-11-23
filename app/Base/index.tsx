@@ -66,11 +66,17 @@ function Base() {
                     <div className={styles.header}>
                         <div className={styles.headerContent}>
                             <div className={styles.leftContainer}>
-                                <img
-                                    className={styles.logo}
-                                    src={logo}
-                                    alt=""
-                                />
+                                <a
+                                    href="https://www.rcce-collective.net/"
+                                    target="_blank"
+                                    rel="license noopener noreferrer"
+                                >
+                                    <img
+                                        className={styles.logo}
+                                        src={logo}
+                                        alt=""
+                                    />
+                                </a>
                             </div>
                             <div className={styles.rightContainer}>
                                 <a
@@ -124,8 +130,9 @@ function Base() {
                         <div className={styles.copyright}>
                             <div className={styles.links}>
                                 <a
-                                    rel="license"
                                     href="http://creativecommons.org/licenses/by-sa/4.0/"
+                                    target="_blank"
+                                    rel="license noopener noreferrer"
                                 >
                                     <img
                                         alt="Creative Commons License"
@@ -134,9 +141,10 @@ function Base() {
                                 </a>
                                 This work is licensed under a
                                 <a
-                                    rel="license"
                                     href="http://creativecommons.org/licenses/by-sa/4.0/"
                                     className={styles.link}
+                                    target="_blank"
+                                    rel="license noopener noreferrer"
                                 >
                                     Creative Commons Attribution
                                     -ShareAlike 4.0 International License
