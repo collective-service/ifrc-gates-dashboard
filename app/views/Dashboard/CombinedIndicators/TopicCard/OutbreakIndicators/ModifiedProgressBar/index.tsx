@@ -1,18 +1,25 @@
 import React, { useMemo, useCallback } from 'react';
 import { _cs } from '@togglecorp/fujs';
-import { Button } from '@the-deep/deep-ui';
+import {
+    Button,
+    Tooltip,
+} from '@the-deep/deep-ui';
+import { IoInformationCircleOutline } from 'react-icons/io5';
 
 import ProgressBar, { Props as ProgressBarProps } from '#components/ProgressBar';
 import {
     formatNumber,
 } from '#utils/common';
+import Sources from '#components/Sources';
 
 import styles from './styles.css';
 
 export interface Props extends Omit<ProgressBarProps, 'barName' | 'barHeight'> {
     indicatorName?: string;
     emergency?: string;
+    country?: string;
     subvariableName?: string;
+    title?: string;
     indicatorId?: string;
     subVariable?: string;
     onTitleClick?: (indicatorId?: string, subVariable?: string, emergency?: string) => void;
@@ -31,9 +38,11 @@ function ModifiedProgressBar(props: Props) {
         onTitleClick,
         emergency,
         region,
+        country,
         format,
         showRegionalValue,
         indicatorValueRegional,
+        title,
         ...otherProps
     } = props;
 
@@ -61,21 +70,38 @@ function ModifiedProgressBar(props: Props) {
         <ProgressBar
             className={_cs(styles.modifiedProgressBar, className)}
             barName={(
-                <Button
-                    className={styles.barName}
-                    childrenContainerClassName={styles.children}
-                    name={undefined}
-                    onClick={handleTitleClick}
-                    variant="transparent"
-                >
-                    <div className={styles.indicatorName}>
-                        {indicatorName}
+                <div className={styles.barNameContainer}>
+                    <Button
+                        className={styles.barName}
+                        childrenContainerClassName={styles.children}
+                        name={undefined}
+                        onClick={handleTitleClick}
+                        variant="transparent"
+                    >
+                        <div className={styles.indicatorName}>
+                            {indicatorName}
+                        </div>
+                        <div className={styles.separator}>{'>'}</div>
+                        <div className={styles.subvariableName}>
+                            {subvariableName}
+                        </div>
+                    </Button>
+                    <div>
+                        <IoInformationCircleOutline />
+                        <Tooltip
+                            trackMousePosition
+                        >
+                            {title}
+                            <Sources
+                                country={country}
+                                emergency={emergency}
+                                subvariable={subVariable}
+                                indicatorId={indicatorId}
+                                variant="mini"
+                            />
+                        </Tooltip>
                     </div>
-                    <div className={styles.separator}>{'>'}</div>
-                    <div className={styles.subvariableName}>
-                        {subvariableName}
-                    </div>
-                </Button>
+                </div>
             )}
             format={format}
             barHeight={8}

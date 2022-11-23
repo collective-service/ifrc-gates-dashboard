@@ -15,12 +15,10 @@ export interface Props {
     className?: string | undefined;
     barHeight?: number;
     barName: React.ReactNode | undefined;
-    title: string | undefined;
     valueTitle?: string | undefined;
     color?: string;
     value: number | null | undefined;
     totalValue: number | null | undefined;
-    icon?: React.ReactNode;
     format: FormatType;
     footer?: React.ReactNode;
     hideTooltip?: boolean;
@@ -31,12 +29,10 @@ function ProgressBar(props: Props) {
         className,
         barHeight = 8,
         barName,
-        title,
         valueTitle,
         color,
         value,
         totalValue,
-        icon,
         format,
         footer,
         hideTooltip = false,
@@ -59,9 +55,6 @@ function ProgressBar(props: Props) {
         <div className={_cs(className, styles.progressInfo)}>
             <div className={styles.progressTitle}>
                 {barName}
-                <div title={title}>
-                    {icon}
-                </div>
             </div>
             <div className={styles.progressValueWrapper}>
                 <div

@@ -16,6 +16,7 @@ interface Props {
     sourceComment?: string;
     organization?: string | null;
     sourceDate?: string | null;
+    variant?: 'regular' | 'mini';
 }
 
 function Source(props: Props) {
@@ -26,6 +27,7 @@ function Source(props: Props) {
         sourceComment,
         organization,
         sourceDate,
+        variant,
     } = props;
 
     return (
@@ -37,7 +39,10 @@ function Source(props: Props) {
                 <IoInformationCircle />
             </div>
             <div
-                className={styles.label}
+                className={_cs(
+                    styles.label,
+                    variant === 'mini' && styles.mini,
+                )}
             >
                 {`
                     ${title}

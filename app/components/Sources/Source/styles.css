@@ -8,6 +8,11 @@
         flex-grow: 1;
         margin: 0;
         min-width: 20rem;
+
+        &.mini {
+            min-width: unset;
+            font-size: var(--dui-font-size-small);
+        }
     }
 
     .info-icon {

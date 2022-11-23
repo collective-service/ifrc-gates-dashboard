@@ -1,26 +1,33 @@
 .modified-progress-bar {
     display: flex;
 
-    .bar-name {
-        display: inline-block;
-        padding: 0;
+    .bar-name-container {
+        display: flex;
+        align-items: center;
         text-align: left;
-        font-weight: var(--dui-font-weight-normal);
+        gap: var(--dui-spacing-small);
 
-        .children {
-            display: inline;
-        }
+        .bar-name {
+            display: inline-block;
+            padding: 0;
+            text-align: left;
+            font-weight: var(--dui-font-weight-normal);
 
-        .indicator-name,
-        .separator,
-        .subvariable-name {
-            display: inline;
-            color: var(--dui-color-text-label);
-            font-size: var(--dui-font-size-small);
-        }
+            .children {
+                display: inline;
+            }
 
-        .separator {
-            padding: 0 var(--dui-spacing-extra-small);
+            .indicator-name,
+            .separator,
+            .subvariable-name {
+                display: inline;
+                color: var(--dui-color-text-label);
+                font-size: var(--dui-font-size-small);
+            }
+
+            .separator {
+                padding: 0 var(--dui-spacing-extra-small);
+            }
         }
     }
 

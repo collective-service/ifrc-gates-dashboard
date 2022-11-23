@@ -78,9 +78,11 @@ function TopicCard(props: Props) {
     ) => ({
         list: data.list,
         emergency,
+        country: filterValues?.country,
         showRegionalValue,
         handleIndicatorClick,
     }), [
+        filterValues,
         showRegionalValue,
         handleIndicatorClick,
     ]);
@@ -93,7 +95,9 @@ function TopicCard(props: Props) {
             emergency: list[0].emergency,
             list,
         }))
-    ), [indicators]);
+    ), [
+        indicators,
+    ]);
 
     return (
         <ContainerCard
