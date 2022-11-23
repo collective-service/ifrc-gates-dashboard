@@ -1,14 +1,17 @@
 .topic-card {
     background-color: var(--dui-color-background);
 
-    .topic-container {
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--dui-spacing-super-large);
+    .heading {
+        --spacing: 0;
 
-        .indicator-item {
-            flex-basis: 30%;
-            /* border-bottom: var(--dui-width-separator-thin) solid var(--dui-color-line-separator); */
+        .topic-description {
+            font-size: var(--dui-font-size-medium);
         }
+    }
+
+    .emergencies {
+        display: flex;
+        flex-direction: column;
+        gap: var(--dui-spacing-medium);
     }
 }
