@@ -123,7 +123,38 @@
                 .percentage-card {
                     flex-basis: calc(45% - var(--dui-spacing-large));
                     flex-grow: 1;
-                    gap: var(--dui-spacing-mega-large);
+                    border-radius: 0;
+                    /* By default, ContainerCard has border-radius */
+                    box-shadow: 0px 0px 10px var(--dui-card-box-shadow);
+                    overflow-y: auto;
+
+                    .global-details {
+                        display: flex;
+                        gap: var(--dui-spacing-large);
+                        overflow-y: auto;
+
+                        .globalValue {
+                            display: flex;
+                            align-items: center;
+                            flex-basis: calc(40% - var(--dui-spacing-extra-large));
+                            justify-content: center;
+                            color: var(--color-text-secondary);
+                            font-size: var(--dui-font-size-ultra-large);
+                        }
+
+                        .global-progress-bar {
+                            flex-basis: calc(60% - var(--dui-spacing-extra-large));
+                            flex-grow: 1;
+                            padding: var(--dui-spacing-large);
+                            height: 16rem;
+                            overflow-y: hidden;
+                            scrollbar-gutter: stable both-edges;
+
+                            &:hover{
+                                overflow-y: auto;
+                            }
+                        }
+                    }
                 }
 
                 .indicators-chart {
