@@ -8,7 +8,6 @@ import {
     Button,
     ListView,
     useModalState,
-    PendingMessage,
 } from '@the-deep/deep-ui';
 import { _cs } from '@togglecorp/fujs';
 import {
@@ -42,6 +41,9 @@ const COMBINED_SOURCES = gql`
             order: {
                 sourceDate: DESC,
             }
+            pagination: {
+                limit: 100
+            }
         ) {
             id
             title
@@ -59,6 +61,7 @@ interface Props {
     emergency?: string;
     subvariable?: string;
     indicatorId?: string;
+    variant?: 'regular' | 'mini';
 }
 
 function Sources(props: Props) {
@@ -68,6 +71,7 @@ function Sources(props: Props) {
         emergency,
         subvariable,
         indicatorId,
+        variant = 'regular',
     } = props;
 
     const [
@@ -77,7 +81,7 @@ function Sources(props: Props) {
     ] = useModalState(false);
 
     const sourcesVariables = useMemo((): CombinedSourcesQueryVariables => ({
-        iso3: country ?? 'AFG',
+        iso3: country,
         emergency,
         subvariable,
         indicatorId,
@@ -90,7 +94,6 @@ function Sources(props: Props) {
 
     const {
         data: sourcesResponse,
-        loading: sourcesResponseLoading,
     } = useQuery<CombinedSourcesQuery, CombinedSourcesQueryVariables>(
         COMBINED_SOURCES,
         {
@@ -99,8 +102,9 @@ function Sources(props: Props) {
     );
 
     const sourcesList = useMemo(() => (
-        sourcesResponse?.dataGranular.slice(0, 3)
+        variant === 'mini' ? sourcesResponse?.dataGranular : sourcesResponse?.dataGranular.slice(0, 3)
     ), [
+        variant,
         sourcesResponse?.dataGranular,
     ]);
 
@@ -110,47 +114,51 @@ function Sources(props: Props) {
         sourceDate: data?.sourceDate,
         sourceComment: data?.sourceComment ?? '',
         organization: data?.organisation,
-    }), []);
+        variant,
+    }), [variant]);
+
+    if ((sourcesResponse?.dataGranular?.length ?? 0) === 0) {
+        return null;
+    }
 
     return (
-        <>
-            {sourcesResponseLoading && <PendingMessage />}
-            {((sourcesResponse?.dataGranular?.length ?? 0) > 0)
-                && (
-                    <Container
-                        className={_cs(className, styles.sources)}
-                        heading="Sources"
-                        headingSize="extraSmall"
-                        spacing="compact"
-                        headerActions={(sourcesResponse?.dataGranular.length ?? 0) > 3 && (
-                            <Button
-                                name={undefined}
-                                variant="transparent"
-                                onClick={showSourceModal}
-                                actions={<IoChevronDownOutline />}
-                            >
-                                View all
-                            </Button>
-                        )}
-                    >
-                        <ListView
-                            renderer={Source}
-                            rendererParams={sourcesRendererParams}
-                            keySelector={sourcesKeySelector}
-                            data={sourcesList}
-                            errored={false}
-                            filtered={false}
-                            pending={false}
-                        />
-                        {sourceModalShown && (
-                            <SourcesModal
-                                onModalClose={hideSourceModal}
-                                sourcesList={sourcesResponse?.dataGranular}
-                            />
-                        )}
-                    </Container>
-                )}
-        </>
+        <Container
+            className={_cs(
+                className,
+                styles.sources,
+                variant === 'mini' && styles.mini,
+            )}
+            heading="Sources"
+            headingClassName={styles.heading}
+            headingSize="extraSmall"
+            spacing="compact"
+            headerActions={(sourcesResponse?.dataGranular.length ?? 0) > 3 && variant === 'regular' && (
+                <Button
+                    name={undefined}
+                    variant="transparent"
+                    onClick={showSourceModal}
+                    actions={<IoChevronDownOutline />}
+                >
+                    View all
+                </Button>
+            )}
+        >
+            <ListView
+                renderer={Source}
+                rendererParams={sourcesRendererParams}
+                keySelector={sourcesKeySelector}
+                data={sourcesList}
+                errored={false}
+                filtered={false}
+                pending={false}
+            />
+            {sourceModalShown && (
+                <SourcesModal
+                    onModalClose={hideSourceModal}
+                    sourcesList={sourcesResponse?.dataGranular}
+                />
+            )}
+        </Container>
     );
 }
 

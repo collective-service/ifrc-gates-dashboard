@@ -1,6 +1,5 @@
 import React, { useCallback } from 'react';
 import { _cs } from '@togglecorp/fujs';
-import { IoInformationCircleOutline } from 'react-icons/io5';
 import {
     ListView,
     Header,
@@ -21,6 +20,7 @@ interface Props {
     showRegionalValue: boolean;
     emergency: string;
     handleIndicatorClick: (indicatorId?: string, subVariable?: string, emergency?: string) => void;
+    country?: string;
 }
 
 function OutbreakIndicators(props: Props) {
@@ -29,6 +29,7 @@ function OutbreakIndicators(props: Props) {
         list,
         showRegionalValue,
         emergency,
+        country,
         handleIndicatorClick,
     } = props;
 
@@ -38,12 +39,12 @@ function OutbreakIndicators(props: Props) {
             indicatorName: data.indicatorName,
             subvariableName: data.subvariable ?? undefined,
             title: data.indicatorDescription ?? undefined,
+            country,
             valueTitle: data.indicatorName ?? undefined,
             value: data.indicatorValue ?? undefined,
             totalValue: 1,
             indicatorId: data.indicatorId ?? undefined,
             subVariable: data.subvariable ?? undefined,
-            icon: <IoInformationCircleOutline />,
             color: '#98a6b5',
             emergency,
             region: data.region ?? undefined,
@@ -55,6 +56,7 @@ function OutbreakIndicators(props: Props) {
             showRegionalValue,
             emergency,
             handleIndicatorClick,
+            country,
         ],
     );
 

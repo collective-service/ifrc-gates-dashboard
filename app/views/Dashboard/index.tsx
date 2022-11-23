@@ -660,7 +660,6 @@ function Dashboard() {
                     <ProgressBar
                         className={styles.progressBar}
                         color="var(--dui-color-brand)"
-                        title={undefined}
                         barName={undefined}
                         value={progress}
                         totalValue={1}

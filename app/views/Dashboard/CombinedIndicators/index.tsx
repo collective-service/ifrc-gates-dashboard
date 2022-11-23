@@ -24,7 +24,6 @@ import {
     GlobalCombinedIndicatorsQueryVariables,
 } from '#generated/types';
 import { TabTypes } from '#views/Dashboard';
-import Sources from '#components/Sources';
 
 import TopicCard from './TopicCard';
 import { AdvancedOptionType } from '../AdvancedFilters';
@@ -355,12 +354,6 @@ function CombinedIndicators(props: Props) {
                 filtered={!filterDataEmpty}
                 messageShown
                 messageIconShown
-            />
-            <Sources
-                country={filterValues?.country}
-                emergency={filterValues?.outbreak}
-                subvariable={filterValues?.subvariable}
-                indicatorId={filterValues?.indicator}
             />
         </div>
     );
