@@ -27,6 +27,7 @@ export interface Props {
     newDeathsPerMillion?: string | null;
     statValueLoading?: boolean;
     indicatorMonth?: string | null;
+    uncertaintyRange?: string | undefined;
 }
 
 function PercentageStats(props: Props) {
@@ -45,9 +46,10 @@ function PercentageStats(props: Props) {
         newDeathsPerMillion,
         statValueLoading,
         indicatorMonth,
+        uncertaintyRange,
     } = props;
 
-    const empty = statValue === '0';
+    const empty = !statValue;
 
     return (
         <ContainerCard
@@ -60,7 +62,7 @@ function PercentageStats(props: Props) {
                             <div className={styles.outbreakCard}>
                                 {heading}
                             </div>
-                            {(newDeaths || newCasesPerMillion) && (
+                            {(newDeaths || newCasesPerMillion) ? (
                                 <Tooltip>
                                     <div>
                                         {`New Cases: ${newCases ?? 0}`}
@@ -78,8 +80,22 @@ function PercentageStats(props: Props) {
                                         {`Deaths Per Million: ${newDeathsPerMillion ?? 0}`}
                                     </div>
                                     <div>
-                                        {`Date: ${indicatorMonth}`}
+                                        {`Date: ${indicatorMonth ?? '--'}`}
                                     </div>
+                                </Tooltip>
+                            ) : (
+                                <Tooltip>
+                                    <div>
+                                        {`Total: ${statValue ?? 0}`}
+                                    </div>
+                                    <div>
+                                        {`Date: ${indicatorMonth ?? '--'}`}
+                                    </div>
+                                    {uncertaintyRange && (
+                                        <div>
+                                            {`Uncertainty Range: ${uncertaintyRange}`}
+                                        </div>
+                                    )}
                                 </Tooltip>
                             )}
                         </>

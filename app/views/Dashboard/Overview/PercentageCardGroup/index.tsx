@@ -93,6 +93,8 @@ const OVERVIEW_STATS = gql`
             id
             indicatorId
             indicatorName
+            type
+            errorMargin
             indicatorValueGlobal
             indicatorMonth
             emergency
@@ -158,6 +160,8 @@ const OVERVIEW_STATS = gql`
             indicatorMonth
             indicatorId
             indicatorName
+            type
+            errorMargin
             format
         }
         uncertaintyGlobal: globalLevel (
@@ -182,6 +186,8 @@ const OVERVIEW_STATS = gql`
             indicatorMonth
             indicatorId
             indicatorName
+            type
+            errorMargin
             indicatorValueGlobal
             format
             subvariable
@@ -209,6 +215,8 @@ const OVERVIEW_STATS = gql`
             indicatorMonth
             indicatorId
             indicatorName
+            type
+            errorMargin
             indicatorValueRegional
             region
             format
@@ -319,6 +327,8 @@ function PercentageCardGroup(props: Props) {
                 format: region.format,
                 fill: isDefined(filterValues?.region)
                     && (region.region !== filterValues?.region) ? 0.2 : 1,
+                indicatorType: region.type,
+                errorMargin: region.errorMargin,
             }
         ))
     ), [
@@ -366,12 +376,12 @@ function PercentageCardGroup(props: Props) {
         if (filterValues?.region) {
             return formatNumber(
                 regionTotalCase?.format as FormatType,
-                regionTotalCase?.indicatorValue ?? 0,
+                regionTotalCase?.indicatorValue,
             );
         }
         return formatNumber(
             (globalTotalCase?.format ?? 'raw') as FormatType,
-            globalTotalCase?.indicatorValueGlobal ?? 0,
+            globalTotalCase?.indicatorValueGlobal,
         );
     }, [
         regionTotalCase?.indicatorValue,
@@ -379,6 +389,57 @@ function PercentageCardGroup(props: Props) {
         filterValues?.region,
         globalTotalCase?.format,
         regionTotalCase?.format,
+    ]);
+
+    const percentageCardMonth = useMemo(() => {
+        if (filterValues?.region) {
+            return regionTotalCase?.indicatorMonth;
+        }
+        return globalTotalCase?.indicatorMonth;
+    }, [
+        regionTotalCase?.indicatorMonth,
+        globalTotalCase?.indicatorMonth,
+        filterValues?.region,
+    ]);
+
+    const uncertaintyRange = useMemo(() => {
+        if (filterValues?.indicator
+            && (regionTotalCase?.indicatorType === 'Social Behavioural Indicators')
+        ) {
+            const negativeRange = negativeToZero(
+                regionTotalCase.indicatorValue,
+                regionTotalCase.errorMargin,
+            );
+            const positiveRange = positiveToZero(
+                regionTotalCase.indicatorValue,
+                regionTotalCase.errorMargin,
+            );
+            const range = `${negativeRange} - ${positiveRange}`;
+            return range;
+        }
+        if (filterValues?.indicator
+            && (globalTotalCase?.type === 'Social Behavioural Indicators')
+        ) {
+            const negativeRange = negativeToZero(
+                globalTotalCase?.indicatorValueGlobal,
+                globalTotalCase?.errorMargin,
+            );
+            const positiveRange = positiveToZero(
+                globalTotalCase?.indicatorValueGlobal,
+                globalTotalCase?.errorMargin,
+            );
+            const range = `${negativeRange} - ${positiveRange}`;
+            return range;
+        }
+        return undefined;
+    }, [
+        filterValues?.indicator,
+        regionTotalCase?.indicatorType,
+        globalTotalCase?.type,
+        globalTotalCase?.errorMargin,
+        globalTotalCase?.indicatorValueGlobal,
+        regionTotalCase?.errorMargin,
+        regionTotalCase?.indicatorValue,
     ]);
 
     const uncertaintyGlobalChart = useMemo(() => (
@@ -398,6 +459,8 @@ function PercentageCardGroup(props: Props) {
                     id: global.id,
                     format: global.format as FormatType,
                     subvariable: global.subvariable,
+                    indicatorType: global.type,
+                    errorMargin: global.errorMargin,
                 };
             }
 
@@ -416,6 +479,8 @@ function PercentageCardGroup(props: Props) {
                 minimumValue: negativeRange ?? 0,
                 maximumValue: positiveRange,
                 indicatorName: global.indicatorName,
+                indicatorType: global.type,
+                errorMargin: global.errorMargin,
                 id: global.id,
                 format: global.format as FormatType,
                 subvariable: global.subvariable,
@@ -438,6 +503,8 @@ function PercentageCardGroup(props: Props) {
                     date: region.indicatorMonth,
                     region: region.region,
                     indicatorName: region.indicatorName,
+                    indicatorType: region.type,
+                    errorMargin: region.errorMargin,
                     id: region.id,
                     format: region.format as FormatType,
                     subvariable: region.subvariable,
@@ -460,6 +527,8 @@ function PercentageCardGroup(props: Props) {
                 maximumValue: positiveRange,
                 region: region.region,
                 indicatorName: region.indicatorName,
+                indicatorType: region.type,
+                errorMargin: region.errorMargin,
                 id: region.id,
                 format: region.format as FormatType,
                 subvariable: region.subvariable,
@@ -570,6 +639,8 @@ function PercentageCardGroup(props: Props) {
                 headingSize="extraSmall"
                 statValue={totalCaseValue}
                 statValueLoading={loading}
+                indicatorMonth={percentageCardMonth}
+                uncertaintyRange={uncertaintyRange}
             />
             {uncertaintyChartActive ? (
                 <UncertaintyChart
