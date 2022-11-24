@@ -3,9 +3,9 @@ import {
     isNotDefined,
 } from '@togglecorp/fujs';
 
-import {
-    wsEndpoint,
-} from '#base/configs/restRequest';
+import { apiEndpoint } from '#base/configs/env';
+
+export const wsEndpoint = apiEndpoint ?? 'http://localhost:7020/api/v1';
 
 type Maybe<T> = T | null | undefined;
 
