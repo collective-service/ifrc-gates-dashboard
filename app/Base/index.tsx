@@ -14,7 +14,10 @@ import browserHistory from '#base/configs/history';
 import sentryConfig from '#base/configs/sentry';
 import apolloConfig from '#base/configs/apollo';
 import { trackingId, gaConfig } from '#base/configs/googleAnalytics';
-import { mapboxToken } from '#base/configs/env';
+import {
+    mapboxToken,
+    adminEndpoint,
+} from '#base/configs/env';
 
 import Dashboard from '#views/Dashboard';
 import goarnLogo from '#resources/icons/goarn.png';
@@ -22,10 +25,7 @@ import ifrcLogo from '#resources/icons/ifrc.png';
 import unicefLogo from '#resources/icons/unicef.png';
 import logo from '#resources/icons/cs_logo.png';
 import whoLogo from '#resources/icons/who.png';
-import {
-    wsEndpoint,
-    adminEndpoint,
-} from '#base/configs/restRequest';
+import { wsEndpoint } from '#base/utils/restRequest';
 
 import styles from './styles.css';
 

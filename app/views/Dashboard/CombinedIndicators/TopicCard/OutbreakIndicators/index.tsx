@@ -12,7 +12,7 @@ import { IndicatorType } from '../..';
 
 import styles from './styles.css';
 
-const indicatorKeySelector = (d: IndicatorType) => d.subvariable ?? '';
+const indicatorKeySelector = (d: IndicatorType) => `${d.indicatorId}-${d.subvariable}` ?? '';
 
 interface Props {
     className?: string;

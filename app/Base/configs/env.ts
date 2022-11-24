@@ -8,7 +8,7 @@ export const isAlpha = process.env.REACT_APP_ENVIRONMENT === 'alpha';
 export const isNightly = process.env.REACT_APP_ENVIRONMENT === 'nightly';
 export const isDev = !isBeta && !isAlpha && !isNightly;
 
-export const apiHttps = process.env.REACT_APP_API_HTTPS || 'http';
-export const apiEndpoint = process.env.REACT_APP_API_END as string; // localhost:8000
+export const apiEndpoint = process.env.REACT_APP_API_END as string; // 'http://localhost:7020/api/v1'
+export const adminEndpoint = process.env.REACT_APP_ADMIN_END as string ?? 'http://localhost:7020/admin';
 
 export const mapboxToken = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN as string;

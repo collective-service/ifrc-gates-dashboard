@@ -456,8 +456,10 @@ function Dashboard() {
                 exportParams,
             );
         }
+        hideExportConfirm();
         setSelectedExport(undefined);
     }, [
+        hideExportConfirm,
         exportParams,
         triggerExportStart,
         selectedExport,

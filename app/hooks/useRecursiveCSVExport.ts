@@ -56,14 +56,22 @@ async function fetchRecursive({
     totalCount: number,
     noOfRetries?: number,
 }) {
-    const response = await fetchData(
-        url,
-        {
-            ...urlParams,
-            offset,
-            limit: pageLimit,
-        },
-    );
+    let response;
+
+    try {
+        response = await fetchData(
+            url,
+            {
+                ...urlParams,
+                offset,
+                limit: pageLimit,
+            },
+        );
+    } catch {
+        onFailure('Failed to fetch data');
+        return;
+    }
+
     if (response.status >= 200 && response.status <= 299) {
         onPartialSuccess(response.data);
 

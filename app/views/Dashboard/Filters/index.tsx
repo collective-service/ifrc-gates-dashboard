@@ -221,22 +221,24 @@ function Filters(props: Props) {
     const countriesWithNull = countriesFromProps ?? [];
     const countries = countriesWithNull.filter((country) => !doesObjectHaveAnyEmptyValue(country));
 
-    const outbreaks = emergencies?.map((e) => ({
+    const outbreaks = useMemo(() => (emergencies?.map((e) => ({
         key: e.outbreak,
         label: e.outbreak,
-    }));
+    }))), [emergencies]);
 
-    const regionGroupedCountryList = listToGroupList(
-        countriesFromProps,
-        (country) => country.region ?? '__null',
-    );
+    const regionList = useMemo(() => {
+        const regionGroupedCountryList = listToGroupList(
+            countriesFromProps,
+            (country) => country.region ?? '__null',
+        );
+        const regionListUnsafe = regionGroupedCountryList
+            ? Object.keys(regionGroupedCountryList) : [];
 
-    const regionListUnsafe = regionGroupedCountryList ? Object.keys(regionGroupedCountryList) : [];
-
-    const regionList = regionListUnsafe
-        .filter((r) => r !== '__null')
-        .map((r) => ({ key: r, title: r }))
-        .sort((a, b) => compareString(a.key, b.key));
+        return regionListUnsafe
+            .filter((r) => r !== '__null')
+            .map((r) => ({ key: r, title: r }))
+            .sort((a, b) => compareString(a.key, b.key));
+    }, [countriesFromProps]);
 
     const isFilterEmpty = useMemo(() => {
         if (activeTab === 'country') {
