@@ -127,7 +127,7 @@ const INDICATORS = gql`
 
 const SUBVARIABLES = gql`
     query Subvariables(
-        $iso3: String,
+        $iso3: String!,
         $indicatorId: String!,
     ) {
         filterOptions {
