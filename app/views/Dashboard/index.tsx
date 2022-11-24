@@ -269,7 +269,7 @@ function Dashboard() {
     const subvariablesVariables = useMemo(() => {
         if (filterValues?.indicator) {
             return {
-                iso3: activeTab === 'country' ? filterValueCountry : undefined,
+                iso3: (activeTab === 'country' ? filterValueCountry : undefined) ?? '',
                 indicatorId: filterValues.indicator,
             };
         }
