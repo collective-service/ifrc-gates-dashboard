@@ -67,7 +67,7 @@ interface TooltipProps {
 
 const COUNTRY_SUBVARIABLES = gql`
     query CountrySubvariables(
-        $iso3: String,
+        $iso3: String!,
         $indicatorId: String!,
     ) {
         filterOptions {

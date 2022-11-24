@@ -3,7 +3,9 @@ import { isDefined } from '@togglecorp/fujs';
 import {
     formatNumber,
     FormatType,
-} from '../../utils/common';
+    negativeToZero,
+    positiveToZero,
+} from '#utils/common';
 
 import styles from './styles.css';
 
@@ -45,7 +47,7 @@ function CustomTooltip(props: Props) {
 
     const uncertaintyRange = useMemo(() => (
         format === 'percent'
-            ? `[${minValue}% - ${maxValue}%]`
+            ? `[${negativeToZero(minValue, null)}% - ${positiveToZero(maxValue, null)}%]`
             : `[${formatNumber(format, minValue)} - ${formatNumber(format, maxValue)}]`
     ), [
         minValue,
