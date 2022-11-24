@@ -61,13 +61,28 @@ export const COUNTRIES_AND_OUTBREAKS = gql`
 const NARRATIVES = gql`
     query Narrative(
         $iso3: String,
+        $indicatorId: String,
+        $topic: String,
+        $topicIsnull: Boolean,
+        $thematicIsnull: Boolean,
+        $indicatorIdIsnull: Boolean,
     ) {
         narratives (
             filters: {
                 iso3: $iso3,
+                indicatorId: $indicatorId,
+                topic: $topic,
+                topicIsnull: $topicIsnull,
+                thematicIsnull: $thematicIsnull,
+                indicatorIdIsnull: $indicatorIdIsnull,
             }
         ) {
+            id
+            topic
+            thematic
             narrative
+            iso3
+            indicatorId
         }
     }
 `;
@@ -293,9 +308,13 @@ function Dashboard() {
     ]);
 
     const narrativeVariables = useMemo((): NarrativeQueryVariables => ({
-        iso3: filterValues?.country,
+        iso3: filterValues?.country ?? '',
+        indicatorId: filterValues?.indicator ?? '',
+        topic: advancedFilterValues?.topic ?? '',
     }), [
         filterValues?.country,
+        filterValues?.indicator,
+        advancedFilterValues?.topic,
     ]);
 
     const {
@@ -381,7 +400,7 @@ function Dashboard() {
                             </TabList>
                         </div>
                         {/* TODO: 1 object will be fetched */}
-                        {activeTab !== 'overview' && (
+                        {(activeTab !== 'overview' && narrativeResponse?.narratives) && (
                             <Narratives
                                 narrative={narrativeStatement}
                             />
