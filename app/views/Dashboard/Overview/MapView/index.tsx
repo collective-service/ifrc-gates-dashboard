@@ -35,7 +35,7 @@ import {
     TopBottomCountriesRankingQueryVariables,
 } from '#generated/types';
 import { formatNumber, FormatType } from '#utils/common';
-import { TabTypes } from '#views/Dashboard';
+import { TabTypes, IndicatorType } from '#views/Dashboard';
 import { FilterType } from '#views/Dashboard/Filters';
 
 import MapModal from './MapModal';
@@ -196,6 +196,7 @@ interface Props {
     regionId: string | undefined;
     outbreakId: string | undefined;
     subvariableId: string | undefined;
+    selectedIndicatorType: IndicatorType;
 
     indicatorExplicitlySet: boolean;
 }
@@ -211,6 +212,7 @@ function MapView(props: Props) {
         regionId,
         outbreakId,
         subvariableId,
+        selectedIndicatorType,
 
         indicatorExplicitlySet,
     } = props;
@@ -591,6 +593,7 @@ function MapView(props: Props) {
                         format={mapDataForSelectedCountry?.format as (FormatType | undefined)}
                         indicatorValue={mapDataForSelectedCountry?.indicatorValue}
                         indicatorExplicitlySet={indicatorExplicitlySet}
+                        selectedIndicatorType={selectedIndicatorType}
                     />
                 )}
             </ContainerCard>

@@ -13,7 +13,7 @@ import PercentageCardGroup from './PercentageCardGroup';
 import MapView from './MapView';
 import OverviewTable from './OverviewTable';
 import { FilterType } from '../Filters';
-import { TabTypes } from '..';
+import { TabTypes, IndicatorType } from '..';
 import styles from './styles.css';
 
 function getMapSubHeader(
@@ -36,6 +36,7 @@ interface Props {
 
     selectedIndicatorName: string | undefined;
     selectedOutbreakName: string | undefined;
+    selectedIndicatorType: IndicatorType;
 }
 
 function Overview(props: Props) {
@@ -47,6 +48,7 @@ function Overview(props: Props) {
 
         selectedIndicatorName,
         selectedOutbreakName,
+        selectedIndicatorType,
     } = props;
 
     const [currentTab, setCurrentTab] = useState<
@@ -142,6 +144,7 @@ function Overview(props: Props) {
                                 setActiveTab={setActiveTab}
                                 setFilterValues={setFilterValues}
                                 indicatorExplicitlySet={!!indicatorId}
+                                selectedIndicatorType={selectedIndicatorType}
                             />
                         </TabPanel>
                         <TabPanel name="tableMode">

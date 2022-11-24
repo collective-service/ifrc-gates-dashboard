@@ -33,7 +33,7 @@ import {
     normalFormatter,
 } from '#utils/common';
 import { FilterType } from '#views/Dashboard/Filters';
-import { TabTypes } from '#views/Dashboard';
+import { TabTypes, IndicatorType } from '#views/Dashboard';
 import UncertaintyChart, { UncertainData } from '#components/UncertaintyChart';
 import Sources from '#components/Sources';
 import ChartContainer from '#components/ChartContainer';
@@ -91,7 +91,7 @@ const COUNTRY_PROFILE = gql`
         contextualData(
             filters: {
                 iso3: $iso3,
-                contextIndicatorId: "new_cases_per_million",
+                contextIndicatorId: $indicatorId,
                 emergency: $emergency,
                 isTwelveMonth: true,
             }
@@ -112,7 +112,7 @@ const COUNTRY_PROFILE = gql`
         }
         contextualDataWithMultipleEmergency(
             iso3: $iso3,
-            contextIndicatorId: "new_cases_per_million",
+            contextIndicatorId: $indicatorId,
         ) {
             emergency
             data {
@@ -163,6 +163,7 @@ interface ModalProps {
     indicatorValue?: number;
     indicatorId: string;
     outbreakId: string | undefined;
+    selectedIndicatorType: IndicatorType;
 
     indicatorExplicitlySet: boolean;
 }
@@ -179,6 +180,7 @@ function MapModal(props: ModalProps) {
         indicatorValue,
         indicatorId,
         outbreakId,
+        selectedIndicatorType,
 
         indicatorExplicitlySet,
     } = props;
@@ -205,7 +207,7 @@ function MapModal(props: ModalProps) {
     const countryVariables = useMemo((): CountryModalQueryVariables => ({
         iso3: countryData.iso3,
         emergency: outbreakId,
-        indicatorId,
+        indicatorId: indicatorId ?? 'new_cases_per_million',
         subvariable: subvariableId,
     }
     ), [
@@ -401,7 +403,10 @@ function MapModal(props: ModalProps) {
             )}
             freeHeight
         >
-            {!indicatorExplicitlySet && (
+            {(
+                selectedIndicatorType === 'Contextual Indicators'
+                || !indicatorExplicitlySet
+            ) && (
                 <div className={styles.chartContainer}>
                     <ChartContainer
                         data={emergencyLineChart}
@@ -455,7 +460,7 @@ function MapModal(props: ModalProps) {
                     </ChartContainer>
                 </div>
             )}
-            {indicatorExplicitlySet && (
+            {selectedIndicatorType === 'Social Behavioural Indicators' && (
                 <UncertaintyChart
                     className={styles.chartContainer}
                     loading={countryResponseLoading}
