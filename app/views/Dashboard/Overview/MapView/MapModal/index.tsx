@@ -33,7 +33,10 @@ import {
     normalFormatter,
 } from '#utils/common';
 import { FilterType } from '#views/Dashboard/Filters';
-import { TabTypes } from '#views/Dashboard';
+import {
+    TabTypes,
+    IndicatorType,
+} from '#views/Dashboard';
 import UncertaintyChart, { UncertainData } from '#components/UncertaintyChart';
 import Sources from '#components/Sources';
 import ChartContainer from '#components/ChartContainer';
@@ -64,8 +67,8 @@ interface TooltipProps {
 
 const COUNTRY_SUBVARIABLES = gql`
     query CountrySubvariables(
-        $iso3: String!,
-        $indicatorId: String,
+        $iso3: String,
+        $indicatorId: String!,
     ) {
         filterOptions {
             subvariables(
@@ -165,6 +168,7 @@ interface ModalProps {
     outbreakId: string | undefined;
 
     indicatorExplicitlySet: boolean;
+    selectedIndicatorType: IndicatorType | undefined;
 }
 
 function MapModal(props: ModalProps) {
@@ -180,6 +184,7 @@ function MapModal(props: ModalProps) {
         indicatorId,
         outbreakId,
 
+        selectedIndicatorType,
         indicatorExplicitlySet,
     } = props;
 
@@ -367,6 +372,7 @@ function MapModal(props: ModalProps) {
         <Modal
             onCloseButtonClick={onModalClose}
             className={_cs(className, styles.mapModal)}
+            backdropClassName={styles.backdrop}
             size="large"
             heading={(
                 <Button
@@ -401,7 +407,7 @@ function MapModal(props: ModalProps) {
             )}
             freeHeight
         >
-            {!indicatorExplicitlySet && (
+            {(!indicatorExplicitlySet || selectedIndicatorType === 'Contextual Indicators') ? (
                 <div className={styles.chartContainer}>
                     <ChartContainer
                         data={emergencyLineChart}
@@ -454,8 +460,7 @@ function MapModal(props: ModalProps) {
                         </LineChart>
                     </ChartContainer>
                 </div>
-            )}
-            {indicatorExplicitlySet && (
+            ) : (
                 <UncertaintyChart
                     className={styles.chartContainer}
                     loading={countryResponseLoading}

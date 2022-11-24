@@ -35,8 +35,6 @@ import {
     IndicatorsForCountryQueryVariables,
     SubvariablesQuery,
     SubvariablesQueryVariables,
-    OverviewSubindicatorsQuery,
-    OverviewSubindicatorsQueryVariables,
     IndicatorsQueryVariables,
     ExportMetaQuery,
     ExportMetaQueryVariables,
@@ -129,8 +127,8 @@ const INDICATORS = gql`
 
 const SUBVARIABLES = gql`
     query Subvariables(
-        $iso3: String!,
-        $indicatorId: String
+        $iso3: String,
+        $indicatorId: String!,
     ) {
         filterOptions {
             subvariables(
@@ -155,25 +153,6 @@ const EXPORT_META = gql`
             totalRawDataCount
             totalSummaryCount
         }
-    }
-`;
-
-const OVERVIEW_SUBINDICATORS = gql`
-    query OverviewSubindicators (
-        $indicatorId: String,
-        $outbreak: String,
-        $region: String,
-    ) {
-        filterOptions {
-            overviewIndicators(
-                indicatorId: $indicatorId,
-                outBreak: $outbreak,
-                region: $region,
-            ) {
-                subvariable
-            }
-        }
-
     }
 `;
 
@@ -206,7 +185,10 @@ function Dashboard() {
 
     useEffect(() => {
         if (activeTab === 'country' && !filterValues) {
-            setFilterValues({ country: 'AFG' });
+            setFilterValues({
+                country: 'AFG',
+                region: 'MENA',
+            });
         }
     }, [activeTab, filterValues]);
 
@@ -235,18 +217,27 @@ function Dashboard() {
         {
             skip: !indicatorListForCountryVariables,
             variables: indicatorListForCountryVariables,
+            onCompleted: (response) => {
+                const isCurrentIndicatorNotInList = isNotDefined(
+                    response?.filterOptions?.countryIndicators?.find(
+                        (indicator) => indicator.indicatorId === filterValues?.indicator,
+                    ),
+                );
+                if (isCurrentIndicatorNotInList) {
+                    setFilterValues((oldValue) => ({
+                        ...oldValue,
+                        indicator: undefined,
+                        subvariable: undefined,
+                    }));
+                }
+            },
         },
     );
 
-    const indicatorVariables = useMemo(() => {
-        if (isDefined(filterValues?.region)) {
-            return {
-                outbreak: filterValues?.outbreak,
-                region: filterValues?.region,
-            };
-        }
-        return undefined;
-    }, [
+    const indicatorVariables = useMemo(() => ({
+        outbreak: filterValues?.outbreak,
+        region: filterValues?.region,
+    }), [
         filterValues?.outbreak,
         filterValues?.region,
     ]);
@@ -258,18 +249,33 @@ function Dashboard() {
         INDICATORS,
         {
             variables: indicatorVariables,
+            onCompleted: (response) => {
+                const isCurrentIndicatorNotInList = isNotDefined(
+                    response?.filterOptions?.overviewIndicators?.find(
+                        (indicator) => indicator.indicatorId === filterValues?.indicator,
+                    ),
+                );
+                if (isCurrentIndicatorNotInList) {
+                    setFilterValues((oldValue) => ({
+                        ...oldValue,
+                        indicator: undefined,
+                        subvariable: undefined,
+                    }));
+                }
+            },
         },
     );
 
     const subvariablesVariables = useMemo(() => {
-        if (isDefined(filterValues?.indicator) && isDefined(filterValueCountry)) {
+        if (filterValues?.indicator) {
             return {
-                iso3: filterValueCountry,
-                indicatorId: filterValues?.indicator,
+                iso3: activeTab === 'country' ? filterValueCountry : undefined,
+                indicatorId: filterValues.indicator,
             };
         }
         return undefined;
     }, [
+        activeTab,
         filterValueCountry,
         filterValues?.indicator,
     ]);
@@ -350,49 +356,6 @@ function Dashboard() {
                     setFilterValues((oldValue) => ({
                         ...oldValue,
                         subvariable: response?.filterOptions?.subvariables?.[0],
-                    }));
-                }
-            },
-        },
-    );
-
-    const overviewSubindicatorVariables = useMemo(() => {
-        if ((activeTab === 'overview') && isDefined(filterValues?.indicator)) {
-            return {
-                indicatorId: filterValues?.indicator,
-                outbreak: filterValues?.outbreak,
-                region: filterValues?.region,
-            };
-        }
-
-        return undefined;
-    }, [
-        filterValues?.indicator,
-        filterValues?.outbreak,
-        filterValues?.region,
-        activeTab,
-    ]);
-
-    const {
-        data: overviewSubindicators,
-        loading: overviewSubindicatorsLoading,
-    } = useQuery<OverviewSubindicatorsQuery, OverviewSubindicatorsQueryVariables>(
-        OVERVIEW_SUBINDICATORS,
-        {
-            skip: !overviewSubindicatorVariables,
-            variables: overviewSubindicatorVariables,
-            onCompleted: (response) => {
-                const isSelectedValInList = (
-                    response?.filterOptions?.overviewIndicators?.findIndex(
-                        (sv) => sv.subvariable === filterValues?.subvariable,
-                    ) ?? -1
-                ) !== -1;
-
-                if (!isSelectedValInList) {
-                    setFilterValues((oldValue) => ({
-                        ...oldValue,
-                        subvariable: response?.filterOptions?.overviewIndicators[0]?.subvariable
-                            ?? undefined,
                     }));
                 }
             },
@@ -502,12 +465,12 @@ function Dashboard() {
     ]);
 
     const selectedIndicatorType = useMemo(() => (
-        indicatorList?.filterOptions?.countryIndicators
+        selectedIndicatorList
             ?.find((ind) => ind.indicatorId === filterValues?.indicator)
             ?.type as IndicatorType
     ), [
         filterValues?.indicator,
-        indicatorList,
+        selectedIndicatorList,
     ]);
 
     const disableExportButton = exportMetaLoading
@@ -611,16 +574,11 @@ function Dashboard() {
                             countries={countriesAndOutbreaks?.countries}
                             emergencies={countriesAndOutbreaks?.outBreaks}
                             subvariableList={subvariableList}
-                            globalIndicatorList={globalIndicatorList}
-                            indicatorList={indicatorList}
-                            overviewSubindicatorsList={overviewSubindicators
-                                ?.filterOptions?.overviewIndicators}
-                            overviewSubindicatorsLoading={overviewSubindicatorsLoading}
+                            indicatorList={selectedIndicatorList}
                             emergenciesLoading={countriesAndOutbreaksLoading}
                             countriesLoading={countriesAndOutbreaksLoading}
                             subvariablesLoading={subvariablesLoading}
-                            globalIndicatorsLoading={globalIndicatorsLoading}
-                            indicatorsLoading={indicatorsLoading}
+                            indicatorsLoading={indicatorsLoading || globalIndicatorsLoading}
                         />
                     </div>
                 </div>
@@ -630,8 +588,9 @@ function Dashboard() {
                             filterValues={filterValues}
                             setActiveTab={setActiveTab}
                             setFilterValues={setFilterValues}
-                            selectedIndicatorName={selectedIndicatorName ?? undefined}
                             selectedOutbreakName={filterValues?.outbreak}
+                            selectedIndicatorName={selectedIndicatorName ?? undefined}
+                            selectedIndicatorType={selectedIndicatorType ?? undefined}
                         />
                     </TabPanel>
                     <TabPanel name="country">
