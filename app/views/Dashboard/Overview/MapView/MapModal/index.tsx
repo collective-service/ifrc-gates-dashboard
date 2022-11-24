@@ -64,8 +64,8 @@ interface TooltipProps {
 
 const COUNTRY_SUBVARIABLES = gql`
     query CountrySubvariables(
-        $iso3: String!,
-        $indicatorId: String,
+        $iso3: String,
+        $indicatorId: String!,
     ) {
         filterOptions {
             subvariables(
@@ -367,6 +367,7 @@ function MapModal(props: ModalProps) {
         <Modal
             onCloseButtonClick={onModalClose}
             className={_cs(className, styles.mapModal)}
+            backdropClassName={styles.backdrop}
             size="large"
             heading={(
                 <Button

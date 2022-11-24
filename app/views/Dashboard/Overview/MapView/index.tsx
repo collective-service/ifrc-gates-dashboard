@@ -111,6 +111,10 @@ type BottomCountryType = NonNullable<TopBottomCountriesRankingQuery['bottomCount
 
 const countriesRankingKeySelector = (d: TopCountryType | BottomCountryType) => d.countryId;
 
+function interpolate(maxValue: number, minValue: number, steps: number, position: number) {
+    return minValue + ((maxValue - minValue) / steps) * position;
+}
+
 interface ClickedPoint {
     indicatorData: OverviewMapDataType,
     name: string,
@@ -367,22 +371,34 @@ function MapView(props: Props) {
 
     const countryFillPaint: mapboxgl.FillPaint = useMemo(() => {
         if (isNotDefined(lowestDataOnMap) || isNotDefined(highestDataOnMap)) {
-            return {};
+            return {
+                'fill-color': '#f0f0f0',
+                'fill-opacity': 0.7,
+            };
         }
+
         return {
             // Color each country on the basis of outbreak
             'fill-color': [
-                'interpolate',
-                ['linear'],
-                ['coalesce', ['feature-state', 'indicatorValue'], lowestDataOnMap],
-                ...(colors.map((color, index) => (
-                    [
-                        (highestDataOnMap / (colors.length - 1)) * index,
+                'case',
+                ['==', ['typeof', ['feature-state', 'indicatorValue']], 'number'],
+                [
+                    'interpolate',
+                    ['linear'],
+                    ['coalesce', ['feature-state', 'indicatorValue'], lowestDataOnMap],
+                    ...colors.flatMap((color, index) => ([
+                        interpolate(highestDataOnMap, lowestDataOnMap, colors.length - 1, index),
                         color,
-                    ]
-                )).flat()),
+                    ])),
+                ],
+                'white',
             ],
-            'fill-opacity': 0.9,
+            'fill-opacity': [
+                'case',
+                ['==', ['typeof', ['feature-state', 'indicatorValue']], 'number'],
+                0.9,
+                0,
+            ],
         };
     }, [
         highestDataOnMap,
@@ -409,6 +425,13 @@ function MapView(props: Props) {
             // FIXME: here "idmc_short" should be replaced with some other name
             const name = feature?.properties?.idmc_short;
 
+            const isValuePresent = (mapIndicatorState
+                ?.find((country) => country.iso === iso3)?.originalValue ?? 0) > 0;
+
+            if (!isValuePresent) {
+                return true;
+            }
+
             if (isDefined(name)) {
                 setCountryData({
                     iso3,
@@ -418,7 +441,10 @@ function MapView(props: Props) {
             }
             return true;
         },
-        [showMapModal],
+        [
+            mapIndicatorState,
+            showMapModal,
+        ],
     );
 
     const handleHoverIn = React.useCallback(

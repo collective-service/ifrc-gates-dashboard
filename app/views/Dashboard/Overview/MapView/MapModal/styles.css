@@ -37,6 +37,10 @@
     }
 }
 
+.backdrop {
+    z-index: 3;
+}
+
 .modal-description {
     display: flex;
     align-items: baseline;
