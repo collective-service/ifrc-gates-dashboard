@@ -35,7 +35,7 @@ import {
     TopBottomCountriesRankingQueryVariables,
 } from '#generated/types';
 import { formatNumber, FormatType } from '#utils/common';
-import { TabTypes } from '#views/Dashboard';
+import { TabTypes, IndicatorType } from '#views/Dashboard';
 import { FilterType } from '#views/Dashboard/Filters';
 
 import MapModal from './MapModal';
@@ -202,6 +202,7 @@ interface Props {
     subvariableId: string | undefined;
 
     indicatorExplicitlySet: boolean;
+    selectedIndicatorType: IndicatorType | undefined;
 }
 
 function MapView(props: Props) {
@@ -217,6 +218,7 @@ function MapView(props: Props) {
         subvariableId,
 
         indicatorExplicitlySet,
+        selectedIndicatorType,
     } = props;
 
     const [
@@ -608,6 +610,7 @@ function MapView(props: Props) {
                 {mapModalShown && countryData && (
                     <MapModal
                         onModalClose={hideMapModal}
+                        selectedIndicatorType={selectedIndicatorType}
                         setActiveTab={setActiveTab}
                         setFilterValues={setFilterValues}
                         indicatorId={indicatorId}

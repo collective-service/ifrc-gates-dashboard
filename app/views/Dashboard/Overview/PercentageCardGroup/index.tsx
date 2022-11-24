@@ -519,7 +519,7 @@ function PercentageCardGroup(props: Props) {
         getLineChartColor,
     ]);
 
-    const customRegionalTooltip = (tooltipProps: TooltipProps) => {
+    const customRegionalTooltip = useCallback((tooltipProps: TooltipProps) => {
         const {
             active,
             payload: regionalData,
@@ -538,8 +538,11 @@ function PercentageCardGroup(props: Props) {
             );
         }
         return null;
-    };
-    const customOutbreakTooltip = (outbreakTooltipProps: OutbreakTooltipProps) => {
+    }, [
+        filterValues?.indicator,
+    ]);
+
+    const customOutbreakTooltip = useCallback((outbreakTooltipProps: OutbreakTooltipProps) => {
         const {
             active,
             payload: outbreakData,
@@ -556,7 +559,7 @@ function PercentageCardGroup(props: Props) {
             );
         }
         return null;
-    };
+    }, []);
 
     return (
         <div className={_cs(className, styles.cardInfo)}>
@@ -568,76 +571,74 @@ function PercentageCardGroup(props: Props) {
                 statValue={totalCaseValue}
                 statValueLoading={loading}
             />
-            {uncertaintyChartActive
-                ? (
-                    <UncertaintyChart
-                        uncertainData={
-                            filterValues?.region
-                                ? uncertaintyRegionChart
-                                : uncertaintyGlobalChart
-                        }
+            {uncertaintyChartActive ? (
+                <UncertaintyChart
+                    uncertainData={
+                        filterValues?.region
+                            ? uncertaintyRegionChart
+                            : uncertaintyGlobalChart
+                    }
+                    loading={loading}
+                    emergencyFilterValue={filterValues?.outbreak}
+                    heading="Indicator overview over the last 12 months"
+                    headingDescription={`Trend chart for ${selectedIndicatorName ?? filterValues?.indicator} `}
+                />
+            ) : (
+                <ContainerCard
+                    className={styles.trendsCard}
+                    headingClassName={styles.headingContent}
+                    heading="Outbreak over last 12 months"
+                    headingSize="extraSmall"
+                    contentClassName={styles.responsiveContent}
+                    headerDescription={`New cases per million for ${filterValues?.outbreak}`}
+                >
+                    <ChartContainer
+                        className={styles.responsiveContainer}
+                        data={outbreakLineChart}
                         loading={loading}
-                        emergencyFilterValue={filterValues?.outbreak}
-                        heading="Indicator overview over the last 12 months"
-                        headingDescription={`Trend chart for ${selectedIndicatorName ?? filterValues?.indicator} `}
-                    />
-                ) : (
-                    <ContainerCard
-                        className={styles.trendsCard}
-                        headingClassName={styles.headingContent}
-                        heading="Outbreak over last 12 months"
-                        headingSize="extraSmall"
-                        contentClassName={styles.responsiveContent}
-                        headerDescription={`New cases per million for ${filterValues?.outbreak}`}
                     >
-                        <ChartContainer
-                            className={styles.responsiveContainer}
+                        <LineChart
                             data={outbreakLineChart}
-                            loading={loading}
+                            margin={{
+                                right: 20,
+                            }}
                         >
-                            <LineChart
-                                data={outbreakLineChart}
-                                margin={{
-                                    right: 20,
+                            <XAxis
+                                dataKey="contextDate"
+                                reversed
+                                tickLine={false}
+                                tickMargin={10}
+                                padding={{
+                                    right: 30,
+                                    left: 20,
                                 }}
-                            >
-                                <XAxis
-                                    dataKey="contextDate"
-                                    reversed
-                                    tickLine={false}
-                                    tickMargin={10}
-                                    padding={{
-                                        right: 30,
-                                        left: 20,
-                                    }}
-                                    fontSize={12}
-                                    interval={0}
-                                    tickFormatter={dateTickFormatter}
-                                    angle={-30}
-                                />
-                                <YAxis
-                                    axisLine={false}
-                                    tickLine={false}
-                                    padding={{ top: 12 }}
-                                    fontSize={12}
-                                    tickFormatter={normalizedTickFormatter}
-                                />
-                                <Tooltip
-                                    content={customOutbreakTooltip}
-                                />
-                                <Legend content={renderLegend} />
-                                <Line
-                                    type="monotone"
-                                    dataKey={filterValues?.outbreak}
-                                    stroke={getLineChartColor(filterValues?.outbreak)}
-                                    strokeWidth={2}
-                                    dot={false}
-                                />
-                            </LineChart>
-                        </ChartContainer>
-                    </ContainerCard>
-                )}
-
+                                fontSize={12}
+                                interval={0}
+                                tickFormatter={dateTickFormatter}
+                                angle={-30}
+                            />
+                            <YAxis
+                                axisLine={false}
+                                tickLine={false}
+                                padding={{ top: 12 }}
+                                fontSize={12}
+                                tickFormatter={normalizedTickFormatter}
+                            />
+                            <Tooltip
+                                content={customOutbreakTooltip}
+                            />
+                            <Legend content={renderLegend} />
+                            <Line
+                                type="monotone"
+                                dataKey={filterValues?.outbreak}
+                                stroke={getLineChartColor(filterValues?.outbreak)}
+                                strokeWidth={2}
+                                dot={false}
+                            />
+                        </LineChart>
+                    </ChartContainer>
+                </ContainerCard>
+            )}
             <ContainerCard
                 className={styles.regionsCard}
                 contentClassName={styles.responsiveContent}

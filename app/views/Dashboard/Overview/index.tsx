@@ -13,7 +13,7 @@ import PercentageCardGroup from './PercentageCardGroup';
 import MapView from './MapView';
 import OverviewTable from './OverviewTable';
 import { FilterType } from '../Filters';
-import { TabTypes } from '..';
+import { TabTypes, IndicatorType } from '..';
 import styles from './styles.css';
 
 function getMapSubHeader(
@@ -36,6 +36,7 @@ interface Props {
 
     selectedIndicatorName: string | undefined;
     selectedOutbreakName: string | undefined;
+    selectedIndicatorType: IndicatorType | undefined;
 }
 
 function Overview(props: Props) {
@@ -46,6 +47,7 @@ function Overview(props: Props) {
         setFilterValues,
 
         selectedIndicatorName,
+        selectedIndicatorType,
         selectedOutbreakName,
     } = props;
 
@@ -80,7 +82,7 @@ function Overview(props: Props) {
         <div className={_cs(className, styles.overviewMain)}>
             {((onlyIndicatorSelected || onlyOutbreakSelected || moreThanTwoFilterSelected) && (
                 <PercentageCardGroup
-                    uncertaintyChartActive={isIndicatorSelected}
+                    uncertaintyChartActive={isIndicatorSelected && selectedIndicatorType === 'Social Behavioural Indicators'}
                     filterValues={filterValues}
                     selectedIndicatorName={selectedIndicatorName}
                     selectedOutbreakName={selectedOutbreakName}
@@ -142,6 +144,7 @@ function Overview(props: Props) {
                                 setActiveTab={setActiveTab}
                                 setFilterValues={setFilterValues}
                                 indicatorExplicitlySet={!!indicatorId}
+                                selectedIndicatorType={selectedIndicatorType ?? undefined}
                             />
                         </TabPanel>
                         <TabPanel name="tableMode">

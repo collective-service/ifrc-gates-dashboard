@@ -465,12 +465,12 @@ function Dashboard() {
     ]);
 
     const selectedIndicatorType = useMemo(() => (
-        indicatorList?.filterOptions?.countryIndicators
+        selectedIndicatorList
             ?.find((ind) => ind.indicatorId === filterValues?.indicator)
             ?.type as IndicatorType
     ), [
         filterValues?.indicator,
-        indicatorList,
+        selectedIndicatorList,
     ]);
 
     const disableExportButton = exportMetaLoading
@@ -588,8 +588,9 @@ function Dashboard() {
                             filterValues={filterValues}
                             setActiveTab={setActiveTab}
                             setFilterValues={setFilterValues}
-                            selectedIndicatorName={selectedIndicatorName ?? undefined}
                             selectedOutbreakName={filterValues?.outbreak}
+                            selectedIndicatorName={selectedIndicatorName ?? undefined}
+                            selectedIndicatorType={selectedIndicatorType ?? undefined}
                         />
                     </TabPanel>
                     <TabPanel name="country">
