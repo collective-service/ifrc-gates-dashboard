@@ -14,12 +14,14 @@ import {
 import {
     ContainerCard,
     Element,
+    ListView,
 } from '@the-deep/deep-ui';
 import {
     compareDate,
     isNotDefined,
     isDefined,
     _cs,
+    compareNumber,
 } from '@togglecorp/fujs';
 import { IoSquare } from 'react-icons/io5';
 import { useQuery, gql } from '@apollo/client';
@@ -28,6 +30,8 @@ import PercentageStats from '#components/PercentageStats';
 import UncertaintyChart from '#components/UncertaintyChart';
 import ChartContainer from '#components/ChartContainer';
 import CustomTooltip from '#components/CustomTooltip';
+import ProgressBar from '#components/ProgressBar';
+import { IndicatorType } from '#views/Dashboard';
 
 import {
     decimalToPercentage,
@@ -222,6 +226,26 @@ const OVERVIEW_STATS = gql`
             format
             subvariable
         }
+        globalLevelSubvariables (
+            emergency: $emergency,
+            indicatorId: $indicatorId,
+            ) {
+            format
+            indicatorDescription
+            indicatorMonth
+            indicatorValue
+            subvariable
+        }
+          regionLevelSubvariables (
+            emergency: $emergency,
+            indicatorId: $indicatorId,
+            ) {
+            format
+            indicatorDescription
+            indicatorMonth
+            indicatorValue
+            subvariable
+        }
     }
 `;
 
@@ -231,6 +255,7 @@ interface Props {
     uncertaintyChartActive: boolean;
     selectedIndicatorName: string | undefined;
     selectedOutbreakName: string | undefined;
+    selectedIndicatorType: IndicatorType | undefined;
 }
 
 interface Payload {
@@ -256,6 +281,16 @@ interface OutbreakTooltipProps {
     }[];
 }
 
+interface GlobalRegionCard {
+    indicatorDescription?: string | null;
+    indicatorMonth: string;
+    indicatorValue?: number | null;
+    format?: string | null;
+    subvariable: string;
+}
+
+const globalRegionKeySelector = (d: GlobalRegionCard) => d.subvariable;
+
 function PercentageCardGroup(props: Props) {
     const {
         className,
@@ -263,6 +298,7 @@ function PercentageCardGroup(props: Props) {
         filterValues,
         selectedIndicatorName,
         selectedOutbreakName,
+        selectedIndicatorType,
     } = props;
 
     const getLineChartColor = useCallback((outbreak?: string) => {
@@ -334,6 +370,33 @@ function PercentageCardGroup(props: Props) {
     ), [
         overviewStatsResponse?.regionalBreakdownRegion,
         filterValues?.region,
+    ]);
+
+    const globalRegionCardList = useMemo(() => {
+        const global = [...(overviewStatsResponse?.globalLevelSubvariables) ?? []].sort(
+            (a, b) => compareNumber(b.indicatorValue, a.indicatorValue),
+        );
+        const region = [...(overviewStatsResponse?.regionLevelSubvariables) ?? []].sort(
+            (a, b) => compareNumber(b.indicatorValue, a.indicatorValue),
+        );
+
+        if (filterValues?.region) {
+            return region;
+        }
+        return global;
+    }, [
+        overviewStatsResponse?.globalLevelSubvariables,
+        overviewStatsResponse?.regionLevelSubvariables,
+        filterValues?.region,
+    ]);
+
+    const selectedGlobalRegion = useMemo(() => (
+        globalRegionCardList.find(
+            (select) => select.subvariable === filterValues?.subvariable,
+        )
+    ), [
+        globalRegionCardList,
+        filterValues?.subvariable,
     ]);
 
     const globalTotalCase = overviewStatsResponse?.totalCasesGlobal[0];
@@ -630,18 +693,58 @@ function PercentageCardGroup(props: Props) {
         return null;
     }, []);
 
+    const globalRegionRendererParams = useCallback((_, data: GlobalRegionCard) => ({
+        barName: filterValues?.subvariable === data.subvariable
+            ? (<b>{data.subvariable}</b>) : data.subvariable,
+        value: data.indicatorValue,
+        format: data.format as FormatType,
+        totalValue: 1,
+        color: '#98A6B5',
+        valueTitle: data.subvariable,
+    }), [filterValues?.subvariable]);
+
     return (
         <div className={_cs(className, styles.cardInfo)}>
-            <PercentageStats
-                className={styles.globalStatCard}
-                heading={cardHeader}
-                headerDescription={cardSubHeader}
-                headingSize="extraSmall"
-                statValue={totalCaseValue}
-                statValueLoading={loading}
-                indicatorMonth={percentageCardMonth}
-                uncertaintyRange={uncertaintyRange}
-            />
+            {selectedIndicatorType === 'Social Behavioural Indicators'
+                ? null
+                : (
+                    <PercentageStats
+                        className={styles.globalStatCard}
+                        heading={cardHeader}
+                        headerDescription={cardSubHeader}
+                        headingSize="extraSmall"
+                        statValue={totalCaseValue}
+                        statValueLoading={loading}
+                        indicatorMonth={percentageCardMonth}
+                        uncertaintyRange={uncertaintyRange}
+                    />
+                )}
+            {(globalRegionCardList && selectedIndicatorType === 'Social Behavioural Indicators') && (
+                <ContainerCard
+                    className={styles.percentageCard}
+                    heading="Global"
+                    headingSize="extraSmall"
+                    headerDescription={`${selectedGlobalRegion?.indicatorDescription} - ${filterValues?.subvariable}`}
+                    contentClassName={styles.globalDetails}
+                >
+                    <div className={styles.globalValue}>
+                        {formatNumber(
+                            selectedGlobalRegion?.format as FormatType,
+                            selectedGlobalRegion?.indicatorValue,
+                        )}
+                    </div>
+                    <ListView
+                        className={styles.globalProgressBar}
+                        renderer={ProgressBar}
+                        keySelector={globalRegionKeySelector}
+                        rendererParams={globalRegionRendererParams}
+                        data={globalRegionCardList}
+                        pending={loading}
+                        errored={false}
+                        filtered={false}
+                    />
+                </ContainerCard>
+            )}
             {uncertaintyChartActive ? (
                 <UncertaintyChart
                     uncertainData={

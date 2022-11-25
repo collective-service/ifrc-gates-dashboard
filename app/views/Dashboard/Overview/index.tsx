@@ -86,6 +86,7 @@ function Overview(props: Props) {
                     filterValues={filterValues}
                     selectedIndicatorName={selectedIndicatorName}
                     selectedOutbreakName={selectedOutbreakName}
+                    selectedIndicatorType={selectedIndicatorType}
                 />
             ))}
             {((noFiltersSelected || onlyRegionSelected) && (
