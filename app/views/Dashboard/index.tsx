@@ -4,25 +4,15 @@ import React, {
     useEffect,
     useState,
 } from 'react';
-import Papa from 'papaparse';
-import {
-    IoDownloadOutline,
-} from 'react-icons/io5';
-import { saveAs } from 'file-saver';
 import {
     Tabs,
     TabList,
     Tab,
     TabPanel,
-    DropdownMenu,
-    DropdownMenuItem,
     Header,
-    useModalState,
-    Modal,
-    Button,
 } from '@the-deep/deep-ui';
-import { isDefined, isNotDefined } from '@togglecorp/fujs';
 import { gql, useQuery } from '@apollo/client';
+import { isDefined, isNotDefined } from '@togglecorp/fujs';
 
 import useSessionStorage from '#hooks/useSessionStorage';
 import Narratives from '#components/Narratives';
@@ -36,16 +26,12 @@ import {
     SubvariablesQuery,
     SubvariablesQueryVariables,
     IndicatorsQueryVariables,
-    ExportMetaQuery,
-    ExportMetaQueryVariables,
 } from '#generated/types';
 import {
     getRegionForCountry,
-    formatNumber,
 } from '#utils/common';
-import useRecursiveCsvExport from '#hooks/useRecursiveCSVExport';
-import ProgressBar from '#components/ProgressBar';
 
+import Export from './Export';
 import Overview from './Overview';
 import Country from './Country';
 import CombinedIndicators from './CombinedIndicators';
@@ -57,7 +43,6 @@ import styles from './styles.css';
 
 export type TabTypes = 'country' | 'overview' | 'combinedIndicators';
 export type IndicatorType = 'Contextual Indicators' | 'Social Behavioural Indicators';
-type ExportTypes = 'raw' | 'summarized' | 'contextual';
 
 export const COUNTRIES_AND_OUTBREAKS = gql`
     query CountriesAndOutbreaks {
@@ -139,23 +124,6 @@ const SUBVARIABLES = gql`
     }
 `;
 
-const EXPORT_META = gql`
-    query ExportMeta(
-        $iso3: String,
-        $indicatorId:String
-    ) {
-        exportMeta(
-            iso3: $iso3,
-            indicatorId: $indicatorId,
-        ) {
-            maxPageLimit
-            totalCountryContextualDataCount
-            totalRawDataCount
-            totalSummaryCount
-        }
-    }
-`;
-
 function Dashboard() {
     const [
         activeTab,
@@ -169,12 +137,6 @@ function Dashboard() {
         advancedFilterValues,
         setAdvancedFilterValues,
     ] = useState<AdvancedOptionType | undefined>();
-
-    const [
-        confirmExportModalShown,
-        showExportConfirm,
-        hideExportConfirm,
-    ] = useModalState(false);
 
     const {
         data: countriesAndOutbreaks,
@@ -199,8 +161,6 @@ function Dashboard() {
             return {
                 iso3: filterValueCountry,
                 outbreak: filterValues?.outbreak,
-                // FIXME: what is this?
-                include_header: false,
             };
         }
         return undefined;
@@ -212,6 +172,7 @@ function Dashboard() {
     const {
         data: indicatorList,
         loading: indicatorsLoading,
+        refetch: retriggerCountryIndicators,
     } = useQuery<IndicatorsForCountryQuery, IndicatorsForCountryQueryVariables>(
         INDICATORS_FOR_COUNTRY,
         {
@@ -280,63 +241,6 @@ function Dashboard() {
         filterValues?.indicator,
     ]);
 
-    const exportParams = useMemo(() => {
-        if (isDefined(filterValues?.indicator) || isDefined(filterValueCountry)) {
-            return {
-                iso3: filterValueCountry,
-                indicator_id: filterValues?.indicator,
-                include_header: true,
-            };
-        }
-        return {};
-    }, [
-        filterValueCountry,
-        filterValues?.indicator,
-    ]);
-
-    const [
-        pendingExport,
-        progress,
-        triggerExportStart,
-    ] = useRecursiveCsvExport({
-        onFailure: (err) => {
-            // eslint-disable-next-line no-console
-            console.error('Failed to download!', err);
-        },
-        onSuccess: (data) => {
-            const unparseData = Papa.unparse(data);
-            const blob = new Blob(
-                [unparseData],
-                { type: 'text/csv' },
-            );
-            saveAs(blob, 'Data Export');
-        },
-    });
-
-    const exportMetaVariables = useMemo(() => {
-        if (isDefined(filterValues?.indicator) || isDefined(filterValueCountry)) {
-            return {
-                iso3: filterValueCountry,
-                indicatorId: filterValues?.indicator,
-            };
-        }
-        return undefined;
-    }, [
-        filterValueCountry,
-        filterValues?.indicator,
-    ]);
-
-    const {
-        data: exportMetaCount,
-        loading: exportMetaLoading,
-    } = useQuery<ExportMetaQuery, ExportMetaQueryVariables>(
-        EXPORT_META,
-        {
-            skip: !exportMetaVariables,
-            variables: exportMetaVariables,
-        },
-    );
-
     const {
         data: subvariableList,
         loading: subvariablesLoading,
@@ -362,7 +266,7 @@ function Dashboard() {
         },
     );
 
-    const handleActiveTabChange = (newActiveTab: TabTypes | undefined) => {
+    const handleActiveTabChange = useCallback((newActiveTab: TabTypes | undefined) => {
         setActiveTab(newActiveTab);
         if (newActiveTab === 'country') {
             setFilterValues((oldFilterValues) => {
@@ -380,53 +284,12 @@ function Dashboard() {
                 };
                 return newValueForRegion;
             });
+            retriggerCountryIndicators();
         }
-    };
-
-    const [selectedExport, setSelectedExport] = useState<ExportTypes | undefined>(undefined);
-
-    const handleExportClick = useCallback((name: ExportTypes) => {
-        setSelectedExport(name);
-        showExportConfirm();
     }, [
-        showExportConfirm,
-    ]);
-
-    const handleExportCancel = useCallback(() => {
-        setSelectedExport(undefined);
-        hideExportConfirm();
-    }, [
-        hideExportConfirm,
-    ]);
-
-    const handleExportConfirm = useCallback(() => {
-        if (selectedExport === 'raw' && exportMetaCount?.exportMeta?.totalRawDataCount) {
-            triggerExportStart(
-                'server://export-raw-data/',
-                exportMetaCount?.exportMeta?.totalRawDataCount,
-                exportParams,
-            );
-        } else if (selectedExport === 'summarized' && exportMetaCount?.exportMeta?.totalSummaryCount) {
-            triggerExportStart(
-                'server://export-summary/',
-                exportMetaCount?.exportMeta?.totalSummaryCount,
-                exportParams,
-            );
-        } else if (selectedExport === 'contextual' && exportMetaCount?.exportMeta?.totalCountryContextualDataCount) {
-            triggerExportStart(
-                'server://export-country-contextual-data/',
-                exportMetaCount?.exportMeta?.totalCountryContextualDataCount,
-                exportParams,
-            );
-        }
-        hideExportConfirm();
-        setSelectedExport(undefined);
-    }, [
-        hideExportConfirm,
-        exportParams,
-        triggerExportStart,
-        selectedExport,
-        exportMetaCount,
+        setActiveTab,
+        countriesAndOutbreaks?.countries,
+        retriggerCountryIndicators,
     ]);
 
     const narrativeVariables = useMemo((): NarrativeQueryVariables => ({
@@ -473,15 +336,6 @@ function Dashboard() {
         selectedIndicatorList,
     ]);
 
-    const disableExportButton = exportMetaLoading
-        || pendingExport
-        || isNotDefined(filterValueCountry || filterValues?.indicator)
-        || (
-            (exportMetaCount?.exportMeta?.totalRawDataCount ?? 0) === 0
-            && (exportMetaCount?.exportMeta?.totalSummaryCount ?? 0) === 0
-            && (exportMetaCount?.exportMeta?.totalCountryContextualDataCount ?? 0) === 0
-        );
-
     return (
         <div className={styles.dashboardNavigation}>
             <Tabs
@@ -497,44 +351,11 @@ function Dashboard() {
                             headingSize="extraLarge"
                         />
                         <div className={styles.dashboardButtons}>
-                            <DropdownMenu
+                            <Export
                                 className={styles.button}
-                                label={pendingExport
-                                    ? `Preparing Export (${formatNumber('percent', progress)})`
-                                    : 'Export'}
-                                variant="tertiary"
-                                icons={<IoDownloadOutline />}
-                                hideDropdownIcon
-                                disabled={disableExportButton}
-                            >
-                                {(exportMetaCount?.exportMeta?.totalRawDataCount ?? 0) > 0 && (
-                                    <DropdownMenuItem
-                                        name="raw"
-                                        onClick={handleExportClick}
-                                    >
-                                        Export Raw Data as CSV
-                                    </DropdownMenuItem>
-                                )}
-                                {(exportMetaCount?.exportMeta?.totalSummaryCount ?? 0) > 0 && (
-                                    <DropdownMenuItem
-                                        name="summarized"
-                                        onClick={handleExportClick}
-                                    >
-                                        Export Summarized Data
-                                    </DropdownMenuItem>
-                                )}
-                                {(exportMetaCount
-                                    ?.exportMeta
-                                    ?.totalCountryContextualDataCount ?? 0) > 0
-                                && (
-                                    <DropdownMenuItem
-                                        name="contextual"
-                                        onClick={handleExportClick}
-                                    >
-                                        Export Contextual Country Data
-                                    </DropdownMenuItem>
-                                )}
-                            </DropdownMenu>
+                                indicatorId={filterValues?.indicator}
+                                countryId={filterValueCountry}
+                            />
                             <TabList className={styles.dashboardTabList}>
                                 <Tab
                                     name="overview"
@@ -610,50 +431,6 @@ function Dashboard() {
                     </TabPanel>
                 </div>
             </Tabs>
-            {pendingExport && (
-                <div className={styles.exportProgressPopup}>
-                    <div className={styles.topContainer}>
-                        Preparing Export...
-                    </div>
-                    <ProgressBar
-                        className={styles.progressBar}
-                        color="var(--dui-color-brand)"
-                        barName={undefined}
-                        value={progress}
-                        totalValue={1}
-                        format="percent"
-                        hideTooltip
-                    />
-                </div>
-            )}
-            {confirmExportModalShown && (
-                <Modal
-                    heading="Export Confirmation"
-                    onCloseButtonClick={handleExportCancel}
-                    freeHeight
-                    footerActions={(
-                        <>
-                            <Button
-                                name={undefined}
-                                onClick={handleExportCancel}
-                                variant="secondary"
-                            >
-                                Cancel
-                            </Button>
-                            <Button
-                                name={undefined}
-                                onClick={handleExportConfirm}
-                            >
-                                Continue
-                            </Button>
-                        </>
-                    )}
-                >
-                    Exporting data for your current selection
-                    might take a bit of time due to its size.
-                    Are you sure you want to continue?
-                </Modal>
-            )}
         </div>
     );
 }

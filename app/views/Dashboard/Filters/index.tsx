@@ -294,33 +294,37 @@ function Filters(props: Props) {
                         groupLabelSelector={(item) => item.region || 'Unnamed'}
                     />
                 )}
-                <SelectInput
-                    className={styles.indicatorSelectInput}
-                    name="indicator"
-                    options={indicatorList}
-                    placeholder="Indicator"
-                    keySelector={indicatorKeySelector}
-                    labelSelector={indicatorLabelSelector}
-                    value={value?.indicator}
-                    onChange={handleInputChange}
-                    variant="general"
-                    disabled={indicatorsLoading}
-                    grouped
-                    groupKeySelector={indicatorGroupKeySelector}
-                    groupLabelSelector={indicatorGroupLabelSelector}
-                />
-                {value?.indicator && (
-                    <SelectInput
-                        name="subvariable"
-                        options={subvariables}
-                        placeholder="Sub-indicator"
-                        keySelector={subvariableKeySelector}
-                        labelSelector={subvariableLabelSelector}
-                        value={value?.subvariable}
-                        onChange={handleInputChange}
-                        variant="general"
-                        disabled={indicatorsLoading || subvariablesLoading}
-                    />
+                {(activeTab === 'overview' || activeTab === 'country') && (
+                    <>
+                        <SelectInput
+                            className={styles.indicatorSelectInput}
+                            name="indicator"
+                            options={indicatorList}
+                            placeholder="Indicator"
+                            keySelector={indicatorKeySelector}
+                            labelSelector={indicatorLabelSelector}
+                            value={value?.indicator}
+                            onChange={handleInputChange}
+                            variant="general"
+                            disabled={indicatorsLoading}
+                            grouped
+                            groupKeySelector={indicatorGroupKeySelector}
+                            groupLabelSelector={indicatorGroupLabelSelector}
+                        />
+                        {value?.indicator && (
+                            <SelectInput
+                                name="subvariable"
+                                options={subvariables}
+                                placeholder="Sub-indicator"
+                                keySelector={subvariableKeySelector}
+                                labelSelector={subvariableLabelSelector}
+                                value={value?.subvariable}
+                                onChange={handleInputChange}
+                                variant="general"
+                                disabled={indicatorsLoading || subvariablesLoading}
+                            />
+                        )}
+                    </>
                 )}
                 <Button
                     name={undefined}
