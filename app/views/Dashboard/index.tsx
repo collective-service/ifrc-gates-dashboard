@@ -66,6 +66,7 @@ const NARRATIVES = gql`
         $topicIsnull: Boolean,
         $thematicIsnull: Boolean,
         $indicatorIdIsnull: Boolean,
+        $iso3Isnull: Boolean,
     ) {
         narratives (
             filters: {
@@ -75,6 +76,7 @@ const NARRATIVES = gql`
                 topicIsnull: $topicIsnull,
                 thematicIsnull: $thematicIsnull,
                 indicatorIdIsnull: $indicatorIdIsnull,
+                iso3Isnull: $iso3Isnull,
             }
         ) {
             id
@@ -309,12 +311,17 @@ function Dashboard() {
 
     const narrativeVariables = useMemo((): NarrativeQueryVariables => ({
         iso3: filterValues?.country ?? '',
-        indicatorId: filterValues?.indicator ?? '',
-        topic: advancedFilterValues?.topic ?? '',
+        indicatorId: filterValues?.indicator,
+        topic: advancedFilterValues?.topic,
+        topicIsnull: isNotDefined(advancedFilterValues?.topic),
+        indicatorIdIsnull: isNotDefined(filterValues?.indicator),
+        iso3Isnull: isNotDefined(filterValues?.country),
+        thematicIsnull: isNotDefined(advancedFilterValues?.thematic),
     }), [
         filterValues?.country,
         filterValues?.indicator,
         advancedFilterValues?.topic,
+        advancedFilterValues?.thematic
     ]);
 
     const {
