@@ -321,7 +321,7 @@ function Dashboard() {
         filterValues?.country,
         filterValues?.indicator,
         advancedFilterValues?.topic,
-        advancedFilterValues?.thematic
+        advancedFilterValues?.thematic,
     ]);
 
     const {
@@ -329,6 +329,7 @@ function Dashboard() {
     } = useQuery<NarrativeQuery, NarrativeQueryVariables>(
         NARRATIVES,
         {
+            skip: activeTab === 'overview',
             variables: narrativeVariables,
         },
     );
