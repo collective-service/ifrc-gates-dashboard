@@ -61,13 +61,30 @@ export const COUNTRIES_AND_OUTBREAKS = gql`
 const NARRATIVES = gql`
     query Narrative(
         $iso3: String,
+        $indicatorId: String,
+        $topic: String,
+        $topicIsnull: Boolean,
+        $thematicIsnull: Boolean,
+        $indicatorIdIsnull: Boolean,
+        $iso3Isnull: Boolean,
     ) {
         narratives (
             filters: {
                 iso3: $iso3,
+                indicatorId: $indicatorId,
+                topic: $topic,
+                topicIsnull: $topicIsnull,
+                thematicIsnull: $thematicIsnull,
+                indicatorIdIsnull: $indicatorIdIsnull,
+                iso3Isnull: $iso3Isnull,
             }
         ) {
+            id
+            topic
+            thematic
             narrative
+            iso3
+            indicatorId
         }
     }
 `;
@@ -293,9 +310,18 @@ function Dashboard() {
     ]);
 
     const narrativeVariables = useMemo((): NarrativeQueryVariables => ({
-        iso3: filterValues?.country,
+        iso3: filterValues?.country ?? '',
+        indicatorId: filterValues?.indicator,
+        topic: advancedFilterValues?.topic,
+        topicIsnull: isNotDefined(advancedFilterValues?.topic),
+        indicatorIdIsnull: isNotDefined(filterValues?.indicator),
+        iso3Isnull: isNotDefined(filterValues?.country),
+        thematicIsnull: isNotDefined(advancedFilterValues?.thematic),
     }), [
         filterValues?.country,
+        filterValues?.indicator,
+        advancedFilterValues?.topic,
+        advancedFilterValues?.thematic,
     ]);
 
     const {
@@ -303,6 +329,7 @@ function Dashboard() {
     } = useQuery<NarrativeQuery, NarrativeQueryVariables>(
         NARRATIVES,
         {
+            skip: activeTab === 'overview',
             variables: narrativeVariables,
         },
     );
@@ -381,7 +408,7 @@ function Dashboard() {
                             </TabList>
                         </div>
                         {/* TODO: 1 object will be fetched */}
-                        {activeTab !== 'overview' && (
+                        {(activeTab !== 'overview' && narrativeResponse?.narratives) && (
                             <Narratives
                                 narrative={narrativeStatement}
                             />
