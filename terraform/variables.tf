@@ -11,5 +11,5 @@ variable dashboard_s3_bucket {
 }
 
 variable domain_name {
-  default = "ifrc-gates.dev.datafriendlyspace.org"
+  default = "dashboard.collective-service.net"
 }
