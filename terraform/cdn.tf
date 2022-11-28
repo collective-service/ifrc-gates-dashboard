@@ -48,14 +48,14 @@ resource "aws_cloudfront_distribution" "website_cdn" {
   }
 
   aliases = [
-    "dashboard.${var.domain_name}"
+    "${var.domain_name}"
   ]
 }
 
 resource "aws_route53_record" "cloudfront_record" {
     zone_id = data.aws_route53_zone.route53_zone.zone_id
     type = "A"
-    name = "dashboard.${var.domain_name}"
+    name = "${var.domain_name}"
     alias {
       name = aws_cloudfront_distribution.website_cdn.domain_name
       zone_id = aws_cloudfront_distribution.website_cdn.hosted_zone_id
