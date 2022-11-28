@@ -239,6 +239,7 @@ const OVERVIEW_STATS = gql`
           regionLevelSubvariables (
             emergency: $emergency,
             indicatorId: $indicatorId,
+            region: $region,
             ) {
             format
             indicatorDescription
