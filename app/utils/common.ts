@@ -137,7 +137,7 @@ export function formatNumber(
     totalValue?: number,
 ) {
     if (isNotDefined(value) || value === null) {
-        return 'N/A';
+        return undefined;
     }
     if (format === 'thousand') {
         return `${Math.round(value / 100) / 10}K`;

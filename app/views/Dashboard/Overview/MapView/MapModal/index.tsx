@@ -293,8 +293,12 @@ function MapModal(props: ModalProps) {
             let uncertainRange;
 
             if (country.errorMargin) {
-                negativeRange = bound(country.indicatorValue - country.errorMargin, 0, 1);
-                positiveRange = bound(country.indicatorValue + country.errorMargin, 0, 1);
+                negativeRange = decimalToPercentage(
+                    bound(country.indicatorValue - country.errorMargin, 0, 1),
+                );
+                positiveRange = decimalToPercentage(
+                    bound(country.indicatorValue + country.errorMargin, 0, 1),
+                );
                 uncertainRange = [negativeRange, positiveRange];
             }
 

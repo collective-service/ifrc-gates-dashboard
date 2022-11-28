@@ -22,6 +22,7 @@ import {
     isDefined,
     _cs,
     compareNumber,
+    bound,
 } from '@togglecorp/fujs';
 import { IoSquare } from 'react-icons/io5';
 import { useQuery, gql } from '@apollo/client';
@@ -436,6 +437,16 @@ function PercentageCardGroup(props: Props) {
         regionTotalCase?.format,
     ]);
 
+    const outbreakSubHeader = useMemo(() => {
+        if (selectedIndicatorName) {
+            return `Trend chart for ${selectedIndicatorName ?? filterValues?.indicator}`;
+        }
+        return `New cases per million for ${selectedOutbreakName}`;
+    }, [filterValues?.indicator,
+        selectedIndicatorName,
+        selectedOutbreakName,
+    ]);
+
     const totalCaseValue = useMemo(() => {
         if (filterValues?.region) {
             return formatNumber(
@@ -478,7 +489,10 @@ function PercentageCardGroup(props: Props) {
                 regionTotalCase.indicatorValue,
                 regionTotalCase.errorMargin,
             );
-            const range = `${negativeRange} - ${positiveRange}`;
+
+            const range = regionTotalCase?.format === 'percent'
+                ? `[${negativeRange}% - ${positiveRange}%]`
+                : `[${negativeRange} - ${positiveRange}]`;
             return range;
         }
         if (filterValues?.indicator
@@ -492,7 +506,10 @@ function PercentageCardGroup(props: Props) {
                 globalTotalCase?.indicatorValueGlobal,
                 globalTotalCase?.errorMargin,
             );
-            const range = `${negativeRange} - ${positiveRange}`;
+
+            const range = globalTotalCase?.format === 'percent'
+                ? `[${negativeRange}% - ${positiveRange}%]`
+                : `[${negativeRange} - ${positiveRange}]`;
             return range;
         }
         return undefined;
@@ -502,6 +519,8 @@ function PercentageCardGroup(props: Props) {
         globalTotalCase?.type,
         globalTotalCase?.errorMargin,
         globalTotalCase?.indicatorValueGlobal,
+        globalTotalCase?.format,
+        regionTotalCase?.format,
         regionTotalCase?.errorMargin,
         regionTotalCase?.indicatorValue,
     ]);
@@ -539,9 +558,12 @@ function PercentageCardGroup(props: Props) {
                     negativeRange,
                     positiveRange,
                 ],
-                // FIXME : solve in common ts
-                minimumValue: negativeRange ?? 0,
-                maximumValue: positiveRange,
+                minimumValue: isDefined(global.indicatorValueGlobal)
+                    ? bound(global.indicatorValueGlobal - global.errorMargin, 0, 1)
+                    : undefined,
+                maximumValue: isDefined(global.indicatorValueGlobal)
+                    ? bound(global.indicatorValueGlobal + global.errorMargin, 0, 1)
+                    : undefined,
                 indicatorName: global.indicatorName,
                 indicatorType: global.type,
                 errorMargin: global.errorMargin,
@@ -586,9 +608,12 @@ function PercentageCardGroup(props: Props) {
                     negativeRange,
                     positiveRange,
                 ],
-                // FIXME : solve in common ts
-                minimumValue: negativeRange ?? 0,
-                maximumValue: positiveRange,
+                minimumValue: isDefined(region.indicatorValueRegional)
+                    ? bound(region.indicatorValueRegional - region.errorMargin, 0, 1)
+                    : undefined,
+                maximumValue: isDefined(region.indicatorValueRegional)
+                    ? bound(region.indicatorValueRegional + region.errorMargin, 0, 1)
+                    : undefined,
                 region: region.region,
                 indicatorName: region.indicatorName,
                 indicatorType: region.type,
@@ -762,10 +787,12 @@ function PercentageCardGroup(props: Props) {
                 <ContainerCard
                     className={styles.trendsCard}
                     headingClassName={styles.headingContent}
-                    heading="Outbreak over last 12 months"
+                    heading={selectedIndicatorType
+                        ? 'Indicator overview over the last 12 months'
+                        : 'Outbreak over the last 12 months'}
                     headingSize="extraSmall"
                     contentClassName={styles.responsiveContent}
-                    headerDescription={`New cases per million for ${filterValues?.outbreak}`}
+                    headerDescription={outbreakSubHeader}
                 >
                     <ChartContainer
                         className={styles.responsiveContainer}
