@@ -76,7 +76,7 @@ function Overview(props: Props) {
     const indicatorIdForOverviewMapAndTable = indicatorId ?? 'new_cases_per_million';
     const indicatorNameForOverviewMapAndTable = indicatorId
         ? (selectedIndicatorName ?? indicatorId)
-        : 'New cases for per million by country';
+        : 'New cases per million by country';
 
     return (
         <div className={_cs(className, styles.overviewMain)}>
@@ -104,7 +104,7 @@ function Overview(props: Props) {
                         spacing="none"
                         heading={
                             currentTab === 'mapMode'
-                                ? 'Overview map'
+                                ? 'Overview Map'
                                 : 'Overview Table'
                         }
                         headingSize="small"

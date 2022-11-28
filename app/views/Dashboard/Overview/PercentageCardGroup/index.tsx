@@ -437,6 +437,16 @@ function PercentageCardGroup(props: Props) {
         regionTotalCase?.format,
     ]);
 
+    const outbreakSubHeader = useMemo(() => {
+        if (selectedIndicatorName) {
+            return `Trend chart for ${selectedIndicatorName ?? filterValues?.indicator}`;
+        }
+        return `New cases per million for ${selectedOutbreakName}`;
+    }, [filterValues?.indicator,
+        selectedIndicatorName,
+        selectedOutbreakName,
+    ]);
+
     const totalCaseValue = useMemo(() => {
         if (filterValues?.region) {
             return formatNumber(
@@ -777,10 +787,12 @@ function PercentageCardGroup(props: Props) {
                 <ContainerCard
                     className={styles.trendsCard}
                     headingClassName={styles.headingContent}
-                    heading="Outbreak over last 12 months"
+                    heading={selectedIndicatorType
+                        ? 'Indicator overview over the last 12 months'
+                        : 'Outbreak over the last 12 months'}
                     headingSize="extraSmall"
                     contentClassName={styles.responsiveContent}
-                    headerDescription={`New cases per million for ${filterValues?.outbreak}`}
+                    headerDescription={outbreakSubHeader}
                 >
                     <ChartContainer
                         className={styles.responsiveContainer}
