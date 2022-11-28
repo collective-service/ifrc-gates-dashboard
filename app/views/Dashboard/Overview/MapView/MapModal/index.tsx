@@ -162,13 +162,12 @@ interface ModalProps {
     countryData: { iso3: string; name: string };
     indicatorMonth?: string;
     format?: FormatType;
-
     indicatorValue?: number;
     indicatorId: string;
     outbreakId: string | undefined;
-
     indicatorExplicitlySet: boolean;
     selectedIndicatorType: IndicatorType | undefined;
+    filterValues?: FilterType
 }
 
 function MapModal(props: ModalProps) {
@@ -183,9 +182,9 @@ function MapModal(props: ModalProps) {
         indicatorValue,
         indicatorId,
         outbreakId,
-
         selectedIndicatorType,
         indicatorExplicitlySet,
+        filterValues,
     } = props;
 
     const subvariablesVariables = useMemo(() => (
@@ -412,58 +411,66 @@ function MapModal(props: ModalProps) {
             freeHeight
         >
             {(!indicatorExplicitlySet || selectedIndicatorType === 'Contextual Indicators') ? (
-                <div className={styles.chartContainer}>
-                    <ChartContainer
-                        data={emergencyLineChart}
-                        loading={countryResponseLoading}
-                    >
-                        <LineChart
+                <>
+                    {
+                        filterValues?.indicator
+                            ? <div>Indicator overview over the last 12 months</div>
+                            : <div>Outbreaks overview over the last 12 months</div>
+
+                    }
+                    <div className={styles.chartContainer}>
+                        <ChartContainer
                             data={emergencyLineChart}
-                            margin={{
-                                right: 10,
-                            }}
+                            loading={countryResponseLoading}
                         >
-                            <XAxis
-                                dataKey="date"
-                                tickLine={false}
-                                padding={{
-                                    right: 30,
-                                    left: 20,
+                            <LineChart
+                                data={emergencyLineChart}
+                                margin={{
+                                    right: 10,
                                 }}
-                                fontSize={12}
-                                interval={0}
-                                angle={-30}
-                                tickMargin={10}
-                                tickFormatter={dateTickFormatter}
-                            />
-                            <YAxis
-                                axisLine={false}
-                                tickLine={false}
-                                fontSize={12}
-                                padding={{ top: 5 }}
-                                tickFormatter={normalizedTickFormatter}
-                            />
-                            <Legend
-                                iconType="rect"
-                                align="right"
-                                verticalAlign="bottom"
-                            />
-                            <Tooltip
-                                content={customOutbreakTooltip}
-                            />
-                            {outbreaks.map((outbreak) => (
-                                <Line
-                                    key={outbreak.emergency}
-                                    dataKey={outbreak.emergency}
-                                    type="monotone"
-                                    stroke={outbreak.fill}
-                                    strokeWidth={3}
-                                    dot={false}
+                            >
+                                <XAxis
+                                    dataKey="date"
+                                    tickLine={false}
+                                    padding={{
+                                        right: 30,
+                                        left: 20,
+                                    }}
+                                    fontSize={12}
+                                    interval={0}
+                                    angle={-30}
+                                    tickMargin={10}
+                                    tickFormatter={dateTickFormatter}
                                 />
-                            ))}
-                        </LineChart>
-                    </ChartContainer>
-                </div>
+                                <YAxis
+                                    axisLine={false}
+                                    tickLine={false}
+                                    fontSize={12}
+                                    padding={{ top: 5 }}
+                                    tickFormatter={normalizedTickFormatter}
+                                />
+                                <Legend
+                                    iconType="rect"
+                                    align="right"
+                                    verticalAlign="bottom"
+                                />
+                                <Tooltip
+                                    content={customOutbreakTooltip}
+                                />
+                                {outbreaks.map((outbreak) => (
+                                    <Line
+                                        key={outbreak.emergency}
+                                        dataKey={outbreak.emergency}
+                                        type="monotone"
+                                        stroke={outbreak.fill}
+                                        strokeWidth={3}
+                                        dot={false}
+                                    />
+                                ))}
+                            </LineChart>
+                        </ChartContainer>
+                    </div>
+                </>
             ) : (
                 <UncertaintyChart
                     className={styles.chartContainer}

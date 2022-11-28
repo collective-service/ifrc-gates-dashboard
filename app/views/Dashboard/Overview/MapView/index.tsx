@@ -191,18 +191,16 @@ function Tooltip(props: TooltipProps) {
 
 interface Props {
     className?: string;
-
     setActiveTab: React.Dispatch<React.SetStateAction<TabTypes | undefined>>;
     setFilterValues: React.Dispatch<React.SetStateAction<FilterType | undefined>>;
-
     selectedIndicatorName: string;
     indicatorId: string;
     regionId: string | undefined;
     outbreakId: string | undefined;
     subvariableId: string | undefined;
-
     indicatorExplicitlySet: boolean;
     selectedIndicatorType: IndicatorType | undefined;
+    filterValues?: FilterType;
 }
 
 function MapView(props: Props) {
@@ -210,15 +208,14 @@ function MapView(props: Props) {
         className,
         setActiveTab,
         setFilterValues,
-
         selectedIndicatorName,
         indicatorId,
         regionId,
         outbreakId,
         subvariableId,
-
         indicatorExplicitlySet,
         selectedIndicatorType,
+        filterValues,
     } = props;
 
     const [
@@ -622,6 +619,7 @@ function MapView(props: Props) {
                         format={mapDataForSelectedCountry?.format as (FormatType | undefined)}
                         indicatorValue={mapDataForSelectedCountry?.indicatorValue}
                         indicatorExplicitlySet={indicatorExplicitlySet}
+                        filterValues={filterValues}
                     />
                 )}
             </ContainerCard>
