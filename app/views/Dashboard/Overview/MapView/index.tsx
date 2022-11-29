@@ -460,6 +460,8 @@ function MapView(props: Props) {
                     name: feature?.properties?.idmc_short ?? indicatorData?.iso3,
                     lngLat,
                 });
+            } else {
+                setMapClickProperties(undefined);
             }
             return true;
         },

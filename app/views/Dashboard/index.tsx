@@ -301,12 +301,15 @@ function Dashboard() {
                 };
                 return newValueForRegion;
             });
-            retriggerCountryIndicators();
+            if (indicatorListForCountryVariables) {
+                retriggerCountryIndicators();
+            }
         }
     }, [
         setActiveTab,
         countriesAndOutbreaks?.countries,
         retriggerCountryIndicators,
+        indicatorListForCountryVariables,
     ]);
 
     const narrativeVariables = useMemo((): NarrativeQueryVariables => ({
