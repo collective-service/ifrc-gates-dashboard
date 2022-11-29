@@ -1,6 +1,6 @@
-# RCCE Collective Service Dashboard
+# Collective Service Dashboard
 
-Client side React components for RCCE Collective Service Project
+Client side React components for Collective Service Project
 
 ## Development
 
