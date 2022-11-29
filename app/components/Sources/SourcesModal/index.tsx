@@ -34,6 +34,7 @@ function SourcesModal(props: Props) {
         <Modal
             size="medium"
             onCloseButtonClick={onModalClose}
+            backdropClassName={styles.backdrop}
             heading="Sources"
             headingClassName={styles.sourceHeading}
         >
