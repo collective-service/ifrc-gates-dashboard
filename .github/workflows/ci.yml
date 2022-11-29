@@ -1,7 +1,6 @@
 name: Dashboard Workflow
 
 on:
-  pull_request:
   push:
     branches:
       - deploy/terraform
