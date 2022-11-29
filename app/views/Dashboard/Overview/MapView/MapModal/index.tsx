@@ -32,6 +32,8 @@ import {
     getShortMonth,
     normalFormatter,
     colors,
+    negativeToZero,
+    positiveToZero,
 } from '#utils/common';
 import { FilterType } from '#views/Dashboard/Filters';
 import {
@@ -279,40 +281,44 @@ function MapModal(props: ModalProps) {
 
     const uncertaintyChart: UncertainData[] | undefined = useMemo(() => (
         countryResponse?.dataCountryLevel.map((country) => {
-            if (isNotDefined(country.indicatorValue)) {
-                return undefined;
+            const negativeRange = negativeToZero(country.indicatorValue, country.errorMargin);
+            const positiveRange = positiveToZero(country.indicatorValue, country.errorMargin);
+
+            if (isNotDefined(country.errorMargin)) {
+                return {
+                    emergency: country.emergency,
+                    indicatorValue: country.format === 'percent'
+                        ? decimalToPercentage(country.indicatorValue)
+                        : country.indicatorValue,
+                    tooltipValue: country.indicatorValue,
+                    date: country.indicatorMonth,
+                    indicatorName: country.indicatorName,
+                    format: country.format as FormatType,
+                    interpolated: country.interpolated,
+                    subvariable: country.subvariable,
+                };
             }
-
-            let negativeRange;
-            let positiveRange;
-            let uncertainRange;
-
-            if (country.errorMargin) {
-                negativeRange = decimalToPercentage(
-                    bound(country.indicatorValue - country.errorMargin, 0, 1),
-                );
-                positiveRange = decimalToPercentage(
-                    bound(country.indicatorValue + country.errorMargin, 0, 1),
-                );
-                uncertainRange = [negativeRange, positiveRange];
-            }
-
-            const numFormat = country.format as FormatType;
 
             return {
                 emergency: country.emergency,
-                indicatorValue: numFormat === 'percent'
+                indicatorValue: country.format === 'percent'
                     ? decimalToPercentage(country.indicatorValue)
                     : country.indicatorValue,
                 tooltipValue: country.indicatorValue,
                 date: country.indicatorMonth,
-
-                uncertainRange,
-                minimumValue: negativeRange,
-                maximumValue: positiveRange,
-
+                // FIXME : Solve the issue of negativeToZero and positiveToZero
+                uncertainRange: [
+                    negativeRange ?? 0,
+                    positiveRange ?? 0,
+                ],
+                minimumValue: isDefined(country.indicatorValue)
+                    ? bound(country.indicatorValue - country.errorMargin, 0, 1)
+                    : undefined,
+                maximumValue: isDefined(country.indicatorValue)
+                    ? bound(country.indicatorValue + country.errorMargin, 0, 1)
+                    : undefined,
                 indicatorName: country.indicatorName,
-                format: numFormat,
+                format: country.format as FormatType,
                 interpolated: country.interpolated,
                 subvariable: country.subvariable,
             };
@@ -442,13 +448,20 @@ function MapModal(props: ModalProps) {
                                     axisLine={false}
                                     tickLine={false}
                                     fontSize={12}
-                                    padding={{ top: 5 }}
                                     tickFormatter={normalizedTickFormatter}
+                                    padding={{
+                                        top: 5,
+                                        bottom: 10,
+                                    }}
                                 />
                                 <Legend
                                     iconType="rect"
                                     align="right"
                                     verticalAlign="bottom"
+                                    iconSize={14}
+                                    wrapperStyle={{
+                                        paddingTop: 20,
+                                    }}
                                 />
                                 <Tooltip
                                     content={customOutbreakTooltip}
