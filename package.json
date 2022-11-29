@@ -1,6 +1,6 @@
 {
-    "name": "rcce-collective-services",
-    "longName": "RCCE Collective Services",
+    "name": "collective-services",
+    "longName": "Collective Services",
     "version": "1.0.0",
     "description": "React components for IFRC Gates Dashboard website",
     "scripts": {
