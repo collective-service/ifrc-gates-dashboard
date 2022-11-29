@@ -8,6 +8,7 @@ import {
     compareDate,
     isDefined,
     compareNumber,
+    bound,
 } from '@togglecorp/fujs';
 import {
     LineChart,
@@ -688,13 +689,17 @@ function Country(props: Props) {
                     : country.indicatorValue,
                 tooltipValue: country.indicatorValue,
                 date: country.indicatorMonth,
+                // FIXME : Solve the issue of negativeToZero and positiveToZero
                 uncertainRange: [
                     negativeRange ?? 0,
                     positiveRange ?? 0,
                 ],
-                // FIXME : solve in common ts
-                minimumValue: negativeRange ?? 0,
-                maximumValue: positiveRange,
+                minimumValue: isDefined(country.indicatorValue)
+                    ? bound(country.indicatorValue - country.errorMargin, 0, 1)
+                    : undefined,
+                maximumValue: isDefined(country.indicatorValue)
+                    ? bound(country.indicatorValue + country.errorMargin, 0, 1)
+                    : undefined,
                 indicatorName: country.indicatorName,
                 format: country.format as FormatType,
                 interpolated: country.interpolated,
