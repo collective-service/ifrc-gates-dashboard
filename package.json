@@ -1,6 +1,6 @@
 {
-    "name": "collective-services",
-    "longName": "Collective Services",
+    "name": "collective-service",
+    "longName": "Collective Service",
     "version": "1.0.0",
     "description": "React components for IFRC Gates Dashboard website",
     "scripts": {

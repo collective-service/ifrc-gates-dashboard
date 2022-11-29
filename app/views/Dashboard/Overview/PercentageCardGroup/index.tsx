@@ -714,6 +714,29 @@ function PercentageCardGroup(props: Props) {
         valueTitle: data.subvariable,
     }), [filterValues?.subvariable]);
 
+    const headingTest = useMemo((): string | undefined => {
+        const isRegionSelected = isDefined(filterValues?.region);
+
+        if (isRegionSelected) {
+            // eslint-disable-next-line max-len
+            const firstRegionalLevelSubvariable = overviewStatsResponse?.regionLevelSubvariables?.[0];
+            if (isDefined(firstRegionalLevelSubvariable)) {
+                return firstRegionalLevelSubvariable.indicatorDescription ?? selectedIndicatorName;
+            }
+            return selectedIndicatorName;
+        }
+        const firstGlobalLevelSubvariable = overviewStatsResponse?.globalLevelSubvariables?.[0];
+
+        if (isDefined(firstGlobalLevelSubvariable)) {
+            return firstGlobalLevelSubvariable.indicatorDescription ?? selectedIndicatorName;
+        }
+        return selectedIndicatorName;
+    }, [
+        filterValues?.region,
+        overviewStatsResponse,
+        selectedIndicatorName,
+    ]);
+
     return (
         <div className={_cs(className, styles.cardInfo)}>
             {selectedIndicatorType === 'Social Behavioural Indicators'
@@ -731,40 +754,40 @@ function PercentageCardGroup(props: Props) {
                     />
                 )}
             {(selectedIndicatorType === 'Social Behavioural Indicators') && (
-                <ChartContainer
+                <ContainerCard
                     className={styles.percentageCard}
-                    data={globalRegionCardList}
-                    loading={loading}
+                    heading="Global"
+                    headingSize="extraSmall"
+                    headerDescription={headingTest}
+                    contentClassName={styles.globalDetails}
                 >
-                    <ContainerCard
-                        className={styles.percentageCard}
-                        heading="Global"
-                        headingSize="extraSmall"
-                        headerDescription={`${filterValues?.region
-                            ? overviewStatsResponse?.regionLevelSubvariables[0].indicatorDescription ?? ''
-                            : overviewStatsResponse?.globalLevelSubvariables[0].indicatorDescription ?? ''} - ${filterValues?.subvariable}`}
-                        contentClassName={styles.globalDetails}
+                    <ChartContainer
+                        className={styles.globalChartContainer}
+                        data={globalRegionCardList}
+                        loading={loading}
                     >
-                        <div className={styles.globalValue}>
-                            {selectedGlobalRegion?.indicatorValue
-                                ? formatNumber(
-                                    selectedGlobalRegion?.format as FormatType,
-                                    selectedGlobalRegion?.indicatorValue,
-                                )
-                                : 'N/A'}
-                        </div>
-                        <ListView
-                            className={styles.globalProgressBar}
-                            renderer={ProgressBar}
-                            keySelector={globalRegionKeySelector}
-                            rendererParams={globalRegionRendererParams}
-                            data={globalRegionCardList}
-                            pending={loading}
-                            errored={false}
-                            filtered={false}
-                        />
-                    </ContainerCard>
-                </ChartContainer>
+                        <>
+                            <div className={styles.globalValue}>
+                                {selectedGlobalRegion?.indicatorValue
+                                    ? formatNumber(
+                                        selectedGlobalRegion?.format as FormatType,
+                                        selectedGlobalRegion?.indicatorValue,
+                                    )
+                                    : 'N/A'}
+                            </div>
+                            <ListView
+                                className={styles.globalProgressBar}
+                                renderer={ProgressBar}
+                                keySelector={globalRegionKeySelector}
+                                rendererParams={globalRegionRendererParams}
+                                data={globalRegionCardList}
+                                pending={loading}
+                                errored={false}
+                                filtered={false}
+                            />
+                        </>
+                    </ChartContainer>
+                </ContainerCard>
             )}
             {uncertaintyChartActive ? (
                 <UncertaintyChart

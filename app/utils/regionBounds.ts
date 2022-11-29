@@ -21,10 +21,10 @@ export const regionBounds = [
     {
         region: 'AsiaPacific',
         bounding_box: [
-            34.10764,
-            -54.77829,
             -117,
             53.5585,
+            34.10764,
+            -54.77829,
         ],
     },
     {

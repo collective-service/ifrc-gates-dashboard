@@ -62,25 +62,30 @@
             gap: var(--dui-spacing-large);
             overflow-y: auto;
 
-            .globalValue {
+            .global-chart-container {
                 display: flex;
-                align-items: center;
-                flex-basis: calc(40% - var(--dui-spacing-extra-large));
                 justify-content: center;
-                color: var(--color-text-secondary);
-                font-size: var(--dui-font-size-mega-large);
-            }
 
-            .global-progress-bar {
-                flex-basis: calc(60% - var(--dui-spacing-extra-large));
-                flex-grow: 1;
-                padding: var(--dui-spacing-large);
-                height: 14rem;
-                overflow-y: hidden;
-                scrollbar-gutter: stable both-edges;
+                .globalValue {
+                    display: flex;
+                    align-items: center;
+                    flex-basis: calc(40% - var(--dui-spacing-extra-large));
+                    justify-content: center;
+                    color: var(--color-text-secondary);
+                    font-size: var(--dui-font-size-mega-large);
+                }
 
-                &:hover{
-                    overflow-y: auto;
+                .global-progress-bar {
+                    flex-basis: calc(60% - var(--dui-spacing-extra-large));
+                    flex-grow: 1;
+                    padding: var(--dui-spacing-large);
+                    height: 14rem;
+                    overflow-y: hidden;
+                    scrollbar-gutter: stable both-edges;
+
+                    &:hover {
+                        overflow-y: auto;
+                    }
                 }
             }
         }
