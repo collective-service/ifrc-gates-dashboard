@@ -178,3 +178,11 @@ export const positiveToZero = (
 
     return decimalToPercentage(sum);
 };
+
+export const colors: Record<string, string> = {
+    'COVID-19': '#FFDD98',
+    Monkeypox: '#ACA28E',
+    Cholera: '#C09A57',
+    'Spanish Flu': '#C7BCA9',
+    Ebola: '#CCB387',
+};

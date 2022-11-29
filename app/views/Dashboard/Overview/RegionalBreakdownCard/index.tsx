@@ -27,6 +27,7 @@ import {
 import {
     formatNumber,
     FormatType,
+    colors,
 } from '#utils/common';
 import ChartContainer from '#components/ChartContainer';
 import CustomTooltip from '#components/CustomTooltip';
@@ -203,7 +204,7 @@ function RegionalBreakdownCard(props: Props) {
             (region) => region.region,
             (item) => ({
                 emergency: item.emergency,
-                fill: item.emergency === 'Monkeypox' ? '#ACA28E' : '#FFDD98',
+                fill: colors[item.emergency],
                 contextIndicatorValue: item.indicatorValueRegional,
                 contextDate: item.indicatorMonth,
                 format: item.format as FormatType,
@@ -226,7 +227,7 @@ function RegionalBreakdownCard(props: Props) {
         (item: TotalGlobal) => item.emergency,
     ).map((entry) => ({
         emergency: entry.emergency,
-        fill: entry.emergency === 'Monkeypox' ? '#ACA28E' : '#FFDD98',
+        fill: colors[entry.emergency],
     }));
 
     const totalGlobalBarChart = regionalTotalResponse?.total.map((total) => (
@@ -237,7 +238,7 @@ function RegionalBreakdownCard(props: Props) {
                 (total?.format ?? 'raw') as FormatType,
                 total?.indicatorValueGlobal ?? 0,
             ),
-            fill: total.emergency === 'Monkeypox' ? '#ACA28E' : '#FFDD98',
+            fill: colors[total.emergency],
         }
     ));
 
@@ -249,7 +250,7 @@ function RegionalBreakdownCard(props: Props) {
                 (region.format ?? 'raw') as FormatType,
                 region.indicatorValueRegional ?? 0,
             ),
-            fill: region.emergency === 'Monkeypox' ? '#ACA28E' : '#FFDD98',
+            fill: colors[region.emergency],
         }
     ));
 

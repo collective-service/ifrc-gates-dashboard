@@ -31,6 +31,7 @@ import {
     FormatType,
     getShortMonth,
     normalFormatter,
+    colors,
 } from '#utils/common';
 import { FilterType } from '#views/Dashboard/Filters';
 import {
@@ -252,9 +253,9 @@ function MapModal(props: ModalProps) {
                         }),
                         { date: key },
                     ),
-                ).sort((a, b) => compareDate(a.date, b.date));
+                );
             },
-        ).flat();
+        ).flat().sort((a, b) => compareDate(a.date, b.date));
 
         const emergencyGroupedList = listToGroupList(
             emergencyMapList,
@@ -270,18 +271,10 @@ function MapModal(props: ModalProps) {
         unique(
             countryResponse?.contextualData ?? [],
             (d) => d.emergency,
-        ).map((item) => {
-            // FIXME: where are the other outbreaks?
-            const colors: Record<string, string> = {
-                'COVID-19': '#FFDD98',
-                Monkeypox: '#ACA28E',
-            };
-
-            return ({
-                emergency: item.emergency,
-                fill: colors[item.emergency] ?? '#FFDD98',
-            });
-        })
+        ).map((item) => ({
+            emergency: item.emergency,
+            fill: colors[item.emergency] ?? '#FFDD98',
+        }))
     ), [countryResponse?.contextualData]);
 
     const uncertaintyChart: UncertainData[] | undefined = useMemo(() => (

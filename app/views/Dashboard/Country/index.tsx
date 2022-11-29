@@ -42,6 +42,7 @@ import {
     negativeToZero,
     normalFormatter,
     positiveToZero,
+    colors,
 } from '#utils/common';
 import {
     CountryQuery,
@@ -780,17 +781,10 @@ function Country(props: Props) {
         unique(
             countryResponse?.contextualData ?? [],
             (d) => d.emergency,
-        ).map((item) => {
-            const colors: Record<string, string> = {
-                'COVID-19': '#FFDD98',
-                Monkeypox: '#ACA28E',
-            };
-
-            return ({
-                emergency: item.emergency,
-                fill: colors[item.emergency] ?? '#FFDD98',
-            });
-        })
+        ).map((item) => ({
+            emergency: item.emergency,
+            fill: colors[item.emergency] ?? '#FFDD98',
+        }))
     ), [countryResponse?.contextualData]);
 
     const scoreCardData: ScoreCardProps[] = useMemo(() => ([
