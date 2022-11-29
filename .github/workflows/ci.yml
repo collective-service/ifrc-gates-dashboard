@@ -120,11 +120,11 @@ jobs:
 
       - name: Terraform plan
         id: plan
-        run: terraform plan  -no-color
+        run: terraform plan -var-file=prod.tfvars -no-color
 
       - name: Terraform apply
         id: apply
-        run: terraform apply -auto-approve -no-color
+        run: terraform apply -var-file=prod.tfvars -auto-approve -no-color
 
       - name: Get Terraform outputs
         id: op-bucket-name
