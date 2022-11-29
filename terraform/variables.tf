@@ -1,15 +1,7 @@
-variable aws_region {
-  default = "eu-west-3"
-}
+variable aws_region {}
 
-variable aws_profile {
-  default = "dfs-rcce"
-}
+variable aws_profile {}
 
-variable dashboard_s3_bucket {
-    default = "test-rcce-website"
-}
+variable dashboard_s3_bucket {}
 
-variable domain_name {
-  default = "dashboard.collective-service.net"
-}
+variable domain_name {}
