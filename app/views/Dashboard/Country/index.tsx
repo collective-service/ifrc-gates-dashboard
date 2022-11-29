@@ -753,6 +753,7 @@ function Country(props: Props) {
                     (group, key) => group.reduce(
                         (acc, item) => ({
                             ...acc,
+                            // FIXME: Change contextIndicatorValue in server
                             [emergency.emergency]: item.format === 'percent'
                                 ? decimalToPercentage(Number(item.contextIndicatorValue))
                                 : Number(item.contextIndicatorValue),
@@ -827,7 +828,6 @@ function Country(props: Props) {
 
     const statusRendererParams = useCallback((_, data: CountryWiseOutbreakCases) => ({
         heading: data.emergency,
-        // TODO: fetch format from server
         statValue: formatNumber(data.format ?? 'raw', data.totalCases ?? 0),
         headerDescription: selectedIndicatorType === 'Contextual Indicators'
             ? selectedIndicatorName

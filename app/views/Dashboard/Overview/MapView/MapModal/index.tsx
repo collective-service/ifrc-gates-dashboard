@@ -167,7 +167,7 @@ interface ModalProps {
     outbreakId: string | undefined;
     indicatorExplicitlySet: boolean;
     selectedIndicatorType: IndicatorType | undefined;
-    filterValues?: FilterType
+    filterValues?: FilterType;
 }
 
 function MapModal(props: ModalProps) {
@@ -242,7 +242,10 @@ function MapModal(props: ModalProps) {
                     (group, key) => group.reduce(
                         (acc, item) => ({
                             ...acc,
-                            [emergency.emergency]: Number(item.contextIndicatorValue),
+                            // FIXME: Change contextIndicatorValue in server
+                            [emergency.emergency]: item.format === 'percent'
+                                ? decimalToPercentage(Number(item.contextIndicatorValue))
+                                : Number(item.contextIndicatorValue),
                             date: item.contextDate,
                             format: item.format,
                             id: item.id,
