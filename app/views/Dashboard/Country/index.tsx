@@ -747,6 +747,7 @@ function Country(props: Props) {
             }
         )), [countryResponse?.disaggregation.genderDisaggregation]);
 
+    // FIXME: this looks too complicated
     const emergencyLineChart = useMemo(() => {
         const emergencyMapList = countryResponse?.contextualDataWithMultipleEmergency.map(
             (emergency) => {
@@ -781,6 +782,7 @@ function Country(props: Props) {
             (d) => d.reduce((acc, item) => ({ ...acc, ...item }), {}),
         );
     }, [countryResponse?.contextualDataWithMultipleEmergency]);
+    console.log('Check emergency line chart data::>>', countryResponse?.contextualDataWithMultipleEmergency);
 
     const outbreaks = useMemo(() => (
         unique(
@@ -1148,7 +1150,7 @@ function Country(props: Props) {
                                         }}
                                         tickLine={false}
                                         fontSize={12}
-                                        interval={0}
+                                        // interval={0}
                                         angle={-30}
                                         tickFormatter={dateTickFormatter}
                                         tickMargin={10}

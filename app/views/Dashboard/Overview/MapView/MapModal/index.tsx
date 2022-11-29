@@ -268,6 +268,7 @@ function MapModal(props: ModalProps) {
             (d) => d.reduce((acc, item) => ({ ...acc, ...item }), {}),
         );
     }, [countryResponse?.contextualDataWithMultipleEmergency]);
+    console.log('Check emergency line chart data in OVERVIEW::>>', countryResponse?.contextualDataWithMultipleEmergency);
 
     const outbreaks = useMemo(() => (
         unique(
