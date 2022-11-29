@@ -350,7 +350,7 @@ function Dashboard() {
     const selectedIndicatorName = useMemo(() => {
         const name = selectedIndicatorList
             ?.find((indicator) => indicator.indicatorId === filterValues?.indicator)
-            ?.indicatorDescription;
+            ?.indicatorDescription ?? '';
         return name;
     }, [
         filterValues?.indicator,

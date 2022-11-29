@@ -769,9 +769,9 @@ function Country(props: Props) {
                             date: item.contextDate,
                         }), { date: key },
                     ),
-                ).sort((a, b) => compareDate(a.date, b.date));
+                );
             },
-        ).flat();
+        ).flat().sort((a, b) => compareDate(a.date, b.date));
 
         const emergencyGroupedList = listToGroupList(
             emergencyMapList,
@@ -782,7 +782,6 @@ function Country(props: Props) {
             (d) => d.reduce((acc, item) => ({ ...acc, ...item }), {}),
         );
     }, [countryResponse?.contextualDataWithMultipleEmergency]);
-    console.log('Check emergency line chart data::>>', countryResponse?.contextualDataWithMultipleEmergency);
 
     const outbreaks = useMemo(() => (
         unique(

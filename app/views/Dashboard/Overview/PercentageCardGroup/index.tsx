@@ -716,8 +716,9 @@ function PercentageCardGroup(props: Props) {
 
     return (
         <div className={_cs(className, styles.cardInfo)}>
-            {selectedIndicatorType === 'Contextual Indicators'
-                && (
+            {selectedIndicatorType === 'Social Behavioural Indicators'
+                ? null
+                : (
                     <PercentageStats
                         className={styles.globalStatCard}
                         heading={cardHeader}
@@ -740,8 +741,8 @@ function PercentageCardGroup(props: Props) {
                         heading="Global"
                         headingSize="extraSmall"
                         headerDescription={`${filterValues?.region
-                            ? overviewStatsResponse?.regionLevelSubvariables[0].indicatorDescription
-                            : overviewStatsResponse?.globalLevelSubvariables[0].indicatorDescription} - ${filterValues?.subvariable}`}
+                            ? overviewStatsResponse?.regionLevelSubvariables[0].indicatorDescription ?? ''
+                            : overviewStatsResponse?.globalLevelSubvariables[0].indicatorDescription ?? ''} - ${filterValues?.subvariable}`}
                         contentClassName={styles.globalDetails}
                     >
                         <div className={styles.globalValue}>
