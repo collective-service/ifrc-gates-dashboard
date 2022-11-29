@@ -3,7 +3,7 @@
     overflow-x: auto;
 
     .overflow-container {
-        height: 100%;
+        overflow: unset;
     }
 
     .each-table-cell {

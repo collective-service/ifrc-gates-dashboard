@@ -731,9 +731,8 @@ function PercentageCardGroup(props: Props) {
 
     return (
         <div className={_cs(className, styles.cardInfo)}>
-            {selectedIndicatorType === 'Social Behavioural Indicators'
-                ? null
-                : (
+            {selectedIndicatorType === 'Contextual Indicators'
+                && (
                     <PercentageStats
                         className={styles.globalStatCard}
                         heading={cardHeader}
@@ -745,31 +744,41 @@ function PercentageCardGroup(props: Props) {
                         uncertaintyRange={uncertaintyRange}
                     />
                 )}
-            {(globalRegionCardList && selectedIndicatorType === 'Social Behavioural Indicators') && (
-                <ContainerCard
+            {(selectedIndicatorType === 'Social Behavioural Indicators') && (
+                <ChartContainer
                     className={styles.percentageCard}
-                    heading="Global"
-                    headingSize="extraSmall"
-                    headerDescription={`${selectedGlobalRegion?.indicatorDescription} - ${filterValues?.subvariable}`}
-                    contentClassName={styles.globalDetails}
+                    data={globalRegionCardList}
+                    loading={loading}
                 >
-                    <div className={styles.globalValue}>
-                        {formatNumber(
-                            selectedGlobalRegion?.format as FormatType,
-                            selectedGlobalRegion?.indicatorValue,
-                        )}
-                    </div>
-                    <ListView
-                        className={styles.globalProgressBar}
-                        renderer={ProgressBar}
-                        keySelector={globalRegionKeySelector}
-                        rendererParams={globalRegionRendererParams}
-                        data={globalRegionCardList}
-                        pending={loading}
-                        errored={false}
-                        filtered={false}
-                    />
-                </ContainerCard>
+                    <ContainerCard
+                        className={styles.percentageCard}
+                        heading="Global"
+                        headingSize="extraSmall"
+                        headerDescription={`${filterValues?.region
+                            ? overviewStatsResponse?.regionLevelSubvariables[0].indicatorDescription
+                            : overviewStatsResponse?.globalLevelSubvariables[0].indicatorDescription} - ${filterValues?.subvariable}`}
+                        contentClassName={styles.globalDetails}
+                    >
+                        <div className={styles.globalValue}>
+                            {selectedGlobalRegion?.indicatorValue
+                                ? formatNumber(
+                                    selectedGlobalRegion?.format as FormatType,
+                                    selectedGlobalRegion?.indicatorValue,
+                                )
+                                : 'N/A'}
+                        </div>
+                        <ListView
+                            className={styles.globalProgressBar}
+                            renderer={ProgressBar}
+                            keySelector={globalRegionKeySelector}
+                            rendererParams={globalRegionRendererParams}
+                            data={globalRegionCardList}
+                            pending={loading}
+                            errored={false}
+                            filtered={false}
+                        />
+                    </ContainerCard>
+                </ChartContainer>
             )}
             {uncertaintyChartActive ? (
                 <UncertaintyChart

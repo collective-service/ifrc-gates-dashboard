@@ -145,6 +145,7 @@ function Overview(props: Props) {
                                 setActiveTab={setActiveTab}
                                 setFilterValues={setFilterValues}
                                 indicatorExplicitlySet={!!indicatorId}
+                                filterValues={filterValues}
                                 selectedIndicatorType={selectedIndicatorType ?? undefined}
                             />
                         </TabPanel>

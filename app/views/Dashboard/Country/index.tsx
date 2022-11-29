@@ -75,6 +75,7 @@ interface CountryWiseOutbreakCases {
     newCasesPerMillion?: string | null;
     newDeathsPerMillion?: string | null;
     indicatorMonth?: string | null;
+    format?: FormatType;
 }
 
 type GlobalCard = NonNullable<CountryQuery['dataCountryLevelMostRecent']>[number]
@@ -612,6 +613,7 @@ function Country(props: Props) {
                 id: total.id,
                 emergency: total.emergency,
                 totalCases: total.indicatorValue,
+                format: total.format as FormatType,
                 indicatorMonth: total.indicatorMonth,
                 totalDeaths: formatNumber(
                     totalDeaths?.format as FormatType,
@@ -751,7 +753,10 @@ function Country(props: Props) {
                     (group, key) => group.reduce(
                         (acc, item) => ({
                             ...acc,
-                            [emergency.emergency]: Number(item.contextIndicatorValue),
+                            // FIXME: Change contextIndicatorValue in server
+                            [emergency.emergency]: item.format === 'percent'
+                                ? decimalToPercentage(Number(item.contextIndicatorValue))
+                                : Number(item.contextIndicatorValue),
                             format: item.format,
                             id: item.id,
                             date: item.contextDate,
@@ -823,8 +828,7 @@ function Country(props: Props) {
 
     const statusRendererParams = useCallback((_, data: CountryWiseOutbreakCases) => ({
         heading: data.emergency,
-        // TODO: fetch format from server
-        statValue: formatNumber('raw', data.totalCases ?? 0),
+        statValue: formatNumber(data.format ?? 'raw', data.totalCases ?? 0),
         headerDescription: selectedIndicatorType === 'Contextual Indicators'
             ? selectedIndicatorName
             : 'Number of cases',
@@ -974,10 +978,12 @@ function Country(props: Props) {
                                     contentClassName={styles.globalDetails}
                                 >
                                     <div className={styles.globalValue}>
-                                        {formatNumber(
-                                            selectedSubvariableGlobal?.format as FormatType,
-                                            selectedSubvariableGlobal?.indicatorValue,
-                                        )}
+                                        {selectedSubvariableGlobal?.indicatorValue
+                                            ? formatNumber(
+                                                selectedSubvariableGlobal?.format as FormatType,
+                                                selectedSubvariableGlobal?.indicatorValue,
+                                            )
+                                            : 'N/A'}
                                     </div>
                                     <ListView
                                         className={styles.globalProgressBar}
@@ -1117,7 +1123,9 @@ function Country(props: Props) {
                     ) : (
                         <ContainerCard
                             className={styles.countryTrend}
-                            heading="Outbreaks overview over the last 12 months"
+                            heading={filterValues?.indicator
+                                ? 'Indicator overview over the last 12 months'
+                                : 'Outbreaks overview over the last 12 months'}
                             headingDescription={`${filterValues?.indicator
                                 ? selectedIndicatorName ?? ''
                                 : 'New cases per million'} for ${currentOutbreak}`}
