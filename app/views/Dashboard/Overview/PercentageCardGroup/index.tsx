@@ -42,6 +42,7 @@ import {
     FormatType,
     negativeToZero,
     positiveToZero,
+    colors,
 } from '#utils/common';
 import {
     OverviewStatsQuery,
@@ -302,21 +303,6 @@ function PercentageCardGroup(props: Props) {
         selectedOutbreakName,
         selectedIndicatorType,
     } = props;
-
-    const getLineChartColor = useCallback((outbreak?: string) => {
-        let color = '';
-        if (outbreak === 'COVID-19') {
-            color = '#FFDD98';
-        } else if (outbreak === 'Ebola') {
-            color = '#CCB387';
-        } else if (outbreak === 'Monkeypox') {
-            color = '#ACA28E';
-        } else {
-            color = '#C09A57';
-        }
-
-        return color;
-    }, []);
 
     const cardSubHeader = useMemo(() => {
         if (selectedIndicatorName) {
@@ -662,7 +648,7 @@ function PercentageCardGroup(props: Props) {
                         key={`item - ${entry.id} `}
                         actions={(
                             <>
-                                <IoSquare color={getLineChartColor(filterValues?.outbreak)} />
+                                <IoSquare color={colors[filterValues?.outbreak ?? 'COVID-19']} />
                                 <span className={styles.outbreakLegendTitleName}>
                                     {entry.value}
                                 </span>
@@ -674,7 +660,6 @@ function PercentageCardGroup(props: Props) {
         );
     }, [
         filterValues?.outbreak,
-        getLineChartColor,
     ]);
 
     const customRegionalTooltip = useCallback((tooltipProps: TooltipProps) => {
@@ -842,7 +827,7 @@ function PercentageCardGroup(props: Props) {
                             <Line
                                 type="monotone"
                                 dataKey={filterValues?.outbreak}
-                                stroke={getLineChartColor(filterValues?.outbreak)}
+                                stroke={colors[filterValues?.outbreak ?? 'COVID-19']}
                                 strokeWidth={2}
                                 dot={false}
                             />
