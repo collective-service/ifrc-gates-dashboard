@@ -2,7 +2,7 @@
     "name": "collective-service",
     "longName": "Collective Service",
     "version": "1.0.0",
-    "description": "React components for IFRC Gates Dashboard website",
+    "description": "Collective Service Dashboard",
     "scripts": {
         "test": "jest",
         "test:coverage": "jest --coverage",
