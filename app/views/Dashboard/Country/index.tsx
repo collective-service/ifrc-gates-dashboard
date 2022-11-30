@@ -2,8 +2,9 @@ import React, { useCallback, useMemo } from 'react';
 import {
     isNotDefined,
     listToGroupList,
-    _cs,
     mapToList,
+    listToMap,
+    _cs,
     unique,
     compareDate,
     isDefined,
@@ -305,6 +306,7 @@ const COUNTRY_PROFILE = gql`
             filters: {
                 indicatorId: $contextualIndicatorId,
                 iso3: $iso3,
+                subvariable: $subvariable,
             }
         ) {
             indicatorValue
@@ -747,41 +749,63 @@ function Country(props: Props) {
             }
         )), [countryResponse?.disaggregation.genderDisaggregation]);
 
-    // FIXME: this looks too complicated
-    const emergencyLineChart = useMemo(() => {
-        const emergencyMapList = countryResponse?.contextualDataWithMultipleEmergency.map(
-            (emergency) => {
-                const emergencyGroupList = listToGroupList(
-                    emergency.data,
-                    (date) => date.contextDate ?? '',
-                );
-                return mapToList(
-                    emergencyGroupList,
-                    (group, key) => group.reduce(
-                        (acc, item) => ({
-                            ...acc,
-                            // FIXME: Change contextIndicatorValue in server
-                            [emergency.emergency]: item.format === 'percent'
-                                ? decimalToPercentage(Number(item.contextIndicatorValue))
-                                : Number(item.contextIndicatorValue),
-                            format: item.format,
-                            id: item.id,
-                            date: item.contextDate,
-                        }), { date: key },
+    const emergencyLineChart = useMemo(
+        () => {
+            if (filterValues?.outbreak) {
+                const emergencyTrend = countryResponse?.dataCountryLevel;
+                if (!emergencyTrend) {
+                    return undefined;
+                }
+                return emergencyTrend.map(
+                    (emergencyDatum) => ({
+                        date: emergencyDatum.indicatorMonth,
+                        format: emergencyDatum.format,
+                        [emergencyDatum.emergency]: emergencyDatum.format === 'percent'
+                            ? decimalToPercentage(emergencyDatum.indicatorValue)
+                            : emergencyDatum.indicatorValue,
+                    }),
+                ).sort((foo, bar) => compareDate(foo.date, bar.date));
+            }
+            const emergencies = countryResponse?.contextualDataWithMultipleEmergency;
+            if (!emergencies) {
+                return [];
+            }
+            const flattenedEmergencies = emergencies.flatMap(
+                (emergency) => emergency.data.map(
+                    (emergencyDatum) => ({
+                        ...emergencyDatum,
+                        emergency: emergency.emergency,
+                    }),
+                ),
+            );
+
+            const format = (flattenedEmergencies.map((item) => item.format)?.[0] as FormatType | undefined) ?? 'raw';
+
+            const emergenciesByDate = listToGroupList(
+                flattenedEmergencies,
+                (emergency) => emergency.contextDate,
+            );
+
+            return mapToList(
+                emergenciesByDate,
+                (emergenciesForDate, key) => ({
+                    date: key,
+                    format,
+                    ...listToMap(
+                        emergenciesForDate,
+                        (emergency) => emergency.emergency,
+                        (emergency) => (format === 'percent'
+                            ? decimalToPercentage(emergency.contextIndicatorValue)
+                            : emergency.contextIndicatorValue),
                     ),
-                );
-            },
-        ).flat().sort((a, b) => compareDate(a.date, b.date));
-
-        const emergencyGroupedList = listToGroupList(
-            emergencyMapList,
-            (month) => month.date,
-        );
-
-        return Object.values(emergencyGroupedList ?? {}).map(
-            (d) => d.reduce((acc, item) => ({ ...acc, ...item }), {}),
-        );
-    }, [countryResponse?.contextualDataWithMultipleEmergency]);
+                }),
+            ).sort((foo, bar) => compareDate(foo.date, bar.date));
+        },
+        [
+            countryResponse,
+            filterValues,
+        ],
+    );
 
     const outbreaks = useMemo(() => (
         unique(
@@ -1143,10 +1167,6 @@ function Country(props: Props) {
                                 >
                                     <XAxis
                                         dataKey="date"
-                                        padding={{
-                                            right: 30,
-                                            left: 20,
-                                        }}
                                         tickLine={false}
                                         fontSize={12}
                                         // interval={0}

@@ -4,6 +4,7 @@ import {
     _cs,
     listToGroupList,
     mapToList,
+    listToMap,
     unique,
     compareDate,
     isNotDefined,
@@ -232,42 +233,65 @@ function MapModal(props: ModalProps) {
         },
     );
 
-    // FIXME: this looks too complicated
-    const emergencyLineChart = useMemo(() => {
-        const emergencyMapList = countryResponse?.contextualDataWithMultipleEmergency.map(
-            (emergency) => {
-                const emergencyGroupList = listToGroupList(
-                    emergency.data,
-                    (data) => data.contextDate,
-                );
-                return mapToList(
-                    emergencyGroupList,
-                    (group, key) => group.reduce(
-                        (acc, item) => ({
-                            ...acc,
-                            // FIXME: Change contextIndicatorValue in server
-                            [emergency.emergency]: item.format === 'percent'
-                                ? decimalToPercentage(Number(item.contextIndicatorValue))
-                                : Number(item.contextIndicatorValue),
-                            date: item.contextDate,
-                            format: item.format,
-                            id: item.id,
-                        }),
-                        { date: key },
+    const emergencyLineChart = useMemo(
+        () => {
+            if (filterValues?.outbreak) {
+                const emergencyTrend = countryResponse?.dataCountryLevel;
+                if (!emergencyTrend) {
+                    return undefined;
+                }
+                return emergencyTrend.map(
+                    (emergencyDatum) => ({
+                        date: emergencyDatum.indicatorMonth,
+                        format: emergencyDatum.format,
+                        [emergencyDatum.emergency]: emergencyDatum.format === 'percent'
+                            ? decimalToPercentage(emergencyDatum.indicatorValue)
+                            : emergencyDatum.indicatorValue,
+                    }),
+                ).sort((foo, bar) => compareDate(foo.date, bar.date));
+            }
+            const emergencies = countryResponse?.contextualDataWithMultipleEmergency;
+            if (!emergencies) {
+                return [];
+            }
+            const flattenedEmergencies = emergencies.flatMap(
+                (emergency) => emergency.data.map(
+                    (emergencyDatum) => ({
+                        ...emergencyDatum,
+                        emergency: emergency.emergency,
+                    }),
+                ),
+            );
+
+            const formatForMultipleEmergencies = (flattenedEmergencies.map(
+                (item) => item.format,
+            )?.[0] as FormatType | undefined) ?? 'raw';
+
+            const emergenciesByDate = listToGroupList(
+                flattenedEmergencies,
+                (emergency) => emergency.contextDate,
+            );
+
+            return mapToList(
+                emergenciesByDate,
+                (emergenciesForDate, key) => ({
+                    date: key,
+                    format: formatForMultipleEmergencies,
+                    ...listToMap(
+                        emergenciesForDate,
+                        (emergency) => emergency.emergency,
+                        (emergency) => (formatForMultipleEmergencies === 'percent'
+                            ? decimalToPercentage(emergency.contextIndicatorValue)
+                            : emergency.contextIndicatorValue),
                     ),
-                );
-            },
-        ).flat().sort((a, b) => compareDate(a.date, b.date));
-
-        const emergencyGroupedList = listToGroupList(
-            emergencyMapList,
-            (data) => data.date,
-        );
-
-        return Object.values(emergencyGroupedList ?? {}).map(
-            (d) => d.reduce((acc, item) => ({ ...acc, ...item }), {}),
-        );
-    }, [countryResponse?.contextualDataWithMultipleEmergency]);
+                }),
+            ).sort((foo, bar) => compareDate(foo.date, bar.date));
+        },
+        [
+            countryResponse,
+            filterValues,
+        ],
+    );
 
     const outbreaks = useMemo(() => (
         unique(
