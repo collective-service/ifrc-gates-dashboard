@@ -80,7 +80,7 @@ function PercentageStats(props: Props) {
                                         {`Deaths Per Million: ${newDeathsPerMillion ?? 0}`}
                                     </div>
                                     <div>
-                                        {`Date: ${indicatorMonth ?? '--'}`}
+                                        {`Date: ${indicatorMonth ?? 'N/a'}`}
                                     </div>
                                 </Tooltip>
                             ) : (
@@ -89,7 +89,7 @@ function PercentageStats(props: Props) {
                                         {`Total: ${statValue ?? 0}`}
                                     </div>
                                     <div>
-                                        {`Date: ${indicatorMonth ?? '--'}`}
+                                        {`Date: ${indicatorMonth ?? 'N/a'}`}
                                     </div>
                                     {uncertaintyRange && (
                                         <div>
@@ -126,6 +126,42 @@ function PercentageStats(props: Props) {
                                     className={styles.subValueText}
                                     value={subValue}
                                 />
+                            )}
+                            {(newDeaths || newCasesPerMillion) ? (
+                                <Tooltip>
+                                    <div>
+                                        {`New Cases: ${newCases ?? 0}`}
+                                    </div>
+                                    <div>
+                                        {`New Deaths: ${newDeaths ?? 0}`}
+                                    </div>
+                                    <div>
+                                        {`Total Deaths: ${totalDeaths ?? 0}`}
+                                    </div>
+                                    <div>
+                                        {`Cases Per Million: ${newCasesPerMillion ?? 0}`}
+                                    </div>
+                                    <div>
+                                        {`Deaths Per Million: ${newDeathsPerMillion ?? 0}`}
+                                    </div>
+                                    <div>
+                                        {`Date: ${indicatorMonth ?? 'N/a'}`}
+                                    </div>
+                                </Tooltip>
+                            ) : (
+                                <Tooltip>
+                                    <div>
+                                        {`Total: ${statValue ?? 0}`}
+                                    </div>
+                                    <div>
+                                        {`Date: ${indicatorMonth ?? 'N/a'}`}
+                                    </div>
+                                    {uncertaintyRange && (
+                                        <div>
+                                            {`Uncertainty Range: ${uncertaintyRange}`}
+                                        </div>
+                                    )}
+                                </Tooltip>
                             )}
                         </>
                     ))}

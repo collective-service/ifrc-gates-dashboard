@@ -983,7 +983,7 @@ function Country(props: Props) {
                                                 selectedSubvariableGlobal?.format as FormatType,
                                                 selectedSubvariableGlobal?.indicatorValue,
                                             )
-                                            : 'N/A'}
+                                            : 'N/a'}
                                     </div>
                                     <ListView
                                         className={styles.globalProgressBar}

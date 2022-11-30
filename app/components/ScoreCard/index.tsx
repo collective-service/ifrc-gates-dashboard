@@ -44,7 +44,7 @@ function ScoreCard(props: Props) {
                 styles.readinessValue,
             )}
             >
-                {(value ? `${Math.round(value)}%` : 'N/A')}
+                {(value ? `${Math.round(value)}%` : 'N/a')}
             </div>
 
             {(date || source) && (

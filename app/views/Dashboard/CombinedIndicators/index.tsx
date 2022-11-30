@@ -349,7 +349,7 @@ function CombinedIndicators(props: Props) {
                 rendererParams={thematicRendererParams}
                 keySelector={thematicKeySelector}
                 emptyMessage="No indicators available"
-                filteredEmptyMessage="Couldn't find thematic data based on the current filters"
+                filteredEmptyMessage="Couldn't find data based on the current filters"
                 emptyIcon={<IoFileTraySharp />}
                 filteredEmptyIcon={<IoFileTraySharp />}
                 pending={loading}
