@@ -51,122 +51,90 @@ function PercentageStats(props: Props) {
 
     const empty = !statValue;
 
+    const valueTooltip = (
+        (newDeaths || newCasesPerMillion) ? (
+            <Tooltip>
+                <div>
+                    {`New Cases: ${newCases ?? 0}`}
+                </div>
+                <div>
+                    {`New Deaths: ${newDeaths ?? 0}`}
+                </div>
+                <div>
+                    {`Total Deaths: ${totalDeaths ?? 0}`}
+                </div>
+                <div>
+                    {`Cases Per Million: ${newCasesPerMillion ?? 0}`}
+                </div>
+                <div>
+                    {`Deaths Per Million: ${newDeathsPerMillion ?? 0}`}
+                </div>
+                <div>
+                    {`Date: ${indicatorMonth ?? 'N/a'}`}
+                </div>
+            </Tooltip>
+        ) : (
+            <Tooltip>
+                <div>
+                    {`Total: ${statValue ?? 0}`}
+                </div>
+                <div>
+                    {`Date: ${indicatorMonth ?? 'N/a'}`}
+                </div>
+                {uncertaintyRange && (
+                    <div>
+                        {`Uncertainty Range: ${uncertaintyRange}`}
+                    </div>
+                )}
+            </Tooltip>
+        )
+    );
+
     return (
         <ContainerCard
             className={_cs(className, styles.percentageStatsCard)}
             headingClassName={styles.percentageHeading}
-            heading={(
+            heading={heading && (
                 <>
-                    {heading && (
-                        <>
-                            <div className={styles.outbreakCard}>
-                                {heading}
-                            </div>
-                            {(newDeaths || newCasesPerMillion) ? (
-                                <Tooltip>
-                                    <div>
-                                        {`New Cases: ${newCases ?? 0}`}
-                                    </div>
-                                    <div>
-                                        {`New Deaths: ${newDeaths ?? 0}`}
-                                    </div>
-                                    <div>
-                                        {`Total Deaths: ${totalDeaths ?? 0}`}
-                                    </div>
-                                    <div>
-                                        {`Cases Per Million: ${newCasesPerMillion ?? 0}`}
-                                    </div>
-                                    <div>
-                                        {`Deaths Per Million: ${newDeathsPerMillion ?? 0}`}
-                                    </div>
-                                    <div>
-                                        {`Date: ${indicatorMonth ?? 'N/a'}`}
-                                    </div>
-                                </Tooltip>
-                            ) : (
-                                <Tooltip>
-                                    <div>
-                                        {`Total: ${statValue ?? 0}`}
-                                    </div>
-                                    <div>
-                                        {`Date: ${indicatorMonth ?? 'N/a'}`}
-                                    </div>
-                                    {uncertaintyRange && (
-                                        <div>
-                                            {`Uncertainty Range: ${uncertaintyRange}`}
-                                        </div>
-                                    )}
-                                </Tooltip>
-                            )}
-                        </>
-                    )}
+                    <div className={styles.outbreakCard}>
+                        {heading}
+                    </div>
+                    {valueTooltip}
                 </>
             )}
             headingSize={headingSize}
-            headerDescription={headerDescription}
+            headerDescription={headerDescription && (
+                <>
+                    <div className={styles.outbreakCard}>
+                        {headerDescription}
+                    </div>
+                    {valueTooltip}
+                </>
+            )}
             headerIconsContainerClassName={styles.iconContainer}
             headerIcons={icon}
             footerContentClassName={empty ? styles.message : styles.valueAndSubValue}
-            footerContent={(
+            footerContent={(empty ? (
+                <Message
+                    empty={empty}
+                    emptyIcon={<IoFileTraySharp />}
+                    pending={statValueLoading}
+                    pendingContainerClassName={styles.pendingMessage}
+                />
+            ) : (
                 <>
-                    {(empty ? (
-                        <Message
-                            empty={empty}
-                            emptyIcon={<IoFileTraySharp />}
-                            pending={statValueLoading}
-                            pendingContainerClassName={styles.pendingMessage}
+                    <div className={styles.valueText}>
+                        {statValue}
+                    </div>
+                    {subValue && (
+                        <NumberOutput
+                            className={styles.subValueText}
+                            value={subValue}
                         />
-                    ) : (
-                        <>
-                            <div className={styles.valueText}>
-                                {statValue}
-                            </div>
-                            {subValue && (
-                                <NumberOutput
-                                    className={styles.subValueText}
-                                    value={subValue}
-                                />
-                            )}
-                            {(newDeaths || newCasesPerMillion) ? (
-                                <Tooltip>
-                                    <div>
-                                        {`New Cases: ${newCases ?? 0}`}
-                                    </div>
-                                    <div>
-                                        {`New Deaths: ${newDeaths ?? 0}`}
-                                    </div>
-                                    <div>
-                                        {`Total Deaths: ${totalDeaths ?? 0}`}
-                                    </div>
-                                    <div>
-                                        {`Cases Per Million: ${newCasesPerMillion ?? 0}`}
-                                    </div>
-                                    <div>
-                                        {`Deaths Per Million: ${newDeathsPerMillion ?? 0}`}
-                                    </div>
-                                    <div>
-                                        {`Date: ${indicatorMonth ?? 'N/a'}`}
-                                    </div>
-                                </Tooltip>
-                            ) : (
-                                <Tooltip>
-                                    <div>
-                                        {`Total: ${statValue ?? 0}`}
-                                    </div>
-                                    <div>
-                                        {`Date: ${indicatorMonth ?? 'N/a'}`}
-                                    </div>
-                                    {uncertaintyRange && (
-                                        <div>
-                                            {`Uncertainty Range: ${uncertaintyRange}`}
-                                        </div>
-                                    )}
-                                </Tooltip>
-                            )}
-                        </>
-                    ))}
+                    )}
+                    {valueTooltip}
                 </>
-            )}
+            ))}
         />
     );
 }

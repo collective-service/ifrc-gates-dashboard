@@ -67,7 +67,7 @@ interface LegendProps {
     payload?: {
         value: string;
         type?: string;
-        id?: string
+        id?: string;
     }[];
 }
 
@@ -281,6 +281,7 @@ interface OutbreakTooltipProps {
             contextDate: string;
             id: string;
             format: string;
+            unformattedValue: number;
         };
     }[];
 }
@@ -620,7 +621,11 @@ function PercentageCardGroup(props: Props) {
                 id: outbreak.id,
                 emergency: outbreak.emergency,
                 contextDate: outbreak.indicatorMonth,
-                [outbreak.emergency]: outbreak.indicatorValueGlobal,
+                format: outbreak.format,
+                unformattedValue: outbreak.indicatorValueGlobal,
+                [outbreak.emergency]: (outbreak.format === 'percent')
+                    ? decimalToPercentage(outbreak.indicatorValueGlobal)
+                    : outbreak.indicatorValueGlobal,
             }
         ));
 
@@ -629,7 +634,11 @@ function PercentageCardGroup(props: Props) {
                 id: region.id,
                 emergency: region.emergency,
                 contextDate: region.indicatorMonth,
-                [region.emergency]: region.indicatorValueRegional,
+                format: region.format,
+                unformattedValue: region.indicatorValueRegional,
+                [region.emergency]: (region.format === 'percent')
+                    ? decimalToPercentage(region.indicatorValueRegional)
+                    : region.indicatorValueRegional,
             }
         ));
         if (filterValues?.region) {
@@ -697,10 +706,10 @@ function PercentageCardGroup(props: Props) {
         if (active && outbreakData) {
             return (
                 <CustomTooltip
-                    format="raw"
+                    format={(outbreakData[0].payload?.format ?? 'raw') as FormatType}
                     heading={outbreakData[0].name}
                     subHeading={`(${outbreakData[0].payload?.contextDate})`}
-                    value={outbreakData[0].value}
+                    value={outbreakData[0].payload?.unformattedValue}
                 />
             );
         }
@@ -717,7 +726,7 @@ function PercentageCardGroup(props: Props) {
         valueTitle: data.subvariable,
     }), [filterValues?.subvariable]);
 
-    const headingTest = useMemo((): string | undefined => {
+    const headingDescription = useMemo((): string | undefined => {
         const isRegionSelected = isDefined(filterValues?.region);
 
         if (isRegionSelected) {
@@ -739,6 +748,24 @@ function PercentageCardGroup(props: Props) {
         overviewStatsResponse,
         selectedIndicatorName,
     ]);
+
+    function StatValueTooltip() {
+        return (
+            <Tooltip>
+                <div>
+                    {`Total: ${totalCaseValue ?? 0}`}
+                </div>
+                <div>
+                    {`Date: ${percentageCardMonth ?? 'N/a'}`}
+                </div>
+                {uncertaintyRange && (
+                    <div>
+                        {`Uncertainty Range: ${uncertaintyRange}`}
+                    </div>
+                )}
+            </Tooltip>
+        );
+    }
 
     return (
         <div className={_cs(className, styles.cardInfo)}>
@@ -764,23 +791,18 @@ function PercentageCardGroup(props: Props) {
                             <div className={styles.outbreakCard}>
                                 Global
                             </div>
-                            <Tooltip>
-                                <div>
-                                    {`Total: ${totalCaseValue ?? 0}`}
-                                </div>
-                                <div>
-                                    {`Date: ${percentageCardMonth ?? 'N/a'}`}
-                                </div>
-                                {uncertaintyRange && (
-                                    <div>
-                                        {`Uncertainty Range: ${uncertaintyRange}`}
-                                    </div>
-                                )}
-                            </Tooltip>
+                            {StatValueTooltip()}
                         </>
                     )}
                     headingSize="extraSmall"
-                    headerDescription={headingTest}
+                    headerDescription={headingDescription && (
+                        <>
+                            <div className={styles.outbreakCard}>
+                                {`${headingDescription} - ${filterValues?.subvariable}`}
+                            </div>
+                            {StatValueTooltip()}
+                        </>
+                    )}
                     contentClassName={styles.globalDetails}
                 >
                     <ChartContainer
@@ -790,12 +812,15 @@ function PercentageCardGroup(props: Props) {
                     >
                         <>
                             <div className={styles.globalValue}>
-                                {selectedGlobalRegion?.indicatorValue
-                                    ? formatNumber(
-                                        selectedGlobalRegion?.format as FormatType,
-                                        selectedGlobalRegion?.indicatorValue,
-                                    )
-                                    : 'N/a'}
+                                <>
+                                    {selectedGlobalRegion?.indicatorValue
+                                        ? formatNumber(
+                                            selectedGlobalRegion?.format as FormatType,
+                                            selectedGlobalRegion?.indicatorValue,
+                                        )
+                                        : 'N/a'}
+                                    {StatValueTooltip()}
+                                </>
                             </div>
                             <ListView
                                 className={styles.globalProgressBar}
@@ -863,8 +888,8 @@ function PercentageCardGroup(props: Props) {
                                 axisLine={false}
                                 tickLine={false}
                                 padding={{ top: 12 }}
-                                fontSize={12}
                                 tickFormatter={normalizedTickFormatter}
+                                fontSize={12}
                             />
                             <ChartTooltip
                                 content={customOutbreakTooltip}
