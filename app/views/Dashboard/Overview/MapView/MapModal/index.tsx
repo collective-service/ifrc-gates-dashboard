@@ -47,8 +47,6 @@ import ChartContainer from '#components/ChartContainer';
 import {
     CountryModalQuery,
     CountryModalQueryVariables,
-    CountrySubvariablesQuery,
-    CountrySubvariablesQueryVariables,
 } from '#generated/types';
 
 import styles from './styles.css';
@@ -68,20 +66,6 @@ interface TooltipProps {
         };
     }[];
 }
-
-const COUNTRY_SUBVARIABLES = gql`
-    query CountrySubvariables(
-        $iso3: String!,
-        $indicatorId: String!,
-    ) {
-        filterOptions {
-            subvariables(
-                iso3: $iso3,
-                indicatorId: $indicatorId,
-            )
-        }
-    }
-`;
 
 const COUNTRY_PROFILE = gql`
     query CountryModal(
@@ -191,36 +175,17 @@ function MapModal(props: ModalProps) {
         filterValues,
     } = props;
 
-    const subvariablesVariables = useMemo(() => (
-        {
-            iso3: countryData.iso3,
-            indicatorId,
-        }
-    ), [countryData, indicatorId]);
-
-    const {
-        data: subVariableList,
-    } = useQuery<CountrySubvariablesQuery, CountrySubvariablesQueryVariables>(
-        COUNTRY_SUBVARIABLES,
-        {
-            variables: subvariablesVariables,
-        },
-    );
-
-    // FIXME: why use the first one only
-    const subvariableId = subVariableList?.filterOptions.subvariables[0];
-
     const countryVariables = useMemo((): CountryModalQueryVariables => ({
         iso3: countryData.iso3,
         emergency: outbreakId,
         indicatorId,
-        subvariable: subvariableId,
+        subvariable: filterValues?.subvariable,
     }
     ), [
         countryData,
         outbreakId,
         indicatorId,
-        subvariableId,
+        filterValues?.subvariable,
     ]);
 
     const {
@@ -438,12 +403,16 @@ function MapModal(props: ModalProps) {
         >
             {(!indicatorExplicitlySet || selectedIndicatorType === 'Contextual Indicators') ? (
                 <>
-                    {
-                        filterValues?.indicator
-                            ? <div>Indicator overview over the last 12 months</div>
-                            : <div>Outbreaks overview over the last 12 months</div>
+                    <Heading
+                        size="extraSmall"
+                    >
+                        {
+                            filterValues?.indicator
+                                ? 'Indicator overview over the last 12 months'
+                                : 'Outbreaks overview over the last 12 months'
 
-                    }
+                        }
+                    </Heading>
                     <div className={styles.chartContainer}>
                         <ChartContainer
                             data={emergencyLineChart}
@@ -518,7 +487,7 @@ function MapModal(props: ModalProps) {
                 country={countryData.iso3}
                 emergency={outbreakId}
                 indicatorId={indicatorExplicitlySet ? indicatorId : undefined}
-                subvariable={indicatorExplicitlySet ? subvariableId : undefined}
+                subvariable={indicatorExplicitlySet ? filterValues?.subvariable : undefined}
             />
         </Modal>
     );
