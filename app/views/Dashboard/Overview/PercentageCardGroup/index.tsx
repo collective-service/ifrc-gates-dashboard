@@ -6,7 +6,7 @@ import {
     Line,
     XAxis,
     YAxis,
-    Tooltip,
+    Tooltip as ChartTooltip,
     Legend,
     LabelList,
     Cell,
@@ -15,6 +15,7 @@ import {
     ContainerCard,
     Element,
     ListView,
+    Tooltip,
 } from '@the-deep/deep-ui';
 import {
     compareDate,
@@ -66,7 +67,7 @@ interface LegendProps {
     payload?: {
         value: string;
         type?: string;
-        id?: string
+        id?: string;
     }[];
 }
 
@@ -280,6 +281,7 @@ interface OutbreakTooltipProps {
             contextDate: string;
             id: string;
             format: string;
+            unformattedValue: number;
         };
     }[];
 }
@@ -466,6 +468,7 @@ function PercentageCardGroup(props: Props) {
     const uncertaintyRange = useMemo(() => {
         if (filterValues?.indicator
             && (regionTotalCase?.indicatorType === 'Social Behavioural Indicators')
+            && (regionTotalCase?.errorMargin)
         ) {
             const negativeRange = negativeToZero(
                 regionTotalCase.indicatorValue,
@@ -477,12 +480,13 @@ function PercentageCardGroup(props: Props) {
             );
 
             const range = regionTotalCase?.format === 'percent'
-                ? `[${negativeRange}% - ${positiveRange}%]`
-                : `[${negativeRange} - ${positiveRange}]`;
+                ? `${negativeRange}% - ${positiveRange}%`
+                : `${negativeRange} - ${positiveRange}`;
             return range;
         }
         if (filterValues?.indicator
             && (globalTotalCase?.type === 'Social Behavioural Indicators')
+            && (globalTotalCase?.errorMargin)
         ) {
             const negativeRange = negativeToZero(
                 globalTotalCase?.indicatorValueGlobal,
@@ -494,8 +498,8 @@ function PercentageCardGroup(props: Props) {
             );
 
             const range = globalTotalCase?.format === 'percent'
-                ? `[${negativeRange}% - ${positiveRange}%]`
-                : `[${negativeRange} - ${positiveRange}]`;
+                ? `${negativeRange}% - ${positiveRange}%`
+                : `${negativeRange} - ${positiveRange}`;
             return range;
         }
         return undefined;
@@ -617,7 +621,11 @@ function PercentageCardGroup(props: Props) {
                 id: outbreak.id,
                 emergency: outbreak.emergency,
                 contextDate: outbreak.indicatorMonth,
-                [outbreak.emergency]: outbreak.indicatorValueGlobal,
+                format: outbreak.format,
+                unformattedValue: outbreak.indicatorValueGlobal,
+                [outbreak.emergency]: (outbreak.format === 'percent')
+                    ? decimalToPercentage(outbreak.indicatorValueGlobal)
+                    : outbreak.indicatorValueGlobal,
             }
         ));
 
@@ -626,7 +634,11 @@ function PercentageCardGroup(props: Props) {
                 id: region.id,
                 emergency: region.emergency,
                 contextDate: region.indicatorMonth,
-                [region.emergency]: region.indicatorValueRegional,
+                format: region.format,
+                unformattedValue: region.indicatorValueRegional,
+                [region.emergency]: (region.format === 'percent')
+                    ? decimalToPercentage(region.indicatorValueRegional)
+                    : region.indicatorValueRegional,
             }
         ));
         if (filterValues?.region) {
@@ -694,10 +706,10 @@ function PercentageCardGroup(props: Props) {
         if (active && outbreakData) {
             return (
                 <CustomTooltip
-                    format="raw"
+                    format={(outbreakData[0].payload?.format ?? 'raw') as FormatType}
                     heading={outbreakData[0].name}
                     subHeading={`(${outbreakData[0].payload?.contextDate})`}
-                    value={outbreakData[0].value}
+                    value={outbreakData[0].payload?.unformattedValue}
                 />
             );
         }
@@ -714,7 +726,7 @@ function PercentageCardGroup(props: Props) {
         valueTitle: data.subvariable,
     }), [filterValues?.subvariable]);
 
-    const headingTest = useMemo((): string | undefined => {
+    const headingDescription = useMemo((): string | undefined => {
         const isRegionSelected = isDefined(filterValues?.region);
 
         if (isRegionSelected) {
@@ -737,6 +749,24 @@ function PercentageCardGroup(props: Props) {
         selectedIndicatorName,
     ]);
 
+    function StatValueTooltip() {
+        return (
+            <Tooltip>
+                <div>
+                    {`Total: ${totalCaseValue ?? 0}`}
+                </div>
+                <div>
+                    {`Date: ${percentageCardMonth ?? 'N/a'}`}
+                </div>
+                {uncertaintyRange && (
+                    <div>
+                        {`Uncertainty Range: ${uncertaintyRange}`}
+                    </div>
+                )}
+            </Tooltip>
+        );
+    }
+
     return (
         <div className={_cs(className, styles.cardInfo)}>
             {selectedIndicatorType === 'Social Behavioural Indicators'
@@ -756,9 +786,23 @@ function PercentageCardGroup(props: Props) {
             {(selectedIndicatorType === 'Social Behavioural Indicators') && (
                 <ContainerCard
                     className={styles.percentageCard}
-                    heading="Global"
+                    heading={(
+                        <>
+                            <div className={styles.outbreakCard}>
+                                Global
+                            </div>
+                            {StatValueTooltip()}
+                        </>
+                    )}
                     headingSize="extraSmall"
-                    headerDescription={headingTest}
+                    headerDescription={headingDescription && (
+                        <>
+                            <div className={styles.outbreakCard}>
+                                {`${headingDescription} - ${filterValues?.subvariable}`}
+                            </div>
+                            {StatValueTooltip()}
+                        </>
+                    )}
                     contentClassName={styles.globalDetails}
                 >
                     <ChartContainer
@@ -768,12 +812,15 @@ function PercentageCardGroup(props: Props) {
                     >
                         <>
                             <div className={styles.globalValue}>
-                                {selectedGlobalRegion?.indicatorValue
-                                    ? formatNumber(
-                                        selectedGlobalRegion?.format as FormatType,
-                                        selectedGlobalRegion?.indicatorValue,
-                                    )
-                                    : 'N/A'}
+                                <>
+                                    {selectedGlobalRegion?.indicatorValue
+                                        ? formatNumber(
+                                            selectedGlobalRegion?.format as FormatType,
+                                            selectedGlobalRegion?.indicatorValue,
+                                        )
+                                        : 'N/a'}
+                                    {StatValueTooltip()}
+                                </>
                             </div>
                             <ListView
                                 className={styles.globalProgressBar}
@@ -841,10 +888,10 @@ function PercentageCardGroup(props: Props) {
                                 axisLine={false}
                                 tickLine={false}
                                 padding={{ top: 12 }}
-                                fontSize={12}
                                 tickFormatter={normalizedTickFormatter}
+                                fontSize={12}
                             />
-                            <Tooltip
+                            <ChartTooltip
                                 content={customOutbreakTooltip}
                             />
                             <Legend content={renderLegend} />
@@ -878,7 +925,7 @@ function PercentageCardGroup(props: Props) {
                         data={regionalBreakdownRegion}
                         barSize={18}
                     >
-                        <Tooltip
+                        <ChartTooltip
                             cursor={false}
                             content={customRegionalTooltip}
                         />

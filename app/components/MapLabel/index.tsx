@@ -25,10 +25,10 @@ function MapLabel(props: Props) {
             <div className={styles.bar} />
             <div className={styles.labelContainer}>
                 <div>
-                    {formatNumber(format, minValue) ?? 'N/A'}
+                    {formatNumber(format, minValue) ?? 'N/a'}
                 </div>
                 <div>
-                    {formatNumber(format, maxValue) ?? 'N/A'}
+                    {formatNumber(format, maxValue) ?? 'N/a'}
                 </div>
             </div>
         </div>
