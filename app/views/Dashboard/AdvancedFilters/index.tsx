@@ -1,8 +1,14 @@
-import React, { useCallback, useMemo } from 'react';
-
+import React, { useCallback, useMemo, useState } from 'react';
+import {
+    isDefined,
+    unique,
+    _cs,
+} from '@togglecorp/fujs';
 import {
     RadioInput,
     SelectInput,
+    SearchMultiSelectInput,
+    Button,
 } from '@the-deep/deep-ui';
 import { gql, useQuery } from '@apollo/client';
 
@@ -12,6 +18,9 @@ import {
 } from '#generated/types';
 
 import styles from './styles.css';
+
+export type ThematicsOption = NonNullable<NonNullable<AdvancedFilterOptionsQuery['filterOptions']>['thematics']>[number];
+export type TopicsOption = NonNullable<NonNullable<AdvancedFilterOptionsQuery['filterOptions']>['topics']>[number];
 
 export interface AdvancedOptionType {
     type?: string;
@@ -69,6 +78,16 @@ function AdvancedFilters(props: Props) {
         onChange,
     } = props;
 
+    const [
+        thematicOptions,
+        setThematicOptions,
+    ] = useState<ThematicsOption[] | null | undefined>([]);
+
+    const [
+        topicOptions,
+        setTopicOptions,
+    ] = useState<TopicsOption[] | null | undefined>([]);
+
     const filterOptionsVariables = useMemo(() => ({
         type: value?.type ?? '',
         thematic: value?.thematic ?? '',
@@ -82,6 +101,34 @@ function AdvancedFilters(props: Props) {
         ADVANCED_FILTER_OPTIONS,
         {
             variables: filterOptionsVariables,
+            onCompleted: (response) => {
+                const { filterOptions } = response;
+
+                const thematicOptionsFromFilters: ThematicsOption[] = [];
+                const topicOptionsFromFilters: TopicsOption[] = [];
+
+                thematicOptionsFromFilters.push(
+                    ...(filterOptions?.thematics
+                        ?.filter(isDefined) ?? []),
+                );
+
+                topicOptionsFromFilters.push(
+                    ...(filterOptions?.topics
+                        ?.filter(isDefined) ?? []),
+                );
+
+                const uniqueThematics = unique(
+                    thematicOptionsFromFilters,
+                    (o) => o,
+                );
+                const uniqueTopics = unique(
+                    topicOptionsFromFilters,
+                    (o) => o,
+                );
+
+                setThematicOptions(uniqueThematics);
+                setTopicOptions(uniqueTopics);
+            },
         },
     );
 
@@ -141,42 +188,104 @@ function AdvancedFilters(props: Props) {
     );
 
     return (
-        <div className={styles.advancedFilters}>
-            <RadioInput
-                name="type"
-                className={styles.filter}
-                keySelector={filterTypeKeySelector}
-                label="Type"
-                labelSelector={filterTypeLabelSelector}
-                options={types}
-                value={value?.type}
-                onChange={handleInputChange}
-                disabled={advancedFiltersLoading}
-            />
-            <SelectInput
-                name="thematic"
-                className={styles.filter}
-                options={thematics}
-                placeholder="Thematic"
-                keySelector={thematicKeySelector}
-                labelSelector={thematicLabelSelector}
-                value={value?.thematic}
-                onChange={handleInputChange}
-                variant="general"
-                disabled={advancedFiltersLoading}
-            />
-            <SelectInput
-                name="topic"
-                className={styles.filter}
-                options={topics}
-                placeholder="Topic"
-                keySelector={topicKeySelector}
-                labelSelector={topicLabelSelector}
-                value={value?.topic}
-                onChange={handleInputChange}
-                variant="general"
-                disabled={advancedFiltersLoading}
-            />
+        <div className={styles.thematicFilterSection}>
+            <div className={styles.advancedFilters}>
+                <RadioInput
+                    name="type"
+                    className={styles.filter}
+                    keySelector={filterTypeKeySelector}
+                    label="Type"
+                    labelSelector={filterTypeLabelSelector}
+                    options={types}
+                    value={value?.type}
+                    onChange={handleInputChange}
+                    disabled={advancedFiltersLoading}
+                />
+                {/* <SelectInput
+                    name="thematic"
+                    className={styles.filter}
+                    options={thematics}
+                    placeholder="Thematic"
+                    keySelector={thematicKeySelector}
+                    labelSelector={thematicLabelSelector}
+                    value={value?.thematic}
+                    onChange={handleInputChange}
+                    variant="general"
+                    disabled={advancedFiltersLoading}
+                /> */}
+                <SearchMultiSelectInput
+                    name="thematic"
+                    className={styles.filter}
+                    options={thematics}
+                    placeholder="Thematic"
+                    keySelector={thematicKeySelector}
+                    labelSelector={thematicLabelSelector}
+                    value={thematicOptions}
+                    onChange={handleInputChange}
+                    variant="general"
+                    disabled={advancedFiltersLoading}
+                />
+                <SearchMultiSelectInput
+                    name="topic"
+                    className={styles.filter}
+                    options={topics}
+                    placeholder="Topic"
+                    keySelector={topicKeySelector}
+                    labelSelector={topicLabelSelector}
+                    value={topicOptions}
+                    onChange={handleInputChange}
+                    variant="general"
+                    disabled={advancedFiltersLoading}
+                />
+            </div>
+            <div>
+                This is for chip component
+                {/* {value && value.length > 0 && (
+                    <div className={styles.chipCollection}>
+                        {value.map((key) => {
+                            const option = options?.find((opt) => keySelector(opt) === key);
+                            if (!option) {
+                                return null;
+                            }
+                            const label = labelSelector(option);
+                            return (
+                                <Chip
+                                    className={styles.chipLayout}
+                                    key={key}
+                                    label={label}
+                                    disabled={disabled}
+                                    action={!readOnly && (
+                                        <>
+                                            {optionEditable && onOptionEdit && (
+                                                <Button
+                                                    name={key}
+                                                    onClick={onOptionEdit}
+                                                    title="Edit Option"
+                                                    disabled={disabled}
+                                                    spacing="compact"
+                                                    variant="general"
+                                                >
+                                                    <IoCreateOutline />
+                                                </Button>
+                                            )}
+                                            <Button
+                                                name={key}
+                                                onClick={handleCancelOption}
+                                                title="Remove"
+                                                disabled={disabled}
+                                                spacing="compact"
+                                                variant="general"
+                                            >
+                                                <IoCloseOutline />
+                                            </Button>
+                                        </>
+                                    )}
+                                />
+                            );
+                        })}
+                    </div>
+                )} */}
+            </div>
         </div>
     );
 }
