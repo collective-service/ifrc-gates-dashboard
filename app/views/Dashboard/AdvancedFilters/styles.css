@@ -1,14 +1,23 @@
-.advanced-filters {
-    display: flex;
-    align-items: flex-end;
-    flex-wrap: wrap;
+.thematic-filter-section {
     border: 1px solid var(--dui-color-separator);
     border-radius: var(--dui-border-radius-card);
     background-color: var(--dui-color-background);
-    padding: var(--dui-spacing-large);
     gap: var(--dui-spacing-large);
 
-    .filter{
-        flex-shrink: 0;
+    .advanced-filters {
+        display: flex;
+        align-items: flex-end;
+        flex-wrap: wrap;
+        padding: var(--dui-spacing-large);
+        gap: var(--dui-spacing-large);
+
+        .filter {
+            flex-shrink: 0;
+        }
     }
+
+    .filter-options-chip {
+        display: flex;
+    }
+
 }
