@@ -1,16 +1,12 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
-    isDefined,
-    unique,
-    _cs,
-} from '@togglecorp/fujs';
-import {
     RadioInput,
-    SelectInput,
-    SearchMultiSelectInput,
+    MultiSelectInput,
     Button,
 } from '@the-deep/deep-ui';
 import { gql, useQuery } from '@apollo/client';
+import { IoCloseOutline } from 'react-icons/io5';
+import Chip from '#components/Chip';
 
 import {
     AdvancedFilterOptionsQuery,
@@ -21,6 +17,59 @@ import styles from './styles.css';
 
 export type ThematicsOption = NonNullable<NonNullable<AdvancedFilterOptionsQuery['filterOptions']>['thematics']>[number];
 export type TopicsOption = NonNullable<NonNullable<AdvancedFilterOptionsQuery['filterOptions']>['topics']>[number];
+
+interface ChipProps {
+    name: string;
+    value?: string[] | null | undefined;
+    onChange: React.Dispatch<React.SetStateAction<string[] | undefined>>;
+}
+
+function ChipLayout(props: ChipProps) {
+    const {
+        name,
+        value,
+        onChange,
+    } = props;
+
+    const handleCancelOption = useCallback(
+        (selectedKey) => {
+            const newValue = value?.filter((key) => key !== selectedKey) ?? [];
+            onChange(newValue);
+        },
+        [value, onChange],
+    );
+
+    return (
+        <div className={styles.chipComponent}>
+            <div className={styles.chipFilterHeader}>
+                {`${name} filters:`}
+            </div>
+            <div className={styles.chipCollection}>
+                {value?.map((key) => {
+                    const label = key;
+                    return (
+                        <Chip
+                            key={key}
+                            label={label}
+                            actionClassName={styles.chipActionButtons}
+                            action={(
+                                <Button
+                                    name={key}
+                                    onClick={handleCancelOption}
+                                    title="Remove"
+                                    spacing="none"
+                                    variant="transparent"
+                                >
+                                    <IoCloseOutline />
+                                </Button>
+                            )}
+                        />
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
 
 export interface AdvancedOptionType {
     type?: string;
@@ -79,14 +128,14 @@ function AdvancedFilters(props: Props) {
     } = props;
 
     const [
-        thematicOptions,
-        setThematicOptions,
-    ] = useState<ThematicsOption[] | null | undefined>([]);
+        selectedThematicOptions,
+        setSelectedThematicOptions,
+    ] = useState<ThematicsOption[] | undefined>([]);
 
     const [
-        topicOptions,
-        setTopicOptions,
-    ] = useState<TopicsOption[] | null | undefined>([]);
+        selectedTopicOptions,
+        setSelectedTopicOptions,
+    ] = useState<TopicsOption[] | undefined>([]);
 
     const filterOptionsVariables = useMemo(() => ({
         type: value?.type ?? '',
@@ -101,34 +150,6 @@ function AdvancedFilters(props: Props) {
         ADVANCED_FILTER_OPTIONS,
         {
             variables: filterOptionsVariables,
-            onCompleted: (response) => {
-                const { filterOptions } = response;
-
-                const thematicOptionsFromFilters: ThematicsOption[] = [];
-                const topicOptionsFromFilters: TopicsOption[] = [];
-
-                thematicOptionsFromFilters.push(
-                    ...(filterOptions?.thematics
-                        ?.filter(isDefined) ?? []),
-                );
-
-                topicOptionsFromFilters.push(
-                    ...(filterOptions?.topics
-                        ?.filter(isDefined) ?? []),
-                );
-
-                const uniqueThematics = unique(
-                    thematicOptionsFromFilters,
-                    (o) => o,
-                );
-                const uniqueTopics = unique(
-                    topicOptionsFromFilters,
-                    (o) => o,
-                );
-
-                setThematicOptions(uniqueThematics);
-                setTopicOptions(uniqueTopics);
-            },
         },
     );
 
@@ -139,19 +160,19 @@ function AdvancedFilters(props: Props) {
         }))
     ), [advancedFilterOptions?.filterOptions?.types]);
 
-    const thematics = useMemo(() => (
+    const thematicOptions = useMemo(() => (
         advancedFilterOptions?.filterOptions?.thematics.map((t) => ({
             key: t,
             label: t,
         }))
-    ), [advancedFilterOptions?.filterOptions?.thematics]);
+    ), [advancedFilterOptions]);
 
-    const topics = useMemo(() => (
+    const topicOptions = useMemo(() => (
         advancedFilterOptions?.filterOptions?.topics.map((t) => ({
             key: t,
             label: t,
         }))
-    ), [advancedFilterOptions?.filterOptions?.topics]);
+    ), [advancedFilterOptions]);
 
     // FIXME: any reason not to have 3 different handlers?
     const handleInputChange = useCallback(
@@ -163,19 +184,8 @@ function AdvancedFilters(props: Props) {
                         thematic: undefined,
                         topic: undefined,
                     }));
-                } else if (name === 'thematic') {
-                    onChange((oldValue) => ({
-                        // FIXME: Get type of the selected thematic
-                        type: oldValue?.type,
-                        thematic: newValue as string,
-                        topic: undefined,
-                    }));
-                } else if (name === 'topic') {
-                    onChange((oldValue) => ({
-                        type: oldValue?.type,
-                        thematic: oldValue?.thematic,
-                        topic: newValue as string,
-                    }));
+                    setSelectedThematicOptions(undefined);
+                    setSelectedTopicOptions(undefined);
                 } else {
                     onChange((oldValue) => ({
                         ...oldValue,
@@ -201,90 +211,46 @@ function AdvancedFilters(props: Props) {
                     onChange={handleInputChange}
                     disabled={advancedFiltersLoading}
                 />
-                {/* <SelectInput
+                <MultiSelectInput
                     name="thematic"
                     className={styles.filter}
-                    options={thematics}
+                    options={thematicOptions}
                     placeholder="Thematic"
                     keySelector={thematicKeySelector}
                     labelSelector={thematicLabelSelector}
-                    value={value?.thematic}
-                    onChange={handleInputChange}
-                    variant="general"
-                    disabled={advancedFiltersLoading}
-                /> */}
-                <SearchMultiSelectInput
-                    name="thematic"
-                    className={styles.filter}
-                    options={thematics}
-                    placeholder="Thematic"
-                    keySelector={thematicKeySelector}
-                    labelSelector={thematicLabelSelector}
-                    value={thematicOptions}
-                    onChange={handleInputChange}
+                    value={selectedThematicOptions}
+                    onChange={setSelectedThematicOptions}
                     variant="general"
                     disabled={advancedFiltersLoading}
                 />
-                <SearchMultiSelectInput
+                <MultiSelectInput
                     name="topic"
                     className={styles.filter}
-                    options={topics}
+                    options={topicOptions}
                     placeholder="Topic"
                     keySelector={topicKeySelector}
                     labelSelector={topicLabelSelector}
-                    value={topicOptions}
-                    onChange={handleInputChange}
+                    value={selectedTopicOptions}
+                    onChange={setSelectedTopicOptions}
                     variant="general"
                     disabled={advancedFiltersLoading}
                 />
             </div>
             <div>
-                This is for chip component
-                {/* {value && value.length > 0 && (
-                    <div className={styles.chipCollection}>
-                        {value.map((key) => {
-                            const option = options?.find((opt) => keySelector(opt) === key);
-                            if (!option) {
-                                return null;
-                            }
-                            const label = labelSelector(option);
-                            return (
-                                <Chip
-                                    className={styles.chipLayout}
-                                    key={key}
-                                    label={label}
-                                    disabled={disabled}
-                                    action={!readOnly && (
-                                        <>
-                                            {optionEditable && onOptionEdit && (
-                                                <Button
-                                                    name={key}
-                                                    onClick={onOptionEdit}
-                                                    title="Edit Option"
-                                                    disabled={disabled}
-                                                    spacing="compact"
-                                                    variant="general"
-                                                >
-                                                    <IoCreateOutline />
-                                                </Button>
-                                            )}
-                                            <Button
-                                                name={key}
-                                                onClick={handleCancelOption}
-                                                title="Remove"
-                                                disabled={disabled}
-                                                spacing="compact"
-                                                variant="general"
-                                            >
-                                                <IoCloseOutline />
-                                            </Button>
-                                        </>
-                                    )}
-                                />
-                            );
-                        })}
-                    </div>
-                )} */}
+                {selectedThematicOptions && selectedThematicOptions.length > 0 && (
+                    <ChipLayout
+                        name="Thematic"
+                        value={selectedThematicOptions}
+                        onChange={setSelectedThematicOptions}
+                    />
+                )}
+                {selectedTopicOptions && selectedTopicOptions.length > 0 && (
+                    <ChipLayout
+                        name="Topic"
+                        value={selectedTopicOptions}
+                        onChange={setSelectedTopicOptions}
+                    />
+                )}
             </div>
         </div>
     );
