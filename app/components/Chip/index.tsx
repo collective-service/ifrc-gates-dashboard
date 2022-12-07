@@ -1,7 +1,6 @@
-import React, { ReactNode, useMemo } from 'react';
+import React, { ReactNode } from 'react';
 import {
     _cs,
-    getContrastYIQ,
 } from '@togglecorp/fujs';
 
 import styles from './styles.css';
@@ -15,16 +14,18 @@ export type ChipVariant = (
     | 'warning'
 );
 
+/* NOTE: Disbaled temporarily until client feedback
 const chipVariantToVariableNameMap: {
     [key in ChipVariant]: string;
 } = {
-    accent: '--tui-color-accent',
-    danger: '--tui-color-danger',
-    primary: '--tui-color-primary',
-    warning: '--tui-color-warning',
-    success: '--tui-color-success',
-    default: '--tui-color-background-button',
+    accent: '--dui-color-accent',
+    danger: '--dui-color-danger',
+    primary: '--dui-color-primary',
+    warning: '--dui-color-warning',
+    success: '--dui-color-success',
+    default: '--dui-color-background-button',
 };
+*/
 
 export interface ChipProps {
     /**
@@ -136,5 +137,4 @@ function Chip(props: ChipProps) {
         </div>
     );
 }
-
 export default Chip;

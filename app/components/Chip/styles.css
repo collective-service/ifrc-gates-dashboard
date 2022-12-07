@@ -1,59 +1,59 @@
 .chip {
-    --inner-spacing: var(--tui-spacing-small);
-    --outer-vertical-padding: calc(var(--tui-spacing-medium) - var(--inner-spacing));
+    --inner-spacing: var(--dui-spacing-extra-small);
+    --outer-vertical-padding: calc(var(--dui-spacing-medium) - var(--inner-spacing));
 
     display: flex;
     align-items: center;
-    border-radius: calc(1em + 2 * var(--outer-vertical-padding));
-    background-color: var(--color-background);
-    padding: var(--outer-vertical-padding) calc(var(--tui-spacing-large) - var(--inner-spacing));
+    border-radius: 2em;
+    background-color: #e7e7e7;
+    padding: 0  var(--dui-spacing-small);
     width: fit-content;
     color: var(--color-text);
-    font-weight: var(--tui-font-weight-bold);
+    font-size: var(--dui-font-size-small);
 
     &.disabled {
-        opacity: var(--tui-opacity-disabled-element);
+        opacity: var(--dui-opacity-disabled-element);
     }
 
     &.default {
-        --color-background: var(--tui-color-background-input-section-light);
+        --color-background: var(--dui-color-background-input-section-light);
     }
 
-    &.accent {
-        --color-background: var(--tui-color-accent);
+    /* &.accent {
+        --color-background: var(--dui-color-accent);
     }
 
     &.danger {
-        --color-background: var(--tui-color-danger);
+        --color-background: var(--dui-color-danger);
     }
 
     &.primary {
-        --color-background: var(--tui-color-primary);
+        --color-background: var(--dui-color-primary);
     }
 
     &.success {
-        --color-background: var(--tui-color-success);
+        --color-background: var(--dui-color-success);
     }
 
     &.warning {
-        --color-background: var(--tui-color-warning);
+        --color-background: var(--dui-color-warning);
     }
 
     &.light {
-        --border-color: var(--tui-color-separator-light);
+        --border-color: var(--dui-color-separator-light);
     }
 
     &.dark {
-        --border-color: var(--tui-color-separator-dark);
+        --border-color: var(--dui-color-separator-dark);
     }
 
     &.inner-light {
-        --color-text: var(--tui-color-text-button-light);
+        --color-text: var(--dui-color-text-button-light);
     }
 
     &.inner-dark {
-        --color-text: var(--tui-color-text-button-dark);
-    }
+        --color-text: var(--dui-color-text-button-dark);
+    } */
 
     .icon {
         display: flex;
