@@ -1,6 +1,5 @@
 import React, { useMemo, useCallback } from 'react';
 import { IoClose } from 'react-icons/io5';
-
 import {
     listToGroupList,
     doesObjectHaveNoData,
