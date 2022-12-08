@@ -5,7 +5,7 @@ import {
     Button,
 } from '@the-deep/deep-ui';
 import { gql, useQuery } from '@apollo/client';
-import { IoCloseOutline } from 'react-icons/io5';
+import { IoCloseOutline, IoClose } from 'react-icons/io5';
 import Chip from '#components/Chip';
 
 import {
@@ -197,6 +197,19 @@ function AdvancedFilters(props: Props) {
         [onChange],
     );
 
+    const handleClearAdvancedFilters = useCallback(
+        () => {
+            onChange({});
+            setSelectedThematicOptions(undefined);
+            setSelectedTopicOptions(undefined);
+        },
+        [onChange],
+    );
+
+    const advancedFiltersSelected = (
+        (selectedThematicOptions && selectedThematicOptions?.length > 0)
+        || (selectedTopicOptions && selectedTopicOptions?.length > 0));
+
     return (
         <div className={styles.thematicFilterSection}>
             <div className={styles.advancedFilters}>
@@ -250,6 +263,17 @@ function AdvancedFilters(props: Props) {
                         value={selectedTopicOptions}
                         onChange={setSelectedTopicOptions}
                     />
+                )}
+                {advancedFiltersSelected && (
+                    <Button
+                        name={undefined}
+                        variant="transparent"
+                        icons={<IoClose />}
+                        onClick={handleClearAdvancedFilters}
+                        className={styles.clearButton}
+                    >
+                        Clear all
+                    </Button>
                 )}
             </div>
         </div>
