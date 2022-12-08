@@ -1034,7 +1034,7 @@ function Country(props: Props) {
                                 <ContainerCard
                                     className={styles.genderDisaggregation}
                                     contentClassName={styles.genderDisaggregationContent}
-                                    heading="Gender Disaggregation"
+                                    heading="Population Disaggregation"
                                     headerDescription={selectedIndicatorName}
                                     headingClassName={styles.heading}
                                     headingSize="extraSmall"
