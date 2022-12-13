@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
     ComposedChart,
     Area,
@@ -11,11 +11,12 @@ import {
     ContainerCard,
 } from '@the-deep/deep-ui';
 import { isNotDefined, _cs } from '@togglecorp/fujs';
-
 import {
     FormatType,
     getShortMonth,
     normalFormatter,
+    min,
+    max,
 } from '#utils/common';
 import CustomTooltip from '#components/CustomTooltip';
 import ChartContainer from '#components/ChartContainer';
@@ -34,6 +35,7 @@ export interface UncertainData {
     indicatorName?: string | null;
     format?: FormatType;
     subvariable?: string;
+    interpolated?: number | null | undefined;
 }
 
 interface Payload {
@@ -128,6 +130,27 @@ function UncertaintyChart(props: Props) {
         loading,
     } = props;
 
+    const valueRange = uncertainData?.filter((item) => item.interpolated === 0);
+    const maxValue = max(valueRange, (val) => new Date(val.date).getTime());
+    const minValue = min(valueRange, (val) => new Date(val.date).getTime());
+
+    const uncertainDataFiltered = useMemo(() => uncertainData?.map((item) => {
+        if (item.interpolated === 1) {
+            return { ...item, interpolatedValue: item.indicatorValue, indicatorValue: null };
+        }
+        if (item.date === maxValue?.date) {
+            return { ...item, interpolatedValue: item.indicatorValue };
+        }
+        if (item.date === minValue?.date) {
+            return { ...item, interpolatedValue: item.indicatorValue };
+        }
+        return { ...item, interpolatedValue: null };
+    }), [
+        maxValue?.date,
+        minValue?.date,
+        uncertainData,
+    ]);
+
     return (
         <ContainerCard
             className={_cs(className, styles.areaChart)}
@@ -138,12 +161,12 @@ function UncertaintyChart(props: Props) {
             headerDescription={headingDescription}
         >
             <ChartContainer
-                data={uncertainData}
+                data={uncertainDataFiltered}
                 loading={loading}
                 className={styles.responsiveContainer}
             >
                 <ComposedChart
-                    data={uncertainData}
+                    data={uncertainDataFiltered}
                 >
                     <XAxis
                         dataKey="date"
@@ -177,6 +200,13 @@ function UncertaintyChart(props: Props) {
                         stroke="#2F9C67"
                         strokeWidth={2}
                         dot={<CustomDots />}
+                    />
+                    <Line
+                        dataKey="interpolatedValue"
+                        stroke="#2F9C67"
+                        strokeWidth={2}
+                        strokeDasharray="2 2"
+                        dot={false}
                     />
                     <Tooltip content={TooltipContent} />
                 </ComposedChart>
