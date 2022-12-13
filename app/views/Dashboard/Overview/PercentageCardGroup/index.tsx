@@ -310,9 +310,8 @@ function PercentageCardGroup(props: Props) {
         if (selectedIndicatorName) {
             return selectedIndicatorName;
         }
-        return filterValues?.indicator;
+        return '';
     }, [
-        filterValues,
         selectedIndicatorName,
     ]);
 
@@ -857,7 +856,7 @@ function PercentageCardGroup(props: Props) {
                         : 'Outbreak over the last 12 months'}
                     headingSize="extraSmall"
                     contentClassName={styles.responsiveContent}
-                    headerDescription={outbreakSubHeader}
+                    headerDescription={outbreakSubHeader ?? ''}
                 >
                     <ChartContainer
                         className={styles.responsiveContainer}
@@ -879,7 +878,7 @@ function PercentageCardGroup(props: Props) {
                                     right: 30,
                                     left: 20,
                                 }}
-                                fontSize={12}
+                                fontSize={10}
                                 interval={0}
                                 tickFormatter={dateTickFormatter}
                                 angle={-30}
@@ -932,7 +931,10 @@ function PercentageCardGroup(props: Props) {
                         <XAxis
                             dataKey="region"
                             tickLine={false}
-                            fontSize={12}
+                            fontSize={11}
+                            tickMargin={10}
+                            interval={0}
+                            angle={-30}
                         />
                         <YAxis
                             padding={{ bottom: 0 }}
