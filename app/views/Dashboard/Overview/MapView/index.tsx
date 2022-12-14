@@ -279,11 +279,19 @@ function MapView(props: Props) {
     const [
         mapIndicatorState,
         formatOnMap,
+
         lowestDataOnMap,
         highestDataOnMap,
         originalLowestDataOnMap,
         originalHighestDataOnMap,
     ] = useMemo(() => {
+        function calculateValue(value: number, format: FormatType) {
+            if (format === 'thousand' || format === 'million' || format === 'raw') {
+                return Math.log10(value);
+            }
+            return value;
+        }
+
         const countryIndicator = overviewMapData?.overviewMap?.map(
             (indicatorValue) => {
                 const val = indicatorValue.indicatorValue ?? 0;
@@ -292,10 +300,7 @@ function MapView(props: Props) {
                 }
                 const format = indicatorValue.format as FormatType;
 
-                let sanitizedValue = val;
-                if (format === 'thousand' || format === 'million' || format === 'raw') {
-                    sanitizedValue = Math.log10(val);
-                }
+                const sanitizedValue = calculateValue(val, format);
 
                 const value = {
                     id: Number(indicatorValue.countryId),
@@ -322,26 +327,35 @@ function MapView(props: Props) {
         }
 
         // NOTE: we will always have a min and max item
-        const maxItem = countryIndicator[0];
+        let maxItem = countryIndicator[0];
         const minItem = countryIndicator[countryIndicator.length - 1];
+
+        // Let's add 1 to maxItem is maxItem.originalValue is equal to minItem.originalValue
+        if (
+            isDefined(maxItem?.originalValue)
+            && isDefined(minItem?.originalValue)
+            && maxItem.originalValue === minItem.originalValue
+        ) {
+            const val = maxItem.originalValue + 1;
+            const format = maxItem.format as FormatType;
+            const sanitizedValue = calculateValue(val, format);
+            maxItem = {
+                ...maxItem,
+                value: sanitizedValue,
+                originalValue: val,
+            };
+        }
 
         const format = (maxItem?.format as FormatType | undefined) ?? 'percent';
 
         return [
             countryIndicator,
             format,
-            format === 'percent'
-                ? 0
-                : minItem.value,
-            format === 'percent'
-                ? 1
-                : maxItem.value,
-            format === 'percent'
-                ? 0
-                : minItem.originalValue,
-            format === 'percent'
-                ? 1
-                : maxItem.originalValue,
+
+            format === 'percent' ? 0 : minItem.value,
+            format === 'percent' ? 1 : maxItem.value,
+            format === 'percent' ? 0 : minItem.originalValue,
+            format === 'percent' ? 1 : maxItem.originalValue,
         ];
     }, [overviewMapData?.overviewMap]);
 
