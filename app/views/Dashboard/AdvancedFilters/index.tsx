@@ -18,6 +18,27 @@ import styles from './styles.css';
 export type ThematicsOption = NonNullable<NonNullable<AdvancedFilterOptionsQuery['filterOptions']>['thematics']>[number];
 export type TopicsOption = NonNullable<NonNullable<AdvancedFilterOptionsQuery['filterOptions']>['topics']>[number];
 
+export interface AdvancedOptionType {
+    type?: string;
+    thematics?: string[];
+    topics?: string[];
+}
+
+interface Thematic {
+    key: string;
+    label: string;
+}
+
+const ADVANCED_FILTER_OPTIONS = gql`
+query AdvancedFilterOptions($thematics: [String!], $type: String) {
+        filterOptions {
+            types
+            thematics(type: $type)
+            topics(thematics: $thematics)
+        }
+    }
+`;
+
 interface ChipProps {
     name: string;
     value?: string[] | null | undefined;
@@ -71,27 +92,6 @@ function ChipLayout(props: ChipProps) {
     );
 }
 
-export interface AdvancedOptionType {
-    type?: string;
-    thematic?: string;
-    topic?: string;
-}
-
-interface Thematic {
-    key: string;
-    label: string;
-}
-
-const ADVANCED_FILTER_OPTIONS = gql`
-query AdvancedFilterOptions($thematic: String!, $type: String!) {
-        filterOptions {
-            types
-            thematics(type: $type)
-            topics(thematic: $thematic)
-        }
-    }
-`;
-
 interface FilterType {
     key: string;
     label: string;
@@ -137,10 +137,13 @@ function AdvancedFilters(props: Props) {
         setSelectedTopicOptions,
     ] = useState<TopicsOption[] | undefined>([]);
 
-    const filterOptionsVariables = useMemo(() => ({
+    const filterOptionsVariables = useMemo((): AdvancedFilterOptionsQueryVariables => ({
         type: value?.type ?? '',
-        thematic: value?.thematic ?? '',
-    }), [value?.type, value?.thematic]);
+        thematics: selectedThematicOptions ?? undefined,
+    }), [
+        value?.type,
+        selectedThematicOptions,
+    ]);
 
     const {
         previousData: prevData,
@@ -181,11 +184,24 @@ function AdvancedFilters(props: Props) {
                 if (name === 'type') {
                     onChange(() => ({
                         type: newValue as string,
-                        thematic: undefined,
-                        topic: undefined,
+                        thematics: undefined,
+                        topics: undefined,
                     }));
                     setSelectedThematicOptions(undefined);
                     setSelectedTopicOptions(undefined);
+                } else if (name === 'thematics') {
+                    onChange((oldValue) => ({
+                        ...oldValue,
+                        thematics: newValue as string[],
+                        topics: undefined,
+                    }));
+                    setSelectedThematicOptions(newValue as string[]);
+                } else if (name === 'topics') {
+                    onChange((oldValue) => ({
+                        ...oldValue,
+                        topics: newValue as string[],
+                    }));
+                    setSelectedTopicOptions(newValue as string[]);
                 } else {
                     onChange((oldValue) => ({
                         ...oldValue,
@@ -225,26 +241,26 @@ function AdvancedFilters(props: Props) {
                     disabled={advancedFiltersLoading}
                 />
                 <MultiSelectInput
-                    name="thematic"
+                    name="thematics"
                     className={styles.filter}
                     options={thematicOptions}
                     placeholder="Thematic"
                     keySelector={thematicKeySelector}
                     labelSelector={thematicLabelSelector}
-                    value={selectedThematicOptions}
-                    onChange={setSelectedThematicOptions}
+                    value={value?.thematics}
+                    onChange={handleInputChange}
                     variant="general"
                     disabled={advancedFiltersLoading}
                 />
                 <MultiSelectInput
-                    name="topic"
+                    name="topics"
                     className={styles.filter}
                     options={topicOptions}
                     placeholder="Topic"
                     keySelector={topicKeySelector}
                     labelSelector={topicLabelSelector}
-                    value={selectedTopicOptions}
-                    onChange={setSelectedTopicOptions}
+                    value={value?.topics}
+                    onChange={handleInputChange}
                     variant="general"
                     disabled={advancedFiltersLoading}
                 />

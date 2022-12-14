@@ -15,10 +15,6 @@
         opacity: var(--dui-opacity-disabled-element);
     }
 
-    &.default {
-        --color-background: var(--dui-color-background-input-section-light);
-    }
-
     /* &.accent {
         --color-background: var(--dui-color-accent);
     }

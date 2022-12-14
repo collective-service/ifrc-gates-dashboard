@@ -34,15 +34,15 @@ const COUNTRY_COMBINED_INDICATORS = gql`
     query CountryCombinedIndicators (
         $emergency: String,
         $iso3: String,
-        $topic: String
-        $thematic: String
+        $topics:[String!],
+        $thematics:[String!],
         $type: String
     ) {
         countryCombinedIndicators (filters: {
             emergency: $emergency,
             iso3: $iso3,
-            topic: $topic,
-            thematic: $thematic,
+            topics: $topics,
+            thematics: $thematics,
             type: $type,
         }) {
             thematic
@@ -73,15 +73,15 @@ const REGIONAL_COMBINED_INDICATORS = gql`
     query RegionalCombinedIndicators (
         $emergency: String,
         $region: String,
-        $topic: String
-        $thematic: String
+        $topics: [String!],
+        $thematics: [String!],
         $type: String
     ) {
         regionCombinedIndicators (filters: {
             emergency: $emergency,
             region: $region,
-            topic: $topic,
-            thematic: $thematic,
+            topics: $topics,
+            thematics: $thematics,
             type: $type,
         }) {
             thematic
@@ -112,12 +112,12 @@ const GLOBAL_COMBINED_INDICATORS = gql`
     query GlobalCombinedIndicators(
         $emergency: String,
         $type: String,
-        $thematic: String,
-        $topic: String,
+        $thematics: [String!],
+        $topics: [String!],
     ) {
         globalCombinedIndicators(filters: {
-            topic: $topic,
-            thematic: $thematic,
+            topics: $topics,
+            thematics: $thematics,
             type: $type,
             emergency: $emergency,
         }) {
@@ -237,8 +237,8 @@ function CombinedIndicators(props: Props) {
                 iso3: filterValues?.country,
                 emergency: filterValues?.outbreak,
                 type: advancedFilterValues?.type,
-                thematic: advancedFilterValues?.thematic,
-                topic: advancedFilterValues?.topic,
+                thematics: advancedFilterValues?.thematics,
+                topics: advancedFilterValues?.topics,
             },
         },
     );
@@ -254,8 +254,8 @@ function CombinedIndicators(props: Props) {
                 emergency: filterValues?.outbreak,
                 region: filterValues?.region,
                 type: advancedFilterValues?.type,
-                thematic: advancedFilterValues?.thematic,
-                topic: advancedFilterValues?.topic,
+                thematics: advancedFilterValues?.thematics,
+                topics: advancedFilterValues?.topics,
             },
         },
     );
@@ -269,9 +269,9 @@ function CombinedIndicators(props: Props) {
             skip: isDefined(filterValues?.country) || isDefined(filterValues?.region),
             variables: {
                 emergency: filterValues?.outbreak,
-                thematic: advancedFilterValues?.thematic,
+                thematics: advancedFilterValues?.thematics,
                 type: advancedFilterValues?.type,
-                topic: advancedFilterValues?.topic,
+                topics: advancedFilterValues?.topics,
             },
         },
     );

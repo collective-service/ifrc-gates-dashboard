@@ -325,16 +325,17 @@ function Filters(props: Props) {
                         )}
                     </>
                 )}
-                <Button
-                    name={undefined}
-                    variant="transparent"
-                    icons={<IoClose />}
-                    onClick={handleClear}
-                    className={styles.clearButton}
-                    disabled={isFilterEmpty}
-                >
-                    Clear all
-                </Button>
+                {!isFilterEmpty && (
+                    <Button
+                        name={undefined}
+                        variant="transparent"
+                        icons={<IoClose />}
+                        onClick={handleClear}
+                        className={styles.clearButton}
+                    >
+                        Clear all
+                    </Button>
+                )}
             </div>
             {activeTab === 'combinedIndicators' && (
                 <AdvancedFilters
