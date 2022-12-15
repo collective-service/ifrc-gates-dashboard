@@ -25,7 +25,7 @@ import Map, {
     MapTooltip,
 } from '@togglecorp/re-map';
 
-import ProgressBar from '#components/ProgressBar';
+import MapProgressBar from '#components/MapProgressBar';
 import MapLabel from '#components/MapLabel';
 import { regionBounds } from '#utils/regionBounds';
 import {
@@ -145,6 +145,7 @@ const countryLinePaint: mapboxgl.LinePaint = {
 };
 
 const barHeight = 10;
+const defaultBounds: [number, number, number, number] = [90, -55, -90, 80];
 
 interface TooltipProps {
     countryName: string | undefined;
@@ -233,6 +234,11 @@ function MapView(props: Props) {
         mapClickProperties,
         setMapClickProperties,
     ] = useState<ClickedPoint | undefined>();
+
+    const [
+        currentRegionBounds,
+        setCurrentRegionBounds,
+    ] = useState<[number, number, number, number]>();
 
     const [
         countryData,
@@ -365,18 +371,23 @@ function MapView(props: Props) {
     }, [overviewMapData?.overviewMap]);
 
     const selectedRegionBounds = useMemo((): [number, number, number, number] => {
-        const defaultBounds: [number, number, number, number] = [90, -55, -90, 80];
-        if (isNotDefined(regionId)) {
+        if (isNotDefined(regionId) && isNotDefined(currentRegionBounds)) {
             return defaultBounds;
+        }
+        if (isDefined(currentRegionBounds)) {
+            return currentRegionBounds;
         }
         const regionData = regionBounds?.find(
             (region) => region.region === regionId,
         );
-        const regionBbox = regionData?.bounding_box as (
+        const regionBox = regionData?.bounding_box as (
             [number, number, number, number] | undefined
         );
-        return regionBbox ?? defaultBounds;
-    }, [regionId]);
+        return currentRegionBounds ?? [0, 0, 0, 0];
+    }, [
+        regionId,
+        currentRegionBounds,
+    ]);
 
     const mapDataForSelectedCountry = useMemo(() => (
         overviewMapData?.overviewMap.find((country) => (
@@ -433,11 +444,12 @@ function MapView(props: Props) {
             totalValue: highestTopRankingValue,
             color: '#98A6B5',
             format: data.format as FormatType,
+            setCurrentRegionBounds,
         }),
         [highestTopRankingValue],
     );
-
-    const handleClick = useCallback(
+    console.log('check currentRegionBounds', currentRegionBounds);
+    const handleMapCountryClick = useCallback(
         (feature: mapboxgl.MapboxGeoJSONFeature) => {
             const iso3 = feature?.properties?.iso3;
             // FIXME: here "idmc_short" should be replaced with some other name
@@ -527,7 +539,7 @@ function MapView(props: Props) {
                                 type: 'fill',
                                 paint: countryFillPaint,
                             }}
-                            onClick={handleClick}
+                            onClick={handleMapCountryClick}
                             onMouseEnter={handleHoverIn}
                             onMouseLeave={handleHoverOut}
                         />
@@ -579,7 +591,7 @@ function MapView(props: Props) {
                             className={styles.progressList}
                             keySelector={countriesRankingKeySelector}
                             data={topCountriesList}
-                            renderer={ProgressBar}
+                            renderer={MapProgressBar}
                             rendererParams={countriesRankingRendererParams}
                             emptyMessage="No country data to show"
                             filtered={false}
@@ -607,7 +619,7 @@ function MapView(props: Props) {
                             className={styles.progressList}
                             keySelector={countriesRankingKeySelector}
                             data={bottomCountriesList}
-                            renderer={ProgressBar}
+                            renderer={MapProgressBar}
                             rendererParams={countriesRankingRendererParams}
                             filtered={false}
                             errored={false}

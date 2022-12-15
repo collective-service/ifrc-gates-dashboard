@@ -1,0 +1,106 @@
+import React, { useMemo, useCallback } from 'react';
+import {
+    _cs,
+} from '@togglecorp/fujs';
+import { Tooltip } from '@the-deep/deep-ui';
+import {
+    formatNumber,
+    FormatType,
+    normalCommaFormatter,
+} from '#utils/common';
+
+import styles from './styles.css';
+
+export interface Props {
+    className?: string | undefined;
+    barHeight?: number;
+    barName: React.ReactNode | undefined;
+    valueTitle?: string | undefined;
+    color?: string;
+    value: number | null | undefined;
+    totalValue: number | null | undefined;
+    format: FormatType;
+    footer?: React.ReactNode;
+    hideTooltip?: boolean;
+    setCurrentRegionBounds: React.Dispatch<React.SetStateAction<[number, number, number, number]
+        | undefined>>;
+}
+
+function MapProgressBar(props: Props) {
+    const {
+        className,
+        barHeight = 8,
+        barName,
+        valueTitle,
+        color,
+        value,
+        totalValue,
+        format,
+        footer,
+        hideTooltip = false,
+        setCurrentRegionBounds,
+    } = props;
+
+    const valueTooltip = useMemo(() => {
+        if (format === 'percent') {
+            return (`${valueTitle}: ${Math.round((value ?? 0) * 10000) / 100}%` ?? undefined);
+        }
+        return (`${valueTitle}: ${normalCommaFormatter().format(value ?? 0)}`);
+    }, [
+        value,
+        valueTitle,
+        format,
+    ]);
+
+    const totalValueForWidth = formatNumber('percent', value ?? 0, !!totalValue);
+
+    const handleMapProgressClick = useCallback(() => {
+        // eslint-disable-next-line
+        console.log('Clicked a progress bar::');
+        setCurrentRegionBounds([50, -55, -80, 50]);
+    }, []);
+
+    return (
+        <div
+            className={_cs(className, styles.progressInfo)}
+            onClick={handleMapProgressClick}
+            role="presentation"
+        >
+            <div className={styles.progressTitle}>
+                {barName}
+            </div>
+            <div className={styles.progressValueWrapper}>
+                <div
+                    className={styles.progressBarWrapper}
+                    style={{ height: `${barHeight}px` }}
+                >
+                    <div
+                        className={styles.progressBarStyle}
+                        key={undefined}
+                        style={{
+                            width: totalValueForWidth,
+                            backgroundColor: color ?? 'blue',
+                        }}
+                    />
+                </div>
+                {!hideTooltip && (
+                    <Tooltip
+                        trackMousePosition
+                    >
+                        {valueTooltip}
+                    </Tooltip>
+                )}
+                <div
+                    className={styles.progressValue}
+                >
+                    {format === 'percent'
+                        ? formatNumber('percent', value ?? 0)
+                        : formatNumber(format, value ?? 0, !!totalValue)}
+                </div>
+            </div>
+            {footer}
+        </div>
+    );
+}
+
+export default MapProgressBar;
