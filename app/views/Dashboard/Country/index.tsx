@@ -1001,13 +1001,20 @@ function Country(props: Props) {
                                         ?.dataCountryLevelMostRecent[0].indicatorDescription} - ${filterValues?.subvariable}`}
                                     contentClassName={styles.globalDetails}
                                 >
-                                    <div className={styles.globalValue}>
-                                        {selectedSubvariableGlobal?.indicatorValue
-                                            ? formatNumber(
-                                                selectedSubvariableGlobal?.format as FormatType,
-                                                selectedSubvariableGlobal?.indicatorValue,
-                                            )
-                                            : 'N/a'}
+                                    <div className={styles.globalValueBox}>
+                                        <div className={styles.globalValue}>
+                                            {selectedSubvariableGlobal?.indicatorValue
+                                                ? formatNumber(
+                                                    selectedSubvariableGlobal?.format as FormatType,
+                                                    selectedSubvariableGlobal?.indicatorValue,
+                                                )
+                                                : 'N/a'}
+                                        </div>
+                                        {selectedSubvariableGlobal?.indicatorMonth && (
+                                            <div className={styles.globalValueDate}>
+                                                {`As of ${dateTickFormatter(selectedSubvariableGlobal?.indicatorMonth)}`}
+                                            </div>
+                                        )}
                                     </div>
                                     <ListView
                                         className={styles.globalProgressBar}
