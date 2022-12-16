@@ -5,8 +5,8 @@ import {
     Button,
 } from '@the-deep/deep-ui';
 import { gql, useQuery } from '@apollo/client';
-import { IoCloseOutline, IoClose } from 'react-icons/io5';
-import Chip from '#components/Chip';
+import { IoClose } from 'react-icons/io5';
+import ChipCollection from '#components/ChipCollection';
 
 import {
     AdvancedFilterOptionsQuery,
@@ -38,59 +38,6 @@ query AdvancedFilterOptions($thematics: [String!], $type: String) {
         }
     }
 `;
-
-interface ChipProps {
-    name: string;
-    value?: string[] | null | undefined;
-    onChange: React.Dispatch<React.SetStateAction<string[] | undefined>>;
-}
-
-function ChipLayout(props: ChipProps) {
-    const {
-        name,
-        value,
-        onChange,
-    } = props;
-
-    const handleCancelOption = useCallback(
-        (selectedKey) => {
-            const newValue = value?.filter((key) => key !== selectedKey) ?? [];
-            onChange(newValue);
-        },
-        [value, onChange],
-    );
-
-    return (
-        <div className={styles.chipComponent}>
-            <div className={styles.chipFilterHeader}>
-                {`${name} filters:`}
-            </div>
-            <div className={styles.chipCollection}>
-                {value?.map((key) => {
-                    const label = key;
-                    return (
-                        <Chip
-                            key={key}
-                            label={label}
-                            actionClassName={styles.chipActionButtons}
-                            action={(
-                                <Button
-                                    name={key}
-                                    onClick={handleCancelOption}
-                                    title="Remove"
-                                    spacing="none"
-                                    variant="transparent"
-                                >
-                                    <IoCloseOutline />
-                                </Button>
-                            )}
-                        />
-                    );
-                })}
-            </div>
-        </div>
-    );
-}
 
 interface FilterType {
     key: string;
@@ -267,14 +214,14 @@ function AdvancedFilters(props: Props) {
             </div>
             <div>
                 {selectedThematicOptions && selectedThematicOptions.length > 0 && (
-                    <ChipLayout
+                    <ChipCollection
                         name="Thematic"
                         value={selectedThematicOptions}
                         onChange={setSelectedThematicOptions}
                     />
                 )}
                 {selectedTopicOptions && selectedTopicOptions.length > 0 && (
-                    <ChipLayout
+                    <ChipCollection
                         name="Topic"
                         value={selectedTopicOptions}
                         onChange={setSelectedTopicOptions}
