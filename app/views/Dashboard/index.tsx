@@ -131,11 +131,13 @@ const SUBVARIABLES = gql`
     query Subvariables(
         $iso3: String!,
         $indicatorId: String!,
+        $emergency: String!,
     ) {
         filterOptions {
             subvariables(
                 iso3: $iso3,
                 indicatorId: $indicatorId,
+                emergency: $emergency,
             )
         }
     }
@@ -249,6 +251,7 @@ function Dashboard() {
             return {
                 iso3: (activeTab === 'country' ? filterValueCountry : undefined) ?? '',
                 indicatorId: filterValues.indicator,
+                emergency: filterValues.outbreak ?? '',
             };
         }
         return undefined;
@@ -256,6 +259,7 @@ function Dashboard() {
         activeTab,
         filterValueCountry,
         filterValues?.indicator,
+        filterValues?.outbreak,
     ]);
 
     const {
