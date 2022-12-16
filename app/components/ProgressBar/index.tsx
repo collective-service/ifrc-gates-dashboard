@@ -1,13 +1,14 @@
-import React, { useMemo } from 'react';
-import {
-    _cs,
-} from '@togglecorp/fujs';
-import { Tooltip } from '@the-deep/deep-ui';
 import {
     formatNumber,
     FormatType,
     normalCommaFormatter,
 } from '#utils/common';
+import { Tooltip } from '@the-deep/deep-ui';
+import {
+    isNotDefined,
+    _cs,
+} from '@togglecorp/fujs';
+import React, { useMemo } from 'react';
 
 import styles from './styles.css';
 
@@ -39,14 +40,36 @@ function ProgressBar(props: Props) {
     } = props;
 
     const valueTooltip = useMemo(() => {
+        if (isNotDefined(value)) {
+            return 0;
+        }
         if (format === 'percent') {
             return (`${valueTitle}: ${Math.round((value ?? 0) * 10000) / 100}%` ?? undefined);
+        }
+        if (value < 0.999) {
+            return value;
         }
         return (`${valueTitle}: ${normalCommaFormatter().format(value ?? 0)}`);
     }, [
         value,
         valueTitle,
         format,
+    ]);
+
+    const progressValue = useMemo(() => {
+        if (isNotDefined(value)) {
+            return 0;
+        }
+        if (format === 'percent') {
+            return formatNumber('percent', value);
+        }
+        if (value < 0.9999) {
+            return '< 1';
+        }
+        return formatNumber(format, value, totalValue ?? 0);
+    }, [value,
+        format,
+        totalValue,
     ]);
 
     const totalValueForWidth = formatNumber('percent', value ?? 0, totalValue ?? 0);
@@ -80,9 +103,7 @@ function ProgressBar(props: Props) {
                 <div
                     className={styles.progressValue}
                 >
-                    {format === 'percent'
-                        ? formatNumber('percent', value ?? 0)
-                        : formatNumber(format, value ?? 0, totalValue ?? 0)}
+                    {progressValue}
                 </div>
             </div>
             {footer}

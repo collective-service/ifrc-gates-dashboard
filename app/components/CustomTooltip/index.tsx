@@ -92,10 +92,7 @@ function CustomTooltip(props: Props) {
         return (
             <div className={styles.tooltipContent}>
                 {isDefined(valueLabel) && `${valueLabel} : `}
-                {(isDefined(value) && value !== null) && formatNumber(
-                    format === 'million' ? 'raw' : format,
-                    value,
-                )}
+                {format === 'raw' ? value : formatNumber(format, value)}
                 {(isDefined(minValue) && isDefined(maxValue))
                     ? uncertaintyRange
                     : null}

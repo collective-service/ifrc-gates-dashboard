@@ -1,7 +1,7 @@
 import React from 'react';
 import { _cs } from '@togglecorp/fujs';
 
-import { formatNumber, FormatType } from '#utils/common';
+import { formatNumber, FormatType, normalizedValue } from '#utils/common';
 
 import styles from './styles.css';
 
@@ -28,7 +28,7 @@ function MapLabel(props: Props) {
                     {formatNumber(format, minValue) ?? 'N/a'}
                 </div>
                 <div>
-                    {formatNumber(format, maxValue) ?? 'N/a'}
+                    {normalizedValue(maxValue, format) ?? 'N/a'}
                 </div>
             </div>
         </div>

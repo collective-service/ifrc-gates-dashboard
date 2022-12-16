@@ -18,7 +18,8 @@ export interface Props {
     heading?: React.ReactNode;
     headerDescription?: React.ReactNode;
     headingSize?: headingSizeType;
-    statValue: string | undefined;
+    statValue: string | number | undefined;
+    nonNormalizedStatValue?: number | null;
     subValue?: number;
     newDeaths?: string | null;
     newCasesPerMillion?: string | null;
@@ -40,6 +41,7 @@ function PercentageStats(props: Props) {
         statValue,
         subValue,
         newDeaths,
+        nonNormalizedStatValue,
         newCasesPerMillion,
         totalDeaths,
         newCases,
@@ -76,7 +78,7 @@ function PercentageStats(props: Props) {
         ) : (
             <Tooltip>
                 <div>
-                    {`Total: ${statValue ?? 0}`}
+                    {`Total: ${nonNormalizedStatValue ?? statValue ?? 0}`}
                 </div>
                 <div>
                     {`Date: ${indicatorMonth ?? 'N/a'}`}

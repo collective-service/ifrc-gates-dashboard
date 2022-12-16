@@ -34,7 +34,10 @@ import {
     TopBottomCountriesRankingQuery,
     TopBottomCountriesRankingQueryVariables,
 } from '#generated/types';
-import { formatNumber, FormatType } from '#utils/common';
+import {
+    FormatType,
+    normalizedValue,
+} from '#utils/common';
 import { TabTypes, IndicatorType } from '#views/Dashboard';
 import { FilterType } from '#views/Dashboard/Filters';
 
@@ -178,9 +181,9 @@ function Tooltip(props: TooltipProps) {
                     </>
                 )}
                 value={
-                    formatNumber(
-                        (indicatorData?.format ?? 'raw') as FormatType,
+                    normalizedValue(
                         indicatorData?.indicatorValue,
+                        (indicatorData?.format ?? 'raw') as FormatType,
                     )
                 }
                 hideLabelColon

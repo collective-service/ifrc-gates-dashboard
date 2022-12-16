@@ -28,13 +28,13 @@ import {
 } from 'recharts';
 import {
     decimalToPercentage,
-    formatNumber,
     FormatType,
     getShortMonth,
     normalFormatter,
     colors,
     negativeToZero,
     positiveToZero,
+    normalizedValue,
 } from '#utils/common';
 import { FilterType } from '#views/Dashboard/Filters';
 import {
@@ -342,7 +342,7 @@ function MapModal(props: ModalProps) {
                             </div>
                         )}
                         <div className={styles.tooltipContent}>
-                            {formatNumber('raw', item.value ?? 0)}
+                            {item.value}
                         </div>
                     </div>
                 ))}
@@ -385,9 +385,9 @@ function MapModal(props: ModalProps) {
                         size="extraLarge"
                         className={styles.countryCaseData}
                     >
-                        {formatNumber(
-                            format as FormatType,
+                        {normalizedValue(
                             indicatorValue,
+                            format as FormatType,
                         )}
                     </Heading>
                     <Heading

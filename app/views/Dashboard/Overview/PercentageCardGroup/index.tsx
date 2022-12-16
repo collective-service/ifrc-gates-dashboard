@@ -44,6 +44,7 @@ import {
     negativeToZero,
     positiveToZero,
     colors,
+    normalizedValue,
 } from '#utils/common';
 import {
     OverviewStatsQuery,
@@ -343,9 +344,9 @@ function PercentageCardGroup(props: Props) {
             {
                 id: region.id,
                 indicatorValue: region.indicatorValueRegional,
-                normalizedValue: formatNumber(
+                normalizedValue: normalizedValue(
+                    region.indicatorValueRegional,
                     region.format as FormatType,
-                    region.indicatorValueRegional ?? 0,
                 ),
                 indicatorMonth: region.indicatorMonth,
                 region: region.region,
@@ -355,8 +356,7 @@ function PercentageCardGroup(props: Props) {
                 indicatorType: region.type,
                 errorMargin: region.errorMargin,
             }
-        ))
-    ), [
+        ))), [
         overviewStatsResponse?.regionalBreakdownRegion,
         filterValues?.region,
     ]);
@@ -388,7 +388,20 @@ function PercentageCardGroup(props: Props) {
         filterValues?.subvariable,
     ]);
 
-    const globalTotalCase = overviewStatsResponse?.totalCasesGlobal[0];
+    const totalCasesGlobal = useMemo(() => (
+        overviewStatsResponse?.totalCasesGlobal.map((global) => (
+            {
+                ...global,
+                normalizedValue: normalizedValue(
+                    global.indicatorValueGlobal,
+                    global.format as FormatType,
+                ),
+            }
+        ))), [
+        overviewStatsResponse?.totalCasesGlobal,
+    ]);
+
+    const globalTotalCase = totalCasesGlobal?.[0];
 
     const regionTotalCase = useMemo(() => (
         regionalBreakdownRegion?.find(
@@ -436,21 +449,24 @@ function PercentageCardGroup(props: Props) {
 
     const totalCaseValue = useMemo(() => {
         if (filterValues?.region) {
-            return formatNumber(
-                regionTotalCase?.format as FormatType,
-                regionTotalCase?.indicatorValue,
-            );
+            return regionTotalCase?.normalizedValue;
         }
-        return formatNumber(
-            (globalTotalCase?.format ?? 'raw') as FormatType,
-            globalTotalCase?.indicatorValueGlobal,
-        );
+        return globalTotalCase?.normalizedValue;
     }, [
-        regionTotalCase?.indicatorValue,
-        globalTotalCase?.indicatorValueGlobal,
+        regionTotalCase,
+        globalTotalCase,
         filterValues?.region,
-        globalTotalCase?.format,
-        regionTotalCase?.format,
+    ]);
+
+    const nonNormalizedTotalCaseValue = useMemo(() => {
+        if (filterValues?.region) {
+            return regionTotalCase?.indicatorValue;
+        }
+        return globalTotalCase?.indicatorValueGlobal;
+    }, [
+        globalTotalCase,
+        regionTotalCase,
+        filterValues?.region,
     ]);
 
     const percentageCardMonth = useMemo(() => {
@@ -459,8 +475,8 @@ function PercentageCardGroup(props: Props) {
         }
         return globalTotalCase?.indicatorMonth;
     }, [
-        regionTotalCase?.indicatorMonth,
-        globalTotalCase?.indicatorMonth,
+        regionTotalCase,
+        globalTotalCase,
         filterValues?.region,
     ]);
 
@@ -504,14 +520,8 @@ function PercentageCardGroup(props: Props) {
         return undefined;
     }, [
         filterValues?.indicator,
-        regionTotalCase?.indicatorType,
-        globalTotalCase?.type,
-        globalTotalCase?.errorMargin,
-        globalTotalCase?.indicatorValueGlobal,
-        globalTotalCase?.format,
-        regionTotalCase?.format,
-        regionTotalCase?.errorMargin,
-        regionTotalCase?.indicatorValue,
+        regionTotalCase,
+        globalTotalCase,
     ]);
 
     const uncertaintyGlobalChart = useMemo(() => (
@@ -777,6 +787,7 @@ function PercentageCardGroup(props: Props) {
                         headerDescription={cardSubHeader}
                         headingSize="extraSmall"
                         statValue={totalCaseValue}
+                        nonNormalizedStatValue={nonNormalizedTotalCaseValue}
                         statValueLoading={loading}
                         indicatorMonth={percentageCardMonth}
                         uncertaintyRange={uncertaintyRange}

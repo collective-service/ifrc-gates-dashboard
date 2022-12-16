@@ -25,9 +25,9 @@ import {
     RegionalAndTotalQueryVariables,
 } from '#generated/types';
 import {
-    formatNumber,
     FormatType,
     colors,
+    normalizedValue,
 } from '#utils/common';
 import ChartContainer from '#components/ChartContainer';
 import CustomTooltip from '#components/CustomTooltip';
@@ -159,7 +159,6 @@ function CustomTotalTooltip(tooltipProps: TooltipProps) {
                 heading={label}
                 subHeading={`(${totalCases[0].payload?.indicatorMonth})`}
                 value={totalCases[0].payload?.indicatorValue}
-
             />
         );
     }
@@ -234,9 +233,9 @@ function RegionalBreakdownCard(props: Props) {
         {
             ...total,
             indicatorValue: total.indicatorValueGlobal,
-            normalizedValue: formatNumber(
-                (total?.format ?? 'raw') as FormatType,
-                total?.indicatorValueGlobal ?? 0,
+            normalizedValue: normalizedValue(
+                total.indicatorValueGlobal,
+                total.format as FormatType,
             ),
             fill: colors[total.emergency],
         }
@@ -246,9 +245,9 @@ function RegionalBreakdownCard(props: Props) {
         {
             ...region,
             indicatorValue: region.indicatorValueRegional,
-            normalizedValue: formatNumber(
-                (region.format ?? 'raw') as FormatType,
-                region.indicatorValueRegional ?? 0,
+            normalizedValue: normalizedValue(
+                region.indicatorValueRegional,
+                region.format as FormatType,
             ),
             fill: colors[region.emergency],
         }

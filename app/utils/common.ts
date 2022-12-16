@@ -187,6 +187,25 @@ export const colors: Record<string, string> = {
     Ebola: '#CCB387',
 };
 
+export const normalizedValue = (
+    value: number | null | undefined,
+    format: FormatType,
+) => {
+    if (isNotDefined(value)) {
+        return 0;
+    }
+    if (format === 'percent') {
+        return formatNumber(format, value);
+    }
+    if (value < 0.999) {
+        return '<1';
+    }
+    return formatNumber(
+        (format ?? 'raw'),
+        value,
+    );
+};
+
 export type Maybe<T> = T | undefined | null;
 
 export function max<T>(
