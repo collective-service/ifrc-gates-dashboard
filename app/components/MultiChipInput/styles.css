@@ -6,7 +6,6 @@
     gap: var(--dui-spacing-large);
 
     .chip-filter-header {
-        color: var(--color);
         font-size: var(--dui-font-size-small);
         font-weight: var(--dui-font-weight-bold);
     }

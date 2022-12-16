@@ -226,6 +226,20 @@ function CombinedIndicators(props: Props) {
         setActiveTab,
     } = props;
 
+    const countryCombinedVariables = useMemo((): CountryCombinedIndicatorsQueryVariables => ({
+        iso3: filterValues?.country,
+        emergency: filterValues?.outbreak,
+        type: advancedFilterValues?.type,
+        thematics: advancedFilterValues?.thematics,
+        topics: advancedFilterValues?.topics,
+    }), [
+        filterValues?.country,
+        filterValues?.outbreak,
+        advancedFilterValues?.type,
+        advancedFilterValues?.topics,
+        advancedFilterValues?.thematics,
+    ]);
+
     const {
         data: countryCombinedIndicatorsData,
         loading: countryCombinedIndicatorsLoading,
@@ -233,15 +247,23 @@ function CombinedIndicators(props: Props) {
         COUNTRY_COMBINED_INDICATORS,
         {
             skip: isNotDefined(filterValues?.country),
-            variables: {
-                iso3: filterValues?.country,
-                emergency: filterValues?.outbreak,
-                type: advancedFilterValues?.type,
-                thematics: advancedFilterValues?.thematics,
-                topics: advancedFilterValues?.topics,
-            },
+            variables: countryCombinedVariables,
         },
     );
+
+    const regionalCombinedVariables = useMemo((): RegionalCombinedIndicatorsQueryVariables => ({
+        emergency: filterValues?.outbreak,
+        region: filterValues?.region,
+        type: advancedFilterValues?.type,
+        thematics: advancedFilterValues?.thematics,
+        topics: advancedFilterValues?.topics,
+    }), [
+        filterValues?.region,
+        filterValues?.outbreak,
+        advancedFilterValues?.type,
+        advancedFilterValues?.topics,
+        advancedFilterValues?.thematics,
+    ]);
 
     const {
         data: regionalCombinedIndicatorsData,
@@ -250,15 +272,21 @@ function CombinedIndicators(props: Props) {
         REGIONAL_COMBINED_INDICATORS,
         {
             skip: isDefined(filterValues?.country) || isNotDefined(filterValues?.region),
-            variables: {
-                emergency: filterValues?.outbreak,
-                region: filterValues?.region,
-                type: advancedFilterValues?.type,
-                thematics: advancedFilterValues?.thematics,
-                topics: advancedFilterValues?.topics,
-            },
+            variables: regionalCombinedVariables,
         },
     );
+
+    const globalCombinedVariables = useMemo((): GlobalCombinedIndicatorsQueryVariables => ({
+        emergency: filterValues?.outbreak,
+        thematics: advancedFilterValues?.thematics,
+        type: advancedFilterValues?.type,
+        topics: advancedFilterValues?.topics,
+    }), [
+        filterValues?.outbreak,
+        advancedFilterValues?.type,
+        advancedFilterValues?.topics,
+        advancedFilterValues?.thematics,
+    ]);
 
     const {
         data: globalCombinedIndicatorsData,
@@ -267,12 +295,7 @@ function CombinedIndicators(props: Props) {
         GLOBAL_COMBINED_INDICATORS,
         {
             skip: isDefined(filterValues?.country) || isDefined(filterValues?.region),
-            variables: {
-                emergency: filterValues?.outbreak,
-                thematics: advancedFilterValues?.thematics,
-                type: advancedFilterValues?.type,
-                topics: advancedFilterValues?.topics,
-            },
+            variables: globalCombinedVariables,
         },
     );
 

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
     RadioInput,
     MultiSelectInput,
@@ -6,7 +6,7 @@ import {
 } from '@the-deep/deep-ui';
 import { gql, useQuery } from '@apollo/client';
 import { IoClose } from 'react-icons/io5';
-import ChipCollection from '#components/ChipCollection';
+import MultiChipInput from '#components/MultiChipInput';
 
 import {
     AdvancedFilterOptionsQuery,
@@ -74,22 +74,12 @@ function AdvancedFilters(props: Props) {
         onChange,
     } = props;
 
-    const [
-        selectedThematicOptions,
-        setSelectedThematicOptions,
-    ] = useState<ThematicsOption[] | undefined>([]);
-
-    const [
-        selectedTopicOptions,
-        setSelectedTopicOptions,
-    ] = useState<TopicsOption[] | undefined>([]);
-
     const filterOptionsVariables = useMemo((): AdvancedFilterOptionsQueryVariables => ({
         type: value?.type ?? '',
-        thematics: selectedThematicOptions ?? undefined,
+        thematics: value?.thematics ?? undefined,
     }), [
         value?.type,
-        selectedThematicOptions,
+        value?.thematics,
     ]);
 
     const {
@@ -134,21 +124,17 @@ function AdvancedFilters(props: Props) {
                         thematics: undefined,
                         topics: undefined,
                     }));
-                    setSelectedThematicOptions(undefined);
-                    setSelectedTopicOptions(undefined);
                 } else if (name === 'thematics') {
                     onChange((oldValue) => ({
                         ...oldValue,
                         thematics: newValue as string[],
                         topics: undefined,
                     }));
-                    setSelectedThematicOptions(newValue as string[]);
                 } else if (name === 'topics') {
                     onChange((oldValue) => ({
                         ...oldValue,
                         topics: newValue as string[],
                     }));
-                    setSelectedTopicOptions(newValue as string[]);
                 } else {
                     onChange((oldValue) => ({
                         ...oldValue,
@@ -157,21 +143,18 @@ function AdvancedFilters(props: Props) {
                 }
             }
         },
-        [onChange],
+        [
+            onChange,
+        ],
     );
 
-    const handleClearAdvancedFilters = useCallback(
-        () => {
-            onChange({});
-            setSelectedThematicOptions(undefined);
-            setSelectedTopicOptions(undefined);
-        },
-        [onChange],
-    );
+    const handleClearAdvancedFilters = useCallback(() => {
+        onChange({});
+    }, [onChange]);
 
     const advancedFiltersSelected = (
-        (selectedThematicOptions && selectedThematicOptions?.length > 0)
-        || (selectedTopicOptions && selectedTopicOptions?.length > 0));
+        (value?.thematics && value.thematics.length > 0)
+        || (value?.topics && value.topics.length > 0));
 
     return (
         <div className={styles.thematicFilterSection}>
@@ -213,18 +196,22 @@ function AdvancedFilters(props: Props) {
                 />
             </div>
             <div>
-                {selectedThematicOptions && selectedThematicOptions.length > 0 && (
-                    <ChipCollection
-                        name="Thematic"
-                        value={selectedThematicOptions}
-                        onChange={setSelectedThematicOptions}
+                {value?.thematics && value.thematics.length > 0 && (
+                    <MultiChipInput
+                        name="thematics"
+                        label="Thematics filters"
+                        value={value?.thematics}
+                        onChange={handleInputChange}
+                        disabled={advancedFiltersLoading}
                     />
                 )}
-                {selectedTopicOptions && selectedTopicOptions.length > 0 && (
-                    <ChipCollection
-                        name="Topic"
-                        value={selectedTopicOptions}
-                        onChange={setSelectedTopicOptions}
+                {value?.topics && value.topics.length > 0 && (
+                    <MultiChipInput
+                        name="topics"
+                        label="Topics filters"
+                        value={value?.topics}
+                        onChange={handleInputChange}
+                        disabled={advancedFiltersLoading}
                     />
                 )}
                 {advancedFiltersSelected && (
