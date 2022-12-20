@@ -3,7 +3,7 @@ name: Dashboard Workflow
 on:
   push:
     branches:
-      - deploy/terraform
+      - release
 
 jobs:
   build_test:
@@ -89,6 +89,9 @@ jobs:
   build_terraform:
     name: Terraform actions
     runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: # FIXME: add value
     needs: build_test
     defaults:
       run:
@@ -140,9 +143,6 @@ jobs:
     name: Deploy to AWS (S3 + Cloudfront)
     needs: build_terraform
     runs-on: ubuntu-latest
-    environment:
-      name: Release
-      url: # FIXME: add value
 
     if: github.event_name == 'push'
 
