@@ -15,6 +15,11 @@
             overflow-y: auto;
         }
 
+        .map-section-header {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
         .map-action-tabs {
             flex-shrink: 0;
             padding: var(--dui-spacing-large);
