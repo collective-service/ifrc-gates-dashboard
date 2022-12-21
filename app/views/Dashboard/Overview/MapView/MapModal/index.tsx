@@ -34,7 +34,7 @@ import {
     colors,
     negativeToZero,
     positiveToZero,
-    normalizedValue,
+    formatNumber,
 } from '#utils/common';
 import { FilterType } from '#views/Dashboard/Filters';
 import {
@@ -342,6 +342,12 @@ function MapModal(props: ModalProps) {
                             </div>
                         )}
                         <div className={styles.tooltipContent}>
+                            {/* FIXME: pass prop to show decimal here */}
+                            {formatNumber(
+                                'raw',
+                                item.value,
+                                false,
+                            )}
                             {item.value}
                         </div>
                     </div>
@@ -385,9 +391,9 @@ function MapModal(props: ModalProps) {
                         size="extraLarge"
                         className={styles.countryCaseData}
                     >
-                        {normalizedValue(
-                            indicatorValue,
+                        {formatNumber(
                             format as FormatType,
+                            indicatorValue,
                         )}
                     </Heading>
                     <Heading

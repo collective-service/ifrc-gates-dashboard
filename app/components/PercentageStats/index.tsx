@@ -8,6 +8,7 @@ import {
 } from '@the-deep/deep-ui';
 import { _cs } from '@togglecorp/fujs';
 import { IoFileTraySharp } from 'react-icons/io5';
+import { formatNumber, FormatType } from '#utils/common';
 
 import styles from './styles.css';
 
@@ -18,8 +19,8 @@ export interface Props {
     heading?: React.ReactNode;
     headerDescription?: React.ReactNode;
     headingSize?: headingSizeType;
-    statValue: string | number | undefined;
-    nonNormalizedStatValue?: number | null;
+    statValue: number | undefined | null;
+    format: FormatType;
     subValue?: number;
     newDeaths?: string | null;
     newCasesPerMillion?: string | null;
@@ -41,7 +42,6 @@ function PercentageStats(props: Props) {
         statValue,
         subValue,
         newDeaths,
-        nonNormalizedStatValue,
         newCasesPerMillion,
         totalDeaths,
         newCases,
@@ -49,8 +49,10 @@ function PercentageStats(props: Props) {
         statValueLoading,
         indicatorMonth,
         uncertaintyRange,
+        format,
     } = props;
 
+    // FIXME: use isNotDefined
     const empty = !statValue;
 
     const valueTooltip = (
@@ -78,7 +80,7 @@ function PercentageStats(props: Props) {
         ) : (
             <Tooltip>
                 <div>
-                    {`Total: ${nonNormalizedStatValue ?? statValue ?? 0}`}
+                    {`Total: ${formatNumber(format, statValue, false)}`}
                 </div>
                 <div>
                     {`Date: ${indicatorMonth ?? 'N/a'}`}

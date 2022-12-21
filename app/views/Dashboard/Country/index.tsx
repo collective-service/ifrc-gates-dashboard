@@ -622,22 +622,27 @@ function Country(props: Props) {
                 totalDeaths: formatNumber(
                     totalDeaths?.format as FormatType,
                     totalDeaths?.indicatorValue,
+                    false,
                 ),
                 newCases: formatNumber(
                     newCases?.format as FormatType,
                     newCases?.indicatorValue,
+                    false,
                 ),
                 newDeaths: formatNumber(
                     newDeaths?.format as FormatType,
                     newDeaths?.indicatorValue,
+                    false,
                 ),
                 newCasesPerMillion: formatNumber(
                     newCasesPerMillion?.format as FormatType,
                     newCasesPerMillion?.indicatorValue,
+                    false,
                 ),
                 newDeathsPerMillion: formatNumber(
                     newDeathsPerMillion?.format as FormatType,
                     newDeathsPerMillion?.indicatorValue,
+                    false,
                 ),
             };
         });
@@ -852,7 +857,8 @@ function Country(props: Props) {
 
     const statusRendererParams = useCallback((_, data: CountryWiseOutbreakCases) => ({
         heading: data.emergency,
-        statValue: formatNumber(data.format ?? 'raw', data.totalCases ?? 0),
+        statValue: data.totalCases,
+        format: data.format ?? 'raw' as const,
         headerDescription: selectedIndicatorType === 'Contextual Indicators'
             ? selectedIndicatorName
             : 'Number of cases',
@@ -918,7 +924,7 @@ function Country(props: Props) {
                                 {`(${item.payload?.date})`}
                             </div>
                             <div className={styles.tooltipContent}>
-                                {formatNumber('raw' as FormatType, item.value ?? 0)}
+                                {formatNumber('raw' as FormatType, item.value ?? 0, false)}
                             </div>
                         </div>
                     ))}

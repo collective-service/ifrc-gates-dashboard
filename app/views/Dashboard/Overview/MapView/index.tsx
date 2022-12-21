@@ -36,7 +36,7 @@ import {
 } from '#generated/types';
 import {
     FormatType,
-    normalizedValue,
+    formatNumber,
 } from '#utils/common';
 import { TabTypes, IndicatorType } from '#views/Dashboard';
 import { FilterType } from '#views/Dashboard/Filters';
@@ -181,9 +181,11 @@ function Tooltip(props: TooltipProps) {
                     </>
                 )}
                 value={
-                    normalizedValue(
-                        indicatorData?.indicatorValue,
+                    /* FIXME: pass prop to show decimal here */
+                    formatNumber(
                         (indicatorData?.format ?? 'raw') as FormatType,
+                        indicatorData?.indicatorValue,
+                        false,
                     )
                 }
                 hideLabelColon

@@ -48,7 +48,7 @@ function CustomTooltip(props: Props) {
     const uncertaintyRange = useMemo(() => (
         format === 'percent'
             ? `[${negativeToZero(minValue, null)}% - ${positiveToZero(maxValue, null)}%]`
-            : `[${formatNumber(format, minValue)} - ${formatNumber(format, maxValue)}]`
+            : `[${formatNumber(format, minValue, false)} - ${formatNumber(format, maxValue, false)}]`
     ), [
         minValue,
         maxValue,
@@ -78,11 +78,13 @@ function CustomTooltip(props: Props) {
                             && (`${formatNumber(
                                 'raw',
                                 item.contextIndicatorValue,
+                                false,
                             )} (${formatNumber(
                                 'percent',
                                 isDefined(calculatedTotal) && calculatedTotal !== 0
                                     ? item.contextIndicatorValue / calculatedTotal
                                     : undefined,
+                                false,
                             )})`)}
                         {(isDefined(minValue) && isDefined(maxValue))
                             ? uncertaintyRange
@@ -94,7 +96,7 @@ function CustomTooltip(props: Props) {
         return (
             <div className={styles.tooltipContent}>
                 {isDefined(valueLabel) && `${valueLabel} : `}
-                {format === 'raw' ? value : formatNumber(format, value)}
+                {formatNumber(format, value, false)}
                 {(isDefined(minValue) && isDefined(maxValue))
                     ? uncertaintyRange
                     : null}

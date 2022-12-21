@@ -27,7 +27,7 @@ import {
 import {
     FormatType,
     colors,
-    normalizedValue,
+    formatNumber,
 } from '#utils/common';
 import ChartContainer from '#components/ChartContainer';
 import CustomTooltip from '#components/CustomTooltip';
@@ -233,9 +233,9 @@ function RegionalBreakdownCard(props: Props) {
         {
             ...total,
             indicatorValue: total.indicatorValueGlobal,
-            normalizedValue: normalizedValue(
-                total.indicatorValueGlobal,
+            indicatorFormattedValue: formatNumber(
                 total.format as FormatType,
+                total.indicatorValueGlobal,
             ),
             fill: colors[total.emergency],
         }
@@ -245,9 +245,9 @@ function RegionalBreakdownCard(props: Props) {
         {
             ...region,
             indicatorValue: region.indicatorValueRegional,
-            normalizedValue: normalizedValue(
-                region.indicatorValueRegional,
+            indicatorFormattedValue: formatNumber(
                 region.format as FormatType,
+                region.indicatorValueRegional,
             ),
             fill: colors[region.emergency],
         }
@@ -331,7 +331,7 @@ function RegionalBreakdownCard(props: Props) {
                                 />
                             ))}
                             <LabelList
-                                dataKey="normalizedValue"
+                                dataKey="indicatorFormattedValue"
                                 position="insideBottomLeft"
                                 angle={270}
                                 offset={-2.8}

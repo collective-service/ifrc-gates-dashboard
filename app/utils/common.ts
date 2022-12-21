@@ -130,53 +130,82 @@ export function rankedSearchOnList<T>(
         ));
 }
 
-function divide(dividend: number, divisor: number, precision = 1): number {
+function divide(
+    dividend: number,
+    divisor: number,
+    precision = 1,
+    abbreviate: boolean,
+): number {
     const foo = 10 ** precision;
-    return Math.round(dividend / (divisor * foo)) / foo;
+    const result = Math.round(dividend / (divisor * foo)) / foo;
+    if (!abbreviate && Math.abs(result) < 1) {
+        return dividend / divisor;
+    }
+    return result;
+}
+
+function formatRawNumber(
+    value: number | null | undefined,
+    formatter: ((value: number) => string) | undefined,
+    abbreviate: boolean,
+) {
+    if (isNotDefined(value)) {
+        return undefined;
+    }
+    if (abbreviate && value > 0 && value < 1) {
+        return '<1';
+    }
+    return formatter ? formatter(value) : String(value);
 }
 
 export type FormatType = 'thousand' | 'million' | 'raw' | 'percent';
 export function formatNumber(
     format: FormatType,
     value: number | null | undefined,
+    abbreviate = true,
 ): string | undefined {
     if (isNotDefined(value) || value === null) {
         return undefined;
     }
+    if (format === 'raw') {
+        return String(value);
+    }
     if (format === 'thousand') {
-        const normalizedValue = divide(value, 1000);
-        return `${normalizedValue}K`;
+        const normalValue = formatRawNumber(
+            divide(
+                value,
+                1000,
+                1,
+                abbreviate,
+            ),
+            undefined,
+            abbreviate,
+        );
+        return `${normalValue}K`;
     }
     if (format === 'million') {
-        const normalizedValue = divide(value, 1000000);
-        return `${normalizedValue}M`;
+        const normalValue = formatRawNumber(
+            divide(value, 1000000, 1, abbreviate),
+            undefined,
+            abbreviate,
+        );
+        return `${normalValue}M`;
     }
     if (format === 'percent') {
-        const percent = divide(value * 100, 1);
+        const percent = formatRawNumber(
+            divide(value * 100, 1, 1, abbreviate),
+            undefined,
+            abbreviate,
+        );
         return `${percent}%`;
     }
-    const normalizedValue = divide(value, 1);
-    return `${normalCommaFormatter().format(normalizedValue)}`;
-}
-
-export const normalizedValue = (
-    value: number | null | undefined,
-    format: FormatType,
-): string | number | undefined => {
-    if (isNotDefined(value)) {
-        return 0;
-    }
-    if (format === 'percent') {
-        return formatNumber(format, value);
-    }
-    if (value > 0 && value < 1) {
-        return '<1';
-    }
-    return formatNumber(
-        (format ?? 'raw'),
-        value,
+    const normalValue = formatRawNumber(
+        divide(value, 1, 1, abbreviate),
+        (val) => normalCommaFormatter().format(val),
+        abbreviate,
     );
-};
+    return normalValue;
+}
 
 // FIXME: remove this and use fujs.bound instead
 export const negativeToZero = (

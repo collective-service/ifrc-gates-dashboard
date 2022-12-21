@@ -1,11 +1,9 @@
 import {
     formatNumber,
     FormatType,
-    normalCommaFormatter,
 } from '#utils/common';
 import { Tooltip } from '@the-deep/deep-ui';
 import {
-    isNotDefined,
     isDefined,
     _cs,
 } from '@togglecorp/fujs';
@@ -40,50 +38,18 @@ function ProgressBar(props: Props) {
         hideTooltip = false,
     } = props;
 
-    const valueTooltip = useMemo(() => {
-        if (isNotDefined(value)) {
-            return 0;
-        }
+    const actualValue = useMemo(() => {
         if (format === 'percent') {
-            return (`${valueTitle}: ${Math.round((value ?? 0) * 10000) / 100}%` ?? undefined);
-        }
-        if (value < 0.999) {
             return value;
         }
-        return (`${valueTitle}: ${normalCommaFormatter().format(value ?? 0)}`);
+        return isDefined(totalValue) && totalValue !== 0
+            ? (value ?? 0) / totalValue
+            : undefined;
     }, [
         value,
-        valueTitle,
-        format,
-    ]);
-
-    const progressValue = useMemo(() => {
-        if (isNotDefined(value)) {
-            return 0;
-        }
-        if (format === 'percent') {
-            return formatNumber('percent', value);
-        }
-        if (value < 1) {
-            return '< 1';
-        }
-        return formatNumber(
-            format,
-            isDefined(totalValue) && totalValue !== 0
-                ? (value ?? 0) / totalValue
-                : undefined,
-        );
-    }, [value,
         format,
         totalValue,
     ]);
-
-    const totalValueForWidth = formatNumber(
-        'percent',
-        isDefined(totalValue) && totalValue !== 0
-            ? (value ?? 0) / totalValue
-            : undefined,
-    );
 
     return (
         <div className={_cs(className, styles.progressInfo)}>
@@ -99,7 +65,9 @@ function ProgressBar(props: Props) {
                         className={styles.progressBarStyle}
                         key={undefined}
                         style={{
-                            width: totalValueForWidth,
+                            width: isDefined(actualValue)
+                                ? 100 * actualValue
+                                : 0,
                             backgroundColor: color ?? 'blue',
                         }}
                     />
@@ -108,13 +76,14 @@ function ProgressBar(props: Props) {
                     <Tooltip
                         trackMousePosition
                     >
-                        {valueTooltip}
+                        {/* FIXME: pass prop to show decimal here */}
+                        {`${valueTitle}: ${formatNumber(format, actualValue, false)}`}
                     </Tooltip>
                 )}
                 <div
                     className={styles.progressValue}
                 >
-                    {progressValue}
+                    {formatNumber(format, actualValue)}
                 </div>
             </div>
             {footer}
