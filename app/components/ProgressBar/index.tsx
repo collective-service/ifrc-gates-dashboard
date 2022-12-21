@@ -6,6 +6,7 @@ import {
 import { Tooltip } from '@the-deep/deep-ui';
 import {
     isNotDefined,
+    isDefined,
     _cs,
 } from '@togglecorp/fujs';
 import React, { useMemo } from 'react';
@@ -63,16 +64,26 @@ function ProgressBar(props: Props) {
         if (format === 'percent') {
             return formatNumber('percent', value);
         }
-        if (value < 0.9999) {
+        if (value < 1) {
             return '< 1';
         }
-        return formatNumber(format, value, totalValue ?? 0);
+        return formatNumber(
+            format,
+            isDefined(totalValue) && totalValue !== 0
+                ? (value ?? 0) / totalValue
+                : undefined,
+        );
     }, [value,
         format,
         totalValue,
     ]);
 
-    const totalValueForWidth = formatNumber('percent', value ?? 0, totalValue ?? 0);
+    const totalValueForWidth = formatNumber(
+        'percent',
+        isDefined(totalValue) && totalValue !== 0
+            ? (value ?? 0) / totalValue
+            : undefined,
+    );
 
     return (
         <div className={_cs(className, styles.progressInfo)}>

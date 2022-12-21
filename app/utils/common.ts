@@ -130,30 +130,55 @@ export function rankedSearchOnList<T>(
         ));
 }
 
+function divide(dividend: number, divisor: number, precision = 1): number {
+    const foo = 10 ** precision;
+    return Math.round(dividend / (divisor * foo)) / foo;
+}
+
 export type FormatType = 'thousand' | 'million' | 'raw' | 'percent';
 export function formatNumber(
     format: FormatType,
     value: number | null | undefined,
-    totalValue?: number,
-) {
+): string | undefined {
     if (isNotDefined(value) || value === null) {
         return undefined;
     }
     if (format === 'thousand') {
-        return `${Math.round(value / 100) / 10}K`;
+        const normalizedValue = divide(value, 1000);
+        return `${normalizedValue}K`;
     }
     if (format === 'million') {
-        return `${Math.round(value / 100000) / 10}M`;
+        const normalizedValue = divide(value, 1000000);
+        return `${normalizedValue}M`;
     }
     if (format === 'percent') {
-        if (isDefined(totalValue) && totalValue > 0) {
-            return `${Math.round((value / totalValue) * 1000) / 10}%`;
-        }
-        return `${value ? decimalToPercentage(value) : 0}%`;
+        const percent = divide(value * 100, 1);
+        return `${percent}%`;
     }
-    return `${normalCommaFormatter().format(Math.round(value * 10) / 10)}`;
+    const normalizedValue = divide(value, 1);
+    return `${normalCommaFormatter().format(normalizedValue)}`;
 }
 
+export const normalizedValue = (
+    value: number | null | undefined,
+    format: FormatType,
+): string | number | undefined => {
+    if (isNotDefined(value)) {
+        return 0;
+    }
+    if (format === 'percent') {
+        return formatNumber(format, value);
+    }
+    if (value > 0 && value < 1) {
+        return '<1';
+    }
+    return formatNumber(
+        (format ?? 'raw'),
+        value,
+    );
+};
+
+// FIXME: remove this and use fujs.bound instead
 export const negativeToZero = (
     indicatorValue: number | null | undefined,
     errorMarginValue: number | null | undefined,
@@ -166,6 +191,7 @@ export const negativeToZero = (
     return decimalToPercentage(difference);
 };
 
+// FIXME: remove this and use fujs.bound instead
 export const positiveToZero = (
     indicatorValue: number | null | undefined,
     errorMarginValue: number | null | undefined,
@@ -185,25 +211,6 @@ export const colors: Record<string, string> = {
     Cholera: '#C09A57',
     'Spanish Flu': '#C7BCA9',
     Ebola: '#CCB387',
-};
-
-export const normalizedValue = (
-    value: number | null | undefined,
-    format: FormatType,
-) => {
-    if (isNotDefined(value)) {
-        return 0;
-    }
-    if (format === 'percent') {
-        return formatNumber(format, value);
-    }
-    if (value < 0.999) {
-        return '<1';
-    }
-    return formatNumber(
-        (format ?? 'raw'),
-        value,
-    );
 };
 
 export type Maybe<T> = T | undefined | null;

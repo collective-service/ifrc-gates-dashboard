@@ -57,6 +57,7 @@ function CustomTooltip(props: Props) {
 
     const calculatedTotal = useMemo(() => (
         customTooltipData?.reduce(
+            // FIXME: this might not be correct
             (acc, obj) => (acc + (obj?.contextIndicatorValue ?? 1)), 0,
         )
     ), [
@@ -79,8 +80,9 @@ function CustomTooltip(props: Props) {
                                 item.contextIndicatorValue,
                             )} (${formatNumber(
                                 'percent',
-                                item.contextIndicatorValue,
-                                calculatedTotal,
+                                isDefined(calculatedTotal) && calculatedTotal !== 0
+                                    ? item.contextIndicatorValue / calculatedTotal
+                                    : undefined,
                             )})`)}
                         {(isDefined(minValue) && isDefined(maxValue))
                             ? uncertaintyRange
