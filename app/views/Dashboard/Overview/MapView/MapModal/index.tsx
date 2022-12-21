@@ -348,7 +348,6 @@ function MapModal(props: ModalProps) {
                                 item.value,
                                 false,
                             )}
-                            {item.value}
                         </div>
                     </div>
                 ))}

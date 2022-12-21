@@ -130,32 +130,29 @@ export function rankedSearchOnList<T>(
         ));
 }
 
-function divide(
-    dividend: number,
-    divisor: number,
-    precision = 1,
-    abbreviate: boolean,
-): number {
-    const foo = 10 ** precision;
-    const result = Math.round(dividend / (divisor * foo)) / foo;
-    if (!abbreviate && Math.abs(result) < 1) {
-        return dividend / divisor;
+function defaultFormatter(value: number, abbreviate: boolean) {
+    if (Math.abs(value) < 1 && value !== 0) {
+        return abbreviate ? '<1' : String(value);
     }
-    return result;
+    return String(Math.round(value * 10) / 10);
+}
+
+function rawFormatter(value: number, abbreviate: boolean) {
+    if (Math.abs(value) < 1 && value !== 0) {
+        return abbreviate ? '<1' : String(value);
+    }
+    return normalCommaFormatter().format(value);
 }
 
 function formatRawNumber(
     value: number | null | undefined,
-    formatter: ((value: number) => string) | undefined,
+    formatter: ((value: number, abbreviate: boolean) => string) | undefined = defaultFormatter,
     abbreviate: boolean,
 ) {
     if (isNotDefined(value)) {
         return undefined;
     }
-    if (abbreviate && value > 0 && value < 1) {
-        return '<1';
-    }
-    return formatter ? formatter(value) : String(value);
+    return formatter(value, abbreviate);
 }
 
 export type FormatType = 'thousand' | 'million' | 'raw' | 'percent';
@@ -167,17 +164,9 @@ export function formatNumber(
     if (isNotDefined(value) || value === null) {
         return undefined;
     }
-    if (format === 'raw') {
-        return String(value);
-    }
     if (format === 'thousand') {
         const normalValue = formatRawNumber(
-            divide(
-                value,
-                1000,
-                1,
-                abbreviate,
-            ),
+            value / 1000,
             undefined,
             abbreviate,
         );
@@ -185,7 +174,7 @@ export function formatNumber(
     }
     if (format === 'million') {
         const normalValue = formatRawNumber(
-            divide(value, 1000000, 1, abbreviate),
+            value / 1000000,
             undefined,
             abbreviate,
         );
@@ -193,15 +182,15 @@ export function formatNumber(
     }
     if (format === 'percent') {
         const percent = formatRawNumber(
-            divide(value * 100, 1, 1, abbreviate),
+            value * 100,
             undefined,
             abbreviate,
         );
         return `${percent}%`;
     }
     const normalValue = formatRawNumber(
-        divide(value, 1, 1, abbreviate),
-        (val) => normalCommaFormatter().format(val),
+        value,
+        rawFormatter,
         abbreviate,
     );
     return normalValue;

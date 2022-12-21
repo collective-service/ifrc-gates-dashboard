@@ -25,8 +25,7 @@ function MapLabel(props: Props) {
             <div className={styles.bar} />
             <div className={styles.labelContainer}>
                 <div>
-                    {/* FIXME: handle special case here */}
-                    {formatNumber(format, minValue, false) ?? 'N/a'}
+                    {minValue < 1 ? 0 : formatNumber(format, minValue, false) ?? 'N/a'}
                 </div>
                 <div>
                     {formatNumber(format, maxValue) ?? 'N/a'}

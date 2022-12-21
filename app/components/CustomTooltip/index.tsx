@@ -84,7 +84,6 @@ function CustomTooltip(props: Props) {
                                 isDefined(calculatedTotal) && calculatedTotal !== 0
                                     ? item.contextIndicatorValue / calculatedTotal
                                     : undefined,
-                                false,
                             )})`)}
                         {(isDefined(minValue) && isDefined(maxValue))
                             ? uncertaintyRange

@@ -185,7 +185,6 @@ function Tooltip(props: TooltipProps) {
                     formatNumber(
                         (indicatorData?.format ?? 'raw') as FormatType,
                         indicatorData?.indicatorValue,
-                        false,
                     )
                 }
                 hideLabelColon

@@ -128,7 +128,7 @@ function PercentageStats(props: Props) {
             ) : (
                 <>
                     <div className={styles.valueText}>
-                        {statValue}
+                        {formatNumber(format, statValue, true)}
                     </div>
                     {subValue && (
                         <NumberOutput
