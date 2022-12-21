@@ -108,6 +108,7 @@ function Overview(props: Props) {
                                 : 'Overview Table'
                         }
                         headingSize="small"
+                        headingSectionClassName={styles.mapSectionHeader}
                         headingContainerClassName={styles.mapHeaderContainer}
                         headingDescription={getMapSubHeader(
                             indicatorIdForOverviewMapAndTable,

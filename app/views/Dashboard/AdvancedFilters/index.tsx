@@ -161,7 +161,6 @@ function AdvancedFilters(props: Props) {
             <div className={styles.advancedFilters}>
                 <RadioInput
                     name="type"
-                    className={styles.filter}
                     keySelector={filterTypeKeySelector}
                     label="Type"
                     labelSelector={filterTypeLabelSelector}
@@ -172,7 +171,6 @@ function AdvancedFilters(props: Props) {
                 />
                 <MultiSelectInput
                     name="thematics"
-                    className={styles.filter}
                     options={thematicOptions}
                     placeholder="Thematic"
                     keySelector={thematicKeySelector}
@@ -184,7 +182,6 @@ function AdvancedFilters(props: Props) {
                 />
                 <MultiSelectInput
                     name="topics"
-                    className={styles.filter}
                     options={topicOptions}
                     placeholder="Topic"
                     keySelector={topicKeySelector}

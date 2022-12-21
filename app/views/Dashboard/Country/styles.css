@@ -8,6 +8,10 @@
     }
 
     .country-main {
+        @media only screen and (max-width:1440px) {
+            flex-wrap: wrap;
+        }
+
         display: flex;
         gap: var(--dui-spacing-large);
 
@@ -30,6 +34,10 @@
                 .status-container {
                     display: flex;
                     gap: var(--dui-spacing-large);
+
+                    @media only screen and (max-width:720px) {
+                        flex-wrap: wrap;
+                    }
 
                     &.wrap-reversed {
                         flex-wrap: wrap-reverse;
@@ -215,6 +223,10 @@
         }
 
         .country-info {
+            @media only screen and (max-width:1440px) {
+                width: 100%;
+            }
+
             flex-shrink: 0;
             border-radius: 0;
             /* By default, ContainerCard has border-radius */
