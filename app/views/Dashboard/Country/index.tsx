@@ -1073,6 +1073,10 @@ function Country(props: Props) {
                                                 <XAxis
                                                     dataKey="category"
                                                     tickLine={false}
+                                                    interval={0}
+                                                    angle={-30}
+                                                    fontSize={12}
+                                                    tickMargin={10}
                                                 />
                                                 <YAxis
                                                     type="number"
@@ -1130,6 +1134,9 @@ function Country(props: Props) {
                                                     dataKey="category"
                                                     tickLine={false}
                                                     fontSize={12}
+                                                    interval={0}
+                                                    angle={-30}
+                                                    tickMargin={10}
                                                 />
                                                 <YAxis
                                                     type="number"
