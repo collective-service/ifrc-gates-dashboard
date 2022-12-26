@@ -11,6 +11,10 @@
         flex-wrap: wrap;
         gap: var(--dui-spacing-large);
 
+        @media only screen and (max-width:610px) {
+            flex-direction: column;
+        }
+
         .progress-bar {
             flex-basis: 30%;
         }
