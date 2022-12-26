@@ -17,6 +17,7 @@
 
         .dashboard-buttons {
             @media only screen and (max-width:610px) {
+                align-content: flex-start;
                 flex-direction: column;
             }
 
@@ -56,6 +57,14 @@
 
                 &:not(:last-child) {
                     border-right: var(--width-separator-thin) solid var(--dui-tab-background-color);
+                }
+
+                @media only screen and (max-width:610px) {
+                    &:not(:last-child) {
+                        border-right: unset;
+                    }
+
+                    padding: var(--dui-spacing-medium);
                 }
             }
 
