@@ -135,19 +135,25 @@ function UncertaintyChart(props: Props) {
     const minValue = min(valueRange, (val) => new Date(val.date).getTime());
 
     const uncertainDataFiltered = useMemo(() => uncertainData?.map((item) => {
-        if (item.interpolated === 1) {
+        if (
+            item.date === maxValue?.date
+            && item.date === minValue?.date
+        ) {
+            return { ...item, interpolatedValue: item.indicatorValue };
+        }
+        if (
+            item.interpolated === 1
+            && maxValue
+            && item.date >= maxValue?.date
+            && minValue
+            && item.date <= minValue?.date
+        ) {
             return { ...item, interpolatedValue: item.indicatorValue, indicatorValue: null };
-        }
-        if (item.date === maxValue?.date) {
-            return { ...item, interpolatedValue: item.indicatorValue };
-        }
-        if (item.date === minValue?.date) {
-            return { ...item, interpolatedValue: item.indicatorValue };
         }
         return { ...item, interpolatedValue: null };
     }), [
-        maxValue?.date,
-        minValue?.date,
+        maxValue,
+        minValue,
         uncertainData,
     ]);
 
