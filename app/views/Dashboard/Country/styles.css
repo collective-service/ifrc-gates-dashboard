@@ -156,8 +156,9 @@
                             }
 
                             .global-value-date {
+                                text-align: right;
                                 color: var(--dui-color-watermark);
-                                font-size: var(--dui-font-size-super-large);
+                                font-size: var(--dui-font-size-extra-large);
                             }
                         }
 

@@ -10,7 +10,11 @@ import {
 import {
     ContainerCard,
 } from '@the-deep/deep-ui';
-import { isNotDefined, _cs } from '@togglecorp/fujs';
+import {
+    isDefined,
+    isNotDefined,
+    _cs,
+} from '@togglecorp/fujs';
 import {
     FormatType,
     getShortMonth,
@@ -135,19 +139,35 @@ function UncertaintyChart(props: Props) {
     const minValue = min(valueRange, (val) => new Date(val.date).getTime());
 
     const uncertainDataFiltered = useMemo(() => uncertainData?.map((item) => {
-        if (item.interpolated === 1) {
-            return { ...item, interpolatedValue: item.indicatorValue, indicatorValue: null };
+        let nonInterpolatedValue = null;
+        let interpolatedValue = null;
+
+        if (
+            item.date === maxValue?.date
+            || item.date === minValue?.date
+        ) {
+            nonInterpolatedValue = item.indicatorValue;
+            interpolatedValue = item.indicatorValue;
+        } else if (
+            isDefined(maxValue)
+            && item.date < maxValue?.date
+            && isDefined(minValue)
+            && item.date > minValue?.date
+        ) {
+            nonInterpolatedValue = item.indicatorValue;
+            interpolatedValue = null;
+        } else {
+            interpolatedValue = item.indicatorValue;
+            nonInterpolatedValue = null;
         }
-        if (item.date === maxValue?.date) {
-            return { ...item, interpolatedValue: item.indicatorValue };
-        }
-        if (item.date === minValue?.date) {
-            return { ...item, interpolatedValue: item.indicatorValue };
-        }
-        return { ...item, interpolatedValue: null };
+        return {
+            ...item,
+            nonInterpolatedValue,
+            interpolatedValue,
+        };
     }), [
-        maxValue?.date,
-        minValue?.date,
+        maxValue,
+        minValue,
         uncertainData,
     ]);
 
@@ -195,7 +215,7 @@ function UncertaintyChart(props: Props) {
                         fill="#8DD2B1"
                     />
                     <Line
-                        dataKey="indicatorValue"
+                        dataKey="nonInterpolatedValue"
                         name={emergencyFilterValue}
                         stroke="#2F9C67"
                         strokeWidth={2}
