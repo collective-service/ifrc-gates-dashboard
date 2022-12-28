@@ -108,7 +108,7 @@ function ModifiedProgressBar(props: Props) {
             )}
             format={format}
             barHeight={8}
-            footer={showRegionalValue && subValuePercentage && (
+            footer={showRegionalValue && (
                 <div className={styles.subValue}>
                     {subValuePercentage}
                 </div>

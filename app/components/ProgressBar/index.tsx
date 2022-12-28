@@ -1,13 +1,13 @@
-import React, { useMemo } from 'react';
-import {
-    _cs,
-} from '@togglecorp/fujs';
-import { Tooltip } from '@the-deep/deep-ui';
 import {
     formatNumber,
     FormatType,
-    normalCommaFormatter,
 } from '#utils/common';
+import { Tooltip } from '@the-deep/deep-ui';
+import {
+    isDefined,
+    _cs,
+} from '@togglecorp/fujs';
+import React, { useMemo } from 'react';
 
 import styles from './styles.css';
 
@@ -38,18 +38,18 @@ function ProgressBar(props: Props) {
         hideTooltip = false,
     } = props;
 
-    const valueTooltip = useMemo(() => {
+    const actualValue = useMemo(() => {
         if (format === 'percent') {
-            return (`${valueTitle}: ${Math.round((value ?? 0) * 10000) / 100}%` ?? undefined);
+            return isDefined(value) ? value * 100 : undefined;
         }
-        return (`${valueTitle}: ${normalCommaFormatter().format(value ?? 0)}`);
+        return isDefined(totalValue) && totalValue !== 0
+            ? ((value ?? 0) / totalValue) * 100
+            : undefined;
     }, [
         value,
-        valueTitle,
         format,
+        totalValue,
     ]);
-
-    const totalValueForWidth = formatNumber('percent', value ?? 0, totalValue ?? 0);
 
     return (
         <div className={_cs(className, styles.progressInfo)}>
@@ -65,7 +65,9 @@ function ProgressBar(props: Props) {
                         className={styles.progressBarStyle}
                         key={undefined}
                         style={{
-                            width: totalValueForWidth,
+                            width: isDefined(actualValue)
+                                ? `${actualValue}%`
+                                : 0,
                             backgroundColor: color ?? 'blue',
                         }}
                     />
@@ -74,15 +76,13 @@ function ProgressBar(props: Props) {
                     <Tooltip
                         trackMousePosition
                     >
-                        {valueTooltip}
+                        {`${valueTitle}: ${formatNumber(format, value, false)}`}
                     </Tooltip>
                 )}
                 <div
                     className={styles.progressValue}
                 >
-                    {format === 'percent'
-                        ? formatNumber('percent', value ?? 0)
-                        : formatNumber(format, value ?? 0, totalValue ?? 0)}
+                    {formatNumber(format, value)}
                 </div>
             </div>
             {footer}

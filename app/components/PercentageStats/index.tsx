@@ -6,8 +6,12 @@ import {
     Tooltip,
     Message,
 } from '@the-deep/deep-ui';
-import { _cs } from '@togglecorp/fujs';
+import {
+    _cs,
+    isNotDefined,
+} from '@togglecorp/fujs';
 import { IoFileTraySharp } from 'react-icons/io5';
+import { formatNumber, FormatType } from '#utils/common';
 
 import styles from './styles.css';
 
@@ -18,7 +22,8 @@ export interface Props {
     heading?: React.ReactNode;
     headerDescription?: React.ReactNode;
     headingSize?: headingSizeType;
-    statValue: string | undefined;
+    statValue: number | undefined | null;
+    format: FormatType;
     subValue?: number;
     newDeaths?: string | null;
     newCasesPerMillion?: string | null;
@@ -47,9 +52,10 @@ function PercentageStats(props: Props) {
         statValueLoading,
         indicatorMonth,
         uncertaintyRange,
+        format,
     } = props;
 
-    const empty = !statValue;
+    const empty = isNotDefined(statValue);
 
     const valueTooltip = (
         (newDeaths || newCasesPerMillion) ? (
@@ -76,7 +82,7 @@ function PercentageStats(props: Props) {
         ) : (
             <Tooltip>
                 <div>
-                    {`Total: ${statValue ?? 0}`}
+                    {`Total: ${formatNumber(format, statValue, false)}`}
                 </div>
                 <div>
                     {`Date: ${indicatorMonth ?? 'N/a'}`}
@@ -124,7 +130,7 @@ function PercentageStats(props: Props) {
             ) : (
                 <>
                     <div className={styles.valueText}>
-                        {statValue}
+                        {formatNumber(format, statValue, true)}
                     </div>
                     {subValue && (
                         <NumberOutput

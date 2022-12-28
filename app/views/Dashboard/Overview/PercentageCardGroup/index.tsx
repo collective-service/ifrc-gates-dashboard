@@ -306,15 +306,6 @@ function PercentageCardGroup(props: Props) {
         selectedIndicatorType,
     } = props;
 
-    const cardSubHeader = useMemo(() => {
-        if (selectedIndicatorName) {
-            return selectedIndicatorName;
-        }
-        return '';
-    }, [
-        selectedIndicatorName,
-    ]);
-
     const overviewStatsVariables = useMemo((): OverviewStatsQueryVariables => ({
         emergency: filterValues?.outbreak,
         indicatorId: filterValues?.indicator ?? 'new_cases_per_million',
@@ -337,30 +328,6 @@ function PercentageCardGroup(props: Props) {
             variables: overviewStatsVariables,
         },
     );
-
-    const regionalBreakdownRegion = useMemo(() => (
-        overviewStatsResponse?.regionalBreakdownRegion.map((region) => (
-            {
-                id: region.id,
-                indicatorValue: region.indicatorValueRegional,
-                normalizedValue: formatNumber(
-                    region.format as FormatType,
-                    region.indicatorValueRegional ?? 0,
-                ),
-                indicatorMonth: region.indicatorMonth,
-                region: region.region,
-                format: region.format,
-                fill: isDefined(filterValues?.region)
-                    && (region.region !== filterValues?.region) ? 0.2 : 1,
-                indicatorType: region.type,
-                errorMargin: region.errorMargin,
-            }
-        ))
-    ), [
-        overviewStatsResponse?.regionalBreakdownRegion,
-        filterValues?.region,
-    ]);
-
     const globalRegionCardList = useMemo(() => {
         const global = [...(overviewStatsResponse?.globalLevelSubvariables) ?? []].sort(
             (a, b) => compareNumber(b.indicatorValue, a.indicatorValue),
@@ -388,12 +355,46 @@ function PercentageCardGroup(props: Props) {
         filterValues?.subvariable,
     ]);
 
-    const globalTotalCase = overviewStatsResponse?.totalCasesGlobal[0];
+    const totalCasesGlobal = useMemo(() => (
+        overviewStatsResponse?.totalCasesGlobal.map((global) => (
+            {
+                ...global,
+                normalizedValue: formatNumber(
+                    global.format as FormatType,
+                    global.indicatorValueGlobal,
+                ),
+            }
+        ))), [
+        overviewStatsResponse?.totalCasesGlobal,
+    ]);
+
+    const globalTotalCase = totalCasesGlobal?.[0];
+
+    const regionalBreakdownRegion = useMemo(() => (
+        overviewStatsResponse?.regionalBreakdownRegion.map((region) => ({
+            id: region.id,
+            indicatorValue: region.indicatorValueRegional,
+            normalizedValue: formatNumber(
+                region.format as FormatType,
+                region.indicatorValueRegional,
+            ),
+            indicatorMonth: region.indicatorMonth,
+            region: region.region,
+            format: region.format,
+            fill: isDefined(filterValues?.region)
+                && (region.region !== filterValues?.region) ? 0.2 : 1,
+            indicatorType: region.type,
+            errorMargin: region.errorMargin,
+        }))
+    ), [
+        overviewStatsResponse?.regionalBreakdownRegion,
+        filterValues?.region,
+    ]);
 
     const regionTotalCase = useMemo(() => (
-        regionalBreakdownRegion?.find(
-            (total) => total.region === filterValues?.region,
-        )
+        regionalBreakdownRegion?.find((total) => (
+            total.region === filterValues?.region
+        ))
     ), [
         regionalBreakdownRegion,
         filterValues?.region,
@@ -424,45 +425,21 @@ function PercentageCardGroup(props: Props) {
         regionTotalCase?.format,
     ]);
 
-    const outbreakSubHeader = useMemo(() => {
-        if (selectedIndicatorName) {
-            return `Trend chart for ${selectedIndicatorName ?? filterValues?.indicator}`;
-        }
-        return `New cases per million for ${selectedOutbreakName}`;
-    }, [filterValues?.indicator,
-        selectedIndicatorName,
-        selectedOutbreakName,
-    ]);
+    const outbreakSubHeader = selectedIndicatorName
+        ? `Trend chart for ${selectedIndicatorName ?? filterValues?.indicator}`
+        : `New cases per million for ${selectedOutbreakName}`;
 
-    const totalCaseValue = useMemo(() => {
-        if (filterValues?.region) {
-            return formatNumber(
-                regionTotalCase?.format as FormatType,
-                regionTotalCase?.indicatorValue,
-            );
-        }
-        return formatNumber(
-            (globalTotalCase?.format ?? 'raw') as FormatType,
-            globalTotalCase?.indicatorValueGlobal,
-        );
-    }, [
-        regionTotalCase?.indicatorValue,
-        globalTotalCase?.indicatorValueGlobal,
-        filterValues?.region,
-        globalTotalCase?.format,
-        regionTotalCase?.format,
-    ]);
+    const totalCaseValue = filterValues?.region
+        ? regionTotalCase?.indicatorValue
+        : globalTotalCase?.indicatorValueGlobal;
 
-    const percentageCardMonth = useMemo(() => {
-        if (filterValues?.region) {
-            return regionTotalCase?.indicatorMonth;
-        }
-        return globalTotalCase?.indicatorMonth;
-    }, [
-        regionTotalCase?.indicatorMonth,
-        globalTotalCase?.indicatorMonth,
-        filterValues?.region,
-    ]);
+    const totalCaseFormat = filterValues?.region
+        ? (regionTotalCase?.format as FormatType | undefined)
+        : (globalTotalCase?.format as FormatType | undefined);
+
+    const percentageCardMonth = filterValues?.region
+        ? regionTotalCase?.indicatorMonth
+        : globalTotalCase?.indicatorMonth;
 
     const uncertaintyRange = useMemo(() => {
         if (filterValues?.indicator
@@ -504,14 +481,8 @@ function PercentageCardGroup(props: Props) {
         return undefined;
     }, [
         filterValues?.indicator,
-        regionTotalCase?.indicatorType,
-        globalTotalCase?.type,
-        globalTotalCase?.errorMargin,
-        globalTotalCase?.indicatorValueGlobal,
-        globalTotalCase?.format,
-        regionTotalCase?.format,
-        regionTotalCase?.errorMargin,
-        regionTotalCase?.indicatorValue,
+        regionTotalCase,
+        globalTotalCase,
     ]);
 
     const uncertaintyGlobalChart = useMemo(() => (
@@ -748,23 +719,21 @@ function PercentageCardGroup(props: Props) {
         selectedIndicatorName,
     ]);
 
-    function StatValueTooltip() {
-        return (
-            <Tooltip>
+    const tooltip = (
+        <Tooltip>
+            <div>
+                {`Total: ${formatNumber(totalCaseFormat ?? 'raw' as const, totalCaseValue, false)}`}
+            </div>
+            <div>
+                {`Date: ${percentageCardMonth ?? 'N/a'}`}
+            </div>
+            {uncertaintyRange && (
                 <div>
-                    {`Total: ${totalCaseValue ?? 0}`}
+                    {`Uncertainty Range: ${uncertaintyRange}`}
                 </div>
-                <div>
-                    {`Date: ${percentageCardMonth ?? 'N/a'}`}
-                </div>
-                {uncertaintyRange && (
-                    <div>
-                        {`Uncertainty Range: ${uncertaintyRange}`}
-                    </div>
-                )}
-            </Tooltip>
-        );
-    }
+            )}
+        </Tooltip>
+    );
 
     return (
         <div className={_cs(className, styles.cardInfo)}>
@@ -774,9 +743,10 @@ function PercentageCardGroup(props: Props) {
                     <PercentageStats
                         className={styles.globalStatCard}
                         heading={cardHeader}
-                        headerDescription={cardSubHeader}
+                        headerDescription={selectedIndicatorName ?? ''}
                         headingSize="extraSmall"
                         statValue={totalCaseValue}
+                        format={totalCaseFormat ?? 'raw' as const}
                         statValueLoading={loading}
                         indicatorMonth={percentageCardMonth}
                         uncertaintyRange={uncertaintyRange}
@@ -790,7 +760,7 @@ function PercentageCardGroup(props: Props) {
                             <div className={styles.outbreakCard}>
                                 Global
                             </div>
-                            {StatValueTooltip()}
+                            {tooltip}
                         </>
                     )}
                     headingSize="extraSmall"
@@ -799,7 +769,7 @@ function PercentageCardGroup(props: Props) {
                             <div className={styles.outbreakCard}>
                                 {`${headingDescription} - ${filterValues?.subvariable}`}
                             </div>
-                            {StatValueTooltip()}
+                            {tooltip}
                         </>
                     )}
                     contentClassName={styles.globalDetails}
@@ -818,7 +788,7 @@ function PercentageCardGroup(props: Props) {
                                             selectedGlobalRegion?.indicatorValue,
                                         )
                                         : 'N/a'}
-                                    {StatValueTooltip()}
+                                    {tooltip}
                                 </>
                             </div>
                             <ListView

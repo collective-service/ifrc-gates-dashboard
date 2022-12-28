@@ -130,30 +130,73 @@ export function rankedSearchOnList<T>(
         ));
 }
 
+function defaultFormatter(value: number, abbreviate: boolean) {
+    if (Math.abs(value) < 1 && value !== 0) {
+        return abbreviate ? '<1' : String(value);
+    }
+    return String(Math.round(value * 10) / 10);
+}
+
+function rawFormatter(value: number, abbreviate: boolean) {
+    if (Math.abs(value) < 1 && value !== 0) {
+        return abbreviate ? '<1' : String(value);
+    }
+    return normalCommaFormatter().format(value);
+}
+
+function formatRawNumber(
+    value: number | null | undefined,
+    formatter: ((value: number, abbreviate: boolean) => string) | undefined = defaultFormatter,
+    abbreviate: boolean,
+) {
+    if (isNotDefined(value)) {
+        return undefined;
+    }
+    return formatter(value, abbreviate);
+}
+
 export type FormatType = 'thousand' | 'million' | 'raw' | 'percent';
 export function formatNumber(
     format: FormatType,
     value: number | null | undefined,
-    totalValue?: number,
-) {
+    abbreviate = true,
+): string | undefined {
     if (isNotDefined(value) || value === null) {
         return undefined;
     }
     if (format === 'thousand') {
-        return `${Math.round(value / 100) / 10}K`;
+        const normalValue = formatRawNumber(
+            value / 1000,
+            undefined,
+            abbreviate,
+        );
+        return `${normalValue}K`;
     }
     if (format === 'million') {
-        return `${Math.round(value / 100000) / 10}M`;
+        const normalValue = formatRawNumber(
+            value / 1000000,
+            undefined,
+            abbreviate,
+        );
+        return `${normalValue}M`;
     }
     if (format === 'percent') {
-        if (isDefined(totalValue) && totalValue > 0) {
-            return `${Math.round((value / totalValue) * 1000) / 10}%`;
-        }
-        return `${value ? decimalToPercentage(value) : 0}%`;
+        const percent = formatRawNumber(
+            value * 100,
+            undefined,
+            abbreviate,
+        );
+        return `${percent}%`;
     }
-    return `${normalCommaFormatter().format(Math.round(value * 10) / 10)}`;
+    const normalValue = formatRawNumber(
+        value,
+        rawFormatter,
+        abbreviate,
+    );
+    return normalValue;
 }
 
+// FIXME: remove this and use fujs.bound instead
 export const negativeToZero = (
     indicatorValue: number | null | undefined,
     errorMarginValue: number | null | undefined,
@@ -166,6 +209,7 @@ export const negativeToZero = (
     return decimalToPercentage(difference);
 };
 
+// FIXME: remove this and use fujs.bound instead
 export const positiveToZero = (
     indicatorValue: number | null | undefined,
     errorMarginValue: number | null | undefined,

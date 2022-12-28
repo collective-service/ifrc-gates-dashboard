@@ -185,7 +185,7 @@ function Export(props: Props) {
             <DropdownMenu
                 className={className}
                 label={pendingExport
-                    ? `Preparing Export (${formatNumber('percent', progress)})`
+                    ? `Preparing Export (${formatNumber('percent', progress, false)})`
                     : 'Export'}
                 variant="tertiary"
                 icons={<IoDownloadOutline />}

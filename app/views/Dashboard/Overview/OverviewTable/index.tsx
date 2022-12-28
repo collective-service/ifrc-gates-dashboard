@@ -193,7 +193,7 @@ function IndicatorValue(props: IndicatorValueProps) {
                 color: getTextColorForHex(color),
             }}
         >
-            {isDefined(value) ? formatNumber(format, value) : '-'}
+            {isDefined(value) ? formatNumber(format, value, false) : '-'}
         </div>
     );
 }

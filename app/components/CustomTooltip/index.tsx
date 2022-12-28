@@ -48,7 +48,7 @@ function CustomTooltip(props: Props) {
     const uncertaintyRange = useMemo(() => (
         format === 'percent'
             ? `[${negativeToZero(minValue, null)}% - ${positiveToZero(maxValue, null)}%]`
-            : `[${formatNumber(format, minValue)} - ${formatNumber(format, maxValue)}]`
+            : `[${formatNumber(format, minValue, false)} - ${formatNumber(format, maxValue, false)}]`
     ), [
         minValue,
         maxValue,
@@ -57,7 +57,7 @@ function CustomTooltip(props: Props) {
 
     const calculatedTotal = useMemo(() => (
         customTooltipData?.reduce(
-            (acc, obj) => (acc + (obj?.contextIndicatorValue ?? 1)), 0,
+            (acc, obj) => (acc + (obj?.contextIndicatorValue ?? 0)), 0,
         )
     ), [
         customTooltipData,
@@ -77,10 +77,12 @@ function CustomTooltip(props: Props) {
                             && (`${formatNumber(
                                 'raw',
                                 item.contextIndicatorValue,
+                                false,
                             )} (${formatNumber(
                                 'percent',
-                                item.contextIndicatorValue,
-                                calculatedTotal,
+                                isDefined(calculatedTotal) && calculatedTotal !== 0
+                                    ? item.contextIndicatorValue / calculatedTotal
+                                    : undefined,
                             )})`)}
                         {(isDefined(minValue) && isDefined(maxValue))
                             ? uncertaintyRange
@@ -92,10 +94,7 @@ function CustomTooltip(props: Props) {
         return (
             <div className={styles.tooltipContent}>
                 {isDefined(valueLabel) && `${valueLabel} : `}
-                {(isDefined(value) && value !== null) && formatNumber(
-                    format === 'million' ? 'raw' : format,
-                    value,
-                )}
+                {formatNumber(format, value, false)}
                 {(isDefined(minValue) && isDefined(maxValue))
                     ? uncertaintyRange
                     : null}

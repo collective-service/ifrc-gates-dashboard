@@ -34,7 +34,10 @@ import {
     TopBottomCountriesRankingQuery,
     TopBottomCountriesRankingQueryVariables,
 } from '#generated/types';
-import { formatNumber, FormatType } from '#utils/common';
+import {
+    FormatType,
+    formatNumber,
+} from '#utils/common';
 import { TabTypes, IndicatorType } from '#views/Dashboard';
 import { FilterType } from '#views/Dashboard/Filters';
 
@@ -171,7 +174,6 @@ function Tooltip(props: TooltipProps) {
                 label={(
                     <>
                         {countryName}
-                        {/* TODO: Get outbreak from server */}
                         <div className={styles.description}>
                             {indicatorName}
                         </div>
@@ -181,6 +183,7 @@ function Tooltip(props: TooltipProps) {
                     formatNumber(
                         (indicatorData?.format ?? 'raw') as FormatType,
                         indicatorData?.indicatorValue,
+                        true,
                     )
                 }
                 hideLabelColon
