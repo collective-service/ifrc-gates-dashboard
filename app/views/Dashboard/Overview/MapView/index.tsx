@@ -174,17 +174,16 @@ function Tooltip(props: TooltipProps) {
                 label={(
                     <>
                         {countryName}
-                        {/* TODO: Get outbreak from server */}
                         <div className={styles.description}>
                             {indicatorName}
                         </div>
                     </>
                 )}
                 value={
-                    /* FIXME: pass prop to show decimal here */
                     formatNumber(
                         (indicatorData?.format ?? 'raw') as FormatType,
                         indicatorData?.indicatorValue,
+                        true,
                     )
                 }
                 hideLabelColon

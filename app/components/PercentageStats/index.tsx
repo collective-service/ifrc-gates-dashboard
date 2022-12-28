@@ -6,7 +6,10 @@ import {
     Tooltip,
     Message,
 } from '@the-deep/deep-ui';
-import { _cs } from '@togglecorp/fujs';
+import {
+    _cs,
+    isNotDefined,
+} from '@togglecorp/fujs';
 import { IoFileTraySharp } from 'react-icons/io5';
 import { formatNumber, FormatType } from '#utils/common';
 
@@ -52,8 +55,7 @@ function PercentageStats(props: Props) {
         format,
     } = props;
 
-    // FIXME: use isNotDefined
-    const empty = !statValue;
+    const empty = isNotDefined(statValue);
 
     const valueTooltip = (
         (newDeaths || newCasesPerMillion) ? (

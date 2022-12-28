@@ -41,10 +41,8 @@ import {
     formatNumber,
     FormatType,
     getShortMonth,
-    negativeToZero,
-    normalFormatter,
-    positiveToZero,
     colors,
+    normalFormatter,
 } from '#utils/common';
 import {
     CountryQuery,
@@ -671,8 +669,12 @@ function Country(props: Props) {
             return undefined;
         }
         const uncertaintyData = countryResponse?.dataCountryLevel.map((country) => {
-            const negativeRange = negativeToZero(country.indicatorValue, country.errorMargin);
-            const positiveRange = positiveToZero(country.indicatorValue, country.errorMargin);
+            const negativeRange = isDefined(country.indicatorValue)
+                ? bound(country.indicatorValue - (country?.errorMargin ?? 0), 0, 1)
+                : 0;
+            const positiveRange = isDefined(country.indicatorValue)
+                ? bound(country.indicatorValue + (country.errorMargin ?? 0), 0, 1)
+                : 0;
 
             if (isNotDefined(country.errorMargin)) {
                 return {
@@ -696,10 +698,9 @@ function Country(props: Props) {
                     : country.indicatorValue,
                 tooltipValue: country.indicatorValue,
                 date: country.indicatorMonth,
-                // FIXME : Solve the issue of negativeToZero and positiveToZero
                 uncertainRange: [
-                    negativeRange ?? 0,
-                    positiveRange ?? 0,
+                    negativeRange,
+                    positiveRange,
                 ],
                 minimumValue: isDefined(country.indicatorValue)
                     ? bound(country.indicatorValue - country.errorMargin, 0, 1)

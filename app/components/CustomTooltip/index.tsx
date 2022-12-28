@@ -57,8 +57,7 @@ function CustomTooltip(props: Props) {
 
     const calculatedTotal = useMemo(() => (
         customTooltipData?.reduce(
-            // FIXME: this might not be correct
-            (acc, obj) => (acc + (obj?.contextIndicatorValue ?? 1)), 0,
+            (acc, obj) => (acc + (obj?.contextIndicatorValue ?? 0)), 0,
         )
     ), [
         customTooltipData,

@@ -76,7 +76,6 @@ function ProgressBar(props: Props) {
                     <Tooltip
                         trackMousePosition
                     >
-                        {/* FIXME: pass prop to show decimal here */}
                         {`${valueTitle}: ${formatNumber(format, value, false)}`}
                     </Tooltip>
                 )}
