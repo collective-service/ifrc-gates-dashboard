@@ -15,6 +15,7 @@ import {
     useSortState,
     SortContext,
     TableSortDirection,
+    Tooltip,
 } from '@the-deep/deep-ui';
 import {
     IoSearch,
@@ -61,6 +62,9 @@ interface TableData {
     data: {
         [key: string]: number | undefined,
     };
+    emergency: {
+        [key: string]: string | undefined,
+    };
     format: FormatType;
 }
 
@@ -103,6 +107,7 @@ const TABLE_DATA = gql`
                 countryId
                 iso3
                 data {
+                    emergency
                     indicatorValue
                     month
                     format
@@ -155,6 +160,7 @@ function CountryListCell(props: CountryListCellProps) {
 interface IndicatorValueProps {
     className?: string;
     value?: number;
+    emergency?: string;
     colorRange?: ColorRange[];
     format: FormatType;
 }
@@ -164,6 +170,7 @@ function IndicatorValue(props: IndicatorValueProps) {
         className,
         colorRange,
         value,
+        emergency,
         format,
     } = props;
 
@@ -194,6 +201,13 @@ function IndicatorValue(props: IndicatorValueProps) {
             }}
         >
             {isDefined(value) ? formatNumber(format, value, false) : '-'}
+            {isDefined(value) && (
+                <Tooltip
+                    trackMousePosition
+                >
+                    {`${emergency}: ${formatNumber(format, value)}`}
+                </Tooltip>
+            )}
         </div>
     );
 }
@@ -284,6 +298,13 @@ function OverviewTable(props: Props) {
                     }),
                     {},
                 ),
+                emergency: item.data.reduce<{ [key: string]: string }>(
+                    (acc, curr) => ({
+                        ...acc,
+                        [curr.month]: curr.emergency,
+                    }),
+                    {},
+                ),
             }));
 
         const filteredData = rankedSearchOnList(
@@ -339,6 +360,7 @@ function OverviewTable(props: Props) {
                         {
                             value: datum.data[date],
                             format: datum.format,
+                            emergency: datum.emergency[date],
                             colorRange,
                         }
                     ),

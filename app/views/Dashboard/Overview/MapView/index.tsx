@@ -179,13 +179,13 @@ function Tooltip(props: TooltipProps) {
                         </div>
                     </>
                 )}
-                value={
-                    formatNumber(
+                value={(
+                    `${indicatorData?.emergency}: ${formatNumber(
                         (indicatorData?.format ?? 'raw') as FormatType,
                         indicatorData?.indicatorValue,
                         true,
-                    )
-                }
+                    )}`
+                )}
                 hideLabelColon
             />
         </MapTooltip>
