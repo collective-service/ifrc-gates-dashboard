@@ -20,7 +20,7 @@ import SourcesModal from './SourcesModal';
 
 import styles from './styles.css';
 
-type SourcesList = NonNullable<CombinedSourcesQuery['dataGranular']>[number];
+type SourcesList = NonNullable<CombinedSourcesQuery['sources']>[number];
 const sourcesKeySelector = (d: SourcesList) => d.id;
 
 const COMBINED_SOURCES = gql`
@@ -30,20 +30,11 @@ const COMBINED_SOURCES = gql`
         $subvariable: String,
         $indicatorId: String,
     ) {
-        dataGranular(
-            filters: {
-                iso3: $iso3,
-                emergency: $emergency,
-                indicatorId: $indicatorId,
-                subvariable: $subvariable,
-                isDistinctSources: true
-            }
-            order: {
-                sourceDate: DESC,
-            }
-            pagination: {
-                limit: 100
-            }
+        sources(
+            iso3: $iso3,
+            emergency: $emergency,
+            indicatorId: $indicatorId,
+            subvariable: $subvariable,
         ) {
             id
             title
@@ -51,6 +42,7 @@ const COMBINED_SOURCES = gql`
             sourceComment
             organisation
             sourceDate
+            indicatorMonth
         }
     }
 `;
@@ -103,11 +95,11 @@ function Sources(props: Props) {
 
     const sourcesList = useMemo(() => (
         variant === 'mini'
-            ? sourcesResponse?.dataGranular
-            : sourcesResponse?.dataGranular.slice(0, 3)
+            ? sourcesResponse?.sources
+            : sourcesResponse?.sources.slice(0, 3)
     ), [
         variant,
-        sourcesResponse?.dataGranular,
+        sourcesResponse,
     ]);
 
     const sourcesRendererParams = useCallback((_, data: SourcesList) => ({
@@ -119,7 +111,7 @@ function Sources(props: Props) {
         variant,
     }), [variant]);
 
-    if ((sourcesResponse?.dataGranular?.length ?? 0) === 0) {
+    if ((sourcesResponse?.sources?.length ?? 0) === 0) {
         return null;
     }
 
@@ -134,7 +126,7 @@ function Sources(props: Props) {
             headingClassName={styles.heading}
             headingSize="extraSmall"
             spacing="compact"
-            headerActions={(sourcesResponse?.dataGranular.length ?? 0) > 3 && variant === 'regular' && (
+            headerActions={(sourcesResponse?.sources.length ?? 0) > 3 && variant === 'regular' && (
                 <Button
                     name={undefined}
                     variant="transparent"
@@ -157,7 +149,7 @@ function Sources(props: Props) {
             {sourceModalShown && (
                 <SourcesModal
                     onModalClose={hideSourceModal}
-                    sourcesList={sourcesResponse?.dataGranular}
+                    sourcesList={sourcesResponse?.sources}
                 />
             )}
         </Container>

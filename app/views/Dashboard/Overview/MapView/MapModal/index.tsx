@@ -269,10 +269,10 @@ function MapModal(props: ModalProps) {
     const uncertaintyChart: UncertainData[] | undefined = useMemo(() => (
         countryResponse?.dataCountryLevel.map((country) => {
             const negativeRange = isDefined(country.indicatorValue)
-                ? bound(country.indicatorValue - (country.errorMargin ?? 0), 0, 1)
+                ? bound(country.indicatorValue - (country.errorMargin ?? 0), 0, 1) * 100
                 : 0;
             const positiveRange = isDefined(country.indicatorValue)
-                ? bound(country.indicatorValue + (country.errorMargin ?? 0), 0, 1)
+                ? bound(country.indicatorValue + (country.errorMargin ?? 0), 0, 1) * 100
                 : 0;
 
             if (isNotDefined(country.errorMargin)) {

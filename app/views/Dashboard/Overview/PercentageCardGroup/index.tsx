@@ -504,6 +504,7 @@ function PercentageCardGroup(props: Props) {
                     subvariable: global.subvariable,
                     indicatorType: global.type,
                     errorMargin: global.errorMargin,
+                    interpolated: 0,
                 };
             }
 
@@ -530,6 +531,7 @@ function PercentageCardGroup(props: Props) {
                 id: global.id,
                 format: global.format as FormatType,
                 subvariable: global.subvariable,
+                interpolated: 0,
             };
         }).sort((a, b) => compareDate(a.date, b.date))
     ), [overviewStatsResponse?.uncertaintyGlobal]);
@@ -554,6 +556,7 @@ function PercentageCardGroup(props: Props) {
                     id: region.id,
                     format: region.format as FormatType,
                     subvariable: region.subvariable,
+                    interpolated: 0,
                 };
             }
 
@@ -581,6 +584,7 @@ function PercentageCardGroup(props: Props) {
                 id: region.id,
                 format: region.format as FormatType,
                 subvariable: region.subvariable,
+                interpolated: 0,
             };
         }).sort((a, b) => compareDate(a.date, b.date))
     ), [overviewStatsResponse?.uncertaintyRegion]);

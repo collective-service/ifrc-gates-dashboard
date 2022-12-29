@@ -141,7 +141,8 @@ function rawFormatter(value: number, abbreviate: boolean) {
     if (Math.abs(value) < 1 && value !== 0) {
         return abbreviate ? '<1' : String(value);
     }
-    return normalCommaFormatter().format(value);
+    const roundedValue = Math.round(value * 10) / 10;
+    return normalCommaFormatter().format(roundedValue);
 }
 
 function formatRawNumber(
