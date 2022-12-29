@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
+import Highlighter from 'react-highlight-words';
 import {
     isDefined,
     listToGroupList,
@@ -20,12 +21,15 @@ const subvariableKeySelector = (d: { emergency: string }) => d.emergency;
 
 interface Props {
     topicName: string;
-    topicDescription?: string;
+    topicDescription: string | undefined;
     indicators: IndicatorType[] | undefined;
     showRegionalValue: boolean;
     filterValues: FilterType | undefined;
     setFilterValues: React.Dispatch<React.SetStateAction<FilterType | undefined>>;
     setActiveTab: React.Dispatch<React.SetStateAction<TabTypes | undefined>>;
+    includedIndicators: string[] | undefined;
+    includedSubvariables: string[] | undefined;
+    searchText: string | undefined;
 }
 
 function TopicCard(props: Props) {
@@ -37,6 +41,9 @@ function TopicCard(props: Props) {
         filterValues,
         setFilterValues,
         setActiveTab,
+        includedIndicators,
+        includedSubvariables,
+        searchText,
     } = props;
 
     const handleIndicatorClick = useCallback((
@@ -81,11 +88,17 @@ function TopicCard(props: Props) {
         emergency,
         country: filterValues?.country,
         showRegionalValue,
+        includedIndicators,
+        includedSubvariables,
         handleIndicatorClick,
+        searchText,
     }), [
         filterValues,
         showRegionalValue,
         handleIndicatorClick,
+        includedIndicators,
+        includedSubvariables,
+        searchText,
     ]);
 
     const groupedList = useMemo(() => (
@@ -103,12 +116,24 @@ function TopicCard(props: Props) {
     return (
         <ContainerCard
             className={styles.topicCard}
-            heading={topicName}
+            heading={(
+                <Highlighter
+                    searchWords={[searchText ?? '']}
+                    autoEscape
+                    textToHighlight={topicName}
+                />
+            )}
             headingSize="small"
             spacing="loose"
             headingContainerClassName={styles.heading}
             headingDescriptionClassName={styles.topicDescription}
-            headingDescription={topicDescription}
+            headingDescription={(
+                <Highlighter
+                    searchWords={[searchText ?? '']}
+                    autoEscape
+                    textToHighlight={topicDescription ?? ''}
+                />
+            )}
             contentClassName={styles.emergencies}
             borderBelowHeader
             borderBelowHeaderWidth="thin"

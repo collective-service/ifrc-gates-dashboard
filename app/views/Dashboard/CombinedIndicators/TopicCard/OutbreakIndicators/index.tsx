@@ -1,5 +1,7 @@
-import React, { useCallback } from 'react';
-import { _cs } from '@togglecorp/fujs';
+import React, { useCallback, useMemo } from 'react';
+import {
+    _cs,
+} from '@togglecorp/fujs';
 import {
     ListView,
     Header,
@@ -21,6 +23,9 @@ interface Props {
     emergency: string;
     handleIndicatorClick: (indicatorId?: string, subVariable?: string, emergency?: string) => void;
     country?: string;
+    includedIndicators?: string[] | undefined;
+    includedSubvariables?: string[] | undefined;
+    searchText: string | undefined;
 }
 
 function OutbreakIndicators(props: Props) {
@@ -31,7 +36,25 @@ function OutbreakIndicators(props: Props) {
         emergency,
         country,
         handleIndicatorClick,
+        includedIndicators,
+        includedSubvariables,
+        searchText,
     } = props;
+
+    const filteredIndicatorsList = useMemo(() => (
+        list.filter(
+            (indicator) => (
+                indicator.indicatorId
+                && indicator.subvariable
+                && includedIndicators?.includes(indicator?.indicatorId ?? undefined)
+                && includedSubvariables?.includes(indicator?.subvariable ?? undefined)
+            ),
+        )
+    ), [
+        includedIndicators,
+        includedSubvariables,
+        list,
+    ]);
 
     const indicatorRendererParams = useCallback(
         (_: string, data: IndicatorType): ModifiedProgressBarProps => ({
@@ -53,11 +76,13 @@ function OutbreakIndicators(props: Props) {
             showRegionalValue,
             onTitleClick: handleIndicatorClick,
             format: (data.format ?? 'raw') as FormatType,
+            searchText,
         }), [
             showRegionalValue,
             emergency,
             handleIndicatorClick,
             country,
+            searchText,
         ],
     );
 
@@ -71,7 +96,7 @@ function OutbreakIndicators(props: Props) {
             <ListView
                 className={styles.indicatorList}
                 keySelector={indicatorKeySelector}
-                data={list}
+                data={filteredIndicatorsList}
                 rendererParams={indicatorRendererParams}
                 renderer={ModifiedProgressBar}
                 pending={false}
