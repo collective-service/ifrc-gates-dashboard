@@ -9,7 +9,7 @@ import Source from '../Source';
 
 import styles from './styles.css';
 
-type SourcesList = NonNullable<CombinedSourcesQuery['dataGranular']>[number];
+type SourcesList = NonNullable<CombinedSourcesQuery['sources']>[number];
 
 interface Props {
     onModalClose: () => void;
