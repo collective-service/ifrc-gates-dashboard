@@ -15,15 +15,15 @@ export interface Props {
     className?: string | undefined;
     barHeight?: number;
     barName: React.ReactNode | undefined;
-    valueTitle?: string | undefined;
+    emergency?: string | undefined;
+    countryCode?: string | undefined;
     color?: string;
     value: number | null | undefined;
     totalValue: number | null | undefined;
     format: FormatType;
     footer?: React.ReactNode;
     hideTooltip?: boolean;
-    setCurrentRegionBounds: React.Dispatch<React.SetStateAction<[number, number, number, number]
-        | undefined>>;
+    setCountryCode: React.Dispatch<React.SetStateAction<string | undefined>>;
 }
 
 function MapProgressBar(props: Props) {
@@ -31,34 +31,36 @@ function MapProgressBar(props: Props) {
         className,
         barHeight = 8,
         barName,
-        valueTitle,
+        emergency,
+        countryCode,
         color,
         value,
         totalValue,
         format,
         footer,
         hideTooltip = false,
-        setCurrentRegionBounds,
+        setCountryCode,
     } = props;
 
     const valueTooltip = useMemo(() => {
         if (format === 'percent') {
-            return (`${valueTitle}: ${Math.round((value ?? 0) * 10000) / 100}%` ?? undefined);
+            return (`${emergency ?? 'N/a'}: ${Math.round((value ?? 0) * 10000) / 100}%` ?? 'N/a');
         }
-        return (`${valueTitle}: ${normalCommaFormatter().format(value ?? 0)}`);
+        return (`${emergency ?? 'N/a'}: ${value ? normalCommaFormatter().format(value) : 'N/a'}`);
     }, [
         value,
-        valueTitle,
+        emergency,
         format,
     ]);
 
     const totalValueForWidth = formatNumber('percent', value ?? 0, !!totalValue);
 
     const handleMapProgressClick = useCallback(() => {
-        // eslint-disable-next-line
-        console.log('Clicked a progress bar::');
-        setCurrentRegionBounds([50, -55, -80, 50]);
-    }, []);
+        setCountryCode(countryCode);
+    }, [
+        countryCode,
+        setCountryCode,
+    ]);
 
     return (
         <div

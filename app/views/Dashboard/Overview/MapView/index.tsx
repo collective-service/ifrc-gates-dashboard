@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { IoFileTraySharp } from 'react-icons/io5';
 import {
     _cs,
@@ -209,6 +209,13 @@ interface Props {
     filterValues?: FilterType;
 }
 
+interface Feature {
+    properties: {
+        iso3: string;
+        // eslint-disable-next-line
+        bounding_box: [number, number, number, number]
+    }
+}
 function MapView(props: Props) {
     const {
         className,
@@ -236,9 +243,14 @@ function MapView(props: Props) {
     ] = useState<ClickedPoint | undefined>();
 
     const [
-        currentRegionBounds,
-        setCurrentRegionBounds,
-    ] = useState<[number, number, number, number]>();
+        countriesBoundList,
+        setCountriesBoundList,
+    ] = useState<Feature[] | undefined>();
+
+    const [
+        countryCode,
+        setCountryCode,
+    ] = useState<string | undefined>();
 
     const [
         countryData,
@@ -371,22 +383,35 @@ function MapView(props: Props) {
     }, [overviewMapData?.overviewMap]);
 
     const selectedRegionBounds = useMemo((): [number, number, number, number] => {
-        if (isNotDefined(regionId) && isNotDefined(currentRegionBounds)) {
+        if (isNotDefined(regionId) && isNotDefined(countriesBoundList)) {
             return defaultBounds;
         }
-        if (isDefined(currentRegionBounds)) {
-            return currentRegionBounds;
+        if (isDefined(countriesBoundList)) {
+            const bounds = countriesBoundList.find(
+                (country) => country.properties.iso3 === countryCode,
+            )?.properties.bounding_box;
+            if (bounds) {
+                const [a, b, c, d] = bounds;
+                return [b, a, d, c];
+            }
+            return defaultBounds;
         }
-        const regionData = regionBounds?.find(
-            (region) => region.region === regionId,
-        );
-        const regionBox = regionData?.bounding_box as (
-            [number, number, number, number] | undefined
-        );
-        return currentRegionBounds ?? [0, 0, 0, 0];
+        if (isDefined(regionId)) {
+            const regionData = regionBounds?.find(
+                (region) => region.region === regionId,
+            );
+            const regionBox = regionData?.boundingBox;
+            if (regionBox) {
+                const [a, b, c, d] = regionBox;
+                return [b, a, d, c];
+            }
+            return defaultBounds;
+        }
+        return defaultBounds;
     }, [
         regionId,
-        currentRegionBounds,
+        countryCode,
+        countriesBoundList,
     ]);
 
     const mapDataForSelectedCountry = useMemo(() => (
@@ -444,11 +469,12 @@ function MapView(props: Props) {
             totalValue: highestTopRankingValue,
             color: '#98A6B5',
             format: data.format as FormatType,
-            setCurrentRegionBounds,
+            countryCode: data.iso3,
+            setCountryCode,
         }),
         [highestTopRankingValue],
     );
-    console.log('check currentRegionBounds', currentRegionBounds);
+
     const handleMapCountryClick = useCallback(
         (feature: mapboxgl.MapboxGeoJSONFeature) => {
             const iso3 = feature?.properties?.iso3;
@@ -502,6 +528,35 @@ function MapView(props: Props) {
         },
         [setMapClickProperties],
     );
+
+    useEffect(() => {
+        async function getCountryBoundsData() {
+            try {
+                const response = await fetch(
+                    'https://rcce-dashboard.s3.eu-west-3.amazonaws.com/countries.json',
+                    {
+                        method: 'GET',
+                    },
+                );
+
+                const { status } = response;
+                if (status !== 200) {
+                    // eslint-disable-next-line
+                    console.error('Error fetching::', status, response.statusText);
+                } else {
+                    const responseText = await response.json();
+                    const boundsCollection = responseText.features.map(
+                        (country: Feature[]) => (country),
+                    );
+                    setCountriesBoundList(boundsCollection);
+                }
+            } catch (e) {
+                // eslint-disable-next-line
+                console.error('failed to fetch', e);
+            }
+        }
+        getCountryBoundsData();
+    }, []);
 
     return (
         <div className={_cs(className, styles.mapViewWrapper)}>
@@ -579,9 +634,7 @@ function MapView(props: Props) {
                     />
                 )}
             </ContainerCard>
-            <ContainerCard
-                className={styles.progressBarContainer}
-            >
+            <ContainerCard className={styles.progressBarContainer}>
                 <div className={styles.highProgressBox}>
                     <Heading size="extraSmall" className={styles.progressListHeader}>
                         Top Ranking

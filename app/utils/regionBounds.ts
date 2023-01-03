@@ -1,8 +1,13 @@
+interface Bounds {
+    region: string;
+    boundingBox: [number, number, number, number];
+}
+
 // eslint-disable-next-line import/prefer-default-export
-export const regionBounds = [
+export const regionBounds: Bounds[] = [
     {
         region: 'Europe',
-        bounding_box: [
+        boundingBox: [
             -25.53273,
             27.63882,
             83.62742,
@@ -11,7 +16,7 @@ export const regionBounds = [
     },
     {
         region: 'Americas',
-        bounding_box: [
+        boundingBox: [
             -54.77829,
             -59.48429,
             83.62742,
@@ -20,7 +25,7 @@ export const regionBounds = [
     },
     {
         region: 'AsiaPacific',
-        bounding_box: [
+        boundingBox: [
             -117,
             53.5585,
             34.10764,
@@ -29,7 +34,7 @@ export const regionBounds = [
     },
     {
         region: 'ESAR',
-        bounding_box: [
+        boundingBox: [
             11.66938,
             -34.83417,
             72.49316,
@@ -38,7 +43,7 @@ export const regionBounds = [
     },
     {
         region: 'MENA',
-        bounding_box: [
+        boundingBox: [
             -17.10318,
             8.63756,
             75.38293,
@@ -47,7 +52,7 @@ export const regionBounds = [
     },
     {
         region: 'WCAR',
-        bounding_box: [
+        boundingBox: [
             -25.36111,
             -40.36714,
             31.31461,
