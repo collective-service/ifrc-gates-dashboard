@@ -102,6 +102,8 @@ const INDICATORS_FOR_COUNTRY = gql`
                 emergencies
                 indicatorId
                 indicatorDescription
+                thematic
+                topic
                 type
             }
         }
@@ -121,6 +123,8 @@ const INDICATORS = gql`
                 emergencies
                 indicatorId
                 indicatorDescription
+                thematic
+                topic
                 type
             }
         }
@@ -287,6 +291,10 @@ function Dashboard() {
         },
     );
 
+    const selectedIndicatorList = (activeTab === 'country')
+        ? indicatorList?.filterOptions?.countryIndicators
+        : globalIndicatorList?.filterOptions?.overviewIndicators;
+
     const handleActiveTabChange = useCallback((newActiveTab: TabTypes | undefined) => {
         setActiveTab(newActiveTab);
         if (newActiveTab === 'country') {
@@ -308,9 +316,33 @@ function Dashboard() {
             if (indicatorListForCountryVariables) {
                 retriggerCountryIndicators();
             }
+        } else if (newActiveTab === 'combinedIndicators') {
+            if (filterValues?.indicator && !(
+                isNotDefined(advancedFilterValues?.type)
+                && ((advancedFilterValues?.thematics?.length ?? 0) > 0)
+                && ((advancedFilterValues?.topics?.length ?? 0) > 0)
+            )) {
+                const thematic = selectedIndicatorList?.find(
+                    (item) => filterValues.indicator === item.indicatorId,
+                )?.thematic;
+                const topic = selectedIndicatorList?.find(
+                    (item) => filterValues.indicator === item.indicatorId,
+                )?.topic;
+                const type = selectedIndicatorList?.find(
+                    (item) => filterValues.indicator === item.indicatorId,
+                )?.type;
+                setAdvancedFilterValues({
+                    topics: topic ? [topic] : undefined,
+                    thematics: thematic ? [thematic] : undefined,
+                    type: type ?? undefined,
+                });
+            }
         }
     }, [
+        filterValues,
+        advancedFilterValues,
         setActiveTab,
+        selectedIndicatorList,
         countriesAndOutbreaks?.countries,
         retriggerCountryIndicators,
         indicatorListForCountryVariables,
@@ -346,10 +378,6 @@ function Dashboard() {
     ), [
         narrativeResponse?.narratives,
     ]);
-
-    const selectedIndicatorList = (activeTab === 'country')
-        ? indicatorList?.filterOptions?.countryIndicators
-        : globalIndicatorList?.filterOptions?.overviewIndicators;
 
     const selectedIndicatorName = useMemo(() => {
         const name = selectedIndicatorList

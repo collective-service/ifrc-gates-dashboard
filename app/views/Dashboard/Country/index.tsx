@@ -1005,7 +1005,7 @@ function Country(props: Props) {
                                     heading="Global"
                                     headingSize="extraSmall"
                                     headerDescription={`${countryResponse
-                                        ?.dataCountryLevelMostRecent[0].indicatorDescription} - ${filterValues?.subvariable}`}
+                                        ?.dataCountryLevelMostRecent?.[0]?.indicatorDescription} - ${filterValues?.subvariable}`}
                                     contentClassName={styles.globalDetails}
                                 >
                                     <div className={styles.globalValueBox}>
