@@ -111,6 +111,10 @@ function PieChartInfo(props: Props) {
                                 x: false,
                                 y: false,
                             }}
+                            position={{
+                                x: 0,
+                                y: -15,
+                            }}
                             content={customPieChartTooltip}
                         />
                     </PieChart>
