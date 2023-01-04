@@ -137,6 +137,7 @@ const COUNTRY_PROFILE = gql`
             stringencyRegion
             stringencyFormat
             stringencyDate
+            totalCases
             economicSupportIndex
             economicSupportIndexRegion
             economicSupportIndexDate

@@ -15,7 +15,7 @@ export interface Props {
     className?: string | undefined;
     barHeight?: number;
     barName: React.ReactNode | undefined;
-    valueTitle?: string | undefined;
+    emergency?: string | undefined;
     color?: string;
     value: number | null | undefined;
     totalValue: number | null | undefined;
@@ -29,9 +29,9 @@ function ProgressBar(props: Props) {
         className,
         barHeight = 8,
         barName,
-        valueTitle,
         color,
         value,
+        emergency,
         totalValue,
         format,
         footer,
@@ -76,7 +76,7 @@ function ProgressBar(props: Props) {
                     <Tooltip
                         trackMousePosition
                     >
-                        {`${valueTitle}: ${formatNumber(format, value, false)}`}
+                        {`${emergency ?? 'N/a'}: ${value ? formatNumber(format, value, false) : 'N/a'}`}
                     </Tooltip>
                 )}
                 <div

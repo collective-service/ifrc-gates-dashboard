@@ -64,7 +64,6 @@ function OutbreakIndicators(props: Props) {
             indicatorMonth: data.indicatorMonth ?? undefined,
             title: data.indicatorDescription ?? undefined,
             country,
-            valueTitle: data.indicatorName ?? undefined,
             value: data.indicatorValue ?? undefined,
             totalValue: 1,
             indicatorId: data.indicatorId ?? undefined,

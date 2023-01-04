@@ -26,10 +26,12 @@
 
         .low-progress-box {
             padding-top: var(--dui-spacing-large);
+            min-height: 21rem;
         }
 
         .high-progress-box {
             padding-top: none;
+            min-height: 21rem;
         }
 
         .pending-message {

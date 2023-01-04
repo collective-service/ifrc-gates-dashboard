@@ -61,19 +61,22 @@ function PercentageStats(props: Props) {
         (newDeaths || newCasesPerMillion) ? (
             <Tooltip>
                 <div>
-                    {`New Cases: ${newCases ?? 0}`}
+                    {`Total Cases: ${statValue ?? 'N/a'}`}
                 </div>
                 <div>
-                    {`New Deaths: ${newDeaths ?? 0}`}
+                    {`New Cases: ${newCases ?? 'N/a'}`}
                 </div>
                 <div>
-                    {`Total Deaths: ${totalDeaths ?? 0}`}
+                    {`New Deaths: ${newDeaths ?? 'N/a'}`}
                 </div>
                 <div>
-                    {`Cases Per Million: ${newCasesPerMillion ?? 0}`}
+                    {`Total Deaths: ${totalDeaths ?? 'N/a'}`}
                 </div>
                 <div>
-                    {`Deaths Per Million: ${newDeathsPerMillion ?? 0}`}
+                    {`Cases Per Million: ${newCasesPerMillion ?? 'N/a'}`}
+                </div>
+                <div>
+                    {`Deaths Per Million: ${newDeathsPerMillion ?? 'N/a'}`}
                 </div>
                 <div>
                     {`Date: ${indicatorMonth ?? 'N/a'}`}
@@ -119,29 +122,33 @@ function PercentageStats(props: Props) {
             )}
             headerIconsContainerClassName={styles.iconContainer}
             headerIcons={icon}
-            footerContentClassName={empty ? styles.message : styles.valueAndSubValue}
-            footerContent={(empty ? (
+            footerContentClassName={styles.valueAndSubValue}
+            footerContent={(!empty && (
+                <>
+                    <div className={styles.valueText}>
+                        {formatNumber(format, statValue, true)}
+                    </div>
+                    {
+                        subValue && (
+                            <NumberOutput
+                                className={styles.subValueText}
+                                value={subValue}
+                            />
+                        )
+                    }
+                    {valueTooltip}
+                </>
+            ))}
+        >
+            {empty && (
                 <Message
                     empty={empty}
                     emptyIcon={<IoFileTraySharp />}
                     pending={statValueLoading}
                     pendingContainerClassName={styles.pendingMessage}
                 />
-            ) : (
-                <>
-                    <div className={styles.valueText}>
-                        {formatNumber(format, statValue, true)}
-                    </div>
-                    {subValue && (
-                        <NumberOutput
-                            className={styles.subValueText}
-                            value={subValue}
-                        />
-                    )}
-                    {valueTooltip}
-                </>
-            ))}
-        />
+            )}
+        </ContainerCard>
     );
 }
 export default PercentageStats;

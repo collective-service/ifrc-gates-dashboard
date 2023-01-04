@@ -91,6 +91,7 @@ const TOP_BOTTOM_COUNTRIES_RANKING = gql`
             format
             indicatorValue
             iso3
+            emergency
         }
         bottomCountriesRanking: overviewRanking(
             emergency: $emergency,
@@ -104,6 +105,7 @@ const TOP_BOTTOM_COUNTRIES_RANKING = gql`
             format
             indicatorValue
             iso3
+            emergency
         }
     }
 `;
@@ -426,8 +428,8 @@ function MapView(props: Props) {
             barHeight,
             barName: data.countryName,
             title: data.countryName,
-            valueTitle: data.countryName,
             value: data.indicatorValue,
+            emergency: data.emergency,
             totalValue: highestTopRankingValue,
             color: '#98A6B5',
             format: data.format as FormatType,
@@ -498,7 +500,7 @@ function MapView(props: Props) {
                     mapOptions={{
                         logoPosition: 'bottom-left',
                         zoom: 1,
-                        minZoom: 0,
+                        minZoom: 0.8,
                         maxZoom: 3.5,
                     }}
                     scaleControlShown
