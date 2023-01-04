@@ -1,10 +1,13 @@
 import React, { useCallback, useMemo } from 'react';
 import { gql, useQuery } from '@apollo/client';
+import Highlighter from 'react-highlight-words';
+
 import {
     _cs,
     doesObjectHaveNoData,
     isDefined,
     isNotDefined,
+    caseInsensitiveSubmatch,
 } from '@togglecorp/fujs';
 import {
     ContainerCard,
@@ -155,12 +158,16 @@ export type IndicatorType = NonNullable<TopicIndicatorType['indicators']>[number
 
 interface ThematicProps {
     thematicName: string;
-    thematicDescription?: string;
+    thematicDescription: string | undefined;
     indicators: TopicIndicatorType[] | undefined;
     showRegionalValue: boolean;
     filterValues: FilterType | undefined;
     setFilterValues: React.Dispatch<React.SetStateAction<FilterType | undefined>>;
     setActiveTab: React.Dispatch<React.SetStateAction<TabTypes | undefined>>;
+    includedTopics: (string | undefined)[] | undefined;
+    includedIndicators: string[] | undefined;
+    includedSubvariables: string[] | undefined;
+    searchText: string | undefined;
 }
 
 function ThematicRenderer(props: ThematicProps) {
@@ -172,6 +179,10 @@ function ThematicRenderer(props: ThematicProps) {
         filterValues,
         setFilterValues,
         setActiveTab,
+        includedTopics,
+        includedIndicators,
+        includedSubvariables,
+        searchText,
     } = props;
 
     const topicKeySelector = (d: TopicIndicatorType) => d.topicName;
@@ -181,26 +192,53 @@ function ThematicRenderer(props: ThematicProps) {
         topicDescription: (data.topicName !== data.topicDescription)
             ? (data.topicDescription ?? undefined) : undefined,
         indicators: data.indicators ?? undefined,
+        includedIndicators,
+        includedSubvariables,
         showRegionalValue,
         filterValues,
         setFilterValues,
         setActiveTab,
+        searchText,
     }), [
         showRegionalValue,
         setActiveTab,
         filterValues,
         setFilterValues,
+        includedIndicators,
+        includedSubvariables,
+        searchText,
+    ]);
+
+    const filteredIndicatorsList = useMemo(() => (
+        indicators?.filter(
+            (indicator) => includedTopics?.includes(indicator?.topicName),
+        )
+    ), [
+        indicators,
+        includedTopics,
     ]);
 
     return (
         <div className={styles.thematicContainer}>
             <ContainerCard
                 className={styles.thematicHeader}
-                heading={thematicName}
-                headerDescription={thematicDescription}
+                heading={(
+                    <Highlighter
+                        searchWords={[searchText ?? '']}
+                        autoEscape
+                        textToHighlight={thematicName}
+                    />
+                )}
+                headerDescription={(
+                    <Highlighter
+                        searchWords={[searchText ?? '']}
+                        autoEscape
+                        textToHighlight={thematicDescription ?? ''}
+                    />
+                )}
             />
             <List
-                data={indicators}
+                data={filteredIndicatorsList}
                 keySelector={topicKeySelector}
                 renderer={TopicCard}
                 rendererParams={topicRendererParams}
@@ -215,6 +253,7 @@ interface Props {
     advancedFilterValues?: AdvancedOptionType | undefined;
     setFilterValues: React.Dispatch<React.SetStateAction<FilterType | undefined>>;
     setActiveTab: React.Dispatch<React.SetStateAction<TabTypes | undefined>>;
+    keywordSearchText: string | undefined;
 }
 
 function CombinedIndicators(props: Props) {
@@ -224,6 +263,7 @@ function CombinedIndicators(props: Props) {
         advancedFilterValues,
         setFilterValues,
         setActiveTab,
+        keywordSearchText,
     } = props;
 
     const countryCombinedVariables = useMemo((): CountryCombinedIndicatorsQueryVariables => ({
@@ -317,6 +357,68 @@ function CombinedIndicators(props: Props) {
         globalCombinedIndicatorsData?.globalCombinedIndicators,
     ]);
 
+    const topicSeparatedIndicators = selectedIndicatorsData?.flatMap(
+        (thematic) => (
+            thematic.topics?.flatMap(
+                (topic) => ({
+                    thematicName: thematic.thematic,
+                    thematicDescription: thematic.thematicDescription,
+                    topicName: topic.topicName,
+                    topicDescription: topic.topicDescription,
+                    indicators: topic.indicators,
+                }),
+            )
+        ),
+    );
+
+    const indicatorsWithFullDetail = topicSeparatedIndicators?.flatMap(
+        (topic) => (
+            topic?.indicators?.flatMap(
+                (indicator) => ({
+                    thematicName: topic.thematicName,
+                    thematicDescription: topic.thematicDescription,
+                    topicName: topic.topicName,
+                    topicDescription: topic.topicDescription,
+                    indicatorId: indicator.indicatorId,
+                    indicatorName: indicator.indicatorName,
+                    indicatorDescription: indicator.indicatorDescription,
+                    subvariable: indicator.subvariable,
+                }),
+            )
+        ),
+    );
+
+    const indicatorsWithConcatenatedString = indicatorsWithFullDetail?.map(
+        (ind) => ({
+            thematicName: ind?.thematicName,
+            topicName: ind?.topicName,
+            indicatorId: ind?.indicatorId,
+            subvariableId: ind?.subvariable,
+            textToSearch: Object.values(ind ?? {}).join(' '),
+        }),
+    );
+
+    const [
+        includedThematics,
+        includedTopics,
+        includedIndicators,
+        includedSubvariables,
+    ] = useMemo(() => {
+        const indicatorItem = indicatorsWithConcatenatedString?.filter((item) => (
+            (keywordSearchText?.length ?? 0) > 0
+                ? caseInsensitiveSubmatch(item.textToSearch, keywordSearchText)
+                : true
+        ));
+        return ([
+            indicatorItem?.map((item) => item.thematicName).filter(isDefined),
+            indicatorItem?.map((item) => item.topicName).filter(isDefined),
+            indicatorItem?.map((item) => item.indicatorId ?? undefined).filter(isDefined),
+            indicatorItem?.map((item) => item.subvariableId ?? undefined).filter(isDefined),
+        ]);
+    }, [
+        indicatorsWithConcatenatedString,
+        keywordSearchText,
+    ]);
     const thematicRendererParams = useCallback((
         _: string,
         item: RegionalIndicatorType | CountryIndicatorType | GlobalIndicatorType,
@@ -326,6 +428,10 @@ function CombinedIndicators(props: Props) {
             ? (item.thematicDescription ?? undefined) : undefined,
         indicators: item.topics ?? undefined,
         showRegionalValue: isDefined(filterValues?.country),
+        includedTopics,
+        includedIndicators,
+        includedSubvariables,
+        searchText: keywordSearchText,
         setFilterValues,
         filterValues,
         setActiveTab,
@@ -334,6 +440,10 @@ function CombinedIndicators(props: Props) {
         filterValues,
         setFilterValues,
         setActiveTab,
+        includedIndicators,
+        includedTopics,
+        includedSubvariables,
+        keywordSearchText,
     ]);
 
     const thematicKeySelector = (
@@ -360,6 +470,15 @@ function CombinedIndicators(props: Props) {
     const filterDataEmpty = doesObjectHaveNoData(filterValues)
         && doesObjectHaveNoData(advancedFilterValues);
 
+    const filteredIndicatorsList = useMemo(() => (
+        selectedIndicatorsData?.filter(
+            (indicator) => (includedThematics?.includes(indicator?.thematic)),
+        )
+    ), [
+        selectedIndicatorsData,
+        includedThematics,
+    ]);
+
     return (
         <div className={_cs(className, styles.combinedIndicatorWrapper)}>
             <ListView
@@ -367,7 +486,7 @@ function CombinedIndicators(props: Props) {
                     styles.themes,
                     (selectedIndicatorsData?.length ?? 0) === 0 && styles.empty,
                 )}
-                data={selectedIndicatorsData}
+                data={filteredIndicatorsList}
                 renderer={ThematicRenderer}
                 rendererParams={thematicRendererParams}
                 keySelector={thematicKeySelector}

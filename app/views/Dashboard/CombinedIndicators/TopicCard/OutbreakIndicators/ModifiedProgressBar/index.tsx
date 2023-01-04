@@ -1,4 +1,5 @@
 import React, { useMemo, useCallback } from 'react';
+import Highlighter from 'react-highlight-words';
 import { _cs } from '@togglecorp/fujs';
 import {
     Button,
@@ -15,7 +16,7 @@ import Sources from '#components/Sources';
 import styles from './styles.css';
 
 export interface Props extends Omit<ProgressBarProps, 'barName' | 'barHeight'> {
-    indicatorName?: string;
+    indicatorName: string;
     emergency?: string;
     country?: string;
     subvariableName?: string;
@@ -27,6 +28,7 @@ export interface Props extends Omit<ProgressBarProps, 'barName' | 'barHeight'> {
     showRegionalValue: boolean;
     indicatorValueRegional?: number | null | undefined;
     region?: string | undefined;
+    searchText: string | undefined;
 }
 
 function ModifiedProgressBar(props: Props) {
@@ -45,6 +47,7 @@ function ModifiedProgressBar(props: Props) {
         indicatorValueRegional,
         indicatorMonth,
         title,
+        searchText,
         ...otherProps
     } = props;
 
@@ -81,11 +84,19 @@ function ModifiedProgressBar(props: Props) {
                         variant="transparent"
                     >
                         <div className={styles.indicatorName}>
-                            {indicatorName}
+                            <Highlighter
+                                searchWords={[searchText ?? '']}
+                                autoEscape
+                                textToHighlight={indicatorName}
+                            />
                         </div>
                         <div className={styles.separator}>{'>'}</div>
                         <div className={styles.subvariableName}>
-                            {subvariableName}
+                            <Highlighter
+                                searchWords={[searchText ?? '']}
+                                autoEscape
+                                textToHighlight={subvariableName ?? ''}
+                            />
                         </div>
                     </Button>
                     <div>

@@ -89,6 +89,8 @@ interface Props {
     emergenciesLoading: boolean | undefined;
     subvariablesLoading: boolean | undefined;
     indicatorsLoading: boolean | undefined;
+    keywordSearchText: string | undefined;
+    setKeywordSearchText: React.Dispatch<React.SetStateAction<string | undefined>>;
 }
 
 function Filters(props: Props) {
@@ -106,6 +108,8 @@ function Filters(props: Props) {
         emergenciesLoading,
         subvariablesLoading,
         indicatorsLoading,
+        keywordSearchText,
+        setKeywordSearchText,
     } = props;
 
     const handleClear = useCallback(() => {
@@ -341,6 +345,8 @@ function Filters(props: Props) {
                 <AdvancedFilters
                     value={advancedFilterValues}
                     onChange={setAdvancedFilterValues}
+                    keywordSearchText={keywordSearchText}
+                    setKeywordSearchText={setKeywordSearchText}
                 />
             )}
         </div>

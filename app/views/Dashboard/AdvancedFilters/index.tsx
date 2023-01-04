@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 import {
     RadioInput,
+    TextInput,
     MultiSelectInput,
     Button,
 } from '@the-deep/deep-ui';
@@ -66,12 +67,16 @@ const topicLabelSelector = (d: Topic) => d.label;
 interface Props {
     value: AdvancedOptionType | undefined;
     onChange: React.Dispatch<React.SetStateAction<AdvancedOptionType | undefined>>;
+    keywordSearchText: string | undefined;
+    setKeywordSearchText: React.Dispatch<React.SetStateAction<string | undefined>>;
 }
 
 function AdvancedFilters(props: Props) {
     const {
         value,
         onChange,
+        keywordSearchText,
+        setKeywordSearchText,
     } = props;
 
     const filterOptionsVariables = useMemo((): AdvancedFilterOptionsQueryVariables => ({
@@ -190,6 +195,14 @@ function AdvancedFilters(props: Props) {
                     onChange={handleInputChange}
                     variant="general"
                     disabled={advancedFiltersLoading}
+                />
+                <TextInput
+                    name="keywords"
+                    label="Keyword"
+                    variant="general"
+                    placeholder="keyword"
+                    value={keywordSearchText}
+                    onChange={setKeywordSearchText}
                 />
             </div>
             <div>

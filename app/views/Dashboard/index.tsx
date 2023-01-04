@@ -30,6 +30,7 @@ import {
 import {
     getRegionForCountry,
 } from '#utils/common';
+import useDebouncedValue from '#hooks/useDebouncedValue';
 
 import Export from './Export';
 import Overview from './Overview';
@@ -167,6 +168,9 @@ function Dashboard() {
     } = useQuery<CountriesAndOutbreaksQuery>(
         COUNTRIES_AND_OUTBREAKS,
     );
+
+    const [keywordSearchText, setKeywordSearchText] = useState<string | undefined>();
+    const searchText = useDebouncedValue(keywordSearchText);
 
     useEffect(() => {
         if (activeTab === 'country' && !filterValues) {
@@ -454,6 +458,8 @@ function Dashboard() {
                             onChange={setFilterValues}
                             advancedFilterValues={advancedFilterValues}
                             setAdvancedFilterValues={setAdvancedFilterValues}
+                            keywordSearchText={searchText}
+                            setKeywordSearchText={setKeywordSearchText}
                             countries={countriesAndOutbreaks?.countries}
                             emergencies={countriesAndOutbreaks?.outBreaks}
                             subvariableList={subvariableList}
@@ -489,6 +495,7 @@ function Dashboard() {
                             advancedFilterValues={advancedFilterValues}
                             setFilterValues={setFilterValues}
                             setActiveTab={setActiveTab}
+                            keywordSearchText={searchText}
                         />
                     </TabPanel>
                 </div>
