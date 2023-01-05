@@ -157,6 +157,10 @@ function AdvancedFilters(props: Props) {
         onChange({});
     }, [onChange]);
 
+    const handleClearKeywords = useCallback(() => {
+        setKeywordSearchText(undefined);
+    }, [setKeywordSearchText]);
+
     const advancedFiltersSelected = (
         (value?.thematics && value.thematics.length > 0)
         || (value?.topics && value.topics.length > 0));
@@ -198,11 +202,19 @@ function AdvancedFilters(props: Props) {
                 />
                 <TextInput
                     name="keywords"
-                    label="Keyword"
                     variant="general"
-                    placeholder="keyword"
+                    placeholder="Keywords"
                     value={keywordSearchText}
                     onChange={setKeywordSearchText}
+                    actions={keywordSearchText && (
+                        <Button
+                            name={undefined}
+                            variant="transparent"
+                            icons={<IoClose />}
+                            onClick={handleClearKeywords}
+                            className={styles.clearButton}
+                        />
+                    )}
                 />
             </div>
             <div>
