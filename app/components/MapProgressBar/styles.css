@@ -6,13 +6,16 @@
     .progress-title {
         display: flex;
         align-items: center;
+        cursor: pointer;
         text-align: left;
         gap: var(--dui-spacing-small);
-    }
 
+    }
     .progress-value-wrapper {
+
         display: flex;
         align-items: center;
+        cursor: pointer;
         line-height: 1;
         gap: var(--dui-spacing-medium);
 

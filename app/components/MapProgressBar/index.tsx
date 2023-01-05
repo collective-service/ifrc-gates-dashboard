@@ -1,12 +1,12 @@
 import React, { useMemo, useCallback } from 'react';
 import {
+    isDefined,
     _cs,
 } from '@togglecorp/fujs';
 import { Tooltip } from '@the-deep/deep-ui';
 import {
     formatNumber,
     FormatType,
-    normalCommaFormatter,
 } from '#utils/common';
 
 import styles from './styles.css';
@@ -42,18 +42,18 @@ function MapProgressBar(props: Props) {
         setCountryCode,
     } = props;
 
-    const valueTooltip = useMemo(() => {
+    const actualValue = useMemo(() => {
         if (format === 'percent') {
-            return (`${emergency ?? 'N/a'}: ${Math.round((value ?? 0) * 10000) / 100}%` ?? 'N/a');
+            return isDefined(value) ? value * 100 : undefined;
         }
-        return (`${emergency ?? 'N/a'}: ${value ? normalCommaFormatter().format(value) : 'N/a'}`);
+        return isDefined(totalValue) && totalValue !== 0
+            ? ((value ?? 0) / totalValue) * 100
+            : undefined;
     }, [
         value,
-        emergency,
         format,
+        totalValue,
     ]);
-
-    const totalValueForWidth = formatNumber('percent', value ?? 0, !!totalValue);
 
     const handleMapProgressClick = useCallback(() => {
         setCountryCode(countryCode);
@@ -80,7 +80,9 @@ function MapProgressBar(props: Props) {
                         className={styles.progressBarStyle}
                         key={undefined}
                         style={{
-                            width: totalValueForWidth,
+                            width: isDefined(actualValue)
+                                ? `${actualValue}%`
+                                : 0,
                             backgroundColor: color ?? 'blue',
                         }}
                     />
@@ -89,7 +91,7 @@ function MapProgressBar(props: Props) {
                     <Tooltip
                         trackMousePosition
                     >
-                        {valueTooltip}
+                        {`${emergency ?? 'N/a'}: ${value ? formatNumber(format, value, false) : 'N/a'}`}
                     </Tooltip>
                 )}
                 <div
