@@ -61,7 +61,7 @@ function PercentageStats(props: Props) {
         (newDeaths || newCasesPerMillion) ? (
             <Tooltip>
                 <div>
-                    {`Total Cases: ${statValue ?? 'N/a'}`}
+                    {`Total Cases: ${statValue ? formatNumber(format, statValue, false) : 'N/a'}`}
                 </div>
                 <div>
                     {`New Cases: ${newCases ?? 'N/a'}`}
