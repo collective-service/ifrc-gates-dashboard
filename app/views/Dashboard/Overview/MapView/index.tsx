@@ -634,7 +634,10 @@ function MapView(props: Props) {
                     />
                 )}
             </ContainerCard>
-            <ContainerCard className={styles.progressBarContainer}>
+            <ContainerCard
+                className={styles.progressBarContainer}
+                contentClassName={styles.progressContent}
+            >
                 <div className={styles.highProgressBox}>
                     <Heading size="extraSmall" className={styles.progressListHeader}>
                         Top Ranking

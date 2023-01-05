@@ -24,33 +24,37 @@
         flex-direction: column;
         flex-shrink: 0;
 
-        .low-progress-box {
-            padding-top: var(--dui-spacing-large);
-            min-height: 21rem;
-        }
-
-        .high-progress-box {
-            padding-top: none;
-            min-height: 21rem;
-        }
-
-        .pending-message {
+        .progress-content {
             display: flex;
-            align-items: center;
             flex-direction: column;
-            justify-content: center;
-            height: 100%;
-        }
+            gap: var(--dui-spacing-large);
+            
+            .low-progress-box {
+                min-height: 7rem;
+            }
 
-        .progress-list-header {
-            padding-bottom: var(--dui-spacing-medium);
-        }
+            .high-progress-box {
+                min-height: 7rem;
+            }
 
-        .progress-list {
-            font-size: small;
+            .pending-message {
+                display: flex;
+                align-items: center;
+                flex-direction: column;
+                justify-content: center;
+                height: 100%;
+            }
 
-            .progress-item-border {
-                margin-top: var(--dui-spacing-medium);
+            .progress-list-header {
+                padding-bottom: var(--dui-spacing-medium);
+            }
+
+            .progress-list {
+                font-size: small;
+
+                .progress-item-border {
+                    margin-top: var(--dui-spacing-medium);
+                }
             }
         }
     }
