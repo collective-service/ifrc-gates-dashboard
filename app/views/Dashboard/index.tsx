@@ -321,6 +321,10 @@ function Dashboard() {
                 retriggerCountryIndicators();
             }
         } else if (newActiveTab === 'combinedIndicators') {
+            if (isNotDefined(filterValues?.indicator)) {
+                setAdvancedFilterValues({});
+            }
+
             if (filterValues?.indicator && !(
                 isNotDefined(advancedFilterValues?.type)
                 && ((advancedFilterValues?.thematics?.length ?? 0) > 0)

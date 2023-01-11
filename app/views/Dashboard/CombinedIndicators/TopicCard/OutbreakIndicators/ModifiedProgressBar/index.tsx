@@ -74,6 +74,7 @@ function ModifiedProgressBar(props: Props) {
     return (
         <ProgressBar
             className={_cs(styles.modifiedProgressBar, className)}
+            emergency={emergency}
             barName={(
                 <div className={styles.barNameContainer}>
                     <Button
