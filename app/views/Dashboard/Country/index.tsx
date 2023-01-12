@@ -329,6 +329,7 @@ const COUNTRY_PROFILE = gql`
             indicatorDescription
             indicatorMonth
             indicatorValue
+            emergency
             format
             subvariable
         }
@@ -889,6 +890,7 @@ function Country(props: Props) {
             ? (<b>{data.subvariable}</b>) : data.subvariable,
         value: data.indicatorValue,
         format: data.format as FormatType,
+        emergency: data.emergency,
         totalValue: 1,
         color: '#98A6B5',
         valueTitle: data.subvariable,
