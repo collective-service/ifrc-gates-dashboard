@@ -200,12 +200,12 @@ function IndicatorValue(props: IndicatorValueProps) {
                 color: getTextColorForHex(color),
             }}
         >
-            {isDefined(value) ? formatNumber(format, value, false) : '-'}
+            {isDefined(value) ? formatNumber(format, value, true) : '-'}
             {isDefined(value) && (
                 <Tooltip
                     trackMousePosition
                 >
-                    {`${emergency}: ${formatNumber(format, value)}`}
+                    {`${emergency}: ${formatNumber(format, value, false)}`}
                 </Tooltip>
             )}
         </div>
