@@ -30,3 +30,23 @@ yarn check-unused
 # Run tests
 yarn test
 ```
+
+## Deployment
+- Staging
+    - Login to the VM.
+      ```bash
+        # Update client and server
+        cd ~/services/client
+        git pull
+
+        cd ~/services/server
+        git pull
+
+        # Update docker containers
+        cd ~/services/
+        docker-compose up --build -d
+      ```
+- Production
+    - The Github Actions deployment pipeline is triggered whenever changes are pushed to the branch `release`.
+    - Requires approval from the administrator.
+    - These actions update the resources in AWS.
