@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
+import { _cs, isNotDefined } from '@togglecorp/fujs';
 import {
     RadioInput,
     TextInput,
@@ -31,7 +32,7 @@ interface Thematic {
 }
 
 const ADVANCED_FILTER_OPTIONS = gql`
-query AdvancedFilterOptions($thematics: [String!], $type: String) {
+    query AdvancedFilterOptions($thematics: [String!], $type: String) {
         filterOptions {
             types
             thematics(type: $type)
@@ -67,6 +68,7 @@ const topicLabelSelector = (d: Topic) => d.label;
 interface Props {
     value: AdvancedOptionType | undefined;
     onChange: React.Dispatch<React.SetStateAction<AdvancedOptionType | undefined>>;
+    onClear: () => void;
     keywordSearchText: string | undefined;
     setKeywordSearchText: React.Dispatch<React.SetStateAction<string | undefined>>;
 }
@@ -75,6 +77,7 @@ function AdvancedFilters(props: Props) {
     const {
         value,
         onChange,
+        onClear,
         keywordSearchText,
         setKeywordSearchText,
     } = props;
@@ -153,10 +156,6 @@ function AdvancedFilters(props: Props) {
         ],
     );
 
-    const handleClearAdvancedFilters = useCallback(() => {
-        onChange({});
-    }, [onChange]);
-
     const handleClearKeywords = useCallback(() => {
         setKeywordSearchText(undefined);
     }, [setKeywordSearchText]);
@@ -206,13 +205,17 @@ function AdvancedFilters(props: Props) {
                     placeholder="Keywords"
                     value={keywordSearchText}
                     onChange={setKeywordSearchText}
-                    actions={keywordSearchText && (
+                    actions={(
                         <Button
                             name={undefined}
                             variant="transparent"
                             icons={<IoClose />}
                             onClick={handleClearKeywords}
-                            className={styles.clearButton}
+                            className={_cs(
+                                styles.clearButton,
+                                isNotDefined(keywordSearchText) && styles.empty,
+                            )}
+                            disabled={isNotDefined(keywordSearchText)}
                         />
                     )}
                 />
@@ -241,7 +244,7 @@ function AdvancedFilters(props: Props) {
                         name={undefined}
                         variant="transparent"
                         icons={<IoClose />}
-                        onClick={handleClearAdvancedFilters}
+                        onClick={onClear}
                         className={styles.clearButton}
                     >
                         Clear all

@@ -12,8 +12,13 @@
         gap: var(--dui-spacing-large);
 
         .clear-button {
-            justify-self: flex-end;
             flex-shrink: 0;
+            padding: 0;
+            justify-self: flex-end;
+
+            &.empty {
+                opacity: 0;
+            }
         }
     }
 }

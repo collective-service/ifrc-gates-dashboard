@@ -112,6 +112,10 @@ function Filters(props: Props) {
         setKeywordSearchText,
     } = props;
 
+    const handleAdvancedFiltersClear = useCallback(() => {
+        setAdvancedFilterValues({});
+    }, [setAdvancedFilterValues]);
+
     const handleClear = useCallback(() => {
         if (activeTab === 'country') {
             onChange((oldValue) => ({
@@ -345,6 +349,7 @@ function Filters(props: Props) {
                 <AdvancedFilters
                     value={advancedFilterValues}
                     onChange={setAdvancedFilterValues}
+                    onClear={handleAdvancedFiltersClear}
                     keywordSearchText={keywordSearchText}
                     setKeywordSearchText={setKeywordSearchText}
                 />

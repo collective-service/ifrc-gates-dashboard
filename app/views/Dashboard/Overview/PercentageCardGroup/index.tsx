@@ -232,7 +232,8 @@ const OVERVIEW_STATS = gql`
         globalLevelSubvariables (
             emergency: $emergency,
             indicatorId: $indicatorId,
-            ) {
+            category: "Global",
+        ) {
             format
             indicatorDescription
             indicatorMonth
@@ -695,10 +696,14 @@ function PercentageCardGroup(props: Props) {
             ? (<b>{data.subvariable}</b>) : data.subvariable,
         value: data.indicatorValue,
         format: data.format as FormatType,
+        emergency: filterValues?.outbreak,
         totalValue: 1,
         color: '#98A6B5',
         valueTitle: data.subvariable,
-    }), [filterValues?.subvariable]);
+    }), [
+        filterValues?.subvariable,
+        filterValues?.outbreak,
+    ]);
 
     const headingDescription = useMemo((): string | undefined => {
         const isRegionSelected = isDefined(filterValues?.region);
@@ -726,7 +731,9 @@ function PercentageCardGroup(props: Props) {
     const tooltip = (
         <Tooltip>
             <div>
-                {`Total: ${formatNumber(totalCaseFormat ?? 'raw' as const, totalCaseValue, false)}`}
+                {`Total: ${totalCaseValue
+                    ? formatNumber(totalCaseFormat ?? 'raw' as const, totalCaseValue, false)
+                    : 'N/a'}`}
             </div>
             <div>
                 {`Date: ${percentageCardMonth ?? 'N/a'}`}
@@ -788,8 +795,8 @@ function PercentageCardGroup(props: Props) {
                                 <>
                                     {selectedGlobalRegion?.indicatorValue
                                         ? formatNumber(
-                                            selectedGlobalRegion?.format as FormatType,
-                                            selectedGlobalRegion?.indicatorValue,
+                                            totalCaseFormat as FormatType,
+                                            totalCaseValue,
                                         )
                                         : 'N/a'}
                                     {tooltip}

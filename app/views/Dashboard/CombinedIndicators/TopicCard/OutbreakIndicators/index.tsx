@@ -20,7 +20,7 @@ interface Props {
     className?: string;
     list: IndicatorType[];
     showRegionalValue: boolean;
-    emergency: string;
+    emergency?: string;
     handleIndicatorClick: (indicatorId?: string, subVariable?: string, emergency?: string) => void;
     country?: string;
     includedIndicators?: string[] | undefined;
