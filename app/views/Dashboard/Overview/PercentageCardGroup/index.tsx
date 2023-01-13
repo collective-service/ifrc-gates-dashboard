@@ -240,10 +240,11 @@ const OVERVIEW_STATS = gql`
             indicatorValue
             subvariable
         }
-          regionLevelSubvariables (
+        regionLevelSubvariables (
             emergency: $emergency,
             indicatorId: $indicatorId,
             region: $region,
+            category: "Global",
             ) {
             format
             indicatorDescription
