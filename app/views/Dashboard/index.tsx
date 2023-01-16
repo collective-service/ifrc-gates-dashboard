@@ -346,6 +346,7 @@ function Dashboard() {
                 });
             }
         }
+        setKeywordSearchText(undefined);
     }, [
         filterValues,
         advancedFilterValues,
