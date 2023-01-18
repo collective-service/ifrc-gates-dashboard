@@ -3,7 +3,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { HotModuleReplacementPlugin, EnvironmentPlugin } = require('webpack');
 const Dotenv = require('dotenv-webpack');
-const { GitRevisionPlugin } = require('git-revision-webpack-plugin');
+// const { GitRevisionPlugin } = require('git-revision-webpack-plugin');
 // const WebpackPwaManifest = require('webpack-pwa-manifest');
 const { merge } = require('webpack-merge');
 const CircularDependencyPlugin = require('circular-dependency-plugin');
@@ -22,7 +22,7 @@ function getPath(value) {
     return path.resolve(__dirname, value);
 }
 
-const gitRevisionPlugin = new GitRevisionPlugin();
+// const gitRevisionPlugin = new GitRevisionPlugin();
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -120,9 +120,9 @@ module.exports = () => {
                 MY_APP_NAME: pkg.longName,
                 // MY_APP_DESCRIPTION: pkg.description,
 
-                REACT_APP_VERSION: gitRevisionPlugin.version(),
-                REACT_APP_COMMITHASH: gitRevisionPlugin.commithash(),
-                REACT_APP_BRANCH: gitRevisionPlugin.branch(),
+                // REACT_APP_VERSION: gitRevisionPlugin.version(),
+                // REACT_APP_COMMITHASH: gitRevisionPlugin.commithash(),
+                // REACT_APP_BRANCH: gitRevisionPlugin.branch(),
             }),
             new Dotenv({
                 safe: true,
