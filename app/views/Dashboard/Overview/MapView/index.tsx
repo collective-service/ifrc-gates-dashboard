@@ -257,6 +257,12 @@ function MapView(props: Props) {
         setCountryData,
     ] = useState<{ iso3: string, name: string } | undefined>();
 
+    useEffect(() => {
+        if (regionId) {
+            setCountryCode(undefined);
+        }
+    }, [regionId]);
+
     const mapVariables = useMemo((): MapDataQueryVariables => ({
         indicatorId,
         emergency: outbreakId,
@@ -386,17 +392,7 @@ function MapView(props: Props) {
         if (isNotDefined(regionId) && isNotDefined(countriesBoundList)) {
             return defaultBounds;
         }
-        if (isDefined(countriesBoundList)) {
-            const bounds = countriesBoundList.find(
-                (country) => country.properties.iso3 === countryCode,
-            )?.properties.bounding_box;
-            if (bounds) {
-                const [a, b, c, d] = bounds;
-                return [b, a, d, c];
-            }
-            return defaultBounds;
-        }
-        if (isDefined(regionId)) {
+        if (isDefined(regionId) && isNotDefined(countryCode)) {
             const regionData = regionBounds?.find(
                 (region) => region.region === regionId,
             );
@@ -407,6 +403,17 @@ function MapView(props: Props) {
             }
             return defaultBounds;
         }
+        if (isDefined(countriesBoundList) && isDefined(countryCode)) {
+            const bounds = countriesBoundList.find(
+                (country) => country.properties.iso3 === countryCode,
+            )?.properties.bounding_box;
+            if (bounds) {
+                const [a, b, c, d] = bounds;
+                return [b, a, d, c];
+            }
+            return defaultBounds;
+        }
+
         return defaultBounds;
     }, [
         regionId,

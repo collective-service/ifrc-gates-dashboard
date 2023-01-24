@@ -28,7 +28,7 @@ export const regionBounds: Bounds[] = [
         boundingBox: [
             -117,
             53.5585,
-            34.10764,
+            36.10764,
             -54.77829,
         ],
     },
