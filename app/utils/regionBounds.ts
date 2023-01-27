@@ -8,8 +8,8 @@ export const regionBounds: Bounds[] = [
     {
         region: 'Europe',
         boundingBox: [
-            -25.53273,
             27.63882,
+            -25.53273,
             83.62742,
             83.62742,
         ],
@@ -17,46 +17,46 @@ export const regionBounds: Bounds[] = [
     {
         region: 'Americas',
         boundingBox: [
-            -54.77829,
             -59.48429,
-            83.62742,
+            30.77829,
             83.13753,
+            -100,
         ],
     },
     {
         region: 'AsiaPacific',
         boundingBox: [
-            -117,
-            53.5585,
-            36.10764,
             -54.77829,
+            34.10764,
+            40.5585,
+            117,
         ],
     },
     {
         region: 'ESAR',
         boundingBox: [
-            11.66938,
             -34.83417,
-            72.49316,
+            11.66938,
             18.00309,
+            72.49316,
         ],
     },
     {
         region: 'MENA',
         boundingBox: [
-            -17.10318,
             8.63756,
-            75.38293,
+            -17.10318,
             39.78168,
+            75.38293,
         ],
     },
     {
         region: 'WCAR',
         boundingBox: [
-            -25.36111,
             -40.36714,
-            31.31461,
+            -25.36111,
             27.31322,
+            31.31461,
         ],
     },
 ];
