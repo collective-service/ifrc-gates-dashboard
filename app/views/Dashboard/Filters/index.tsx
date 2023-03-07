@@ -244,6 +244,8 @@ function Filters(props: Props) {
         activeTab,
     ]);
 
+    const indicatorSortingComparator = (a: string, b: string) => compareString(b, a);
+
     return (
         <div className={styles.filtersWrapper}>
             <div className={styles.filters}>
@@ -317,6 +319,7 @@ function Filters(props: Props) {
                             grouped
                             groupKeySelector={indicatorGroupKeySelector}
                             groupLabelSelector={indicatorGroupLabelSelector}
+                            groupComparator={indicatorSortingComparator}
                         />
                         {value?.indicator && (
                             <SelectInput
